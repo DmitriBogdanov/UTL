@@ -413,6 +413,16 @@ class Profiler {
     bool       print_at_destruction = true;
     std::mutex setter_mutex;
 
+    bool results_are_empty() {
+        // A check used to deduce whether we have any meaningful results to automatically print after exit,
+        // all threads joined, yet none of them contain any profiling records <=> no profiling was ever invoked
+        for (const auto& [thread_id, thread_lifetimes] : this->call_graph_info)
+            for (const auto& lifetime : thread_lifetimes.lifetimes)
+                if (lifetime.joined == false || !lifetime.mat.empty()) return false;
+
+        return true;
+    }
+
     std::string format_available_results(const Style& style = Style{}) {
         const std::lock_guard lock(this->call_graph_mutex);
 
@@ -578,8 +588,8 @@ public:
     Profiler() : main_thread_id(std::this_thread::get_id()) {}
 
     ~Profiler() {
-        if (this->call_graph_info.empty()) return; // no profiling was ever invoked
-        if (!this->print_at_destruction) return;   // printing was manually disabled
+        if (!this->print_at_destruction) return; // printing was manually disabled
+        if (this->results_are_empty()) return;   // no profiling was ever invoked
         std::cout << format_available_results();
     }
 };
