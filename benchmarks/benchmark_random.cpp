@@ -317,24 +317,24 @@ void benchmark_distributions() {
     log::println("Memory usage (double     ) -> ", math::to_memory_units(data_size * sizeof(double)), " MiB");
     log::println("Memory usage (float      ) -> ", math::to_memory_units(data_size * sizeof(float)), " MiB");
 
-    benchmark_distributions_for_prng<std::minstd_rand>("std::minstd_rand");
+    //benchmark_distributions_for_prng<std::minstd_rand>("std::minstd_rand");
     benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
-    benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
-    benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
-    benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
+    //benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
+    //benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
+    //benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
     benchmark_distributions_for_prng<random::generators::SplitMix32>("SplitMix32");
     benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
-    benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
+    //benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
     benchmark_distributions_for_prng<random::generators::SplitMix64>("SplitMix64");
     benchmark_distributions_for_prng<random::generators::Xoshiro256PP>("Xoshiro256++");
-    benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");
+    //benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");
 }
 
 
 int main() {
 
-    benchmark_prngs();
-    //benchmark_distributions();
+    //benchmark_prngs();
+    benchmark_distributions();
 
     return 0;
 }
