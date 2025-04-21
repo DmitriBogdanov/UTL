@@ -8754,7 +8754,6 @@ namespace utl::random {
 // --- Implementation utils ---
 // ============================
 
-
 // --- Type traits ---
 // -------------------
 
@@ -8795,17 +8794,60 @@ using _require_float = _require<std::is_floating_point_v<T>>;
 template <class T>
 using _require_uint = _require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
 
+// --- Wide uint for Lemire's algorithm ---
+// ----------------------------------------
+
+// GCC & clang provide 128-bit integers as compiler extension
+#if defined(__SIZEOF_INT128__) && !defined(__wasm__)
+using _uint128_type = __uint128_t;
+
+// Otherwise fallback onto a manual emulation
+#else
+
+// Emulation of 128-bit unsigned integer tailored specifically for usage in 64-bit Lemire's algorithm,
+// this allows us to skip a lot of generic logic since we really only need 3 things:
+//
+//    1) 'uint128(x) * uint128(y)'       that performs 64x64 -> 128 bit multiplication
+//    2) 'static_cast<std::uint64_t>(x)' that returns lower 64 bits
+//    3) 'x >> 64'                       that returns upper 64 bits
+//
+struct _uint128_type {
+    std::uint64_t low{}, high{};
+
+    constexpr _uint128_type(std::uint64_t low) noexcept : low(low) {}
+    constexpr explicit _uint128_type(std::uint64_t low, std::uint64_t high) noexcept : low(low), high(high) {}
+
+    [[nodiscard]] constexpr operator std::uint64_t() const noexcept { return this->low; }
+
+    [[nodiscard]] constexpr _uint128_type operator*(_uint128_type other) const noexcept {
+        // Compute all of the cross products
+        const std::uint64_t lo_lo = (this->low & 0xFFFFFFFF) * (other.low & 0xFFFFFFFF);
+        const std::uint64_t hi_lo = (this->low >> 32) * (other.low & 0xFFFFFFFF);
+        const std::uint64_t lo_hi = (this->low & 0xFFFFFFFF) * (other.low >> 32);
+        const std::uint64_t hi_hi = (this->low >> 32) * (other.low >> 32);
+
+        // Add products together, this will never overflow
+        const std::uint64_t cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
+        const std::uint64_t upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
+        const std::uint64_t lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
+
+        return _uint128_type{lower, upper};
+    }
+
+    [[nodiscard]] constexpr _uint128_type operator>>(int) const noexcept { return this->high; }
+};
+
+#endif
+
 // clang-format off
 template<class T> struct _wider { static_assert(_always_false_v<T>, "Missing specialization."); };
 
 template<> struct _wider<std::uint8_t > { using type = std::uint16_t; };
 template<> struct _wider<std::uint16_t> { using type = std::uint32_t; };
 template<> struct _wider<std::uint32_t> { using type = std::uint64_t; };
-template<> struct _wider<std::uint64_t> { using type = void; };
+template<> struct _wider<std::uint64_t> { using type = _uint128_type; };
 
 template<class T> using _wider_t = typename _wider<T>::type;
-
-template <class T> constexpr bool _has_wider = !std::is_void_v<_wider_t<T>>;
 // clang-format on
 
 // --- Bit twiddling utils ---
@@ -9523,24 +9565,14 @@ constexpr T _uniform_uint_lemire(Gen& gen, T range) noexcept(noexcept(gen())) {
     return product >> std::numeric_limits<T>::digits;
 }
 
-template <class T, class Gen, _require_uint<T> = true>
-constexpr T _uniform_uint_modx1(Gen& gen, T range) noexcept(noexcept(gen())) {
-    T x{}, r{};
-    do {
-        x = gen();
-        r = x % range;
-    } while (x - r > _uint_minus(range));
-    return r;
-} // slightly slower than lemire's, but doesn't require a wider type
-
-// Reimplementation of libc++ `std::uniform_int_distribution<>` except
+// Reimplementation of libc++ 'std::uniform_int_distribution<>' except
 // - constexpr
 // - const-qualified (relative to distribution parameters)
 // - noexcept as long as 'Gen::operator()' is noexcept, which is true for all generators in this module
-// - supports `std::uint8_t`, `std::int8_t`, `char`
+// - supports 'std::uint8_t', 'std::int8_t', 'char'
 // - produces the same sequence on each platform
-// Performance is exactly the same a libc++ version of `std::uniform_int_distribution<>`,
-// in fact, it is likely to return the exact same sequence for all types except 64-bit integers
+// Performance is exactly the same a libc++ version of 'std::uniform_int_distribution<>',
+// in fact, it is likely to return the exact same sequence for most types
 template <class T, class Gen, _require_integral<T> = true>
 constexpr T _generate_uniform_int(Gen& gen, T min, T max) noexcept {
     using result_type    = T;
@@ -9561,17 +9593,16 @@ constexpr T _generate_uniform_int(Gen& gen, T min, T max) noexcept {
 
     // PRNG has enough state for the range
     if (prng_range > range) {
-        const common_type ext_range = range + 1; // range can be zero
+        const common_type ext_range = range + 1; // never overflows due to branch condition
 
-        // PRNG uses all 'common_type' bits uniformly
-        // => use Lemire's algorithm if possible, fallback onto modx1 otherwise,
-        //    libc++ uses conditionally compiled lemire's with 128-bit ints instead of doing a fallback,
-        //    this is slightly faster, but leads to platforms-dependant sequences
+        // PRNG is bit-uniform
+        // => use Lemire's algorithm, GCC/clang provide 128-bit arithmetics natively, other
+        //    compilers use emulation, Lemire with emulated 128-bit ints performs about the
+        //    same as Java's "modx1", which is the best algorithm without wide arithmetics
         if constexpr (prng_range == type_range) {
-            if constexpr (_has_wider<common_type>) res = _uniform_uint_lemire(gen, ext_range);
-            else res = _uniform_uint_modx1(gen, ext_range);
+            res = _uniform_uint_lemire<common_type> (gen, ext_range);
         }
-        // PRNG doesn't use all bits uniformly (usually because 'prng_min' is '1')
+        // PRNG is non-uniform (usually because 'prng_min' is '1')
         // => fallback onto a 2-division algorithm
         else {
             const common_type scaling = prng_range / ext_range;
@@ -10103,7 +10134,6 @@ T rand_linear_combination(const T& A, const T& B) noexcept(noexcept(A + B) && no
 
 #endif
 #endif // module utl::random
-
 
 
 

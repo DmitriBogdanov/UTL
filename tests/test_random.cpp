@@ -158,7 +158,7 @@ TEST_CASE_TEMPLATE("Uniform int distribution covers whole interval for every PRN
                    random::generators::SplitMix64,                                       //
                    random::generators::Xoshiro256PP                                      //
 ) {
-    random::generators::SplitMix32 gen;
+    Gen gen;
 
     constexpr int min   = 0;
     constexpr int max   = 17;
@@ -180,7 +180,7 @@ double vec_min(const std::vector<double>& vec) { return *std::min_element(vec.be
 
 double vec_max(const std::vector<double>& vec) { return *std::max_element(vec.begin(), vec.end()); }
 
-TEST_CASE("Uniform distribution mean/min/max are sensible for every generator") {
+TEST_CASE("Uniform distribution mean/min/max are sensible") {
 
     constexpr std::size_t N   = 100'000; // number of random vals
     constexpr double      eps = 2e-2;    // epsilon used for double comparison, 1e-2 ~ 1% allowed error
