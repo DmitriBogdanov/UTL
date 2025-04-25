@@ -224,7 +224,7 @@ private:
 // --- Local datetime ---
 // ======================
 
-std::tm to_localtime(const std::time_t& time) {
+inline std::tm to_localtime(const std::time_t& time) {
     // There are 3 ways of getting localtime in C-stdlib:
     //    1. 'std::localtime()' - isn't thread-safe and will be marked as "deprecated" by MSVC
     //    2. 'localtime_r()'    - isn't a part of C++, it's a part of C11, in reality provided by POSIX

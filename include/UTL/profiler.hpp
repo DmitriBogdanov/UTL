@@ -676,7 +676,7 @@ public:
 
 inline thread_local ThreadCallGraph thread_call_graph;
 
-void Profiler::upload_this_thread() { thread_call_graph.upload_results(false); }
+inline void Profiler::upload_this_thread() { thread_call_graph.upload_results(false); }
 
 // =======================
 // --- Callsite Marker ---
