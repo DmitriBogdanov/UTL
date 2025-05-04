@@ -319,7 +319,7 @@ Output:
 
 By far the most significant part of profiling overhead comes from calls to `std::chrono::steady_clock::now()`.
 
-It is possible to significantly reduce that overhead by using CPU-counter intrinsics. To do so simply define `UTL_PROFILER_USE_INTRINSICS_FOR_FREQUENCY` macro with a need frequency:
+It is possible to significantly reduce that overhead by using CPU-counter intrinsics. To do so simply define `UTL_PROFILER_USE_INTRINSICS_FOR_FREQUENCY` macro for appropriate frequency:
 
 ```cpp
 #define UTL_PROFILER_USE_INTRINSICS_FOR_FREQUENCY 3.3e9 // 3.3 GHz (AMD Ryzen 5 5600H)
