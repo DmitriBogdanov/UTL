@@ -241,10 +241,10 @@ class NodeMatrix {
     // [ callsites ] dense vector containing info about the callsites
     // 'callsites[callsite_id]' -> pointers to file/function/label & line
 
-    std::size_t rows_size;
-    std::size_t cols_size;
-    std::size_t rows_capacity;
-    std::size_t cols_capacity;
+    std::size_t rows_size     = 0;
+    std::size_t cols_size     = 0;
+    std::size_t rows_capacity = 0;
+    std::size_t cols_capacity = 0;
 
 public:
     std::size_t rows() const noexcept { return this->rows_size; }
@@ -407,8 +407,8 @@ class Profiler {
     call_graph_storage call_graph_info;
     std::mutex         call_graph_mutex;
 
-    std::thread::id main_thread_id;
-    std::size_t     thread_counter;
+    std::thread::id main_thread_id = std::this_thread::get_id();
+    std::size_t     thread_counter = 0;
 
     bool       print_at_destruction = true;
     std::mutex setter_mutex;
@@ -584,8 +584,6 @@ public:
 
         return this->format_available_results(style);
     }
-
-    Profiler() : main_thread_id(std::this_thread::get_id()) {}
 
     ~Profiler() {
         if (!this->print_at_destruction) return; // printing was manually disabled
