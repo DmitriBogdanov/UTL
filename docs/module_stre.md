@@ -9,7 +9,9 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/stre.hpp)
 
-**utl::stre** (aka **STR**ing **E**xpansions) module contains efficient implementations of most commonly used string utility-functions.
+**utl::stre** (aka **str**ing **e**xpansions) header contains implementations of most commonly used string utils.
+
+**Motivation:** Despite the seeming triviality of the topic a lot of implementations found online are either horribly inefficient or contain straight up bugs in some edge cases. Here, the goal is to "get it right" so no time would be spent reinventing the wheel in the future.
 
 ## Definitions
 

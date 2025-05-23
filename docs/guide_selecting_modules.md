@@ -1,8 +1,8 @@
-# Selecting only specific UTL modules
+# Including only specific modules while using amalgamated header
 
 [<- back to README.md](..)
 
-Specific modules can be selected to restrict accessible functionality and reduce the amount of included standard headers.
+While using [individual headers](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL) is generally more robust, the amalgamated [`UTL.hpp`](./../single_include/UTL.hpp) still allows selection of individual libraries to include (for example, to reduce compile times when only some of the modules are needed).
 
 This is achievable by declaring `#define UTL_PICK_MODULES` and `#define <module_identifier>` for all necessary modules before including the library header, see [examples](#selecting-specific-modules).
 
@@ -10,19 +10,24 @@ This is achievable by declaring `#define UTL_PICK_MODULES` and `#define <module_
 
 | Name | Identifier |
 | --- | --- |
-| utl::json | UTLMODULE_JSON |
-| utl::math | UTLMODULE_MATH |
-| utl::mvl | UTLMODULE_MVL |
-| utl::predef | UTLMODULE_PREDEF |
-| utl::profiler | UTLMODULE_PROFILER |
-| utl::progressbar | UTLMODULE_PROGRESSBAR |
-| utl::random | UTLMODULE_RANDOM |
-| utl::shell | UTLMODULE_SHELL |
-| utl::sleep | UTLMODULE_SLEEP |
-| utl::stre | UTLMODULE_STRE |
-| utl::table | UTLMODULE_TABLE |
-| utl::timer | UTLMODULE_TIMER |
-| utl::voidstream | UTLMODULE_VOIDSTREAM |
+| `utl::bit` | `UTLMODULE_BIT` |
+| `utl::enum_reflect` | `UTLMODULE_ENUM_REFLECT` |
+| `utl::integral` | `UTLMODULE_INTEGRAL` |
+| `utl::json` | `UTLMODULE_JSON` |
+| `utl::log` | `UTLMODULE_LOG` |
+| `utl::math` | `UTLMODULE_MATH` |
+| `utl::mvl` | `UTLMODULE_MVL` |
+| `utl::parallel` | `UTLMODULE_PARALLEL` |
+| `utl::predef` | `UTLMODULE_PREDEF` |
+| `utl::profiler` | `UTLMODULE_PROFILER` |
+| `utl::progressbar` | `UTLMODULE_PROGRESSBAR` |
+| `utl::random` | `UTLMODULE_RANDOM` |
+| `utl::shell` | `UTLMODULE_SHELL` |
+| `utl::sleep` | `UTLMODULE_SLEEP` |
+| `utl::stre` | `UTLMODULE_STRE` |
+| `utl::struct_reflect` | `UTLMODULE_STRUCT_REFLECT` |
+| `utl::table` | `UTLMODULE_TABLE` |
+| `utl::time` | `UTLMODULE_TIME` |
 
 ## Examples
 
@@ -80,7 +85,3 @@ int main() {
     // < your code here >
 }
 ```
-
-## Including modules directly
-
-Individual modules can also be grabbed directly from [`include/UTL/`](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL). In this case they can be included directly and no other action is needed.

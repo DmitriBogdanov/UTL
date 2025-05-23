@@ -5,25 +5,25 @@
 
 # UTL
 
-**UTL** is a collection of small self-contained libraries that aim to provide a set of concise utilities aimed at prototyping with minimal boilerplate. Most of the modules were created during my work in gamedev and math research projects.
+**UTL** is a collection of small self-contained libraries aimed at prototyping with minimal boilerplate. Most of the modules were created during my work in gamedev and math research projects.
 
-For the ease of integration, this library is distributed in a form of a **single header**, which can be found [here](./single_include/UTL.hpp).
+For the ease of integration, all libraries are distributed as **individual headers**, which can be found [**here**](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL).
 
-All modules can also be downloaded [individually](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL).
+The entire collection can also be downloaded as an [**amalgamated single-header**](./single_include/UTL.hpp).
 
 ## Design goals
 
 Implementation of this library sets following design goals:
 
-* **Header only**. Adding library to the project should be as simple as adding a header.
-* **Concise**. Methods must require minimal boilerplate on user side.
-* **Platform agnostic**. Implementation should be based around C++ standard and whenever OS-specific methods are unavoidable select appropriate implementation automatically.
-* **Fully modular**. Every module should be independent of others and reside in a separate namespace. Modules together with their STL dependencies should be toggleable through a `#define`.
+* **Easy integration**. Adding libraries to the project should be as simple as including their corresponding headers.
+* **Concise syntax**. Library usage should require minimal boilerplate on user side.
+* **Platform agnostic.** Implementation should be based around the C++ standard. Platform-specific features might be provided as optional addons.
+* **Non-intrusive.** Every library should reside in its own namespace, use its own macro prefix and not introduce any invasive identifiers.
 
-Secondary design goals also include:
+Quality goals include:
 
-* **Modern C++ style**. Usage of modern C++ idioms is preferred.
-* **Usage examples**. Documentation should include usage examples for all major methods.
+* **Modern C++ style**. Usage of modern C++ idioms is heavily preferred.
+* **Usage examples**. Documentation should include  practical usage examples for all major methods.
 * **Test & benchmark coverage.** All modules should have appropriate unit test coverage, performance-focused implementations should be benchmarked against alternative approaches.
 
 ## Modules & documentation
@@ -51,7 +51,7 @@ Secondary design goals also include:
 
 ## See also
 
-* [How to include only specific modules](./docs/guide_selecting_modules.md)
+* [How to include only specific modules when using amalgamated header](./docs/guide_selecting_modules.md)
 
 * [Names reserved for implementation](./docs/guide_reserved_names.md)
 
@@ -60,18 +60,17 @@ Secondary design goals also include:
 ## Requirements
 
 * Requires **C++17** support
-* Some modules require POSIX-compliant system (Linux) or Windows
 
 ## Third-party tools & libraries
 
-While the library itself consists of a single header with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in a repo.
+While the library itself consists of a single header with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in the repo.
 
 | Tool                                                         | Version      | Used for                                                     |
 | ------------------------------------------------------------ | ------------ | ------------------------------------------------------------ |
 | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | **v.14.0.0** | Automatic code formatting                                    |
 | [clangd](https://clangd.llvm.org)                            | **v.15.0.7** | Language server functionality                                |
 | [CMake](https://cmake.org)                                   | **v.3.2.11** | Build system, [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html) testing facilities |
-| [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html) | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) instrumentation for the test environment |
+| [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html) | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) test instrumentation |
 | [cppcheck](https://github.com/danmar/cppcheck)               | **v.2.7**    | Static analysis                                              |
 
 | Library                                                | Version            | License                                                                        | Used for                   | Embedded in repo |
@@ -85,13 +84,10 @@ While the library itself consists of a single header with no embedded dependenci
 
 ## Work in progress
 
-* Old module reworks (`utl::table`);
-* Examples for `utl::math`;
-* Small API improvements for `utl::log`;
-* Vector support for `utl::mvl`;
-* Matrix concat functions for `utl::mvl`;
-* Index span API for `utl::mvl`;
-* Binary operator refactors for `utl::mvl`;
+* `utl::table` rewrite;
+* `utl::log` formatting system rework;
+* `utl::math` cleanup;
+* Vectors, index spans, matrix concat and binary operators for `utl::mvl`;
 * Test coverage statistics.
 
 ## License

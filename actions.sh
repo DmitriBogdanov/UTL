@@ -16,8 +16,7 @@
 #     config  - Configures CMake with appropriate args
 #     build   - Builds the project (requires configured CMake)
 #     test    - Runs CTest tests (requires successful build)
-#     run     - Runs currently selected executable
-#     profile - Runs currently selected executable with Callgrind profiler
+#     profile - Runs currently selected executable with Callgrind
 #   
 #   Usage example:
 #     > bash actions.sh clear config build test  

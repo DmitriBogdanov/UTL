@@ -14,6 +14,7 @@ AllowShortCaseLabelsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
+SortUsingDeclarations: false
 ColumnLimit: 120
 IndentWidth: 4
 MaxEmptyLinesToKeep: 6
