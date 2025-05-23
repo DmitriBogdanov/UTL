@@ -52,7 +52,7 @@
 #include <x86intrin.h>
 #endif
 
-#define utl_profiler_cpu_counter __rdtsc()
+#define utl_random_cpu_counter __rdtsc()
 
 #else
 
