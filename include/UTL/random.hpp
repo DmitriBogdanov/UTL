@@ -17,12 +17,12 @@
 #include <array>            // array<>
 #include <cassert>          // assert()
 #include <chrono>           // high_resolution_clock
-#include <cstdint>          // uint64_t
+#include <cstdint>          // uint8_t, uint16_t, uint32_t, uint64_t
 #include <initializer_list> // initializer_list<>
 #include <limits>           // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
 #include <mutex>            // mutex, lock_guard<>
 #include <random>           // random_device, uniform_.._distribution<>, generate_canonical<>, seed_seq<>
-#include <type_traits>      // is_integral_v<>
+#include <type_traits>      // enable_if_t<>, is_integral<>, is_unsigned<>, is_floating_point<>
 #include <utility>          // declval<>()
 #include <vector>           // vector<>, hash<>
 
@@ -115,7 +115,7 @@ using _require_uint = _require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
 #if defined(__SIZEOF_INT128__) && !defined(__wasm__)
 using _uint128_type = __uint128_t;
 
-// Otherwise fallback onto a manual emulation
+// Otherwise fallback onto either MSVC intrinsics or manual emulation
 #else
 
 // Emulation of 128-bit unsigned integer tailored specifically for usage in 64-bit Lemire's algorithm,
@@ -134,6 +134,17 @@ struct _uint128_type {
     [[nodiscard]] constexpr operator std::uint64_t() const noexcept { return this->low; }
 
     [[nodiscard]] constexpr _uint128_type operator*(_uint128_type other) const noexcept {
+        #if defined(UTL_RANDOM_USE_INTRINSICS) && defined(_MSC_VER) && (defined(__x86_64__) || defined(__amd64__))
+        // Unlike GCC, MSVC also requires 'UTL_RANDOM_USE_INTRINSICS' flag since it also needs '#include <intrin.h>'
+        // for 128-bit multiplication, which could be considered a somewhat intrusive thing to include
+        
+        std::uint64_t upper = 0;
+        std::uint64_t lower = _umul128(this->low, other.low, &upper);
+        
+        return _uint128_type{lower, upper};
+        
+        #else
+        
         // Compute all of the cross products
         const std::uint64_t lo_lo = (this->low & 0xFFFFFFFF) * (other.low & 0xFFFFFFFF);
         const std::uint64_t hi_lo = (this->low >> 32) * (other.low & 0xFFFFFFFF);
@@ -146,6 +157,8 @@ struct _uint128_type {
         const std::uint64_t lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
         return _uint128_type{lower, upper};
+        
+        #endif
     }
 
     [[nodiscard]] constexpr _uint128_type operator>>(int) const noexcept { return this->high; }

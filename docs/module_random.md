@@ -39,7 +39,7 @@ These pseudorandom number generators (aka [PRNGs](https://en.wikipedia.org/wiki/
 - Reproducible results, built-in engines may differ compiler to compiler
 - Random generators & distributions work even in `constexpr` context
 - Almost everything is `noexcept`
-- An option to use [cryptographically secure PRNG](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator)
+- An option to use [cryptographically secure PRNGs](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator)
 - More reliable sources of entropy than [std::random_device](https://en.cppreference.com/w/cpp/numeric/random/random_device)
 
 ## Definitions
@@ -47,7 +47,7 @@ These pseudorandom number generators (aka [PRNGs](https://en.wikipedia.org/wiki/
 ```cpp
 // PRNG implementations
 namespace generators {
-    class GeneratorAPIExample {
+    class GeneratorAPI {
         using result_type;
         
         static constexpr result_type min() noexcept;
@@ -108,7 +108,7 @@ template <class T, class Gen>
 constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen()));
 
 // Convenient random functions
-int rand_int(int min, int max)                    noexcept;
+int rand_int(          int min,          int max) noexcept;
 int rand_uint(unsigned int min, unsigned int max) noexcept;
 
 float rand_float()                     noexcept; // U[0, 1]     uniform distribution
@@ -133,7 +133,7 @@ T rand_linear_combination(const T& A, const T& B);
 ### Random bit generators
 
 > ```cpp
-> class GeneratorAPIExample {
+> class GeneratorAPI {
 >     using result_type;
 > 
 >     static constexpr result_type min() noexcept;
@@ -430,6 +430,20 @@ Output:
 ```
 { -2, 6, 6, 3, -6, 2 }
 ```
+
+## Improving entropy with x86/x64 intrinsics
+
+`utl::random` can also make use of x86/x64 intrinsics, to enable their usage simply define `UTL_RANDOM_USE_INTRINSICS` before including the header:
+
+```cpp
+#define UTL_RANDOM_USE_INTRINSICS
+#include "UTL/random.hpp" // will now use intrinsics
+```
+
+This achieves two things:
+
+- `entropy()` and `entropy_seq()` will now use CPU-counter intrinsics as an additional source of relatively high-quality entropy
+- MSVC will now use a more efficient implementation of 64-bit `UniformIntDistribution`
 
 ## Notes on random number generation
 
