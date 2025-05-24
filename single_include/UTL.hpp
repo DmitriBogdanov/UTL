@@ -9743,7 +9743,9 @@ constexpr T _generate_canonical_generic(Gen& gen) noexcept(noexcept(gen())) {
     for (int i = 0; i < invocations_needed; ++i) {
         res += (static_cast<float_type>(gen()) - static_cast<float_type>(prng_min)) * factor;
         factor *= prng_float_range;
-    } // same algorithm is used by 'std::generate_canonical<>' in all major compilers as of 2025
+    }
+    // same algorithm is used by 'std::generate_canonical<>' in GCC/clang as of 2025, MSVC used to do the same
+    // before the P0952R2 overhaul (see https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0952r2.html)
 
     return res / factor;
 }
@@ -9826,7 +9828,7 @@ struct UniformRealDistribution {
         return p.min + generate_canonical<result_type>(gen) * (p.max - p.min);
     } // for std-compatibility
 
-    constexpr void        reset() const noexcept {} // there is nothing to reset, provided for std-API compatibility
+    constexpr void        reset() const noexcept {} // nothing to reset, provided for std-API compatibility
     constexpr param_type  params() const noexcept { return this->pars; }
     constexpr void        params(const param_type& p) noexcept { *this = UniformRealDistribution(p); }
     constexpr result_type a() const noexcept { return this->pars.min; }
@@ -9942,7 +9944,7 @@ public:
 // --- Approximate normal distribution ---
 // ---------------------------------------
 
-// Extremely fast, but noticeably imprecise normal distribution, can be very useful for fuzzing & gamedev=
+// Extremely fast, but noticeably imprecise normal distribution, can be very useful for fuzzing & gamedev
 
 template <class T, _require_uint<T> = true>
 [[nodiscard]] constexpr int _popcount(T x) noexcept {
@@ -10038,10 +10040,7 @@ struct ApproxNormalDistribution {
         return _approx_standard_normal<result_type>(gen) * params.stddev + params.mean;
     }
 
-    constexpr void reset() const noexcept {
-        this->saved           = 0;
-        this->saved_available = false;
-    }
+    constexpr void reset() const noexcept {} // nothing to reset, provided for std-API compatibility
     [[nodiscard]] constexpr param_type  param() const noexcept { return this->pars; }
     constexpr void                      param(const param_type& p) noexcept { *this = NormalDistribution(p); }
     [[nodiscard]] constexpr result_type mean() const noexcept { return this->pars.mean; }
@@ -10113,6 +10112,7 @@ inline bool rand_bool() noexcept { return static_cast<bool>(rand_uint(0, 1)); }
 
 template <class T>
 const T& rand_choice(std::initializer_list<T> objects) noexcept {
+    assert(objects.size() > 0);
     const int random_index = rand_int(0, static_cast<int>(objects.size()) - 1);
     return objects.begin()[random_index];
 }

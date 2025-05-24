@@ -183,6 +183,22 @@ struct uint_dist_mod_1x {
 };
 
 template <class T>
+struct uint_dist_biased_mult {
+    using narrow = T;
+    using wide   = wider_t<T>;
+
+    narrow range;
+
+    constexpr uint_dist_biased_mult(T range) noexcept : range(range) {}
+
+    template <class Gen>
+    constexpr T operator()(Gen& gen) const noexcept {
+        const wide mul = wide(gen()) * wide(this->range);
+        return mul >> std::numeric_limits<narrow>::digits;
+    }
+};
+
+template <class T>
 struct float_dist_std_canonical {
     T min, max;
 
@@ -253,6 +269,11 @@ void benchmark_distributions_for_prng(const char* name) {
             const uint_dist_mod_1x dist{range};
             for (auto&& e : data) e = min + dist(gen);
         });
+        
+        benchmark("uint_dist_biased_mult", [&] {
+            const uint_dist_biased_mult dist{range};
+            for (auto&& e : data) e = min + dist(gen);
+        });
 
         benchmark("UniformIntDistribution", [&] {
             const random::UniformIntDistribution dist{min, max};
@@ -321,10 +342,10 @@ void benchmark_distributions() {
     benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
     //benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
     //benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
-    //benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
+    benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
     benchmark_distributions_for_prng<random::generators::SplitMix32>("SplitMix32");
     benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
-    //benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
+    benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
     benchmark_distributions_for_prng<random::generators::SplitMix64>("SplitMix64");
     benchmark_distributions_for_prng<random::generators::Xoshiro256PP>("Xoshiro256++");
     //benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");

@@ -29,9 +29,9 @@
 // ===============================
 
 #define FAST_CHECK(arg_)                                                                                               \
-    if (bool res_ = !(arg_)) CHECK(res_)
-// doing straight-up 'CHECK' is somehow MUCH slower, I assume this is caused by the need to remember/log
-// successful checks too
+    if (bool(arg_) == false) CHECK(arg_)
+// somehow much faster than doing a raw 'CHECK()', I assume this is  
+// due to the test framework needing to save successful checks
 
 template <class T, class Func>
 void test_in_every_real_range(Func&& func) {
@@ -56,11 +56,9 @@ TEST_CASE_TEMPLATE("Uniform real distribution doesn't go out of range", T, //
 ) {
     random::generators::SplitMix32 gen;
 
-    constexpr std::size_t sample = 200; // large samples are slower
+    constexpr std::size_t sample = 120; // large samples are slower
 
-    // Check that values never escape [min, max] range,
-    // technically it should be [min, max) range according to the standard,
-    // however almost every major has/had a bug where bounds were included
+    // Check that values never escape [min, max] range
     test_in_every_real_range<T>([&](T min, T max) {
         const random::UniformRealDistribution dist{min, max};
         for (std::size_t i = 0; i < sample; ++i) {
@@ -107,14 +105,14 @@ TEST_CASE_TEMPLATE("Uniform int distribution doesn't go out of range", T, //
 ) {
     random::generators::SplitMix32 gen;
 
-    constexpr std::size_t sample = 200; // large samples are slower
+    constexpr std::size_t sample = 120; // large samples are slower
 
     // Check that values never escape [min, max] range
     test_in_every_int_range<T>([&](T min, T max) {
         const random::UniformIntDistribution dist{min, max};
         for (std::size_t i = 0; i < sample; ++i) {
             const auto value = dist(gen);
-            std::cout << "[" << min << " / " << max << "]\n";
+            // std::cout << "[" << min << " / " << max << "]\n";
             FAST_CHECK(min <= value);
             FAST_CHECK(max >= value);
         }

@@ -491,7 +491,7 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 > **(3)** The difference between `ChaCha8`, `ChaCha12` and `ChaCha20` is the number of stream cypher rounds — 8, 12 and 20 correspondingly. More rounds make the state more difficult to discover, but have a negative effect on performance. As of now (year 2025) `ChaCha12` seems like a reasonable default since it provides 5 rounds of security margin over the best known attack.
 
 > [!Note]
-> **(4)** `C` function [rand()](https://en.cppreference.com/w/c/numeric/random/rand) is implementation-defined, on most existing implementation it uses an old [LCG](https://en.wikipedia.org/wiki/Linear_congruential_generator) engine similar to `std::minstd_rand`. It is generally an extremely low-quality way of generating random and faces a host of additional issues on platforms with low `RAND_MAX`, which includes Windows where `RAND_MAX` is equal `32767` (less than **2 bytes** of information, an almost ridiculous value, really). **GCC**, which is used in this benchmark, implements `rand()` using [linear feedback shift register](http://en.wikipedia.org/wiki/Linear_feedback_shift_register), which is less likely to encounter the most blatant of issues, but is still ultimately an inferior approach.
+> **(4)** `C` function [rand()](https://en.cppreference.com/w/c/numeric/random/rand) is implementation-defined, on most existing implementations it uses an old [LCG](https://en.wikipedia.org/wiki/Linear_congruential_generator) engine similar to `std::minstd_rand`. It is generally an extremely low-quality way of generating random and faces a host of additional issues on platforms with low `RAND_MAX`, which includes Windows where `RAND_MAX` is equal `32767` (less than **2 bytes** of information, an almost ridiculous value, really). **GCC**, which is used in this benchmark, implements `rand()` using [linear feedback shift register](http://en.wikipedia.org/wiki/Linear_feedback_shift_register), which is less likely to encounter the most blatant of issues, but is still ultimately an inferior approach.
 
 Random quality ratings are as follows:
 
@@ -575,7 +575,7 @@ This trend can be observed rather clearly by looking at the lineup of default PR
 | `Rust`         | 2015         | ChaCha12 / Xoshiro256++                                      | Good          |
 | `.NET`         | 2016         | Subtractive Generator (below v.6) ➔ Xoshiro256&ast;&ast; (above v.6) | Decent ➔ Good |
 
-While older languages usually stick to their already existing implementations, newer project tend to choose modern PRNGs for the purpose. This establishes a strong case for switching to using `Xoshiro` / `PCG` family of PRNGs as a default choice in new projects. Engines of families such as `ChaCha` and `ISAAC` also provide cryptographic security to the random sequence, which in essence means that the state of the engine cannot be easily discovered from a piece of its random sequence. This usually has a noticeable performance cost, however even they fair rather well compared to the old monsters such as `std::ranlux48` which runs almost **80 times slower** than Xoshiro256++.
+While older languages usually stick to their already existing implementations, newer projects tend to choose modern PRNGs for the purpose. This establishes a strong case for switching to using `Xoshiro` / `PCG` family of PRNGs as a default choice in new projects. Engines of families such as `ChaCha` and `ISAAC` also provide cryptographic security to the random sequence, which in essence means that the state of the engine cannot be easily discovered from a piece of its random sequence. This usually has a noticeable performance cost, however even they fair rather well compared to the old monsters such as `std::ranlux48` which runs almost **80 times slower** than Xoshiro256++.
 
 ### Additional considerations
 
@@ -611,7 +611,7 @@ Such approach however is beyond cumbersome and is rarely used in practice, which
 
 #### Entropy
 
-Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy is a standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
+Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy is a standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, CPU ticks, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
 
 The result of such approach is generally satisfactory, however oftentimes not sufficient for proper cryptographic security.
 
