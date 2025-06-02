@@ -87,8 +87,8 @@ namespace utl::random {
 
 utl_random_define_trait(_is_seed_seq,
                         std::declval<T>().generate(std::declval<std::uint32_t*>(), std::declval<std::uint32_t*>()));
-// this type trait is necessary to restrict template constructors & seed functions that take 'SeedSeq&& seq', 
-// otherwise they will get picked instead of regular seeding methods even for integer arguments. 
+// this type trait is necessary to restrict template constructors & seed functions that take 'SeedSeq&& seq',
+// otherwise they will get picked instead of regular seeding methods even for integer arguments.
 // This is how standard library seems to do it (based on GCC implementation) so we follow their API.
 
 #undef utl_random_define_trait
@@ -134,17 +134,17 @@ struct _uint128_type {
     [[nodiscard]] constexpr operator std::uint64_t() const noexcept { return this->low; }
 
     [[nodiscard]] constexpr _uint128_type operator*(_uint128_type other) const noexcept {
-        #if defined(UTL_RANDOM_USE_INTRINSICS) && defined(_MSC_VER) && (defined(__x86_64__) || defined(__amd64__))
+#if defined(UTL_RANDOM_USE_INTRINSICS) && defined(_MSC_VER) && (defined(__x86_64__) || defined(__amd64__))
         // Unlike GCC, MSVC also requires 'UTL_RANDOM_USE_INTRINSICS' flag since it also needs '#include <intrin.h>'
         // for 128-bit multiplication, which could be considered a somewhat intrusive thing to include
-        
+
         std::uint64_t upper = 0;
         std::uint64_t lower = _umul128(this->low, other.low, &upper);
-        
+
         return _uint128_type{lower, upper};
-        
-        #else
-        
+
+#else
+
         // Compute all of the cross products
         const std::uint64_t lo_lo = (this->low & 0xFFFFFFFF) * (other.low & 0xFFFFFFFF);
         const std::uint64_t hi_lo = (this->low >> 32) * (other.low & 0xFFFFFFFF);
@@ -157,8 +157,8 @@ struct _uint128_type {
         const std::uint64_t lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
         return _uint128_type{lower, upper};
-        
-        #endif
+
+#endif
     }
 
     [[nodiscard]] constexpr _uint128_type operator>>(int) const noexcept { return this->high; }
@@ -927,7 +927,7 @@ constexpr T _generate_uniform_int(Gen& gen, T min, T max) noexcept {
         //    compilers use emulation, Lemire with emulated 128-bit ints performs about the
         //    same as Java's "modx1", which is the best algorithm without wide arithmetics
         if constexpr (prng_range == type_range) {
-            res = _uniform_uint_lemire<common_type> (gen, ext_range);
+            res = _uniform_uint_lemire<common_type>(gen, ext_range);
         }
         // PRNG is non-uniform (usually because 'prng_min' is '1')
         // => fallback onto a 2-division algorithm
@@ -1078,8 +1078,12 @@ constexpr T _generate_canonical_generic(Gen& gen) noexcept(noexcept(gen())) {
         res += (static_cast<float_type>(gen()) - static_cast<float_type>(prng_min)) * factor;
         factor *= prng_float_range;
     }
+    res /= factor;
     // same algorithm is used by 'std::generate_canonical<>' in GCC/clang as of 2025, MSVC used to do the same
     // before the P0952R2 overhaul (see https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0952r2.html)
+
+    if (res >= float_type(1)) res = float_type(1) - std::numeric_limits<float_type>::epsilon() / float_type(2);
+    // GCC patch the fixes occasional generation of '1's, has non-zero effect on performance
 
     return res / factor;
 }
@@ -1110,6 +1114,7 @@ constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen())) {
 
     // Note 1: Note hexadecimal float literals, 'p' separates hex-base from the exponent
     // Note 2: Floats have 'mantissa_size + 1' significant bits due to having a sign bit
+    // Note 3: All of the methods below produce [0, 1) range
 
     // Bit-uniform PRNGs can be simply bitmasked & shifted to obtain mantissa
     // 64-bit float, 64-bit uniform PRNG
@@ -1198,8 +1203,8 @@ private:
     // ('generate_canonical()' that was implemented earlier)
     //
     // Note 1:
-    // While our 'generate_canonical()' is slightly different in that in produces [0, 1] range
-    // instead of [0, 1), this is not an issue since Marsaglia Polar is a rejection method and does
+    // Even if 'generate_canonical()' produced [0, 1] range instead of [0, 1), 
+    // this would not be an issue since Marsaglia Polar is a rejection method and does
     // not care about the inclusion of upper-boundaries, they get rejected by 'r2 > T(1)' check
     //
     // Note 2:
@@ -1374,9 +1379,9 @@ struct ApproxNormalDistribution {
         return _approx_standard_normal<result_type>(gen) * params.stddev + params.mean;
     }
 
-    constexpr void reset() const noexcept {} // nothing to reset, provided for std-API compatibility
-    [[nodiscard]] constexpr param_type  param() const noexcept { return this->pars; }
-    constexpr void                      param(const param_type& p) noexcept { *this = NormalDistribution(p); }
+    constexpr void                     reset() const noexcept {} // nothing to reset, provided for std-API compatibility
+    [[nodiscard]] constexpr param_type param() const noexcept { return this->pars; }
+    constexpr void                     param(const param_type& p) noexcept { *this = NormalDistribution(p); }
     [[nodiscard]] constexpr result_type mean() const noexcept { return this->pars.mean; }
     [[nodiscard]] constexpr result_type stddev() const noexcept { return this->pars.stddev; }
     [[nodiscard]] constexpr result_type min() const noexcept { return std::numeric_limits<result_type>::lowest(); }

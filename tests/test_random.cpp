@@ -20,7 +20,15 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// NOTE: DOCS
+// This is in no way a proper PRNG test, proper testing of PRNGs is usually done through
+//    - Diehard testing suite: https://en.wikipedia.org/wiki/Diehard_tests
+//    - TestU01 testing suite: https://en.wikipedia.org/wiki/TestU01
+//
+// Both testing suites are implemented in ANSI C. A "good" PRNG would be expected to pass
+// (or at least mostly pass) TestU01 Big Crush, however checking it is a task for PRNG designers.
+//
+// The library simply provides clean implementations of well known algorithms so we check
+// some surface-level invariants to see that their implementation wasn't accidentally broken.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -30,7 +38,7 @@
 
 #define FAST_CHECK(arg_)                                                                                               \
     if (bool(arg_) == false) CHECK(arg_)
-// somehow much faster than doing a raw 'CHECK()', I assume this is  
+// somehow much faster than doing a raw 'CHECK()', I assume this is
 // due to the test framework needing to save successful checks
 
 template <class T, class Func>
@@ -225,13 +233,4 @@ TEST_CASE("Uniform distribution mean/min/max are sensible") {
     CHECK(vec_mean(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(-2.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(2.0).epsilon(eps));
-
-    // This is in no way a proper PRNG test, proper testing of PRNGs is usually done through
-    // Diehard testing suite:
-    // https://en.wikipedia.org/wiki/Diehard_tests
-    // and "TestU01" ANSI C library:
-    // https://en.wikipedia.org/wiki/TestU01
-    // a "good" PRNG would be expected to pass (or at least mostly pass) TestU01 Big Crush,
-    // however it is a task for PRNG designers, here we merely implement well known algorithms
-    // and check that their implementation wasn't accidentally broken.
 }
