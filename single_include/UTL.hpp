@@ -10111,7 +10111,7 @@ inline double rand_normal_double() {
 inline bool rand_bool() noexcept { return static_cast<bool>(rand_uint(0, 1)); }
 
 template <class T>
-const T& rand_choice(std::initializer_list<T> objects) noexcept {
+T rand_choice(std::initializer_list<T> objects) noexcept {
     assert(objects.size() > 0);
     const int random_index = rand_int(0, static_cast<int>(objects.size()) - 1);
     return objects.begin()[random_index];

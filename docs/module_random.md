@@ -122,7 +122,7 @@ double rand_normal_float();                          // N(0, 1)      normal dist
 bool rand_bool() noexcept;
 
 template<class T>
-constexpr T& rand_choice(std::initializer_list<T> objects) noexcept;
+T rand_choice(std::initializer_list<T> objects) noexcept;
 
 template<class T>
 T rand_linear_combination(const T& A, const T& B);
@@ -188,13 +188,13 @@ A global instance of **Xoshiro256++** generator used by convenience functions of
 **Note:** All random engines are inherently non-thread-safe, a proper way of generating numbers in parallel is to create local generators on each thread and seed them with different values.
 
 > ```cpp
-> void random::seed(std::uint64_t random_seed) noexcept;
+> void seed(std::uint64_t random_seed) noexcept;
 > ```
 
 Seeds global random engine with `random_seed`.
 
 > ```cpp
-> void random::seed_with_entropy();
+> void seed_with_entropy();
 > ```
 
 Seeds global random engine using combined entropy from several sources, the main one being [std::random_device](https://en.cppreference.com/w/cpp/numeric/random/random_device) which uses hardware source of non-deterministic randomness.
@@ -310,41 +310,41 @@ Normal floating-point distribution class that provides a 1-to-1 copy of [`std::n
 ### Convenient random functions
 
 > ```cpp
-> int random::rand_int(          int min,          int max);
-> int random::rand_uint(unsigned int min, unsigned int max);
+> int rand_int(          int min,          int max);
+> int rand_uint(unsigned int min, unsigned int max);
 > ```
 
 Returns random integer in a $[min, max]$ range.
 
 > ```cpp
-> float  random::rand_float();
-> double random::rand_double();
+> float  rand_float();
+> double rand_double();
 > ```
 
 Returns random float/double in a $[0, 1]$ range.
 
 > ```cpp
-> float  random::rand_float(  float min,  float max);
-> double random::rand_double(double min, double max);
+> float  rand_float(  float min,  float max);
+> double rand_double(double min, double max);
 > ```
 
 Returns random float/double in a $[min, max]$ range.
 
 > ```cpp
-> float  random::rand_normal_float();
-> double random::rand_normal_double();
+> float  rand_normal_float();
+> double rand_normal_double();
 > ```
 
 Returns random normally distributed float/double with a mean $0$ and variance $1$.
 
 > ```cpp
-> bool random::rand_bool();
+> bool rand_bool();
 > ```
 
 Returns `true`/`false` randomly. Effectively same as `rand_uint(0, 1)`.
 
 > ```cpp
-> const T& rand_choice(std::initializer_list<T> objects);
+> T rand_choice(std::initializer_list<T> objects);
 > ```
 
 Returns randomly chosen object from a list.
@@ -476,7 +476,7 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 | `std::ranlux48`             | ~4%            | 120 bytes              | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                                   |
 
 > [!Important]
-> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular number may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/benchmark_random.cpp).
+> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/benchmark_random.cpp).
 
 > [!Important]
 > Performance is measured in **values per unit of time**, to get a *bytes per unit of time* metric, the measurements can be normalized by a `sizeof(result_type)`, making 32-bit generators effectively two times slower than listed in the table.
