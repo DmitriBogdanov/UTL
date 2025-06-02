@@ -8687,7 +8687,7 @@ private:
 #include <initializer_list> // initializer_list<>
 #include <limits>           // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
 #include <mutex>            // mutex, lock_guard<>
-#include <random>           // random_device, uniform_.._distribution<>, generate_canonical<>, seed_seq<>
+#include <random>           // random_device, uniform_..._distribution<>, generate_canonical<>, seed_seq<>
 #include <type_traits>      // enable_if_t<>, is_integral<>, is_unsigned<>, is_floating_point<>
 #include <utility>          // declval<>()
 #include <vector>           // vector<>, hash<>
@@ -8753,9 +8753,9 @@ namespace utl::random {
 
 utl_random_define_trait(_is_seed_seq,
                         std::declval<T>().generate(std::declval<std::uint32_t*>(), std::declval<std::uint32_t*>()));
-// this type trait is necessary to restrict template constructors & seed function that take 'SeedSeq&& seq', otherwise
-// they will get pick instead of regular seeding methods for even for integer conversions. This is how standard library
-// seems to do it (based on GCC implementation) so we follow their API.
+// this type trait is necessary to restrict template constructors & seed functions that take 'SeedSeq&& seq', 
+// otherwise they will get picked instead of regular seeding methods even for integer arguments. 
+// This is how standard library seems to do it (based on GCC implementation) so we follow their API.
 
 #undef utl_random_define_trait
 
