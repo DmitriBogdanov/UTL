@@ -335,16 +335,16 @@ constexpr bool debug =
     buffer += "Architecture:      ";
     buffer += architecture_name;
     buffer += '\n';
-    
-    #ifdef __cpp_lib_hardware_interference_size
+
+#ifdef __cpp_lib_hardware_interference_size
     buffer += "L1 cache line (D):  ";
     buffer += std::to_string(std::hardware_destructive_interference_size);
     buffer += '\n';
-    
+
     buffer += "L1 cache line (C):  ";
     buffer += std::to_string(std::hardware_constructive_interference_size);
     buffer += '\n';
-    #endif // not (currently) implemented in GCC / clang despite being a C++17 feature
+#endif // not (currently) implemented in GCC / clang despite being a C++17 feature
 
     buffer += "Compiled in DEBUG: ";
     buffer += debug ? "true" : "false";
@@ -534,7 +534,7 @@ constexpr bool debug =
 // are still illegal due to 'if constexpr' requiting both branches to have defined identifiers,
 // but since this arcane concept is already implemented why not keep it.
 
-} // namespace utl::predef
+} // namespace utl::predef::impl
 
 // ______________________ PUBLIC API ______________________
 
@@ -564,7 +564,7 @@ using impl::compilation_summary;
 // macro -> UTL_PREDEF_VA_ARGS_COUNT
 // macro -> UTL_PREDEF_IS_FUNCTION_DEFINED_TRAIT
 
-} // namespace utl::XXXXXXXXXXXX
+} // namespace utl::predef
 
 #endif
 #endif // module utl::predef

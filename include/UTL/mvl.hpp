@@ -43,7 +43,7 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// [experimental!] This header is still work in progress and likely to undergo significant changes to 
+// [experimental!] This header is still work in progress and likely to undergo significant changes to
 // its API & implementation.
 //
 // This module tries to implement an "unreasonably flexible yet convenient" template for vectors and matrices,

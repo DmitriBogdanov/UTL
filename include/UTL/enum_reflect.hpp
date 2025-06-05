@@ -111,7 +111,7 @@ struct meta {
 
 #define UTL_ENUM_REFLECT(enum_name_, ...)                                                                              \
     template <>                                                                                                        \
-    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                      \
+    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                 \
         using type = enum_name_;                                                                                       \
                                                                                                                        \
         constexpr static std::string_view type_name = #enum_name_;                                                     \

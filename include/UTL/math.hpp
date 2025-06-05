@@ -455,7 +455,7 @@ template <MemoryUnit units = MemoryUnit::MiB, class T>
     return to_memory_units<units>(bytes);
 }
 
-} // namespace utl::math
+} // namespace utl::math::impl
 
 // ______________________ PUBLIC API ______________________
 

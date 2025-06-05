@@ -375,7 +375,7 @@ struct meta {
 
 #define UTL_ENUM_REFLECT(enum_name_, ...)                                                                              \
     template <>                                                                                                        \
-    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                      \
+    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                 \
         using type = enum_name_;                                                                                       \
                                                                                                                        \
         constexpr static std::string_view type_name = #enum_name_;                                                     \
@@ -4003,7 +4003,7 @@ template <MemoryUnit units = MemoryUnit::MiB, class T>
     return to_memory_units<units>(bytes);
 }
 
-} // namespace utl::math
+} // namespace utl::math::impl
 
 // ______________________ PUBLIC API ______________________
 
@@ -4112,7 +4112,7 @@ using impl::quick_memory_estimate;
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// [experimental!] This header is still work in progress and likely to undergo significant changes to 
+// [experimental!] This header is still work in progress and likely to undergo significant changes to
 // its API & implementation.
 //
 // This module tries to implement an "unreasonably flexible yet convenient" template for vectors and matrices,
@@ -7598,16 +7598,16 @@ constexpr bool debug =
     buffer += "Architecture:      ";
     buffer += architecture_name;
     buffer += '\n';
-    
-    #ifdef __cpp_lib_hardware_interference_size
+
+#ifdef __cpp_lib_hardware_interference_size
     buffer += "L1 cache line (D):  ";
     buffer += std::to_string(std::hardware_destructive_interference_size);
     buffer += '\n';
-    
+
     buffer += "L1 cache line (C):  ";
     buffer += std::to_string(std::hardware_constructive_interference_size);
     buffer += '\n';
-    #endif // not (currently) implemented in GCC / clang despite being a C++17 feature
+#endif // not (currently) implemented in GCC / clang despite being a C++17 feature
 
     buffer += "Compiled in DEBUG: ";
     buffer += debug ? "true" : "false";
@@ -7797,7 +7797,7 @@ constexpr bool debug =
 // are still illegal due to 'if constexpr' requiting both branches to have defined identifiers,
 // but since this arcane concept is already implemented why not keep it.
 
-} // namespace utl::predef
+} // namespace utl::predef::impl
 
 // ______________________ PUBLIC API ______________________
 
@@ -7827,7 +7827,7 @@ using impl::compilation_summary;
 // macro -> UTL_PREDEF_VA_ARGS_COUNT
 // macro -> UTL_PREDEF_IS_FUNCTION_DEFINED_TRAIT
 
-} // namespace utl::XXXXXXXXXXXX
+} // namespace utl::predef
 
 #endif
 #endif // module utl::predef
@@ -8685,6 +8685,10 @@ struct Profiler {
 #ifndef UTLHEADERGUARD_PROGRESSBAR
 #define UTLHEADERGUARD_PROGRESSBAR
 
+#define UTL_PROGRESSBAR_VERSION_MAJOR 1
+#define UTL_PROGRESSBAR_VERSION_MINOR 0
+#define UTL_PROGRESSBAR_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // max(), clamp()
@@ -8707,7 +8711,7 @@ struct Profiler {
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::progressbar {
+namespace utl::progressbar::impl {
 
 // Proper progress bar, uses '\r' to render new state in the same spot.
 // Allocates when formatting things for the first time, after that storage gets reused.
@@ -8937,6 +8941,15 @@ private:
         this->chars_drawn = this->progress_in_chars;
     }
 };
+
+} // namespace utl::progressbar::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::progressbar {
+
+using impl::Percentage;
+using impl::Ruler;
 
 } // namespace utl::progressbar
 

@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_PROGRESSBAR
 #define UTLHEADERGUARD_PROGRESSBAR
 
+#define UTL_PROGRESSBAR_VERSION_MAJOR 1
+#define UTL_PROGRESSBAR_VERSION_MINOR 0
+#define UTL_PROGRESSBAR_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // max(), clamp()
@@ -34,7 +38,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::progressbar {
+namespace utl::progressbar::impl {
 
 // Proper progress bar, uses '\r' to render new state in the same spot.
 // Allocates when formatting things for the first time, after that storage gets reused.
@@ -264,6 +268,15 @@ private:
         this->chars_drawn = this->progress_in_chars;
     }
 };
+
+} // namespace utl::progressbar::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::progressbar {
+
+using impl::Percentage;
+using impl::Ruler;
 
 } // namespace utl::progressbar
 
