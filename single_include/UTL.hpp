@@ -8975,6 +8975,10 @@ using impl::Ruler;
 #ifndef UTLHEADERGUARD_RANDOM
 #define UTLHEADERGUARD_RANDOM
 
+#define UTL_RANDOM_VERSION_MAJOR 1 // [!] API-breaking patch is currently planned
+#define UTL_RANDOM_VERSION_MINOR 0
+#define UTL_RANDOM_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <array>            // array<>
@@ -9025,7 +9029,7 @@ using impl::Ruler;
 
 #endif
 
-namespace utl::random {
+namespace utl::random::impl {
 
 // ============================
 // --- Implementation utils ---
@@ -10166,7 +10170,7 @@ private:
     // ('generate_canonical()' that was implemented earlier)
     //
     // Note 1:
-    // Even if 'generate_canonical()' produced [0, 1] range instead of [0, 1), 
+    // Even if 'generate_canonical()' produced [0, 1] range instead of [0, 1),
     // this would not be an issue since Marsaglia Polar is a rejection method and does
     // not care about the inclusion of upper-boundaries, they get rejected by 'r2 > T(1)' check
     //
@@ -10424,6 +10428,38 @@ T rand_linear_combination(const T& A, const T& B) noexcept(noexcept(A + B) && no
     const auto weight = rand_double();
     return A * weight + B * (1. - weight);
 } // random linear combination of 2 colors/vectors/etc
+
+} // namespace utl::random::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::random {
+
+namespace generators = impl::generators;
+
+using impl::default_generator_type;
+using impl::default_result_type;
+using impl::default_generator;
+
+using impl::seed;
+using impl::seed_with_entropy;
+
+using impl::entropy_seq;
+using impl::entropy;
+
+using impl::UniformIntDistribution;
+using impl::UniformRealDistribution;
+using impl::NormalDistribution;
+using impl::ApproxNormalDistribution;
+using impl::generate_canonical;
+
+using impl::rand_int;
+using impl::rand_uint;
+using impl::rand_float;
+using impl::rand_double;
+using impl::rand_bool;
+using impl::rand_choice;
+using impl::rand_linear_combination;
 
 } // namespace utl::random
 
