@@ -15,7 +15,6 @@
 #include "UTL/stre.hpp"
 #include "UTL/struct_reflect.hpp"
 #include "UTL/table.hpp"
-#include "UTL/timer.hpp"
 
 #include <chrono>
 #include <complex>
