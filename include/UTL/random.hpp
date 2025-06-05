@@ -13,7 +13,7 @@
 #define UTLHEADERGUARD_RANDOM
 
 #define UTL_RANDOM_VERSION_MAJOR 2
-#define UTL_RANDOM_VERSION_MINOR 0
+#define UTL_RANDOM_VERSION_MINOR 1
 #define UTL_RANDOM_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -26,6 +26,7 @@
 #include <limits>           // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
 #include <mutex>            // mutex, lock_guard<>
 #include <random>           // random_device, uniform_..._distribution<>, generate_canonical<>, seed_seq<>
+#include <thread>           // thread::id, this_thread::get_id()
 #include <type_traits>      // enable_if_t<>, is_integral<>, is_unsigned<>, is_floating_point<>
 #include <utility>          // declval<>()
 #include <vector>           // vector<>, hash<>
@@ -852,12 +853,21 @@ inline std::seed_seq entropy_seq() {
     // CPU counter (if available, hashed compilation time otherwise)
     const auto cpu_counter = static_cast<std::uint64_t>(utl_random_cpu_counter);
 
+    // Thread ID (guarantees different seeding for thread-local PRNGs)
+    const std::size_t thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+
     // Note:
     // There are other sources of entropy, such as function addresses,
     // but those can be rather "constant" on some platforms
 
-    return {seed_rd, crush_to_uint32(seed_time), crush_to_uint32(heap_address_hash),
-            crush_to_uint32(stack_address_hash), crush_to_uint32(cpu_counter)};
+    return {
+        seed_rd,                             //
+        crush_to_uint32(seed_time),          //
+        crush_to_uint32(heap_address_hash),  //
+        crush_to_uint32(stack_address_hash), //
+        crush_to_uint32(cpu_counter),        //
+        crush_to_uint32(thread_id)           //
+    };
 }
 
 inline std::uint32_t entropy() {
@@ -1477,7 +1487,7 @@ T choose(std::initializer_list<T> list) {
 }
 
 template <class Container>
-auto choose(const Container &list) {
+auto choose(const Container& list) {
     return list.at(uniform<std::size_t>(0, list.size() - 1));
 }
 
@@ -1501,18 +1511,18 @@ inline  float normal_float (                          ) { return  normal< float>
 inline double normal_double(                          ) { return  normal<double>(            ); }
 // clang-format on
 
-int    uniform_int   (   int min,    int max);
-Uint   uniform_uint  (  Uint min,   Uint max);
-bool   uniform_bool  (                      );
-float  uniform_float ( float min,  float max);
+int    uniform_int(int min, int max);
+Uint   uniform_uint(Uint min, Uint max);
+bool   uniform_bool();
+float  uniform_float(float min, float max);
 double uniform_double(double min, double max);
-float  uniform_float (                      );
-double uniform_double(                      );
+float  uniform_float();
+double uniform_double();
 
-float  normal_float ( float mean,  float stddev);
+float  normal_float(float mean, float stddev);
 double normal_double(double mean, double stddev);
-float  normal_float (                          );
-double normal_double(                          );
+float  normal_float();
+double normal_double();
 
 } // namespace utl::random::impl
 
