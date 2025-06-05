@@ -10480,12 +10480,13 @@ using impl::rand_linear_combination;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include <mutex>
-#include <stdexcept>
-#include <type_traits>
 #if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_SHELL)
 #ifndef UTLHEADERGUARD_SHELL
 #define UTLHEADERGUARD_SHELL
+
+#define UTL_SHELL_VERSION_MAJOR 0 // [!] module awaiting a rewrite
+#define UTL_SHELL_VERSION_MINOR 0
+#define UTL_SHELL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -10494,6 +10495,7 @@ using impl::rand_linear_combination;
 #include <filesystem>    // fs::remove(), fs::path, fs::exists(), fs::temp_directory_path()
 #include <fstream>       // ofstream, ifstream
 #include <sstream>       // ostringstream
+#include <stdexcept>     // runtime_error
 #include <string>        // string
 #include <string_view>   // string_view
 #include <unordered_set> // unordered_set<>
@@ -10509,7 +10511,7 @@ using impl::rand_linear_combination;
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::shell {
+namespace utl::shell::impl {
 
 // =================================
 // --- Temporary File Generation ---
@@ -10607,8 +10609,8 @@ inline CommandResult run_command(const std::string& command) {
     // but it doesn't seem there is a portable way to do better (aka going
     // back to previous note about platform-specific APIs)
 
-    const auto stdout_file = utl::shell::generate_temp_file();
-    const auto stderr_file = utl::shell::generate_temp_file();
+    const auto stdout_file = generate_temp_file();
+    const auto stderr_file = generate_temp_file();
 
     // Redirect stdout and stderr of the command to temporary files
     std::ostringstream ss;
@@ -10623,8 +10625,8 @@ inline CommandResult run_command(const std::string& command) {
     std::ostringstream stderr_stream;
     stdout_stream << std::ifstream(stdout_file).rdbuf();
     stderr_stream << std::ifstream(stderr_file).rdbuf();
-    utl::shell::erase_temp_file(stdout_file);
-    utl::shell::erase_temp_file(stderr_file);
+    erase_temp_file(stdout_file);
+    erase_temp_file(stderr_file);
 
     // Return
     CommandResult result = {status, stdout_stream.str(), stderr_stream.str()};
@@ -10653,6 +10655,24 @@ inline CommandResult run_command(const std::string& command) {
     for (std::size_t i = 0; i < arguments.size(); ++i) arguments.emplace_back(argv[i]);
     return arguments;
 }
+
+} // namespace utl::shell::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::shell {
+
+using impl::random_ascii_string;
+
+using impl::generate_temp_file;
+using impl::clear_temp_files;
+using impl::erase_temp_file;
+
+using impl::get_exe_path;
+using impl::get_command_line_args;
+
+using impl::CommandResult;
+using impl::run_command;
 
 } // namespace utl::shell
 
