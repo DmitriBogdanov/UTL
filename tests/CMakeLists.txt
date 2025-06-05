@@ -14,6 +14,7 @@ macro(add_utl_test filename)
         -fno-sanitize-recover=all
         -fsanitize=undefined,address,leak
         -Wall -Wextra -Wpedantic -Werror
+        -fmax-errors=1
     )
     # '-O0  -fno-omit-frame-pointer'           => no optimization makes compilation a bit faster
     # '-g3'                                    => leave as much debug info as possible, use '-ggdb3'

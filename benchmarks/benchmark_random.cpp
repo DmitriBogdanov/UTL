@@ -88,8 +88,11 @@ void benchmark_prngs() {
 // --- Uniform Distribution benchmarks ---
 // =======================================
 
+template <class T>
+constexpr bool always_false_v = false;
+
 // clang-format off
-template<class T> struct wider { static_assert(json::_always_false_v<T>, "Missing specialization"); };
+template<class T> struct wider { static_assert(always_false_v<T>, "Missing specialization"); };
 
 template<> struct wider<std::uint8_t > { using type = std::uint16_t; };
 template<> struct wider<std::uint16_t> { using type = std::uint32_t; };
@@ -98,7 +101,7 @@ template<> struct wider<std::int8_t  > { using type =  std::int16_t; };
 template<> struct wider<std::int16_t > { using type =  std::int32_t; };
 template<> struct wider<std::int32_t > { using type =  std::int64_t; };
 
-template<class T> struct narrower_t { static_assert(json::_always_false_v<T>, "Missing specialization"); };
+template<class T> struct narrower_t { static_assert(always_false_v<T>, "Missing specialization"); };
 
 
 template<> struct narrower_t< std::uint8_t> { using type =          void; };
