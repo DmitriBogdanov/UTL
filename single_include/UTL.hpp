@@ -362,7 +362,7 @@ template <class>
 constexpr bool always_false_v = false;
 
 template <class Enum>
-struct meta {
+struct Meta {
     static_assert(always_false_v<Enum>,
                   "Provided enum does not have a defined reflection. Use 'UTL_ENUM_REFLECT' macro to define one.");
     // makes instantiation of this template a compile-time error
@@ -375,7 +375,7 @@ struct meta {
 
 #define UTL_ENUM_REFLECT(enum_name_, ...)                                                                              \
     template <>                                                                                                        \
-    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                 \
+    struct utl::enum_reflect::impl::Meta<enum_name_> {                                                                 \
         using type = enum_name_;                                                                                       \
                                                                                                                        \
         constexpr static std::string_view type_name = #enum_name_;                                                     \
@@ -390,16 +390,16 @@ struct meta {
 // ======================
 
 template <class Enum>
-constexpr auto type_name = meta<Enum>::type_name;
+constexpr auto type_name = Meta<Enum>::type_name;
 
 template <class Enum>
-constexpr auto names = meta<Enum>::names;
+constexpr auto names = Meta<Enum>::names;
 
 template <class Enum>
-constexpr auto values = meta<Enum>::values;
+constexpr auto values = Meta<Enum>::values;
 
 template <class Enum>
-constexpr auto entries = meta<Enum>::entries;
+constexpr auto entries = Meta<Enum>::entries;
 
 template <class Enum>
 constexpr auto size = std::tuple_size_v<decltype(values<Enum>)>;
@@ -1080,7 +1080,7 @@ utl_json_define_trait(has_mapped_type, std::declval<typename std::decay_t<T>::ma
 #undef utl_json_define_trait
 
 // Workaround for 'static_assert(false)' making program ill-formed even when placed inside an 'if constexpr'
-// branch that never compiles. 'static_assert(_always_false_v<T)' on the other hand doesn't,
+// branch that never compiles. 'static_assert(always_false_v<T)' on the other hand doesn't,
 // which means we can use it to mark branches that should never compile.
 template <class>
 constexpr bool always_false_v = false;
@@ -3930,10 +3930,10 @@ template <class T, class Func, require_float<T> = true, require_invocable_r<T, F
 enum class MemoryUnit { BYTE, KiB, MiB, GiB, TiB, KB, MB, GB, TB };
 
 // Workaround for 'static_assert(false)' making program ill-formed even when placed inside an 'if constexpr' branch
-// that never compiles. 'static_assert(_always_false_v<T>)' on the the other hand delays its evaluation and works as
+// that never compiles. 'static_assert(always_false_v<T>)' on the the other hand delays its evaluation and works as
 // we would want. This is super-well known, this comment just explains the basics should I have amnesia in the future.
-template <MemoryUnit units>
-constexpr bool _always_false_mem_v = false;
+template <MemoryUnit>
+constexpr bool always_false_mem_v = false;
 
 template <class T, class Func>
 constexpr void tuple_for_each(T&& tuple, Func&& func) {
@@ -3951,7 +3951,7 @@ template <MemoryUnit units = MemoryUnit::MiB>
     else if constexpr (units == MemoryUnit::MB) return bytes / 1000. / 1000.;
     else if constexpr (units == MemoryUnit::GB) return bytes / 1000. / 1000. / 1000.;
     else if constexpr (units == MemoryUnit::TB) return bytes / 1000. / 1000. / 1000. / 1000.;
-    else static_assert(_always_false_mem_v<units>, "Function is a non-exhaustive visitor of enum class {MemoryUnit}.");
+    else static_assert(always_false_mem_v<units>, "Function is a non-exhaustive visitor of enum class {MemoryUnit}.");
 }
 
 // Quick memory usage estimate, doesn't iterate containers and doesn't try to expand
@@ -11134,6 +11134,10 @@ using impl::index_of_difference;
 #ifndef UTLHEADERGUARD_STRUCT_REFLECT
 #define UTLHEADERGUARD_STRUCT_REFLECT
 
+#define UTL_STRUCT_REFLECT_VERSION_MAJOR 1
+#define UTL_STRUCT_REFLECT_VERSION_MINOR 0
+#define UTL_STRUCT_REFLECT_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <array>       // array<>
@@ -11157,11 +11161,11 @@ using impl::index_of_difference;
 //
 // An alternative frequently used way to do struct reflection is through generated code with structured binding &
 // hundreds of overloads. This has a benefit of producing nicer error messages on 'for_each()' however the
-// resulting implementation is downright abhorrent.
+// resulting implementation is exceedingly verbose and doesn't provide field name info.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::struct_reflect {
+namespace utl::struct_reflect::impl {
 
 // =================
 // --- Map macro ---
@@ -11204,25 +11208,22 @@ namespace utl::struct_reflect {
 
 // Note: 'srfl' is short for 'struct_reflect'
 
-// =========================
-// --- Struct reflection ---
-// =========================
-
-// --- Implementation ---
-// ----------------------
+// ============================
+// --- Reflection mechanism ---
+// ============================
 
 template <class T1, class T2>
-constexpr std::pair<T1, T2&&> _make_entry(T1&& a, T2&& b) noexcept {
+constexpr std::pair<T1, T2&&> make_entry(T1&& a, T2&& b) noexcept {
     return std::pair<T1, T2&&>(std::forward<T1>(a), std::forward<T2>(b));
     // helper function used to create < name, reference-to-field > entries
 }
 
 template <class>
-inline constexpr bool _always_false_v = false;
+constexpr bool always_false_v = false;
 
 template <class S>
-struct _meta {
-    static_assert(_always_false_v<S>,
+struct Meta {
+    static_assert(always_false_v<S>,
                   "Provided struct does not have a defined reflection. Use 'UTL_STRUCT_REFLECT' macro to define one.");
     // makes instantiation of this template a compile-time error
 };
@@ -11230,7 +11231,7 @@ struct _meta {
 // Helper macros for codegen
 #define utl_srfl_make_name(arg_) std::string_view(#arg_)
 #define utl_srfl_fwd_value(arg_) std::forward<S>(val).arg_
-#define utl_srfl_fwd_entry(arg_) _make_entry(std::string_view(#arg_), std::forward<S>(val).arg_)
+#define utl_srfl_fwd_entry(arg_) make_entry(std::string_view(#arg_), std::forward<S>(val).arg_)
 
 #define utl_srfl_call_unary_func(arg_) func(std::forward<S>(val).arg_);
 #define utl_srfl_call_binary_func(arg_) func(std::forward<S1>(val_1).arg_, std::forward<S2>(val_2).arg_);
@@ -11239,7 +11240,7 @@ struct _meta {
 
 #define UTL_STRUCT_REFLECT(struct_name_, ...)                                                                          \
     template <>                                                                                                        \
-    struct utl::struct_reflect::_meta<struct_name_> {                                                                  \
+    struct utl::struct_reflect::impl::Meta<struct_name_> {                                                             \
         constexpr static std::string_view type_name = #struct_name_;                                                   \
                                                                                                                        \
         constexpr static auto names = std::array{utl_srfl_map_list(utl_srfl_make_name, __VA_ARGS__)};                  \
@@ -11277,25 +11278,26 @@ struct _meta {
 
 // Note: 'true' in front of a generated predicate chain handles the redundant '&&' at the beginning
 
-// --- Public API ---
-// ------------------
+// ======================
+// --- Reflection API ---
+// ======================
 
 template <class S>
-constexpr auto type_name = _meta<S>::type_name;
+constexpr auto type_name = Meta<S>::type_name;
 
 template <class S>
-constexpr auto names = _meta<S>::names;
+constexpr auto names = Meta<S>::names;
 
 template <class S>
 constexpr auto field_view(S&& value) noexcept {
     using struct_type = typename std::decay_t<S>;
-    return _meta<struct_type>::field_view(std::forward<S>(value));
+    return Meta<struct_type>::field_view(std::forward<S>(value));
 }
 
 template <class S>
 constexpr auto entry_view(S&& value) noexcept {
     using struct_type = typename std::decay_t<S>;
-    return _meta<struct_type>::entry_view(std::forward<S>(value));
+    return Meta<struct_type>::entry_view(std::forward<S>(value));
 }
 
 template <class S>
@@ -11309,7 +11311,7 @@ constexpr auto get(S&& value) noexcept {
 template <class S, class Func>
 constexpr void for_each(S&& value, Func&& func) {
     using struct_type = typename std::decay_t<S>;
-    _meta<struct_type>::for_each(std::forward<S>(value), std::forward<Func>(func));
+    Meta<struct_type>::for_each(std::forward<S>(value), std::forward<Func>(func));
 }
 
 template <class S1, class S2, class Func>
@@ -11318,7 +11320,7 @@ constexpr void for_each(S1&& value_1, S2&& value_2, Func&& func) {
     using struct_type_2 = typename std::decay_t<S2>;
     static_assert(std::is_same_v<struct_type_1, struct_type_2>,
                   "Called 'struct_reflect::for_each(s1, s2, func)' with incompatible argument types.");
-    _meta<struct_type_1>::for_each(std::forward<S1>(value_1), std::forward<S2>(value_2), std::forward<Func>(func));
+    Meta<struct_type_1>::for_each(std::forward<S1>(value_1), std::forward<S2>(value_2), std::forward<Func>(func));
 }
 
 // Predicate checks cannot be efficiently implemented in terms of 'for_each()'
@@ -11326,7 +11328,7 @@ constexpr void for_each(S1&& value_1, S2&& value_2, Func&& func) {
 template <class S, class Func>
 constexpr bool true_for_all(const S& value, Func&& func) {
     using struct_type = typename std::decay_t<S>;
-    return _meta<struct_type>::true_for_all(value, std::forward<Func>(func));
+    return Meta<struct_type>::true_for_all(value, std::forward<Func>(func));
 }
 
 template <class S1, class S2, class Func>
@@ -11335,7 +11337,7 @@ constexpr bool true_for_all(const S1& value_1, const S2& value_2, Func&& func) {
     using struct_type_2 = typename std::decay_t<S2>;
     static_assert(std::is_same_v<struct_type_1, struct_type_2>,
                   "Called 'struct_reflect::for_each(s1, s2, func)' with incompatible argument types.");
-    return _meta<struct_type_1>::true_for_all(value_1, value_2, std::forward<Func>(func));
+    return Meta<struct_type_1>::true_for_all(value_1, value_2, std::forward<Func>(func));
 }
 
 // --- Misc utils ---
@@ -11352,7 +11354,7 @@ constexpr void tuple_for_each(T&& tuple, Func&& func) {
 // For a pair of tuple 'std::apply' trick doesn't cut it, gotta do the standard thing
 // with recursion over the index sequence. This looks a little horrible, but no too much
 template <class T1, class T2, class Func, std::size_t... Idx>
-constexpr void _tuple_for_each_impl(T1&& tuple_1, T2&& tuple_2, Func&& func, std::index_sequence<Idx...>) {
+constexpr void tuple_for_each_impl(T1&& tuple_1, T2&& tuple_2, Func&& func, std::index_sequence<Idx...>) {
     (func(std::get<Idx>(std::forward<T1>(tuple_1)), std::get<Idx>(std::forward<T2>(tuple_2))), ...);
     // fold expression '( f(args), ... )' invokes 'f(args)' for all indices in the index sequence
 }
@@ -11363,9 +11365,31 @@ constexpr void tuple_for_each(T1&& tuple_1, T2&& tuple_2, Func&& func) {
     constexpr std::size_t tuple_size_2 = std::tuple_size_v<std::decay_t<T2>>;
     static_assert(tuple_size_1 == tuple_size_2,
                   "Called 'struct_reflect::tuple_for_each(t1, t2, func)' with incompatible tuple sizes.");
-    _tuple_for_each_impl(std::forward<T1>(tuple_1), std::forward<T2>(tuple_2), std::forward<Func>(func),
-                         std::make_index_sequence<tuple_size_1>{});
+    tuple_for_each_impl(std::forward<T1>(tuple_1), std::forward<T2>(tuple_2), std::forward<Func>(func),
+                        std::make_index_sequence<tuple_size_1>{});
 }
+
+} // namespace utl::struct_reflect::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::struct_reflect {
+
+// macro -> UTL_STRUCT_REFLECT
+
+using impl::type_name;
+using impl::size;
+
+using impl::names;
+using impl::field_view;
+using impl::entry_view;
+
+using impl::get;
+
+using impl::for_each;
+using impl::true_for_all;
+
+using impl::tuple_for_each;
 
 } // namespace utl::struct_reflect
 

@@ -98,7 +98,7 @@ template <class>
 constexpr bool always_false_v = false;
 
 template <class Enum>
-struct meta {
+struct Meta {
     static_assert(always_false_v<Enum>,
                   "Provided enum does not have a defined reflection. Use 'UTL_ENUM_REFLECT' macro to define one.");
     // makes instantiation of this template a compile-time error
@@ -111,7 +111,7 @@ struct meta {
 
 #define UTL_ENUM_REFLECT(enum_name_, ...)                                                                              \
     template <>                                                                                                        \
-    struct utl::enum_reflect::impl::meta<enum_name_> {                                                                 \
+    struct utl::enum_reflect::impl::Meta<enum_name_> {                                                                 \
         using type = enum_name_;                                                                                       \
                                                                                                                        \
         constexpr static std::string_view type_name = #enum_name_;                                                     \
@@ -126,16 +126,16 @@ struct meta {
 // ======================
 
 template <class Enum>
-constexpr auto type_name = meta<Enum>::type_name;
+constexpr auto type_name = Meta<Enum>::type_name;
 
 template <class Enum>
-constexpr auto names = meta<Enum>::names;
+constexpr auto names = Meta<Enum>::names;
 
 template <class Enum>
-constexpr auto values = meta<Enum>::values;
+constexpr auto values = Meta<Enum>::values;
 
 template <class Enum>
-constexpr auto entries = meta<Enum>::entries;
+constexpr auto entries = Meta<Enum>::entries;
 
 template <class Enum>
 constexpr auto size = std::tuple_size_v<decltype(values<Enum>)>;

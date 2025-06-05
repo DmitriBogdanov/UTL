@@ -237,7 +237,7 @@ utl_json_define_trait(has_mapped_type, std::declval<typename std::decay_t<T>::ma
 #undef utl_json_define_trait
 
 // Workaround for 'static_assert(false)' making program ill-formed even when placed inside an 'if constexpr'
-// branch that never compiles. 'static_assert(_always_false_v<T)' on the other hand doesn't,
+// branch that never compiles. 'static_assert(always_false_v<T)' on the other hand doesn't,
 // which means we can use it to mark branches that should never compile.
 template <class>
 constexpr bool always_false_v = false;

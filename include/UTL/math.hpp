@@ -382,10 +382,10 @@ template <class T, class Func, require_float<T> = true, require_invocable_r<T, F
 enum class MemoryUnit { BYTE, KiB, MiB, GiB, TiB, KB, MB, GB, TB };
 
 // Workaround for 'static_assert(false)' making program ill-formed even when placed inside an 'if constexpr' branch
-// that never compiles. 'static_assert(_always_false_v<T>)' on the the other hand delays its evaluation and works as
+// that never compiles. 'static_assert(always_false_v<T>)' on the the other hand delays its evaluation and works as
 // we would want. This is super-well known, this comment just explains the basics should I have amnesia in the future.
-template <MemoryUnit units>
-constexpr bool _always_false_mem_v = false;
+template <MemoryUnit>
+constexpr bool always_false_mem_v = false;
 
 template <class T, class Func>
 constexpr void tuple_for_each(T&& tuple, Func&& func) {
@@ -403,7 +403,7 @@ template <MemoryUnit units = MemoryUnit::MiB>
     else if constexpr (units == MemoryUnit::MB) return bytes / 1000. / 1000.;
     else if constexpr (units == MemoryUnit::GB) return bytes / 1000. / 1000. / 1000.;
     else if constexpr (units == MemoryUnit::TB) return bytes / 1000. / 1000. / 1000. / 1000.;
-    else static_assert(_always_false_mem_v<units>, "Function is a non-exhaustive visitor of enum class {MemoryUnit}.");
+    else static_assert(always_false_mem_v<units>, "Function is a non-exhaustive visitor of enum class {MemoryUnit}.");
 }
 
 // Quick memory usage estimate, doesn't iterate containers and doesn't try to expand
