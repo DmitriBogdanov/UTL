@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_SLEEP
 #define UTLHEADERGUARD_SLEEP
 
+#define UTL_SLEEP_VERSION_MAJOR 1
+#define UTL_SLEEP_VERSION_MINOR 0
+#define UTL_SLEEP_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <chrono>  // steady_clock, duration<>, milli
@@ -31,7 +35,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::sleep {
+namespace utl::sleep::impl {
 
 // ======================
 // --- Spinlock sleep ---
@@ -112,6 +116,16 @@ void hybrid(std::chrono::duration<Rep, Period> duration) {
 
     spinlock(remaining_duration);
 }
+
+} // namespace utl::sleep::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::sleep {
+
+using impl::system;
+using impl::spinlock;
+using impl::hybrid;
 
 } // namespace utl::sleep
 
