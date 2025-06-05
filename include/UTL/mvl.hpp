@@ -13,7 +13,7 @@
 #define UTLHEADERGUARD_MVL
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
-#define UTL_MVL_VERSION_MINOR 0 //     functional, but needs significant work
+#define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
 #define UTL_MVL_VERSION_PATCH 0 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________

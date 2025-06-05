@@ -2553,7 +2553,7 @@ using impl::is_reflected_struct;
 #define UTLHEADERGUARD_LOG
 
 #define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_LOG_VERSION_MINOR 0
+#define UTL_LOG_VERSION_MINOR 1
 #define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -3561,7 +3561,7 @@ using impl::add_file_sink;
 #define UTLHEADERGUARD_MATH
 
 #define UTL_MATH_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_MATH_VERSION_MINOR 0
+#define UTL_MATH_VERSION_MINOR 1
 #define UTL_MATH_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -4082,7 +4082,7 @@ using impl::quick_memory_estimate;
 #define UTLHEADERGUARD_MVL
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
-#define UTL_MVL_VERSION_MINOR 0 //     functional, but needs significant work
+#define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
 #define UTL_MVL_VERSION_PATCH 0 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
@@ -10537,7 +10537,7 @@ using impl::choose;
 #define UTLHEADERGUARD_SHELL
 
 #define UTL_SHELL_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_SHELL_VERSION_MINOR 0
+#define UTL_SHELL_VERSION_MINOR 1
 #define UTL_SHELL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -11468,7 +11468,7 @@ using impl::tuple_for_each;
 #define UTLHEADERGUARD_TABLE
 
 #define UTL_TABLE_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_TABLE_VERSION_MINOR 0
+#define UTL_TABLE_VERSION_MINOR 1
 #define UTL_TABLE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________

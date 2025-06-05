@@ -13,7 +13,7 @@
 #define UTLHEADERGUARD_TABLE
 
 #define UTL_TABLE_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_TABLE_VERSION_MINOR 0
+#define UTL_TABLE_VERSION_MINOR 1
 #define UTL_TABLE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
