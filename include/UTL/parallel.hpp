@@ -8,10 +8,13 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include <iterator>
 #if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PARALLEL)
 #ifndef UTLHEADERGUARD_PARALLEL
 #define UTLHEADERGUARD_PARALLEL
+
+#define UTL_PARALLEL_VERSION_MAJOR 1
+#define UTL_PARALLEL_VERSION_MINOR 0
+#define UTL_PARALLEL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -28,15 +31,17 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
+// Library API resembles a minimalistic version of Intel TBB.
+//
 // In C++20 'std::jthread' can be used to simplify code a bit, no reason not to do so.
 //
-// In C++20 '_unroll<>()' template can be improved to take index as a template-lambda-explicit-argument
+// In C++20 'unroll<>()' template can be improved to take index as a template-lambda-explicit-argument
 // rather than a regular arg, ensuring its constexpr'ness. This may lead to a slight performance boost
-// as truly manual unrolling seems to be slightly faster than automatic one.
+// as current automatic unrolling doesn't propagate constexpr'ness of indexation as well.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::parallel {
+namespace utl::parallel::impl {
 
 // =============
 // --- Utils ---
@@ -71,13 +76,13 @@ public:
     const std::size_t detected_threads = std::thread::hardware_concurrency();
     return detected_threads ? detected_threads : 1;
     // 'hardware_concurrency()' returns '0' if it can't determine the number of threads,
-    // in this case we reasonably assume there is a single thread available
+    // in this case we can reasonably assume there is a single thread available
 }
 
 // No reason to include the entirety of <algorithm> just for 2 one-liner functions,
 // so we implement 'std::size_t' min/max here
-[[nodiscard]] constexpr std::size_t _min_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? b : a; }
-[[nodiscard]] constexpr std::size_t _max_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? a : b; }
+[[nodiscard]] constexpr std::size_t min_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? b : a; }
+[[nodiscard]] constexpr std::size_t max_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? a : b; }
 
 // Template for automatic loop unrolling.
 //
@@ -101,19 +106,19 @@ public:
 // allows reordering of math operations is unclear, but this is how it happens when actually measured.
 //
 template <class T, T... indices, class F>
-constexpr void _unroll_impl(std::integer_sequence<T, indices...>, F&& f) {
+constexpr void unroll_impl(std::integer_sequence<T, indices...>, F&& f) {
     (f(std::integral_constant<T, indices>{}), ...);
 }
 template <class T, T count, class F>
-constexpr void _unroll(F&& f) {
-    _unroll_impl(std::make_integer_sequence<T, count>{}, std::forward<F>(f));
+constexpr void unroll_expr(F&& f) {
+    unroll_impl(std::make_integer_sequence<T, count>{}, std::forward<F>(f));
 }
 
 // ===================
 // --- Thread pool ---
 // ===================
 
-// A simple single-queue task threadpool, uploads of arbitrary callables as tasks,
+// A simple single-queue task threadpool, takes arbitrary callables as tasks,
 // returns optional futures, supports pausing. Work stealing would probably be better
 // in a general case, however it complicates the implementation quite noticeably and
 // doesn't provide much measurable benefit under the API of this module.
@@ -177,23 +182,23 @@ private:
     }
 
     void start_threads(std::size_t worker_count_increase) {
-        const std::lock_guard<std::recursive_mutex> thread_lock(this->thread_mutex);
+        const std::lock_guard thread_lock(this->thread_mutex);
         // the mutex has to be recursive because we call '.start_threads()' inside '.set_num_threads()'
         // which also locks 'worker_mutex', if mutex wan't recursive we would deadlock trying to lock
         // it a 2nd time on the same thread.
 
         // NOTE: It feels like '.start_threads()' can be split into '.start_threads()' and
-        // '._start_threads_assuming_locked()' which would remove the need for recursive mutex
+        // '.start_threads_assuming_locked()' which would remove the need for recursive mutex
 
         for (std::size_t i = 0; i < worker_count_increase; ++i)
             this->threads.emplace_back(&ThreadPool::thread_main, this);
     }
 
     void stop_all_threads() {
-        const std::lock_guard<std::recursive_mutex> thread_lock(this->thread_mutex);
+        const std::lock_guard thread_lock(this->thread_mutex);
 
         {
-            const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+            const std::lock_guard task_lock(this->task_mutex);
             this->stopping = true;
             this->task_cv.notify_all();
         } // signals to all threads that they should stop running
@@ -223,13 +228,13 @@ public:
     // ---------------
 
     [[nodiscard]] std::size_t get_thread_count() const {
-        const std::lock_guard<std::recursive_mutex> thread_lock(this->thread_mutex);
+        const std::lock_guard thread_lock(this->thread_mutex);
         return this->threads.size();
     }
 
     void set_thread_count(std::size_t thread_count) {
         this->wait_for_tasks(); // all threads need to be free
-        
+
         const std::size_t current_thread_count = this->get_thread_count();
 
         if (thread_count == current_thread_count) return;
@@ -240,7 +245,7 @@ public:
         } else {
             this->stop_all_threads();
             {
-                const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+                const std::lock_guard task_lock(this->task_mutex);
                 this->stopping = false;
             }
             this->start_threads(thread_count);
@@ -255,7 +260,7 @@ public:
 
     template <class Func, class... Args>
     void add_task(Func&& func, Args&&... args) {
-        const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+        const std::lock_guard task_lock(this->task_mutex);
         this->tasks.emplace(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
         this->task_cv.notify_one(); // wakes up one thread (if possible) so it can pull the new task
     }
@@ -282,14 +287,14 @@ public:
     }
 
     void wait_for_tasks() {
-        std::unique_lock<std::mutex> task_lock(this->task_mutex);
+        std::unique_lock task_lock(this->task_mutex);
         this->waiting = true;
         this->task_finished_cv.wait(task_lock, [&] { return this->tasks.empty() && this->tasks_running == 0; });
         this->waiting = false;
     }
 
     void clear_task_queue() {
-        const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+        const std::lock_guard task_lock(this->task_mutex);
         this->tasks = {}; // for some reason 'std::queue' has no '.clear()', complexity O(N)
     }
 
@@ -297,18 +302,18 @@ public:
     // ---------------
 
     void pause() {
-        const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+        const std::lock_guard task_lock(this->task_mutex);
         this->paused = true;
     }
 
     void unpause() {
-        const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+        const std::lock_guard task_lock(this->task_mutex);
         this->paused = false;
         this->task_cv.notify_all();
     }
 
     [[nodiscard]] bool is_paused() const {
-        const std::lock_guard<std::mutex> task_lock(this->task_mutex);
+        const std::lock_guard task_lock(this->task_mutex);
         return this->paused;
     }
 };
@@ -368,7 +373,7 @@ struct IndexRange {
     constexpr IndexRange(Idx first, Idx last, std::size_t grain_size)
         : first(first), last(last), grain_size(grain_size) {}
     IndexRange(Idx first, Idx last)
-        : IndexRange(first, last, _max_size(1, (last - first) / (get_thread_count() * default_grains_per_thread))){};
+        : IndexRange(first, last, max_size(1, (last - first) / (get_thread_count() * default_grains_per_thread))){};
 };
 
 template <class Iter>
@@ -380,7 +385,7 @@ struct Range {
     Range() = delete;
     constexpr Range(Iter begin, Iter end, std::size_t grain_size) : begin(begin), end(end), grain_size(grain_size) {}
     Range(Iter begin, Iter end)
-        : Range(begin, end, _max_size(1, (end - begin) / (get_thread_count() * default_grains_per_thread))) {}
+        : Range(begin, end, max_size(1, (end - begin) / (get_thread_count() * default_grains_per_thread))) {}
 
 
     template <class Container>
@@ -388,7 +393,7 @@ struct Range {
 
     template <class Container>
     Range(Container& container) : Range(container.begin(), container.end()) {}
-};// requires random-access iterator, but no good way to express that before C++20 concepts
+}; // requires random-access iterator, but no good way to express that before C++20 concepts
 
 // User-defined deduction guides
 //
@@ -409,7 +414,7 @@ Range(Container& container) -> Range<typename Container::iterator>;
 template <class Idx, class Func>
 void for_loop(IndexRange<Idx> range, Func&& func) {
     for (Idx i = range.first; i < range.last; i += range.grain_size)
-        task(std::forward<Func>(func), i, _min_size(i + range.grain_size, range.last));
+        task(std::forward<Func>(func), i, min_size(i + range.grain_size, range.last));
 
     wait_for_tasks();
 }
@@ -417,7 +422,7 @@ void for_loop(IndexRange<Idx> range, Func&& func) {
 template <class Iter, class Func>
 void for_loop(Range<Iter> range, Func&& func) {
     for (Iter i = range.begin; i < range.end; i += range.grain_size)
-        task(std::forward<Func>(func), i, i + _min_size(range.grain_size, range.end - i));
+        task(std::forward<Func>(func), i, i + min_size(range.grain_size, range.end - i));
 
     wait_for_tasks();
 }
@@ -449,10 +454,10 @@ auto reduce(Range<Iter> range, BinaryOp&& op) -> T {
                 // (parallel section) Compute partial result (unrolled for SIMD)
                 // Reduce unrollable part
                 std::array<T, unroll> partial_results;
-                _unroll<std::size_t, unroll>([&](std::size_t j) { partial_results[j] = *(low + j); });
+                unroll_expr<std::size_t, unroll>([&](std::size_t j) { partial_results[j] = *(low + j); });
                 Iter it = low + unroll;
                 for (; it < high - unroll; it += unroll)
-                    _unroll<std::size_t, unroll>(
+                    unroll_expr<std::size_t, unroll>(
                         [&, it](std::size_t j) { partial_results[j] = op(partial_results[j], *(it + j)); });
                 // Reduce remaining elements
                 for (; it < high; ++it) partial_results[0] = op(partial_results[0], *it);
@@ -552,6 +557,32 @@ struct max<void> {
 
     using is_transparent = std::less<>::is_transparent;
 };
+
+} // namespace utl::parallel::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::parallel {
+
+using impl::ThreadPool;
+
+using impl::static_thread_pool;
+using impl::get_thread_count;
+using impl::set_thread_count;
+
+using impl::Range;
+using impl::IndexRange;
+
+using impl::task;
+using impl::task_with_future;
+using impl::wait_for_tasks;
+using impl::for_loop;
+using impl::reduce;
+
+using impl::sum;
+using impl::prod;
+using impl::min;
+using impl::max;
 
 } // namespace utl::parallel
 

@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_MVL
 #define UTLHEADERGUARD_MVL
 
+#define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
+#define UTL_MVL_VERSION_MINOR 0 //     functional, but needs significant work
+#define UTL_MVL_VERSION_PATCH 0 //     to complete and bring up-to-date
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>        // swap(), find(), count(), is_sorted(), min_element(),
