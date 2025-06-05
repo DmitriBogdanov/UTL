@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_LOG
 #define UTLHEADERGUARD_LOG
 
+#define UTL_LOG_VERSION_MAJOR 0 // module awaiting rewrite
+#define UTL_LOG_VERSION_MINOR 0
+#define UTL_LOG_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <array>         // array<>
@@ -70,11 +74,10 @@
 //       This drastically complicates the logic and can be rather at odds with point (1) since unlike
 //       the individual sinks, I don't see a way of making style checks here constexpr, but in the end
 //       that would be a proper solution.
-//
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::log {
+namespace utl::log::impl {
 
 // ======================
 // --- Internal utils ---
@@ -82,18 +85,18 @@ namespace utl::log {
 
 // - SFINAE to select localtime_s() or localtime_r() -
 template <class TimeMoment, class TimeType>
-auto _available_localtime_impl(TimeMoment time_moment, TimeType timer)
+auto available_localtime_impl(TimeMoment time_moment, TimeType timer)
     -> decltype(localtime_s(std::forward<TimeMoment>(time_moment), std::forward<TimeType>(timer))) {
     return localtime_s(std::forward<TimeMoment>(time_moment), std::forward<TimeType>(timer));
 }
 
 template <class TimeMoment, class TimeType>
-auto _available_localtime_impl(TimeMoment time_moment, TimeType timer)
+auto available_localtime_impl(TimeMoment time_moment, TimeType timer)
     -> decltype(localtime_r(std::forward<TimeType>(timer), std::forward<TimeMoment>(time_moment))) {
     return localtime_r(std::forward<TimeType>(timer), std::forward<TimeMoment>(time_moment));
 }
 
-inline std::size_t _get_thread_index(const std::thread::id id) {
+inline std::size_t get_thread_index(const std::thread::id id) {
     static std::mutex     mutex;
     const std::lock_guard lock(mutex);
 
@@ -107,7 +110,7 @@ inline std::size_t _get_thread_index(const std::thread::id id) {
 }
 
 template <class IntType, std::enable_if_t<std::is_integral<IntType>::value, bool> = true>
-unsigned int _integer_digit_count(IntType value) {
+unsigned int integer_digit_count(IntType value) {
     unsigned int digits = (value <= 0) ? 1 : 0;
     // (value <  0) => we add 1 digit because of '-' in front
     // (value == 0) => we add 1 digit for '0' because the loop doesn't account for zero integers
@@ -121,7 +124,7 @@ unsigned int _integer_digit_count(IntType value) {
 
 using clock = std::chrono::steady_clock;
 
-inline const clock::time_point _program_entry_time_point = clock::now();
+inline const clock::time_point program_entry_time_point = clock::now();
 
 // ===================
 // --- Stringifier ---
@@ -140,18 +143,18 @@ inline const clock::time_point _program_entry_time_point = clock::now();
     template <class T>                                                                                                 \
     constexpr bool trait_name_##_v = trait_name_<T>::value
 
-utl_log_define_trait(_has_real, std::declval<T>().real());
-utl_log_define_trait(_has_imag, std::declval<T>().imag());
-utl_log_define_trait(_has_begin, std::declval<T>().begin());
-utl_log_define_trait(_has_end, std::declval<T>().end());
-utl_log_define_trait(_has_input_it, std::next(std::declval<T>().begin()));
-utl_log_define_trait(_has_get, std::get<0>(std::declval<T>()));
-utl_log_define_trait(_has_tuple_size, std::tuple_size<T>::value);
-utl_log_define_trait(_has_container_type, std::declval<typename std::decay_t<T>::container_type>());
-utl_log_define_trait(_has_ostream_insert, std::declval<std::ostream>() << std::declval<T>());
-utl_log_define_trait(_is_pad_left, std::declval<std::decay_t<T>>().is_pad_left);
-utl_log_define_trait(_is_pad_right, std::declval<std::decay_t<T>>().is_pad_right);
-utl_log_define_trait(_is_pad, std::declval<std::decay_t<T>>().is_pad);
+utl_log_define_trait(has_real, std::declval<T>().real());
+utl_log_define_trait(has_imag, std::declval<T>().imag());
+utl_log_define_trait(has_begin, std::declval<T>().begin());
+utl_log_define_trait(has_end, std::declval<T>().end());
+utl_log_define_trait(has_input_it, std::next(std::declval<T>().begin()));
+utl_log_define_trait(has_get, std::get<0>(std::declval<T>()));
+utl_log_define_trait(has_tuple_size, std::tuple_size<T>::value);
+utl_log_define_trait(has_container_type, std::declval<typename std::decay_t<T>::container_type>());
+utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::declval<T>());
+utl_log_define_trait(is_pad_left, std::declval<std::decay_t<T>>().is_pad_left);
+utl_log_define_trait(is_pad_right, std::declval<std::decay_t<T>>().is_pad_right);
+utl_log_define_trait(is_pad, std::declval<std::decay_t<T>>().is_pad);
 
 // Note:
 // Trait '_has_input_it' is trickier than it may seem. Just doing '++std::declval<T>().begin()' will work
@@ -177,28 +180,28 @@ utl_log_define_trait(_is_pad, std::declval<std::decay_t<T>>().is_pad);
 // ----------------------
 
 template <class>
-constexpr bool _always_false_v = false;
+constexpr bool always_false_v = false;
 
 template <class T>
-constexpr int _log_10_ceil(T num) {
-    return num < 10 ? 1 : 1 + _log_10_ceil(num / 10);
+constexpr int log10_ceil(T num) {
+    return num < 10 ? 1 : 1 + log10_ceil(num / 10);
 }
 
 template <class T>
-constexpr int _max_float_digits =
-    4 + std::numeric_limits<T>::max_digits10 + std::max(2, _log_10_ceil(std::numeric_limits<T>::max_exponent10));
+constexpr int max_float_digits =
+    4 + std::numeric_limits<T>::max_digits10 + std::max(2, log10_ceil(std::numeric_limits<T>::max_exponent10));
 // should be the smallest buffer size to account for all possible 'std::to_chars()' outputs,
 // see [https://stackoverflow.com/questions/68472720/stdto-chars-minimal-floating-point-buffer-size]
 
 template <class T>
-constexpr int _max_int_digits = 2 + std::numeric_limits<T>::digits10;
+constexpr int max_int_digits = 2 + std::numeric_limits<T>::digits10;
 // +2 because 'digits10' returns last digit index rather than the number of digits
 // (aka 1 less than one would expect) and doesn't account for possible '-'.
 // Also note that ints use 'digits10' and not 'max_digits10' which is only valid for floats.
 
 // "Unwrapper" for container adaptors such as 'std::queue', 'std::priority_queue', 'std::stack'
 template <class Adaptor>
-const auto& _underlying_container_cref(const Adaptor& adaptor) {
+const auto& underlying_container_cref(const Adaptor& adaptor) {
 
     struct Hack : private Adaptor {
         using container_type = typename Adaptor::container_type;
@@ -278,7 +281,7 @@ struct StringifierBase {
 
     template <class T>
     static void append_int(std::string& buffer, const T& value) {
-        std::array<char, _max_int_digits<T>> str;
+        std::array<char, max_int_digits<T>> str;
         const auto [number_end_ptr, error_code] = std::to_chars(str.data(), str.data() + str.size(), value);
         if (error_code != std::errc())
             throw std::runtime_error("Stringifier encountered std::to_chars() error while serializing an integer.");
@@ -292,7 +295,7 @@ struct StringifierBase {
 
     template <class T>
     static void append_float(std::string& buffer, const T& value) {
-        std::array<char, _max_float_digits<T>> str;
+        std::array<char, max_float_digits<T>> str;
         const auto [number_end_ptr, error_code] = std::to_chars(str.data(), str.data() + str.size(), value);
         if (error_code != std::errc())
             throw std::runtime_error("Stringifier encountered std::to_chars() error while serializing a float.");
@@ -326,12 +329,12 @@ struct StringifierBase {
 
     template <class T>
     static void append_tuple(std::string& buffer, const T& value) {
-        self::_append_tuple_fwd(buffer, value);
+        self::append_tuple_fwd(buffer, value);
     }
 
     template <class T>
     static void append_adaptor(std::string& buffer, const T& value) {
-        derived::append(buffer, _underlying_container_cref(value));
+        derived::append(buffer, underlying_container_cref(value));
     }
 
     template <class T>
@@ -344,7 +347,7 @@ struct StringifierBase {
 
     template <class T>
     static void append(std::string& buffer, const T& value) {
-        self::_append_selector(buffer, value);
+        self::append_selector(buffer, value);
     }
 
     template <class... Args>
@@ -368,40 +371,40 @@ struct StringifierBase {
     // ---------------
 private:
     template <class Tuple, std::size_t... Idx>
-    static void _append_tuple_impl(std::string& buffer, Tuple value, std::index_sequence<Idx...>) {
+    static void append_tuple_impl(std::string& buffer, Tuple value, std::index_sequence<Idx...>) {
         ((Idx == 0 ? "" : buffer += ", ", derived::append(buffer, std::get<Idx>(value))), ...);
         // fold expression '( f(args), ... )' invokes 'f(args)' for all arguments in 'args...'
         // in the same fashion, we can fold over 2 functions by doing '( ( f(args), g(args) ), ... )'
     }
 
     template <template <class...> class Tuple, class... Args>
-    static void _append_tuple_fwd(std::string& buffer, const Tuple<Args...>& value) {
+    static void append_tuple_fwd(std::string& buffer, const Tuple<Args...>& value) {
         buffer += "< ";
-        self::_append_tuple_impl(buffer, value, std::index_sequence_for<Args...>{});
+        self::append_tuple_impl(buffer, value, std::index_sequence_for<Args...>{});
         buffer += " >";
     }
 
     template <class T>
-    static void _append_selector(std::string& buffer, const T& value) {
+    static void append_selector(std::string& buffer, const T& value) {
         // Left-padded something
-        if constexpr (_is_pad_left_v<T>) {
+        if constexpr (is_pad_left_v<T>) {
             std::string temp;
-            self::_append_selector(temp, value.val);
+            self::append_selector(temp, value.val);
             if (temp.size() < value.size) buffer.append(value.size - temp.size(), ' ');
             buffer += temp;
         }
         // Right-padded something
-        else if constexpr (_is_pad_right_v<T>) {
+        else if constexpr (is_pad_right_v<T>) {
             const std::size_t old_size = buffer.size();
-            self::_append_selector(buffer, value.val);
+            self::append_selector(buffer, value.val);
             const std::size_t appended_size = buffer.size() - old_size;
             if (appended_size < value.size) buffer.append(value.size - appended_size, ' ');
             // right-padding is faster than left padding since we don't need a temporary string to get appended size
         }
         // Center-padded something
-        else if constexpr (_is_pad_v<T>) {
+        else if constexpr (is_pad_v<T>) {
             std::string temp;
-            self::_append_selector(temp, value.val);
+            self::append_selector(temp, value.val);
             if (temp.size() < value.size) {
                 const std::size_t lpad_size = (value.size - temp.size()) / 2;
                 const std::size_t rpad_size = value.size - lpad_size - temp.size();
@@ -426,17 +429,17 @@ private:
         // Floating-point
         else if constexpr (std::is_floating_point_v<T>) derived::append_float(buffer, value);
         // Complex
-        else if constexpr (_has_real_v<T> && _has_imag_v<T>) derived::append_complex(buffer, value);
+        else if constexpr (has_real_v<T> && has_imag_v<T>) derived::append_complex(buffer, value);
         // Array-like
-        else if constexpr (_has_begin_v<T> && _has_end_v<T> && _has_input_it_v<T>) derived::append_array(buffer, value);
+        else if constexpr (has_begin_v<T> && has_end_v<T> && has_input_it_v<T>) derived::append_array(buffer, value);
         // Tuple-like
-        else if constexpr (_has_get_v<T> && _has_tuple_size_v<T>) derived::append_tuple(buffer, value);
+        else if constexpr (has_get_v<T> && has_tuple_size_v<T>) derived::append_tuple(buffer, value);
         // Container adaptor
-        else if constexpr (_has_container_type_v<T>) derived::append_adaptor(buffer, value);
+        else if constexpr (has_container_type_v<T>) derived::append_adaptor(buffer, value);
         // 'std::ostream' printable
-        else if constexpr (_has_ostream_insert_v<T>) derived::append_printable(buffer, value);
+        else if constexpr (has_ostream_insert_v<T>) derived::append_printable(buffer, value);
         // No valid stringification exists
-        else static_assert(_always_false_v<T>, "No valid stringification exists for the type.");
+        else static_assert(always_false_v<T>, "No valid stringification exists for the type.");
 
         // Note: Using if-constexpr chain here allows us to pick and choose priority of different branches,
         // removing any possible ambiguity we could encounter doing things through SFINAE or overloads.
@@ -550,33 +553,33 @@ constexpr bool operator<=(Verbosity l, Verbosity r) { return static_cast<int>(l)
 // --- Column widths ---
 // ---------------------
 
-constexpr unsigned int _w_uptime_sec = 4;
-constexpr unsigned int _w_uptime_ms  = 3;
+constexpr unsigned int w_uptime_sec = 4;
+constexpr unsigned int w_uptime_ms  = 3;
 
-constexpr std::size_t _w_callsite_before_dot = 22;
-constexpr std::size_t _w_callsite_after_dot  = 4;
+constexpr std::size_t w_callsite_before_dot = 22;
+constexpr std::size_t w_callsite_after_dot  = 4;
 
-constexpr std::size_t _col_w_datetime = sizeof("yyyy-mm-dd HH:MM:SS") - 1;
-constexpr std::size_t _col_w_uptime   = _w_uptime_sec + 1 + _w_uptime_ms;
-constexpr std::size_t _col_w_thread   = sizeof("thread") - 1;
-constexpr std::size_t _col_w_callsite = _w_callsite_before_dot + 1 + _w_callsite_after_dot;
-constexpr std::size_t _col_w_level    = sizeof("level") - 1;
+constexpr std::size_t col_w_datetime = sizeof("yyyy-mm-dd HH:MM:SS") - 1;
+constexpr std::size_t col_w_uptime   = w_uptime_sec + 1 + w_uptime_ms;
+constexpr std::size_t col_w_thread   = sizeof("thread") - 1;
+constexpr std::size_t col_w_callsite = w_callsite_before_dot + 1 + w_callsite_after_dot;
+constexpr std::size_t col_w_level    = sizeof("level") - 1;
 
 // --- Column left/right delimiters ---
 // ------------------------------------
 
-constexpr std::string_view _col_ld_datetime = "";
-constexpr std::string_view _col_rd_datetime = " ";
-constexpr std::string_view _col_ld_uptime   = "(";
-constexpr std::string_view _col_rd_uptime   = ")";
-constexpr std::string_view _col_ld_thread   = "[";
-constexpr std::string_view _col_rd_thread   = "]";
-constexpr std::string_view _col_ld_callsite = " ";
-constexpr std::string_view _col_rd_callsite = " ";
-constexpr std::string_view _col_ld_level    = "";
-constexpr std::string_view _col_rd_level    = "|";
-constexpr std::string_view _col_ld_message  = " ";
-constexpr std::string_view _col_rd_message  = "\n";
+constexpr std::string_view col_ld_datetime = "";
+constexpr std::string_view col_rd_datetime = " ";
+constexpr std::string_view col_ld_uptime   = "(";
+constexpr std::string_view col_rd_uptime   = ")";
+constexpr std::string_view col_ld_thread   = "[";
+constexpr std::string_view col_rd_thread   = "]";
+constexpr std::string_view col_ld_callsite = " ";
+constexpr std::string_view col_rd_callsite = " ";
+constexpr std::string_view col_ld_level    = "";
+constexpr std::string_view col_rd_level    = "|";
+constexpr std::string_view col_ld_message  = " ";
+constexpr std::string_view col_rd_message  = "\n";
 
 // --- ANSI Colors ---
 // -------------------
@@ -624,15 +627,15 @@ constexpr std::string_view reset = "\033[0m";
 
 } // namespace color
 
-constexpr std::string_view _color_heading = color::bold_cyan;
-constexpr std::string_view _color_reset   = color::reset;
+constexpr std::string_view color_heading = color::bold_cyan;
+constexpr std::string_view color_reset   = color::reset;
 
-constexpr std::string_view _color_trace = color::bright_black;
-constexpr std::string_view _color_debug = color::green;
-constexpr std::string_view _color_note  = color::magenta;
-constexpr std::string_view _color_info  = color::white;
-constexpr std::string_view _color_warn  = color::yellow;
-constexpr std::string_view _color_err   = color::bold_red;
+constexpr std::string_view color_trace = color::bright_black;
+constexpr std::string_view color_debug = color::green;
+constexpr std::string_view color_note  = color::magenta;
+constexpr std::string_view color_info  = color::white;
+constexpr std::string_view color_warn  = color::yellow;
+constexpr std::string_view color_err   = color::bold_red;
 
 // ==================
 // --- Sink class ---
@@ -651,7 +654,7 @@ private:
     bool                                        print_header = true;
     mutable std::mutex                          ostream_mutex;
 
-    friend struct _logger;
+    friend struct Logger;
 
     std::ostream& ostream_ref() {
         if (const auto ref_wrapper_ptr = std::get_if<os_ref_wrapper>(&this->os_variant)) return ref_wrapper_ptr->get();
@@ -728,12 +731,12 @@ private:
 
         // Format columns one-by-one
         if (this->colors == Colors::ENABLE) switch (meta.verbosity) {
-            case Verbosity::ERR: buffer += _color_err; break;
-            case Verbosity::WARN: buffer += _color_warn; break;
-            case Verbosity::NOTE: buffer += _color_note; break;
-            case Verbosity::INFO: buffer += _color_info; break;
-            case Verbosity::DEBUG: buffer += _color_debug; break;
-            case Verbosity::TRACE: buffer += _color_trace; break;
+            case Verbosity::ERR: buffer += color_err; break;
+            case Verbosity::WARN: buffer += color_warn; break;
+            case Verbosity::NOTE: buffer += color_note; break;
+            case Verbosity::INFO: buffer += color_info; break;
+            case Verbosity::DEBUG: buffer += color_debug; break;
+            case Verbosity::TRACE: buffer += color_trace; break;
             }
 
         if (this->columns.datetime) this->format_column_datetime(buffer);
@@ -743,7 +746,7 @@ private:
         if (this->columns.level) this->format_column_level(buffer, meta.verbosity);
         if (this->columns.message) this->format_column_message(buffer, args...);
 
-        if (this->colors == Colors::ENABLE) buffer += _color_reset;
+        if (this->colors == Colors::ENABLE) buffer += color_reset;
 
         // 'std::ostream' isn't guaranteed to be thread-safe, even through many implementations seem to have
         // some thread-safety built into `std::cout` the same cannot be said about a generic 'std::ostream'
@@ -763,70 +766,67 @@ private:
     }
 
     void format_header(std::string& buffer) {
-        if (this->colors == Colors::ENABLE) buffer += _color_heading;
+        if (this->colors == Colors::ENABLE) buffer += color_heading;
         if (this->columns.datetime)
-            append_stringified(buffer, _col_ld_datetime, PadRight{"date       time", _col_w_datetime},
-                               _col_rd_datetime);
+            append_stringified(buffer, col_ld_datetime, PadRight{"date       time", col_w_datetime}, col_rd_datetime);
         if (this->columns.uptime)
-            append_stringified(buffer, _col_ld_uptime, PadRight{"uptime", _col_w_uptime}, _col_rd_uptime);
+            append_stringified(buffer, col_ld_uptime, PadRight{"uptime", col_w_uptime}, col_rd_uptime);
         if (this->columns.thread)
-            append_stringified(buffer, _col_ld_thread, PadRight{"thread", _col_w_thread}, _col_rd_thread);
+            append_stringified(buffer, col_ld_thread, PadRight{"thread", col_w_thread}, col_rd_thread);
         if (this->columns.callsite)
-            append_stringified(buffer, _col_ld_callsite, PadRight{"callsite", _col_w_callsite}, _col_rd_callsite);
-        if (this->columns.level)
-            append_stringified(buffer, _col_ld_level, PadRight{"level", _col_w_level}, _col_rd_level);
-        if (this->columns.message) append_stringified(buffer, _col_ld_message, "message", _col_rd_message);
-        if (this->colors == Colors::ENABLE) buffer += _color_reset;
+            append_stringified(buffer, col_ld_callsite, PadRight{"callsite", col_w_callsite}, col_rd_callsite);
+        if (this->columns.level) append_stringified(buffer, col_ld_level, PadRight{"level", col_w_level}, col_rd_level);
+        if (this->columns.message) append_stringified(buffer, col_ld_message, "message", col_rd_message);
+        if (this->colors == Colors::ENABLE) buffer += color_reset;
     }
 
     void format_column_datetime(std::string& buffer) {
         std::time_t timer = std::time(nullptr);
         std::tm     time_moment{};
 
-        _available_localtime_impl(&time_moment, &timer);
+        available_localtime_impl(&time_moment, &timer);
 
         // Format time straight into the buffer
-        std::array<char, _col_w_datetime + 1>
-            strftime_buffer; // size includes the null terminator added by 'strftime()'
+        std::array<char, col_w_datetime + 1> strftime_buffer; // size includes the null terminator added by 'strftime()'
         std::strftime(strftime_buffer.data(), strftime_buffer.size(), "%Y-%m-%d %H:%M:%S", &time_moment);
 
         // strftime_buffer.back() = ' '; // replace null-terminator added by 'strftime()' with a space
-        buffer += _col_ld_datetime;
-        buffer.append(strftime_buffer.data(), _col_w_datetime);
-        buffer += _col_rd_datetime;
+        buffer += col_ld_datetime;
+        buffer.append(strftime_buffer.data(), col_w_datetime);
+        buffer += col_rd_datetime;
     }
 
     void format_column_uptime(std::string& buffer, clock::time_point now) {
-        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - _program_entry_time_point);
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - program_entry_time_point);
         const auto sec        = (elapsed_ms / 1000).count();
         const auto ms         = (elapsed_ms % 1000).count(); // is 'elapsed_ms - 1000 * full_seconds; faster?
 
-        const unsigned int sec_digits = _integer_digit_count(sec);
-        const unsigned int ms_digits  = _integer_digit_count(ms);
+        const unsigned int sec_digits = integer_digit_count(sec);
+        const unsigned int ms_digits  = integer_digit_count(ms);
 
-        buffer += _col_ld_uptime;
+        buffer += col_ld_uptime;
 
         // Left-pad the value to column width (doing it manually is a bit faster than using PadLeft{})
-        if (sec_digits < _w_uptime_sec) buffer.append(_w_uptime_sec - sec_digits, ' ');
+        if (sec_digits < w_uptime_sec) buffer.append(w_uptime_sec - sec_digits, ' ');
         append_stringified(buffer, sec);
 
         buffer += '.';
 
         // Add leading zeroes to a fixed length
-        if (ms_digits < _w_uptime_ms) buffer.append(_w_uptime_ms - ms_digits, '0');
+        if (ms_digits < w_uptime_ms) buffer.append(w_uptime_ms - ms_digits, '0');
         append_stringified(buffer, ms);
 
-        buffer += _col_rd_uptime;
+        buffer += col_rd_uptime;
     }
 
     void format_column_thread(std::string& buffer) {
-        const auto thread_id       = _get_thread_index(std::this_thread::get_id());
-        const auto thread_id_width = _integer_digit_count(thread_id);
+        const auto thread_id       = get_thread_index(std::this_thread::get_id());
+        const auto thread_id_width = integer_digit_count(thread_id);
 
-        buffer += _col_ld_thread;
-        if (thread_id_width < _col_w_thread) buffer.append(_col_w_thread - thread_id_width, ' ');
+        buffer += col_ld_thread;
+        if (thread_id_width < col_w_thread) buffer.append(col_w_thread - thread_id_width, ' ');
         append_stringified(buffer, thread_id);
-        buffer += _col_rd_thread;
+        buffer += col_rd_thread;
     }
 
     void format_column_callsite(std::string& buffer, const Callsite& callsite) {
@@ -834,20 +834,20 @@ private:
         std::string_view filename = callsite.file.substr(callsite.file.find_last_of("/\\") + 1);
 
         // Left-pad callsite to column width, trim first characters if it's too long
-        if (filename.size() < _w_callsite_before_dot) buffer.append(_w_callsite_before_dot - filename.size(), ' ');
-        else filename.remove_prefix(_w_callsite_before_dot - filename.size());
+        if (filename.size() < w_callsite_before_dot) buffer.append(w_callsite_before_dot - filename.size(), ' ');
+        else filename.remove_prefix(w_callsite_before_dot - filename.size());
 
-        buffer += _col_ld_callsite;
+        buffer += col_ld_callsite;
         buffer += filename;
         buffer += ':';
         // Right-pad line number
         append_stringified(buffer, callsite.line);
-        buffer.append(_w_callsite_after_dot - _integer_digit_count(callsite.line), ' ');
-        buffer += _col_rd_callsite;
+        buffer.append(w_callsite_after_dot - integer_digit_count(callsite.line), ' ');
+        buffer += col_rd_callsite;
     }
 
     void format_column_level(std::string& buffer, Verbosity level) {
-        buffer += _col_ld_level;
+        buffer += col_ld_level;
         switch (level) {
         case Verbosity::ERR: buffer += "  ERR"; break;
         case Verbosity::WARN: buffer += " WARN"; break;
@@ -856,14 +856,14 @@ private:
         case Verbosity::DEBUG: buffer += "DEBUG"; break;
         case Verbosity::TRACE: buffer += "TRACE"; break;
         }
-        buffer += _col_rd_level;
+        buffer += col_rd_level;
     }
 
     template <class... Args>
     void format_column_message(std::string& buffer, const Args&... args) {
-        buffer += _col_ld_message;
+        buffer += col_ld_message;
         append_stringified(buffer, args...);
-        buffer += _col_rd_message;
+        buffer += col_rd_message;
     }
 };
 
@@ -871,7 +871,7 @@ private:
 // --- Logger class ---
 // ====================
 
-struct _logger {
+struct Logger {
     inline static std::list<Sink> sinks;
     // we use list<> because we don't want sinks to ever reallocate when growing / shrinking
     // (reallocation requires a move-constructor, which 'std::mutex' doesn't have),
@@ -880,8 +880,8 @@ struct _logger {
     static inline Sink default_sink{std::cout, Verbosity::TRACE, Colors::ENABLE, std::chrono::milliseconds(0),
                                     Columns{}};
 
-    static _logger& instance() {
-        static _logger logger;
+    static Logger& instance() {
+        static Logger logger;
         return logger;
     }
 
@@ -906,7 +906,7 @@ inline Sink& add_ostream_sink(std::ostream&   os,                               
                               clock::duration flush_interval = std::chrono::milliseconds{}, //
                               const Columns&  columns        = Columns{}                    //
 ) {
-    return _logger::instance().sinks.emplace_back(os, verbosity, colors, flush_interval, columns);
+    return Logger::instance().sinks.emplace_back(os, verbosity, colors, flush_interval, columns);
 }
 
 inline Sink& add_file_sink(const std::string& filename,                                       //
@@ -917,8 +917,8 @@ inline Sink& add_file_sink(const std::string& filename,                         
                            const Columns&     columns        = Columns{}                      //
 ) {
     const auto ios_open_mode = (open_mode == OpenMode::APPEND) ? std::ios::out | std::ios::app : std::ios::out;
-    return _logger::instance().sinks.emplace_back(std::ofstream(filename, ios_open_mode), verbosity, colors,
-                                                  flush_interval, columns);
+    return Logger::instance().sinks.emplace_back(std::ofstream(filename, ios_open_mode), verbosity, colors,
+                                                 flush_interval, columns);
 }
 
 // ======================
@@ -926,22 +926,27 @@ inline Sink& add_file_sink(const std::string& filename,                         
 // ======================
 
 #define UTL_LOG_ERR(...)                                                                                               \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::ERR}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::ERR}, __VA_ARGS__)
 
 #define UTL_LOG_WARN(...)                                                                                              \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::WARN}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::WARN},           \
+                                                    __VA_ARGS__)
 
 #define UTL_LOG_NOTE(...)                                                                                              \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::NOTE}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::NOTE},           \
+                                                    __VA_ARGS__)
 
 #define UTL_LOG_INFO(...)                                                                                              \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::INFO}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::INFO},           \
+                                                    __VA_ARGS__)
 
 #define UTL_LOG_DEBUG(...)                                                                                             \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::DEBUG}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::DEBUG},          \
+                                                    __VA_ARGS__)
 
 #define UTL_LOG_TRACE(...)                                                                                             \
-    utl::log::_logger::instance().push_message({__FILE__, __LINE__}, {utl::log::Verbosity::TRACE}, __VA_ARGS__)
+    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::TRACE},          \
+                                                    __VA_ARGS__)
 
 #ifdef _DEBUG
 #define UTL_LOG_DERR(...) UTL_LOG_ERR(__VA_ARGS__)
@@ -959,6 +964,37 @@ inline Sink& add_file_sink(const std::string& filename,                         
 #define UTL_LOG_DTRACE(...)
 #endif
 
+} // namespace utl::log::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::log {
+
+using impl::PadLeft;
+using impl::PadRight;
+using impl::Pad;
+
+using impl::StringifierBase;
+using impl::Stringifier;
+
+using impl::append_stringified;
+using impl::stringify;
+
+using impl::print;
+using impl::println;
+
+using impl::Verbosity;
+using impl::OpenMode;
+using impl::Colors;
+
+using impl::Columns;
+
+using impl::Sink;
+
+using impl::add_ostream_sink;
+using impl::add_file_sink;
+
+// macro -> ...
 
 } // namespace utl::log
 
