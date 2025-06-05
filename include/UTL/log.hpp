@@ -12,7 +12,7 @@
 #ifndef UTLHEADERGUARD_LOG
 #define UTLHEADERGUARD_LOG
 
-#define UTL_LOG_VERSION_MAJOR 0 // module awaiting rewrite
+#define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
 #define UTL_LOG_VERSION_MINOR 0
 #define UTL_LOG_VERSION_PATCH 0
 

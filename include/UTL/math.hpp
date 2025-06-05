@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_MATH
 #define UTLHEADERGUARD_MATH
 
+#define UTL_MATH_VERSION_MAJOR 0 // [!] module awaiting a rewrite
+#define UTL_MATH_VERSION_MINOR 0
+#define UTL_MATH_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>        // sort(), is_permutation(), reverse()
@@ -31,33 +35,32 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::math {
+namespace utl::math::impl {
 
-// ============================
-// --- Implementation Utils ---
-// ============================
+// ======================
+// --- SFINAE helpers ---
+// ======================
 
-// Make SFINAE a bit nicer
 template <bool Cond>
-using _require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome
+using require = std::enable_if_t<Cond, bool>;
 
 template <class T>
-using _require_arithmetic = _require<std::is_arithmetic_v<T>>;
+using require_arithmetic = require<std::is_arithmetic_v<T>>;
 
 template <class T>
-using _require_integral = _require<std::is_integral_v<T>>;
+using require_integral = require<std::is_integral_v<T>>;
 
 template <class T>
-using _require_uint = _require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
+using require_uint = require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
 
 template <class T>
-using _require_float = _require<std::is_floating_point_v<T>>;
+using require_float = require<std::is_floating_point_v<T>>;
 
 template <class Return, class T, class... Args>
-using _require_invocable_r = _require<std::is_invocable_r_v<Return, T, Args...>>;
+using require_invocable_r = require<std::is_invocable_r_v<Return, T, Args...>>;
 
 template <class T, class... Args>
-using _require_invocable = _require<std::is_invocable_v<T, Args...>>;
+using require_invocable = require<std::is_invocable_v<T, Args...>>;
 
 // ===================
 // --- Type Traits ---
@@ -102,39 +105,39 @@ constexpr double phi     = 1.6180339887498948482; // golden ration
 // --- Basic functions ---
 // =======================
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T abs(T x) noexcept {
     return (x > T(0)) ? x : -x;
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T sign(T x) noexcept {
     if constexpr (std::is_unsigned_v<T>) return (x > T(0)) ? T(1) : T(0);
     else return (x > T(0)) ? T(1) : (x < T(0)) ? T(-1) : T(0);
 } // returns -1 / 0 / 1
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T bsign(T x) noexcept {
     if constexpr (std::is_unsigned_v<T>) return T(1);
     else return (x >= T(0)) ? T(1) : T(-1);
 } // returns -1 / 1 (1 gets priority in x == 0)
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T sqr(T x) noexcept {
     return x * x;
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T cube(T x) noexcept {
     return x * x * x;
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T inv(T x) noexcept {
     return 1. / x; // integers will be cast to float then rounded
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T pow(T x, std::size_t p) noexcept {
     if (p == 0) return T(1);
     if (p == 1) return x;
@@ -142,12 +145,12 @@ template <class T, _require_arithmetic<T> = true>
     return (p % 2 == 0) ? half_pow * half_pow : half_pow * half_pow * x;
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T midpoint(T a, T b) noexcept {
     return (a + b) * 0.5; // integers will be cast to float then rounded
 }
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T absdiff(T a, T b) noexcept {
     return (a > b) ? (a - b) : (b - a);
 }
@@ -158,17 +161,17 @@ template <class T, _require_arithmetic<T> = true>
 // --- Indicator functions ---
 // ===========================
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T heaviside(T x) noexcept {
     return static_cast<T>(x > T(0));
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T kronecker_delta(T i, T j) noexcept {
     return (i == j) ? T(1) : T(0);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T levi_civita(T i, T j, T k) noexcept {
     if (i == j || j == k || k == i) return T(0);
     const std::size_t inversions = (i > j) + (i > k) + (j > k);
@@ -180,13 +183,13 @@ template <class T, _require_integral<T> = true>
 // ===========================
 
 // Degree <-> radian conversion
-template <class T, _require_float<T> = true>
+template <class T, require_float<T> = true>
 [[nodiscard]] constexpr T deg_to_rad(T degrees) noexcept {
     constexpr T factor = T(constants::pi / 180.);
     return degrees * factor;
 }
 
-template <class T, _require_float<T> = true>
+template <class T, require_float<T> = true>
 [[nodiscard]] constexpr T rad_to_deg(T radians) noexcept {
     constexpr T factor = T(180. / constants::pi);
     return radians * factor;
@@ -196,7 +199,7 @@ template <class T, _require_float<T> = true>
 // --- Sequence operations ---
 // ===========================
 
-template <class Idx, class Func, _require_invocable<Func, Idx> = true>
+template <class Idx, class Func, require_invocable<Func, Idx> = true>
 [[nodiscard]] constexpr auto sum(Idx low, Idx high, Func&& func) noexcept(noexcept(func(Idx{}))) {
     assert(low <= high);
     std::invoke_result_t<Func, Idx> res = 0;
@@ -204,7 +207,7 @@ template <class Idx, class Func, _require_invocable<Func, Idx> = true>
     return res;
 }
 
-template <class Idx, class Func, _require_invocable<Func, Idx> = true>
+template <class Idx, class Func, require_invocable<Func, Idx> = true>
 [[nodiscard]] constexpr auto prod(Idx low, Idx high, Func&& func) noexcept(noexcept(func(Idx{}))) {
     assert(low <= high);
     std::invoke_result_t<Func, Idx> res = 1;
@@ -217,14 +220,14 @@ template <class Idx, class Func, _require_invocable<Func, Idx> = true>
 // ==================
 
 // Same thing as C++20 ssize()
-template <class T, _require<has_size_v<T>> = true>
+template <class T, require<has_size_v<T>> = true>
 [[nodiscard]] constexpr auto ssize(const T& container) {
     using return_type = std::common_type_t<std::ptrdiff_t, std::make_signed_t<decltype(container.size())>>;
     return static_cast<return_type>(container.size());
 }
 
 // Utility used to reverse indexation logic, mostly useful when working with unsigned indices
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T reverse_idx(T idx, T size) noexcept {
     return size - T(1) - idx;
 }
@@ -275,17 +278,17 @@ void sort_together(Array& array, SyncedArrays&... synced_arrays) {
 // --- Branchless ternary ---
 // ==========================
 
-template <class T, _require_arithmetic<T> = true>
+template <class T, require_arithmetic<T> = true>
 [[nodiscard]] constexpr T ternary_branchless(bool condition, T return_if_true, T return_if_false) noexcept {
     return (condition * return_if_true) + (!condition * return_if_false);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T ternary_bitselect(bool condition, T return_if_true, T return_if_false) noexcept {
     return (return_if_true & -T(condition)) | (return_if_false & ~(-T(condition)));
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T ternary_bitselect(bool condition, T return_if_true /* returns 0 if false*/) noexcept {
     return return_if_true & -T(condition);
 }
@@ -312,7 +315,7 @@ struct Intervals {
 };
 
 // Linear 1D mesh
-template <class T, _require_float<T> = true>
+template <class T, require_float<T> = true>
 [[nodiscard]] std::vector<T> linspace(T L1, T L2, Intervals N) {
     assert(L1 < L2);
     assert(N.count >= 1);
@@ -323,7 +326,7 @@ template <class T, _require_float<T> = true>
 }
 
 // Chebyshev 1D mesh
-template <class T, _require_float<T> = true>
+template <class T, require_float<T> = true>
 [[nodiscard]] std::vector<T> chebspace(T L1, T L2, Intervals N) {
     assert(L1 < L2);
     assert(N.count >= 1);
@@ -343,7 +346,7 @@ template <class T, _require_float<T> = true>
     return res;
 }
 
-template <class T, class Func, _require_float<T> = true, _require_invocable_r<T, Func, T> = true>
+template <class T, class Func, require_float<T> = true, require_invocable_r<T, Func, T> = true>
 [[nodiscard]] T integrate_trapezoidal(Func&& f, T L1, T L2, Intervals N) {
     assert(L1 < L2);
     assert(N.count >= 1);
@@ -385,7 +388,7 @@ template <MemoryUnit units>
 constexpr bool _always_false_mem_v = false;
 
 template <class T, class Func>
-constexpr void _tuple_for_each(T&& tuple, Func&& func) {
+constexpr void tuple_for_each(T&& tuple, Func&& func) {
     std::apply([&func](auto&&... args) { (func(std::forward<decltype(args)>(args)), ...); }, std::forward<T>(tuple));
 }
 
@@ -436,7 +439,7 @@ template <MemoryUnit units = MemoryUnit::MiB, class T>
     // Tuple-like types
     // (like 'std::tuple', 'std::pair')
     else if constexpr (has_tuple_size_v<T> && has_get_v<T>) {
-        _tuple_for_each(value, [&](auto&& e) { bytes += quick_memory_estimate(e); });
+        tuple_for_each(value, [&](auto&& e) { bytes += quick_memory_estimate(e); });
     }
     // Non-contiguous sized containers
     // (like 'std::list', 'std::queue', 'std::dequeue', 'std::priority_queue')
@@ -452,8 +455,59 @@ template <MemoryUnit units = MemoryUnit::MiB, class T>
     return to_memory_units<units>(bytes);
 }
 
-// TODO:
-// recursive_memory_estimate()
+} // namespace utl::math
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::math {
+
+namespace constants = impl::constants;
+
+using impl::abs;
+using impl::sign;
+using impl::bsign;
+using impl::sqr;
+using impl::cube;
+using impl::inv;
+
+using impl::pow;
+using impl::midpoint;
+using impl::absdiff;
+
+using impl::signpow;
+
+using impl::heaviside;
+using impl::kronecker_delta;
+using impl::levi_civita;
+
+using impl::deg_to_rad;
+using impl::rad_to_deg;
+
+using impl::sum;
+using impl::prod;
+
+using impl::ssize;
+using impl::reverse_idx;
+
+using impl::is_permutation;
+using impl::apply_permutation;
+using impl::sorting_permutation;
+using impl::sort_together;
+
+using impl::ternary_branchless;
+using impl::ternary_bitselect;
+
+using impl::Points;
+using impl::Intervals;
+
+using impl::linspace;
+using impl::chebspace;
+
+using impl::integrate_trapezoidal;
+
+using impl::MemoryUnit;
+using impl::to_memory_units;
+using impl::quick_memory_estimate;
 
 } // namespace utl::math
 
