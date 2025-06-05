@@ -69,11 +69,8 @@
 namespace utl::random::impl {
 
 // ============================
-// --- Implementation utils ---
+// --- SFINAE & type traits ---
 // ============================
-
-// --- Type traits ---
-// -------------------
 
 #define utl_random_define_trait(trait_name_, ...)                                                                      \
     template <class T, class = void>                                                                                   \
@@ -112,8 +109,12 @@ using require_float = require<std::is_floating_point_v<T>>;
 template <class T>
 using require_uint = require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
 
-// --- Wide uint for Lemire's algorithm ---
-// ----------------------------------------
+// ====================
+// --- 128-bit uint ---
+// ====================
+
+// We need 128-bit uint for Lemire's uniform integer distribution algorithm,
+// some PRNGs can also make use of wide integers
 
 // GCC & clang provide 128-bit integers as compiler extension
 #if defined(__SIZEOF_INT128__) && !defined(__wasm__)
@@ -181,8 +182,9 @@ template<> struct wider<std::uint64_t> { using type = Uint128;       };
 template<class T> using wider_t = typename wider<T>::type;
 // clang-format on
 
-// --- Bit twiddling utils ---
-// ---------------------------
+// ===========================
+// --- Bit-twiddling utils ---
+// ===========================
 
 template <class T, require_uint<T> = true>
 [[nodiscard]] constexpr T uint_minus(T value) noexcept {
@@ -246,13 +248,13 @@ template <class T, std::size_t N, require_uint<T> = true>
 }
 
 template <class ResultType>
-[[nodiscard]] constexpr ResultType _mix_seed(ResultType seed) {
+[[nodiscard]] constexpr ResultType mix_seed(ResultType seed) {
     std::uint64_t state = (static_cast<std::uint64_t>(seed) + 0x9E3779B97f4A7C15);
     state               = (state ^ (state >> 30)) * 0xBF58476D1CE4E5B9;
     state               = (state ^ (state >> 27)) * 0x94D049BB133111EB;
     return static_cast<ResultType>(state ^ (state >> 31));
-    // some of the 16/32-bit PRNGs have bad correlation on the successive seeds, this usually
-    // can be alleviated by using a single iteration of a "good" PRNG to pre-mix the seed
+    // some of the 16/32-bit PRNGs have bad correlation on the successive seeds, this can  usually be alleviated
+    // by adding a single iteration of a "good" PRNG to pre-mix the seed, here we have an iteration of SplitMix64
 }
 
 template <class T, require_uint<T> = true>
@@ -372,7 +374,7 @@ public:
     [[nodiscard]] static constexpr result_type max() noexcept { return std::numeric_limits<result_type>::max(); }
 
     constexpr void seed(result_type seed) noexcept {
-        this->s = _mix_seed(seed);
+        this->s = mix_seed(seed);
         // naively seeded SplitMix32 has a horrible correlation between successive seeds, we can mostly alleviate
         // the issue by pre-mixing the seed with a single iteration of a "better" 64-bit algorithm
     }

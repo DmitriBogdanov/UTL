@@ -5,7 +5,7 @@
 All UTL libraries follow [semantic versioning](https://semver.org/), which is defined by 3 numbers **MAJOR.MINOR.PATCH**:
 
 1. **MAJOR** — version that makes incompatible API changes
-2. **MINOR** — version that adds functionality in a backward compatible manner
+2. **MINOR** — version that adds functionality in a backwards compatible manner
 3. **PATCH** — version that contains backwards compatible chores & bug fixes
 
 The version is defined at the top of each header with the following format:
