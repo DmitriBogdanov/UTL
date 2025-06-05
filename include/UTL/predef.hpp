@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_PREDEF
 #define UTLHEADERGUARD_PREDEF
 
+#define UTL_PREDEF_VERSION_MAJOR 1
+#define UTL_PREDEF_VERSION_MINOR 0
+#define UTL_PREDEF_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // fill_n()
@@ -37,14 +41,13 @@
 //
 // In addition utl::predef also provides some miscellaneous macros for automatic codegen, such as:
 //    UTL_PREDEF_VA_ARGS_COUNT(args...)
-//    UTL_PREDEF_ENUM_WITH_STRING_CONVERSION(enum_name, enum_values...)
 //    UTL_PREDEF_IS_FUNCTION_DEFINED() - a nightmare of implementation, but it works
 // some implementations may be rather sketchy due to trying to achieve things that weren't really
 // meant to be achieved, but at the end of the day everything is standard-compliant.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::predef {
+namespace utl::predef::impl {
 
 // ================================
 // --- Compiler Detection Macro ---
@@ -532,6 +535,36 @@ constexpr bool debug =
 // but since this arcane concept is already implemented why not keep it.
 
 } // namespace utl::predef
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::predef {
+
+// macro -> UTL_PREDEF_COMPILER_IS_...
+using impl::compiler_name;
+using impl::compiler_full_name;
+
+// macro -> UTL_PREDEF_PLATFORM_IS_...
+using impl::platform_name;
+
+// macro -> UTL_PREDEF_ARCHITECTURE_IS_...
+using impl::architecture_name;
+
+// macro -> UTL_PREDEF_STANDARD_IS_...
+using impl::standard_name;
+
+// macro -> UTL_PREDEF_MODE_IS_DEBUG
+using impl::debug;
+
+// macro -> UTL_PREDEF_FORCE_INLINE
+// macro -> UTL_PREDEF_ASSUME
+using impl::unreachable;
+
+using impl::compilation_summary;
+// macro -> UTL_PREDEF_VA_ARGS_COUNT
+// macro -> UTL_PREDEF_IS_FUNCTION_DEFINED_TRAIT
+
+} // namespace utl::XXXXXXXXXXXX
 
 #endif
 #endif // module utl::predef
