@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_STRE
 #define UTLHEADERGUARD_STRE
 
+#define UTL_STRE_VERSION_MAJOR 1
+#define UTL_STRE_VERSION_MINOR 0
+#define UTL_STRE_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // transform()
@@ -29,7 +33,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::stre {
+namespace utl::stre::impl {
 
 // ================
 // --- Trimming ---
@@ -248,6 +252,38 @@ template <class T>
         if (str_1[i] != str_2[i]) return i;
     return str_1.size();
 }
+
+} // namespace utl::stre::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::stre {
+
+using impl::trim_left;
+using impl::trim_right;
+using impl::trim;
+
+using impl::pad_left;
+using impl::pad_right;
+using impl::pad;
+
+using impl::pad_with_leading_zeroes;
+
+using impl::to_lower;
+using impl::to_upper;
+
+using impl::starts_with;
+using impl::ends_with;
+using impl::contains;
+
+using impl::replace_all_occurrences;
+using impl::split_by_delimiter;
+
+using impl::repeat_char;
+using impl::repeat_string;
+
+using impl::escape_control_chars;
+using impl::index_of_difference;
 
 } // namespace utl::stre
 
