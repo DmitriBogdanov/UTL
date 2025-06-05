@@ -21,6 +21,10 @@ This file contains specifications that ensure a standardized style of source fil
 #ifndef UTLHEADERGUARD_XXXXXXXXXXXX
 #define UTLHEADERGUARD_XXXXXXXXXXXX
 
+#define UTL_XXXXXXXXXXXX_VERSION_MAJOR 1
+#define UTL_XXXXXXXXXXXX_VERSION_MINOR 0
+#define UTL_XXXXXXXXXXXX_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 // NOTE: STD INCLUDES
@@ -31,9 +35,17 @@ This file contains specifications that ensure a standardized style of source fil
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::XXXXXXXXXXXX {
+namespace utl::XXXXXXXXXXXX::impl {
 
 // NOTE: IMPL
+
+} // namespace utl::XXXXXXXXXXXX
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::XXXXXXXXXXXX {
+
+// NOTE: API
 
 } // namespace utl::XXXXXXXXXXXX
 

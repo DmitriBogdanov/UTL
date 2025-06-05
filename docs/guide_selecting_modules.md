@@ -8,26 +8,26 @@ This is achievable by declaring `#define UTL_PICK_MODULES` and `#define <module_
 
 ## Module Identifiers
 
-| Name | Identifier |
-| --- | --- |
-| `utl::bit` | `UTLMODULE_BIT` |
-| `utl::enum_reflect` | `UTLMODULE_ENUM_REFLECT` |
-| `utl::integral` | `UTLMODULE_INTEGRAL` |
-| `utl::json` | `UTLMODULE_JSON` |
-| `utl::log` | `UTLMODULE_LOG` |
-| `utl::math` | `UTLMODULE_MATH` |
-| `utl::mvl` | `UTLMODULE_MVL` |
-| `utl::parallel` | `UTLMODULE_PARALLEL` |
-| `utl::predef` | `UTLMODULE_PREDEF` |
-| `utl::profiler` | `UTLMODULE_PROFILER` |
-| `utl::progressbar` | `UTLMODULE_PROGRESSBAR` |
-| `utl::random` | `UTLMODULE_RANDOM` |
-| `utl::shell` | `UTLMODULE_SHELL` |
-| `utl::sleep` | `UTLMODULE_SLEEP` |
-| `utl::stre` | `UTLMODULE_STRE` |
+| Name                  | Identifier                 |
+| --------------------- | -------------------------- |
+| `utl::bit`            | `UTLMODULE_BIT`            |
+| `utl::enum_reflect`   | `UTLMODULE_ENUM_REFLECT`   |
+| `utl::integral`       | `UTLMODULE_INTEGRAL`       |
+| `utl::json`           | `UTLMODULE_JSON`           |
+| `utl::log`            | `UTLMODULE_LOG`            |
+| `utl::math`           | `UTLMODULE_MATH`           |
+| `utl::mvl`            | `UTLMODULE_MVL`            |
+| `utl::parallel`       | `UTLMODULE_PARALLEL`       |
+| `utl::predef`         | `UTLMODULE_PREDEF`         |
+| `utl::profiler`       | `UTLMODULE_PROFILER`       |
+| `utl::progressbar`    | `UTLMODULE_PROGRESSBAR`    |
+| `utl::random`         | `UTLMODULE_RANDOM`         |
+| `utl::shell`          | `UTLMODULE_SHELL`          |
+| `utl::sleep`          | `UTLMODULE_SLEEP`          |
+| `utl::stre`           | `UTLMODULE_STRE`           |
 | `utl::struct_reflect` | `UTLMODULE_STRUCT_REFLECT` |
-| `utl::table` | `UTLMODULE_TABLE` |
-| `utl::time` | `UTLMODULE_TIME` |
+| `utl::table`          | `UTLMODULE_TABLE`          |
+| `utl::time`           | `UTLMODULE_TIME`           |
 
 ## Examples
 

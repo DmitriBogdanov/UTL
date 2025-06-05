@@ -166,7 +166,7 @@ Construct progress bar object with following options:
 | `show_ruler`            | Whether to render a numeric label after the bar    |
 | `show_bar`              | Whether to render a remaining time estimate        |
 
-**Note:** Disabling `show_bar` makes little practical sense, considering it make progress bar not display any progress, but it is still provided for the sake of API uniformity.
+**Note:** Disabling `show_bar` makes little practical sense, considering it makes progress bar not display any progress, but it is still provided for the sake of API uniformity.
 
 > ```cpp
 > Ruler();

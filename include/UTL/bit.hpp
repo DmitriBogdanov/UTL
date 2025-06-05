@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_BIT
 #define UTLHEADERGUARD_BIT
 
+#define UTL_XXXXXXXXXXXX_VERSION_MAJOR 1
+#define UTL_XXXXXXXXXXXX_VERSION_MINOR 0
+#define UTL_XXXXXXXXXXXX_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <cassert>          // assert()
@@ -36,41 +40,45 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::bit {
+namespace utl::bit::impl {
 
 // Ensure target is two's complement, this includes pretty much every platform ever to
 // the point that C++20 standardizes two's complement encoding as a requirement,
 // this check exists purely to be pedantic and document our assumptions strictly
 static_assert((-1 & 3) == 3);
 // before C++20 following options could technically be the case:
-// (-1 & 3) == 1 => target is sign & magnitude encoded
-// (-1 & 3) == 2 => target is one's complement
-// (-1 & 3) == 3 => target is two's complement
+//    1. (-1 & 3) == 1 => target is sign & magnitude encoded
+//    2. (-1 & 3) == 2 => target is one's complement
+//    3. (-1 & 3) == 3 => target is two's complement
 // other integer encodings are not possible in the standard
 
 // Note 1:
-// The reason we specify two's complement encoding because in it
-// casting signed <-> unsigned preserves bit pattern in two's complement encoding
+// The reason we specify two's complement encoding is because in it
+// signed <-> unsigned casting preserves the bit pattern
 
 // Note 2:
 // Shifting negative numbers is technically considered UB, in practice every compiler implements
 // signed bitshift as '(signed)( (unsigned)x << shift )' however they still act as if calling shift
 // on a negative 'x < 0' is UB and therefore can never happen which can lead to weirdness with what
-// compiler considers to be a dead code elimination. This is why we do the casting explicitly and
+// compiler considers to be dead code elimination. This is why we do the casting explicitly and
 // use custom 'lshift()' and 'rshift()' to avoid possible UB.
 // see https://stackoverflow.com/a/29710927/28607141
 
-// --- Implementation utils ---
-// ----------------------------
+// =============
+// --- Utils ---
+// =============
+
+// --- SFINAE helpers ---
+// ----------------------
 
 template <bool Cond>
-using _require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome
+using require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome
 
 template <class T>
-using _require_integral = _require<std::is_integral_v<T>>;
+using require_integral = require<std::is_integral_v<T>>;
 
 template <class T>
-using _require_enum = _require<std::is_enum_v<T>>;
+using require_enum = require<std::is_enum_v<T>>;
 
 // --- Getters ---
 // ---------------
@@ -81,7 +89,7 @@ template <class T>
 constexpr std::size_t size_of = sizeof(T) * byte_size;
 
 // Equivalent to C++20 'std::bit_width', but works with signed integers
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr std::size_t width(T value) noexcept {
     auto        uvalue = static_cast<std::make_unsigned_t<T>>(value);
     std::size_t count  = 0;
@@ -99,7 +107,7 @@ template <class T, _require_integral<T> = true>
 // Left shift,
 // unlike regular '<<' works properly with negative values, see notes above
 // undefined behavior if 'shift >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T lshift(T value, std::size_t shift) noexcept {
     assert(shift < size_of<T>);
     return static_cast<T>(static_cast<std::make_unsigned_t<T>>(value) << shift);
@@ -108,7 +116,7 @@ template <class T, _require_integral<T> = true>
 // Right shift,
 // unlike regular '>>' works properly with negative values, see notes above
 // undefined behavior if 'shift >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T rshift(T value, std::size_t shift) noexcept {
     assert(shift < size_of<T>);
     return static_cast<T>(static_cast<std::make_unsigned_t<T>>(value) >> shift);
@@ -116,7 +124,7 @@ template <class T, _require_integral<T> = true>
 
 // Circular left rotate,
 // undefined behavior if 'shift >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T rotl(T value, std::size_t shift) noexcept {
     assert(shift < size_of<T>);
     return lshift(value, shift) | rshift(value, std::numeric_limits<T>::digits - shift);
@@ -124,7 +132,7 @@ template <class T, _require_integral<T> = true>
 
 // Circular right rotate,
 // undefined behavior if 'shift >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T rotr(T value, std::size_t shift) noexcept {
     assert(shift < size_of<T>);
     return lshift(value, std::numeric_limits<T>::digits - shift) | rshift(value, shift);
@@ -136,7 +144,7 @@ template <class T, _require_integral<T> = true>
 
 // Get individual bits,
 // undefined behavior if 'bit >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr bool get(T value, std::size_t bit) noexcept {
     assert(bit < size_of<T>);
     return rshift(value, bit) & T(1);
@@ -144,7 +152,7 @@ template <class T, _require_integral<T> = true>
 
 // Set individual bits,
 // undefined behavior if 'bit >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 constexpr T set(T value, std::size_t bit) noexcept {
     assert(bit < size_of<T>);
     return value | lshift(T(1), bit);
@@ -152,7 +160,7 @@ constexpr T set(T value, std::size_t bit) noexcept {
 
 // Clear individual bits,
 // undefined behavior if 'bit >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 constexpr T clear(T value, std::size_t bit) noexcept {
     assert(bit < size_of<T>);
     return value & ~lshift(T(1), bit);
@@ -160,7 +168,7 @@ constexpr T clear(T value, std::size_t bit) noexcept {
 
 // Flip individual bits,
 // undefined behavior if 'bit >= bit_sizeof<T>'
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 constexpr T flip(T value, std::size_t bit) noexcept {
     assert(bit < size_of<T>);
     return value ^ lshift(T(1), bit);
@@ -170,18 +178,18 @@ constexpr T flip(T value, std::size_t bit) noexcept {
 // --- Enum Bitflags ---
 // =====================
 
-template <class E, _require_enum<E> = true>
+template <class E, require_enum<E> = true>
 [[nodiscard]] constexpr auto to_underlying(E value) noexcept {
     return static_cast<std::underlying_type_t<E>>(value); // in C++23 gets replaced by 'std::to_underlying()'
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr auto to_bool(T value) noexcept {
     return static_cast<bool>(value);
 }
 
 // Thin wrapper around an enum that gives it bitflag semantics
-template <class E, _require_enum<E> = true>
+template <class E, require_enum<E> = true>
 class Flags {
     std::underlying_type_t<E> data{};
 
@@ -221,6 +229,28 @@ public:
     [[nodiscard]] constexpr bool operator> (Flags other) noexcept { return this->data >  other.data; }
     // clang-format on
 };
+
+} // namespace utl::bit::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::bit {
+
+using impl::get;
+using impl::set;
+using impl::clear;
+using impl::flip;
+
+using impl::lshift;
+using impl::rshift;
+using impl::rotl;
+using impl::rotr;
+
+using impl::byte_size;
+using impl::size_of;
+using impl::width;
+
+using impl::Flags;
 
 } // namespace utl::bit
 
