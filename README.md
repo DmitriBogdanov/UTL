@@ -1,5 +1,6 @@
 [<img src ="docs/images/icon_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [<img src ="docs/images/icon_license_mit.svg">](./LICENSE.md)
+[<img src ="docs/images/icon_semver.svg">](./docs/guide_versioning.md)
 [<img src ="docs/images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="docs/images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/single_include)
 
@@ -54,6 +55,7 @@ Quality goals include:
 * [How to include only specific modules when using amalgamated header](./docs/guide_selecting_modules.md)
 * [Names reserved for implementation](./docs/guide_reserved_names.md)
 * [Building tests & benchmarks](./docs/guide_building_project.md)
+* [Semantic versioning](./docs/guide_versioning.md)
 
 ## Requirements
 
