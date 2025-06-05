@@ -154,17 +154,17 @@ int main() {
         // JSON string data
         std::vector<std::string> strings(120'000);
         for (auto& e : strings) {
-            e = utl::shell::random_ascii_string(utl::random::rand_uint(0, 120));
-            if (!e.empty() && utl::random::rand_double() < 0.1)
-                e.at(utl::random::rand_uint(0, e.size() - 1)) =
-                    utl::random::rand_choice({'"', '\\', '/', '\b', '\f', '\n', '\r', '\t'});
+            e = utl::shell::random_ascii_string(utl::random::uniform(0, 120));
+            if (!e.empty() && utl::random::uniform_double() < 0.1)
+                e.at(utl::random::uniform_uint(0, e.size() - 1)) =
+                    utl::random::choose({'"', '\\', '/', '\b', '\f', '\n', '\r', '\t'});
         }
         utl::json::Node(strings).to_file("benchmarks/data/strings.json");
 
         // JSON numeric data
         std::vector<double> numbers(180'000);
         for (auto& e : numbers)
-            e = utl::random::rand_choice({utl::random::rand_double(-10., 10), utl::random::rand_double(-1e108, 1e108)});
+            e = utl::random::choose({utl::random::uniform(-10., 10.), utl::random::uniform(-1e108, 1e108)});
         utl::json::Node(numbers).to_file("benchmarks/data/numbers.json");
     }
     

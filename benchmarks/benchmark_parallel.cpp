@@ -32,8 +32,8 @@ void benchmark_matrix_multiplication() {
     constexpr std::size_t thread_count = 4;
     constexpr int         repeats      = 20; // how many times to repeat matrix multiplication on each epoch
 
-    const mvl::Matrix<double> A(N, N, [] { return random::rand_double(); });
-    const mvl::Matrix<double> B(N, N, [] { return random::rand_double(); });
+    const mvl::Matrix<double> A(N, N, [] { return random::uniform_double(); });
+    const mvl::Matrix<double> B(N, N, [] { return random::uniform_double(); });
     mvl::Matrix<double>       C;
 
     log::println("\n\n====== BENCHMARKING ON: Repeated matrix multiplication ======\n");

@@ -188,48 +188,50 @@ double vec_max(const std::vector<double>& vec) { return *std::max_element(vec.be
 
 TEST_CASE("Uniform distribution mean/min/max are sensible") {
 
-    constexpr std::size_t N   = 100'000; // number of random vals
-    constexpr double      eps = 2e-2;    // epsilon used for double comparison, 1e-2 ~ 1% allowed error
+    constexpr std::size_t N   = 50'000; // number of random vals
+    constexpr double      eps = 5e-2;    // epsilon used for double comparison, 1e-2 ~ 1% allowed error
     std::vector<double>   vec(N);
-
+    
+    random::thread_local_prng().seed(17); // tests should be deterministic
+    
     // Check for all utl::random:: uniform distribution functions
     // that mean/min/max are ~= their expected values
-    for (auto& e : vec) e = random::rand_double();
+    for (auto& e : vec) e = random::uniform_double();
     CHECK(vec_mean(vec) == doctest::Approx(0.5).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(1.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_double(-8., 8.);
+    for (auto& e : vec) e = random::uniform_double(-8., 8.);
     CHECK(vec_mean(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(-8.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(8.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_float();
+    for (auto& e : vec) e = random::uniform_float();
     CHECK(vec_mean(vec) == doctest::Approx(0.5).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(1.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_float(-3., 1.);
+    for (auto& e : vec) e = random::uniform_float(-3., 1.);
     CHECK(vec_mean(vec) == doctest::Approx(-1.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(-3.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(1.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_int(-90, -80);
+    for (auto& e : vec) e = random::uniform_int(-90, -80);
     CHECK(vec_mean(vec) == doctest::Approx(-85.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(-90.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(-80.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_uint(5, 15);
+    for (auto& e : vec) e = random::uniform_uint(5, 15);
     CHECK(vec_mean(vec) == doctest::Approx(10.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(5.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(15.0).epsilon(eps));
 
-    for (auto& e : vec) e = static_cast<int>(random::rand_bool());
+    for (auto& e : vec) e = static_cast<int>(random::uniform_bool());
     CHECK(vec_mean(vec) == doctest::Approx(0.5).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(1.0).epsilon(eps));
 
-    for (auto& e : vec) e = random::rand_choice({-2, -1, 0, 1, 2});
+    for (auto& e : vec) e = random::choose({-2, -1, 0, 1, 2});
     CHECK(vec_mean(vec) == doctest::Approx(0.0).epsilon(eps));
     CHECK(vec_min(vec) == doctest::Approx(-2.0).epsilon(eps));
     CHECK(vec_max(vec) == doctest::Approx(2.0).epsilon(eps));

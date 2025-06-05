@@ -183,7 +183,7 @@ inline double sum_unroll_template(const std::vector<double>& vec) {
 void benchmark_simd_unrolling() {
     double              sum = 0;
     std::vector<double> vec(5'000'000);
-    for (auto& e : vec) e = random::rand_double(-0.01, 0.01);
+    for (auto& e : vec) e = random::uniform(-0.01, 0.01);
 
     bench.minEpochIterations(200).timeUnit(1ms, "ms").title("Unrolling the sum").relative(true).warmup(10);
 
@@ -354,8 +354,8 @@ DenseMat dd_matmul_ikj_ii_kk_blocked(const DenseMat& left, const DenseMat& right
 void benchmark_matmul() {
     constexpr std::size_t N_i = 3110, N_k = 3120, N_j = 3130;
 
-    DenseMat A(N_i, N_k, [] { return random::rand_double(-0.1, 0.1); });
-    DenseMat B(N_k, N_j, [] { return random::rand_double(-0.1, 0.1); });
+    DenseMat A(N_i, N_k, [] { return random::uniform(-0.1, 0.1); });
+    DenseMat B(N_k, N_j, [] { return random::uniform(-0.1, 0.1); });
     DenseMat C(N_i, N_j, 0.);
     
     const auto total_size = A.size() + B.size() + C.size();
@@ -454,7 +454,7 @@ std::string float_stringify_charconv(double value) {
 void benchmark_stringify() {
     constexpr std::size_t N = 500;
 
-    DenseMat A(N, N, [] { return random::rand_double(-0.1, 0.1); });
+    DenseMat A(N, N, [] { return random::uniform(-0.1, 0.1); });
 
     log::println("\n\n====== BENCHMARKING ON: float stringify ======\n");
     log::println("N                 -> ", N);
@@ -576,7 +576,7 @@ int main() {
     //benchmark_stringify();
     
     
-    DenseMat A(3, 4, [] { return random::rand_double(-0.1, 0.1); });
+    DenseMat A(3, 4, [] { return random::uniform(-0.1, 0.1); });
     
     // Human-readable formats
     log::println(mvl::format::as_vector(A));

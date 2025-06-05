@@ -107,25 +107,41 @@ struct ApproxNormalDistribution { /* same API as std::normal_distribution<T> */ 
 template <class T, class Gen>
 constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen()));
 
-// Convenient random functions
-int rand_int(          int min,          int max) noexcept;
-int rand_uint(unsigned int min, unsigned int max) noexcept;
+// Default PRNG
+using PRNG = generators::Xoshiro256PP;
 
-float rand_float()                     noexcept; // U[0, 1)     uniform distribution
-float rand_float(float min, float max) noexcept; // U[min, max) uniform distribution
-float rand_normal_float();                       // N(0, 1)      normal distribution
+PRNG& thread_local_prng();
 
-double rand_double()                       noexcept; // U[0, 1)     uniform distribution
-double rand_double(double min, double max) noexcept; // U[min, max) uniform distribution
-double rand_normal_float();                          // N(0, 1)      normal distribution
+// Convenient random (generic)
+template <class Dist> auto variate(Dist&& dist); // any distribution
 
-bool rand_bool() noexcept;
+template <class T> T uniform(T min, T max); // integer U[min, max]
+template <class T> T uniform(            ); // boolean U[0, 1]
+template <class T> T uniform(T min, T max); // float   U[min, max)
+template <class T> T uniform(            ); // float   U[0, 1)
 
-template<class T>
-T rand_choice(std::initializer_list<T> objects) noexcept;
+template <class T> T normal(T mean, T stddev); // float N(mean, stddev)
+template <class T> T normal(                ); // float N(0, 1)
 
-template<class T>
-T rand_linear_combination(const T& A, const T& B);
+// Convenient random (shortcuts for standard types)
+using Uint = unsigned int;
+
+int    uniform_int   (   int min,    int max); // U[min, max]
+Uint   uniform_uint  (  Uint min,   Uint max); // U[min, max]
+bool   uniform_bool  (                      ); // U[0, 1]
+float  uniform_float ( float min,  float max); // U[min, max)
+double uniform_double(double min, double max); // U[min, max)
+float  uniform_float (                      ); // U[0, 1)
+double uniform_double(                      ); // U[0, 1)
+
+float  normal_float ( float mean,  float stddev); // N(mean, stddev)
+double normal_double(double mean, double stddev); // N(mean, stddev)
+float  normal_float (                          ); // N(0, 1)
+double normal_double(                          ); // N(0, 1)
+
+// Convenient random (other)
+template <class T>            T choose(std::initializer_list<T> list);
+template <class Container> auto choose(const Containe&          list);
 ```
 
 ## Methods
@@ -170,41 +186,6 @@ Unlike standard generators these can also be used in `constexpr` functions.
 
 **Note:** All provided PRNGs have `min() == 0` and `max() == std::numeric_limits<result_type>::max()`.
 
-### Default global PRNG
-
-> ```cpp
-> using default_generator_type = generators::Xoshiro256PP;
-> using default_result_type    = std::uint64_t;
-> ```
-
-Typedefs for default PRNG of this module and its return type.
-
-> ```cpp
-> inline default_generator_type default_generator;
-> ```
-
-A global instance of **Xoshiro256++** generator used by convenience functions of this module.
-
-**Note:** All random engines are inherently non-thread-safe, a proper way of generating numbers in parallel is to create local generators on each thread and seed them with different values.
-
-> ```cpp
-> void seed(std::uint64_t random_seed) noexcept;
-> ```
-
-Seeds global random engine with `random_seed`.
-
-> ```cpp
-> void seed_with_entropy();
-> ```
-
-Seeds global random engine using combined entropy from several sources, the main one being [std::random_device](https://en.cppreference.com/w/cpp/numeric/random/random_device) which uses hardware source of non-deterministic randomness.
-
-It is effectively the same as seeding global engine with `random::entropy_seq()`.
-
-**Note 1:** Resist the temptation to seed engines with `std::time(NULL)`, using proper entropy is how it should be done.
-
-**Note 2:** If no hardware randomness is available, `std::random_device` falls back onto an internal PRNG, it is generally not an issue due to multiple sources of entropy, however it makes cryptographic usage quite tricky.
-
 ### Entropy
 
 > ```cpp
@@ -220,7 +201,7 @@ These functions serve a role of a "slightly better and more convenient [std::ran
 
 `entropy_seq()` generates a full [std::seed_seq](https://en.cppreference.com/w/cpp/numeric/random/seed_seq) instead of a single number, it is mainly useful for seeding generators with a large state.
 
-**Note:** These functions are thread-safe.
+**Note:** Entropy functions are thread-safe.
 
 ### Distributions
 
@@ -306,81 +287,138 @@ Normal floating-point distribution class that provides a 1-to-1 copy of [`std::n
 
 **How is it faster than std:** It uses the fact that [popcount](https://en.cppreference.com/w/cpp/numeric/popcount) of a uniformly distributed integer follows a binomial distribution. By rescaling that binomial distribution and adding some linear fill we can achieve a curve very similar to a proper normal distribution in just a few instructions. While that level of precision is not suitable for a general use, in instances where quality is not particularly important (gamedev, fuzzing) this is perhaps the fastest possible way of generating normally distributed floats.
 
-### Convenient random functions
+### Default PRNG
 
 > ```cpp
-> int rand_int(          int min,          int max);
-> int rand_uint(unsigned int min, unsigned int max);
+> using PRNG = generators::Xoshiro256PP;
 > ```
 
-Returns random integer in a $[min, max]$ range.
+Typedef for a default PRNG. Good choice for most applications.
 
 > ```cpp
-> float  rand_float();
-> double rand_double();
+> PRNG& thread_local_prng();
 > ```
 
-Returns random float/double in a $[0, 1)$ range.
+Thread-local PRNG automatically seeded with entropy.
+
+### Convenient random
+
+> [!Note]
+> This is a `rand()`-like API for various distributions. Uses thread-local random lazily seeded with entropy.
+
+### Generic
 
 > ```cpp
-> float  rand_float(  float min,  float max);
-> double rand_double(double min, double max);
+> template <class Dist> auto variate(Dist&& dist); // any distribution
 > ```
 
-Returns random float/double in a $[min, max)$ range.
+Returns value from distribution `dist` using thread-local random generator.
+
+Effectively equivalent to `dist(thread_local_prng())`.
 
 > ```cpp
-> float  rand_normal_float();
-> double rand_normal_double();
+> template <class T> T uniform(T min, T max); // integer U[min, max]
+> template <class T> T uniform(            ); // boolean U[0, 1]
 > ```
 
-Returns random normally distributed float/double with a mean $0$ and variance $1$.
+Returns random integer `T` in a $[min, max]$ range.
+
+When `T` is a `bool`, function doesn't require any arguments.
 
 > ```cpp
-> bool rand_bool();
+> template <class T> T uniform(T min, T max); // float   U[min, max)
+> template <class T> T uniform(            ); // float   U[0, 1)
 > ```
 
-Returns `true`/`false` randomly. Effectively same as `rand_uint(0, 1)`.
+Returns random floating point `T` in a $[min, max)$ range.
+
+When no arguments are passed uses $[0, 1)$ range. 
 
 > ```cpp
-> T rand_choice(std::initializer_list<T> objects);
+> template <class T> T normal(T mean, T stddev); // float N(mean, stddev)
+> template <class T> T normal(                ); // float N(0, 1)
 > ```
 
-Returns randomly chosen object from a list.
+Returns random normally distributed `T` with `mean` and `stddev`.
+
+When no arguments are passed uses standard mean and deviation.
+
+### Shortcuts for standard types
 
 > ```cpp
-> T rand_linear_combination(const T& A, const T& B);
+> int    uniform_int   (   int min,    int max); // U[min, max]
+> Uint   uniform_uint  (  Uint min,   Uint max); // U[min, max]
+> bool   uniform_bool  (                      ); // U[0, 1]
 > ```
 
-Returns $\alpha A + (1 - \alpha) B$, with random $0 \leq \alpha < 1$. Useful for vector and color operations. Object must have  a defined `operator+()` and scalar `operator*()`.
+`int`, `unsigned int` and `bool` instantiations of the integer `uniform<T>()`.
+
+> ```cpp
+> float  uniform_float ( float min,  float max); // U[min, max)
+> double uniform_double(double min, double max); // U[min, max)
+> float  uniform_float (                      ); // U[0, 1)
+> double uniform_double(                      ); // U[0, 1)
+> ```
+
+`float` and `double` instantiations of the floating point `uniform<T>()`.
+
+> ```cpp
+> float  normal_float ( float mean,  float stddev); // N(mean, stddev)
+> double normal_double(double mean, double stddev); // N(mean, stddev)
+> float  normal_float (                          ); // N(0, 1)
+> double normal_double(                          ); // N(0, 1)
+> ```
+
+`float` and `double` instantiations of the `normal<T>()`.
+
+### Other
+
+> ```cpp
+> template <class T>            T choose(std::initializer_list<T> list);
+> template <class Container> auto choose(const Containe&          list);
+> ```
+
+Returns random element from a `list`.
+
+Generic template requires `Container::at()` and `Container::size()` to exist.
 
 ## Examples
 
 ### Getting random values
 
-[ [Run this code](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGE6a4AMngMmAByPgBGmMQgAOykAA6oCoRODB7evv5JKWkCwaERLNGxCXaYDulCBEzEBJk%2BflK2mPaOAjV1BIXhUTHxtrX1jdktCsM9IX0lA3EAlLaoXsTI7BzmAMwhyN5YANQmm24IBASJCiAA9FfETADuAHTAhAhekV5Kq7KMBI9oLCuABEWIRiHgLKhgOhDKgAG5XOQAFUCVxYTAmMSuqSM9AA%2Bjs9phESjHghEokjtgTBoAII02khAj7dEhCDzQ5xKx0/a8/afELAfbMNgKRJMNb8gi0I7c%2Bk8vl3BjoVAsEAgJSYdB4%2B6vPG/YioRIAT3ZsoZfP2E3Q6rQXgIFstfKObhdhzMZiV2qZEA0pH2XA0Gg5TtDlqOQPdZkOxzdXtV6q9BMEvv9geDYczMddxyjJgArG4GOYzI7Qy63SWkyr3vR2VmGxGo9m44YVWqQNXlpE6yGG2GK7mSwWi8OFeXY0OPV3a5gIABafP%2B/N9/tNkst3PxjszntzxfL1eNyduPOF4sestOwenqttvGRVCeev9rPrj2b0/bxP3x/Po%2BvuGJ5nqOl7jtewF3sqeLIAgqB4GsEAmFyXD%2BmY/qbMhQIAUBkYbje%2Bzfp296wfBiHIRYqH7Oh%2ByYXE2HHjmt6XueY60pmBFQdqtDTHUMGqpEIRMB0DAQGYjwYY8HLvtGBFEUmPGhHxAKCcwIliRJtFSZ%2BIEXqWmxylhDIcIstCcPmvB%2BBwWikKgnCupY1hWssqyYO6mw8KQBCaCZiwANbxFwjxxFwcQABweZIYVmAAbAAnIGS5mRwkiWT5tmcLwlx%2Bt51kmaQcCwDAiAoKqiR0DE5CUAC5X0LEuyGMAXAxUGfB0AQMSXBAkTpapdTGpwnl9cQxoAPKRNolS5Z5AJsIIo0MLQA15aQWAfMAbhiLQlzcLwWDori6w2fgxBTXgcKYDtNmYKolT2kdvBMm06U8ZEdwjR4WDpQQ4JqrtpAXcQj5KECmAHcAimgHlixUAYwAKAAangmD3KNiSMINvD8IIIhiOwLTY/IShqOluioQYRgoNY1j6HgkSXJAixGiJO3ztaEamI5lihfs86jWYvDwjE4JYAz7KtO06QuMqozNKQQTTMUpR6MkqQibLKt5CJvRKwMqEVFUnSTBr%2BttGdRvdDr/SxPrxueE0egTJbivWxIiwKC5axu/o5lpStdkcPsqhhTF84xZI%2BwNUYAYxY8Ghx/sEC4IQJDuVw8y8LlWjzIsCCYEwWCxOLyWpaQar5n6Vk2QHWUgDlPmLIVJXLOc9pVRANUVcQYSsOsweh%2BHkcU0KzVx3HvBainIt6ITuPiATsiKCo6grWTpD3HciSY6ZvukFXgucKN9qJPa%2ByoFQQch2HEdRyPsfxxoiceCwtUxGnGdeQ3/kgJIsfxZIZguAhw0PmOKIVmo%2BxSrwculd0o11sHXT%2B0Nv5mDCo8VBgCYphXzKFTYGgwpxV/pAzYftq6ZSQdnHeHABZ7zgeQrOvkAadSlpIIAA%3D%3D%3D) ]
+[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++//+Generic+functions%0A++++std::cout%0A++++++++%3C%3C+%22integer+U%5B-5,+5%5D+-%3E+%22+%3C%3C+random::uniform(-5,+5)++++%3C%3C+%22%5Cn%22%0A++++++++%3C%3C+%22boolean+U%5B0,+1%5D++-%3E+%22+%3C%3C+random::uniform%3Cbool%3E()+++%3C%3C+%22%5Cn%22%0A++++++++%3C%3C+%22float+++U%5B1,+2)++-%3E+%22+%3C%3C+random::uniform(1.f,+2.f)+%3C%3C+%22%5Cn%22%0A++++++++%3C%3C+%22float+++U%5B0,+1)++-%3E+%22+%3C%3C+random::uniform%3Cfloat%3E()++%3C%3C+%22%5Cn%22%3B%0A%0A++++//+Standard+shortcuts%0A++++std::cout%0A++++++++%3C%3C+%22U%5B0,+1%5D+-%3E+%22+%3C%3C+random::uniform_bool()++%3C%3C+%22%5Cn%22%0A++++++++%3C%3C+%22N(0,+1)+-%3E+%22+%3C%3C+random::normal_double()+%3C%3C+%22%5Cn%22%3B%0A%0A++++//+Other+distributions%0A++++std::cout%0A++++++++%3C%3C+%22Exp(4)+-%3E+%22+%3C%3C+random::variate(std::exponential_distribution%7B4.f%7D)++%3C%3C+%22%5Cn%22%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4)) ]
 
 ```cpp
 using namespace utl;
 
-random::seed_with_entropy();
+// Generic functions
 std::cout
-    << "rand_int(0, 100)                = " << random::rand_int(0, 100)                << "\n"
-    << "rand_double()                   = " << random::rand_double()                   << "\n"
-    << "rand_double(-5, 5)              = " << random::rand_double(-5, 5)              << "\n"
-    << "rand_bool()                     = " << random::rand_bool()                     << "\n"
-    << "rand_choice({1, 2, 3})          = " << random::rand_choice({1, 2, 3})          << "\n"
-    << "rand_linear_combination(2., 3.) = " << random::rand_linear_combination(2., 3.) << "\n";
+    << "integer U[-5, 5] -> " << random::uniform(-5, 5)    << "\n"
+    << "boolean U[0, 1]  -> " << random::uniform<bool>()   << "\n"
+    << "float   U[1, 2)  -> " << random::uniform(1.f, 2.f) << "\n"
+    << "float   U[0, 1)  -> " << random::uniform<float>()  << "\n";
+
+// Standard shortcuts
+std::cout
+    << "U[0, 1] -> " << random::uniform_bool()  << "\n"
+    << "N(0, 1) -> " << random::normal_double() << "\n";
+
+// Other distributions
+std::cout
+    << "Exp(4) -> " << random::variate(std::exponential_distribution{4.f})  << "\n";
 ```
 
 Output:
 ```
-rand_int(0, 100)                = 14
-rand_double()                   = 0.333702
-rand_double(-5, 5)              = -1.9462
-rand_bool()                     = 0
-rand_choice({1, 2, 3})          = 2
-rand_linear_combination(2., 3.) = 2.13217
+integer U[-5, 5] -> 4
+boolean U[0, 1]  -> 1
+float   U[1, 2)  -> 1.57933
+float   U[0, 1)  -> 0.787372
+
+U[0, 1] -> 0
+N(0, 1) -> -0.391094
+
+Exp(4) -> 0.384687
 ```
 
 ### Using custom PRNGs with &lt;random&gt;

@@ -282,6 +282,10 @@ void benchmark_distributions_for_prng(const char* name) {
             const random::UniformIntDistribution dist{min, max};
             for (auto&& e : data) e = dist(gen);
         });
+        
+        benchmark("uniform<>(min, max)", [&] {
+            for (auto&& e : data) e = random::uniform(min, max);
+        });
     };
 
     [[maybe_unused]] const auto bench_reals = [&](auto min, auto max) {
@@ -316,14 +320,31 @@ void benchmark_distributions_for_prng(const char* name) {
             const random::UniformRealDistribution<real> dist{min, max};
             for (auto&& e : data) e = dist(gen);
         });
+        
+        benchmark("uniform<>(min, max)", [&] {
+            for (auto&& e : data) e = random::uniform(min, max);
+        });
+        
+        benchmark("NormalDistribution", [&] {
+            random::NormalDistribution<real> dist{5, 4};
+            for (auto&& e : data) e = dist(gen);
+        });
+        
+        benchmark("normal<>(mean, stddev)", [&] {
+            for (auto&& e : data) e = random::normal<real>(5, 4);
+        });
+        
+        benchmark("normal<>()", [&] {
+            for (auto&& e : data) e = random::normal<real>();
+        });
     };
 
     bench_uints(std::uint64_t(uint_min), std::uint64_t(uint_max));
     bench_uints(std::uint32_t(uint_min), std::uint32_t(uint_max));
-    bench_uints(std::uint16_t(uint_min), std::uint16_t(uint_max));
-    bench_uints(std::uint8_t(uint_min), std::uint8_t(uint_max));
+    //bench_uints(std::uint16_t(uint_min), std::uint16_t(uint_max));
+    //bench_uints(std::uint8_t(uint_min), std::uint8_t(uint_max));
 
-    bench_reals((long double)(real_min), (long double)(real_max));
+    //bench_reals((long double)(real_min), (long double)(real_max));
     bench_reals(double(real_min), double(real_max));
     bench_reals(float(real_min), float(real_max));
 }
@@ -342,13 +363,13 @@ void benchmark_distributions() {
     log::println("Memory usage (float      ) -> ", math::to_memory_units(data_size * sizeof(float)), " MiB");
 
     //benchmark_distributions_for_prng<std::minstd_rand>("std::minstd_rand");
-    benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
+    //benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
     //benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
     //benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
-    benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
+    //benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
     benchmark_distributions_for_prng<random::generators::SplitMix32>("SplitMix32");
-    benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
-    benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
+    //benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
+    //benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
     benchmark_distributions_for_prng<random::generators::SplitMix64>("SplitMix64");
     benchmark_distributions_for_prng<random::generators::Xoshiro256PP>("Xoshiro256++");
     //benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");

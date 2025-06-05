@@ -92,7 +92,7 @@ struct _init_helper {
     _init_helper() {
         pregen_strings.resize(string_pregen_count);
         for (auto& e : pregen_strings)
-            e = shell::random_ascii_string(random::rand_uint(min_string_size, max_string_size));
+            e = shell::random_ascii_string(random::uniform(min_string_size, max_string_size));
     }
 };
 inline _init_helper _init;

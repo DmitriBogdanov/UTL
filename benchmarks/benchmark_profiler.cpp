@@ -29,7 +29,7 @@
 // _____________ BENCHMARK IMPLEMENTATION _____________
 
 const auto compute_value = []() {
-    const auto x1 = std::cos(utl::random::rand_double());
+    const auto x1 = std::cos(utl::random::uniform_double());
     const auto x2 = std::cos(x1);
     const auto x3 = std::cos(x2);
     const auto x4 = std::cos(x3);

@@ -12,7 +12,7 @@
 #ifndef UTLHEADERGUARD_RANDOM
 #define UTLHEADERGUARD_RANDOM
 
-#define UTL_RANDOM_VERSION_MAJOR 1 // [!] API-breaking patch is currently planned
+#define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 0
 #define UTL_RANDOM_VERSION_PATCH 0
 
@@ -102,6 +102,12 @@ using require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbers
 
 template <class T>
 using require_integral = require<std::is_integral_v<T>>;
+
+template <class T>
+using require_bool = require<std::is_same_v<T, bool>>;
+
+template <class T>
+using require_not_bool = require<!std::is_same_v<T, bool>>;
 
 template <class T>
 using require_float = require<std::is_floating_point_v<T>>;
@@ -357,7 +363,7 @@ public:
 //
 class SplitMix32 {
 public:
-    using result_type = std::uint64_t;
+    using result_type = std::uint32_t;
 
 private:
     result_type s{};
@@ -813,14 +819,9 @@ using ChaCha20 = ChaCha<20>;
 
 } // namespace generators
 
-// ===========================
-// --- Default global PRNG ---
-// ===========================
-
-using default_generator_type = generators::Xoshiro256PP;
-using default_result_type    = default_generator_type::result_type;
-
-inline default_generator_type default_generator;
+// ===============
+// --- Entropy ---
+// ===============
 
 inline std::seed_seq entropy_seq() {
     // Ensure thread safety of our entropy source, it should generally work fine even without
@@ -866,14 +867,6 @@ inline std::uint32_t entropy() {
     // brace-initializers will complain about narrowing conversion on some generators. If someone want
     // more entropy than that they can always use the whole sequence as a generic solution.
     // Also having one 'random::entropy()' is much nicer than 'random::entropy_32()' & 'random::entropy_64()'.
-}
-
-inline void seed(default_result_type random_seed) noexcept { default_generator.seed(random_seed); }
-
-inline void seed_with_entropy() {
-    auto seq = entropy_seq();
-    default_generator.seed(seq);
-    // for some god-forsaken reason seeding sequence constructors std:: generators take only l-value sequences
 }
 
 // =====================
@@ -1091,7 +1084,7 @@ constexpr T generate_canonical_generic(Gen& gen) noexcept(noexcept(gen())) {
     if (res >= float_type(1)) res = float_type(1) - std::numeric_limits<float_type>::epsilon() / float_type(2);
     // GCC patch the fixes occasional generation of '1's, has non-zero effect on performance
 
-    return res / factor;
+    return res;
 }
 
 // Wrapper that adds special case optimizations for `_generate_canonical_generic<>()'
@@ -1399,74 +1392,127 @@ struct ApproxNormalDistribution {
     constexpr bool operator!=(const ApproxNormalDistribution& other) noexcept { return !(*this == other); }
 };
 
-// ========================
-// --- Random Functions ---
-// ========================
+// =========================
+// --- Convenient random ---
+// =========================
 
 // Note 1:
-// Despite the intuitive judgement, benchmarks don't seem to indicate that creating
-// new distribution objects on each call introduces any noticeable overhead
-//
-// sizeof(std::uniform_int_distribution<int>)     ==  8
-// sizeof(std::uniform_real_distribution<double>) == 16
-// sizeof(std::normal_distribution<double>)       == 32
-//
-// and same thing for 'UniformIntDistribution', 'UniformRealDistribution'
+// Despite the intuitive judgement, creating new distribution objects on each call doesn't introduce
+// any meaningful overhead. There is however a bit of additional overhead due to 'thread_local' branch
+// caused by the thread local PRNG. It is still much faster that 'rand()' or regular <random> usage, but
+// if user want to have the bleeding edge performance they should use distributions manually.
 
 // Note 2:
 // No '[[nodiscard]]' since random functions inherently can't be pure due to advancing the generator state.
 // Discarding return values while not very sensible, can still be done for the sake of advancing state.
-// Ideally we would want users to advance the state directly, but I'm not sure how to communicate that in
-// '[[nodiscard]]' warnings.
 
-inline int rand_int(int min, int max) noexcept {
-    const UniformIntDistribution<int> distr{min, max};
-    return distr(default_generator);
+// Note 3:
+// "Convenient" random uses a thread-local PRNG lazily initialized with entropy, this is a very sane default for
+// most cases. If explicit seeding is needed it can be achieved with 'thread_local_prng().seed(...)'.
+
+// --- Global PRNG ---
+// -------------------
+
+using PRNG = generators::Xoshiro256PP;
+
+PRNG& thread_local_prng() {
+    // no '[[nodiscard]]' as it can be used for a side effect of initializing PRNG
+    // no 'noexcept' because entropy source can allocate & fail
+    thread_local PRNG prng(entropy_seq());
+    return prng;
 }
 
-inline int rand_uint(unsigned int min, unsigned int max) noexcept {
-    const UniformIntDistribution<unsigned int> distr{min, max};
-    return distr(default_generator);
+// --- Distribution functions ---
+// ------------------------------
+
+// Generic variate, other functions are implemented in terms of this one
+template <class Dist>
+auto variate(Dist&& dist) -> typename std::decay_t<Dist>::result_type {
+    return dist(thread_local_prng());
 }
 
-inline float rand_float() noexcept { return generate_canonical<float>(default_generator); }
-
-inline float rand_float(float min, float max) noexcept {
-    const UniformRealDistribution<float> distr{min, max};
-    return distr(default_generator);
+// Integer U[min, max]
+template <class T, require_integral<T> = true>
+T uniform(T min, T max) {
+    return variate(UniformIntDistribution<T>{min, max});
 }
 
-inline float rand_normal_float() {
-    std::normal_distribution<float> distr;
-    return distr(default_generator);
+// Boolean U[0, 1]
+template <class T, require_integral<T> = true, require_bool<T> = true>
+T uniform() {
+    return variate(UniformIntDistribution<std::uint8_t>{0, 1});
 }
 
-inline double rand_double() noexcept { return generate_canonical<double>(default_generator); }
-
-inline double rand_double(double min, double max) noexcept {
-    const UniformRealDistribution<double> distr{min, max};
-    return distr(default_generator);
+// Float U[min, max)
+template <class T, require_float<T> = true>
+T uniform(T min, T max) {
+    return variate(UniformRealDistribution<T>{min, max});
 }
 
-inline double rand_normal_double() {
-    std::normal_distribution<double> distr;
-    return distr(default_generator);
+// Float U[0, 1)
+template <class T, require_float<T> = true>
+T uniform() {
+    return variate(UniformRealDistribution<T>{0, 1});
 }
 
-inline bool rand_bool() noexcept { return static_cast<bool>(rand_uint(0, 1)); }
+// Float N(mean, stddev)
+template <class T, require_float<T> = true>
+T normal(T mean, T stddev) {
+    return variate(NormalDistribution<T>{mean, stddev});
+    // slower due to discarding state, but that is unavoidable in this API
+}
 
+// Float N(0, 1)
+template <class T, require_float<T> = true>
+T normal() {
+    thread_local NormalDistribution<T> dist{};
+    return variate(dist);
+    // this version can use distribution state properly due to the constant parameters
+}
+
+// Choose random element from a list
 template <class T>
-T rand_choice(std::initializer_list<T> objects) noexcept {
-    assert(objects.size() > 0);
-    const int random_index = rand_int(0, static_cast<int>(objects.size()) - 1);
-    return objects.begin()[random_index];
+T choose(std::initializer_list<T> list) {
+    return list.begin()[uniform<std::size_t>(0, list.size() - 1)];
 }
 
-template <class T>
-T rand_linear_combination(const T& A, const T& B) noexcept(noexcept(A + B) && noexcept(A * 1.)) {
-    const auto weight = rand_double();
-    return A * weight + B * (1. - weight);
-} // random linear combination of 2 colors/vectors/etc
+template <class Container>
+auto choose(const Container &list) {
+    return list.at(uniform<std::size_t>(0, list.size() - 1));
+}
+
+// --- Typed shortcuts ---
+// -----------------------
+
+using Uint = unsigned int;
+
+// clang-format off
+inline    int uniform_int   (   int min,    int max) { return uniform<   int>(min, max); }
+inline   Uint uniform_uint  (  Uint min,   Uint max) { return uniform<  Uint>(min, max); }
+inline   bool uniform_bool  (                      ) { return uniform<  bool>(        ); }
+inline  float uniform_float ( float min,  float max) { return uniform< float>(min, max); }
+inline double uniform_double(double min, double max) { return uniform<double>(min, max); }
+inline  float uniform_float (                      ) { return uniform< float>(        ); }
+inline double uniform_double(                      ) { return uniform<double>(        ); }
+
+inline  float normal_float ( float mean,  float stddev) { return  normal< float>(mean, stddev); }
+inline double normal_double(double mean, double stddev) { return  normal<double>(mean, stddev); }
+inline  float normal_float (                          ) { return  normal< float>(            ); }
+inline double normal_double(                          ) { return  normal<double>(            ); }
+// clang-format on
+
+int    uniform_int   (   int min,    int max);
+Uint   uniform_uint  (  Uint min,   Uint max);
+bool   uniform_bool  (                      );
+float  uniform_float ( float min,  float max);
+double uniform_double(double min, double max);
+float  uniform_float (                      );
+double uniform_double(                      );
+
+float  normal_float ( float mean,  float stddev);
+double normal_double(double mean, double stddev);
+float  normal_float (                          );
+double normal_double(                          );
 
 } // namespace utl::random::impl
 
@@ -1475,13 +1521,6 @@ T rand_linear_combination(const T& A, const T& B) noexcept(noexcept(A + B) && no
 namespace utl::random {
 
 namespace generators = impl::generators;
-
-using impl::default_generator_type;
-using impl::default_result_type;
-using impl::default_generator;
-
-using impl::seed;
-using impl::seed_with_entropy;
 
 using impl::entropy_seq;
 using impl::entropy;
@@ -1492,13 +1531,24 @@ using impl::NormalDistribution;
 using impl::ApproxNormalDistribution;
 using impl::generate_canonical;
 
-using impl::rand_int;
-using impl::rand_uint;
-using impl::rand_float;
-using impl::rand_double;
-using impl::rand_bool;
-using impl::rand_choice;
-using impl::rand_linear_combination;
+using impl::PRNG;
+using impl::thread_local_prng;
+
+using impl::choose;
+using impl::variate;
+using impl::uniform;
+using impl::normal;
+
+using impl::Uint;
+using impl::uniform_int;
+using impl::uniform_uint;
+using impl::uniform_bool;
+using impl::uniform_float;
+using impl::uniform_double;
+using impl::normal_float;
+using impl::normal_double;
+
+using impl::choose;
 
 } // namespace utl::random
 
