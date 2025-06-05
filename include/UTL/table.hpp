@@ -12,6 +12,10 @@
 #ifndef UTLHEADERGUARD_TABLE
 #define UTLHEADERGUARD_TABLE
 
+#define UTL_TABLE_VERSION_MAJOR 0 // [!] module awaiting a rewrite
+#define UTL_TABLE_VERSION_MINOR 0
+#define UTL_TABLE_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <cstddef>          // size_t
@@ -41,21 +45,21 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::table {
+namespace utl::table::impl {
 
 // =====================
 // --- Column Format ---
 // =====================
 
-using uint       = std::streamsize;
-using _ios_flags = std::ios_base::fmtflags;
+using uint      = std::streamsize;
+using ios_flags = std::ios_base::fmtflags;
 
 struct ColumnFormat {
-    _ios_flags flags;
-    uint       precision;
+    ios_flags flags;
+    uint      precision;
 };
 
-struct _Column {
+struct Column {
     uint         width;
     ColumnFormat col_format;
 };
@@ -74,30 +78,30 @@ constexpr ColumnFormat BOOL = {std::ios::boolalpha, 3};
 // --- Internal Table State ---
 // ----------------------------
 
-inline std::vector<_Column> _columns;
-inline std::size_t          _current_column = 0;
-inline std::ostream*        _output_stream  = &std::cout;
-inline bool                 _latex_mode     = false;
+inline std::vector<Column> columns;
+inline std::size_t         current_column = 0;
+inline std::ostream*       output_stream  = &std::cout;
+inline bool                latex_mode     = false;
 
 // ===================
 // --- Table Setup ---
 // ===================
 
 inline void create(std::initializer_list<uint>&& widths) {
-    _columns.resize(widths.size());
-    for (std::size_t i = 0; i < _columns.size(); ++i) {
-        _columns[i].width      = widths.begin()[i];
-        _columns[i].col_format = DEFAULT();
+    columns.resize(widths.size());
+    for (std::size_t i = 0; i < columns.size(); ++i) {
+        columns[i].width      = widths.begin()[i];
+        columns[i].col_format = DEFAULT();
     }
 }
 
 inline void set_formats(std::initializer_list<ColumnFormat>&& formats) {
-    for (std::size_t i = 0; i < _columns.size(); ++i) _columns[i].col_format = formats.begin()[i];
+    for (std::size_t i = 0; i < columns.size(); ++i) columns[i].col_format = formats.begin()[i];
 }
 
-inline void set_ostream(std::ostream& new_ostream) { _output_stream = &new_ostream; }
+inline void set_ostream(std::ostream& new_ostream) { output_stream = &new_ostream; }
 
-inline void set_latex_mode(bool toggle) { _latex_mode = toggle; }
+inline void set_latex_mode(bool toggle) { latex_mode = toggle; }
 
 // =======================
 // --- Table Rendering ---
@@ -119,7 +123,7 @@ template <class T>
 void _append_decorated_value(std::ostream& os, const T& value) {
     using V = std::decay_t<T>;
 
-    if (!_latex_mode) {
+    if (!latex_mode) {
         os << value;
         return;
     }
@@ -140,15 +144,15 @@ void _append_decorated_value(std::ostream& os, const T& value) {
             const std::string mantissa = number_string.substr(0, e_index - 1);
             const char        sign     = number_string.at(e_index + 1);
             const std::string exponent = number_string.substr(e_index + 2);
-            
-            const bool        mantissa_is_one =
+
+            const bool mantissa_is_one =
                 mantissa == "1" || mantissa == "1." || mantissa == "1.0" || mantissa == "1.00" || mantissa == "1.000";
             // dirty, simple, a sensible person would figure this out with math a lookup tables
-            
+
             number_string.clear();
             if (!mantissa_is_one) { // powers of 10 don't need the fractional part
                 number_string += mantissa;
-                number_string += " \\cdot "; 
+                number_string += " \\cdot ";
             }
             number_string += "10^{";
             if (sign == '-') number_string += sign;
@@ -167,48 +171,71 @@ inline void cell(){};
 
 template <class T, class... Types>
 void cell(const T& value, const Types&... other_values) {
-    const auto left_delim  = _latex_mode ? "" : "|";
-    const auto delim       = _latex_mode ? " & " : "|";
-    const auto right_delim = _latex_mode ? " \\\\\n" : "|\n";
+    const auto left_delim  = latex_mode ? "" : "|";
+    const auto delim       = latex_mode ? " & " : "|";
+    const auto right_delim = latex_mode ? " \\\\\n" : "|\n";
 
-    const std::string left_cline      = (_current_column == 0) ? left_delim : "";
-    const std::string right_cline     = (_current_column == _columns.size() - 1) ? right_delim : delim;
-    const _ios_flags  format          = _columns[_current_column].col_format.flags;
-    const uint        float_precision = _columns[_current_column].col_format.precision;
+    const std::string left_cline      = (current_column == 0) ? left_delim : "";
+    const std::string right_cline     = (current_column == columns.size() - 1) ? right_delim : delim;
+    const ios_flags   format          = columns[current_column].col_format.flags;
+    const uint        float_precision = columns[current_column].col_format.precision;
 
     // Save old stream state
     std::ios old_state(nullptr);
-    old_state.copyfmt(*_output_stream);
+    old_state.copyfmt(*output_stream);
 
     // Set table formatting
-    (*_output_stream) << std::resetiosflags((*_output_stream).flags());
-    (*_output_stream).flags(format);
-    (*_output_stream).precision(float_precision);
+    (*output_stream) << std::resetiosflags((*output_stream).flags());
+    (*output_stream).flags(format);
+    (*output_stream).precision(float_precision);
 
     // Print
-    (*_output_stream) << left_cline << std::setw(_columns[_current_column].width);
-    _append_decorated_value(*_output_stream, value);
-    (*_output_stream) << right_cline;
+    (*output_stream) << left_cline << std::setw(columns[current_column].width);
+    _append_decorated_value(*output_stream, value);
+    (*output_stream) << right_cline;
 
     // Return old stream state
-    (*_output_stream).copyfmt(old_state);
+    (*output_stream).copyfmt(old_state);
 
     // Advance column counter
-    _current_column = (_current_column == _columns.size() - 1) ? 0 : _current_column + 1;
+    current_column = (current_column == columns.size() - 1) ? 0 : current_column + 1;
 
     cell(other_values...);
 }
 
 inline void hline() {
-    if (_latex_mode) {
-        (*_output_stream) << "\\hline\n";
+    if (latex_mode) {
+        (*output_stream) << "\\hline\n";
     } else {
-        (*_output_stream) << "|";
-        for (const auto& col : _columns)
-            (*_output_stream) << std::string(static_cast<std::size_t>(col.width), '-') << "|";
-        (*_output_stream) << "\n";
+        (*output_stream) << "|";
+        for (const auto& col : columns)
+            (*output_stream) << std::string(static_cast<std::size_t>(col.width), '-') << "|";
+        (*output_stream) << "\n";
     }
 }
+
+} // namespace utl::table::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::table {
+
+using impl::uint;
+
+using impl::create;
+
+using impl::set_formats;
+using impl::set_ostream;
+using impl::set_latex_mode;
+
+using impl::cell;
+using impl::hline;
+
+using impl::NONE;
+using impl::FIXED;
+using impl::DEFAULT;
+using impl::SCIENTIFIC;
+using impl::BOOL;
 
 } // namespace utl::table
 

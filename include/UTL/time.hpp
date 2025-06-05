@@ -13,6 +13,10 @@
 #ifndef UTLHEADERGUARD_TIME
 #define UTLHEADERGUARD_TIME
 
+#define UTL_TIME_VERSION_MAJOR 1
+#define UTL_TIME_VERSION_MINOR 0
+#define UTL_TIME_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <array>       // array<>
@@ -38,7 +42,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::time {
+namespace utl::time::impl {
 
 // ======================
 // --- <chrono> utils ---
@@ -273,6 +277,32 @@ inline std::tm to_localtime(const std::time_t& time) {
     // Note 2: 'std::chrono::system_clock' is unique - its output can be converted into a C-style 'std::time_t'
     // Note 3: This function is thread-safe, we use a quirky implementation of 'localtime()', see notes above
 }
+
+} // namespace utl::time::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::time {
+
+using impl::SplitDuration;
+
+using impl::unit_split;
+using impl::to_string;
+
+using impl::float_duration;
+
+using impl::ns;
+using impl::us;
+using impl::ms;
+using impl::sec;
+using impl::min;
+using impl::hours;
+
+using impl::Stopwatch;
+using impl::Timer;
+
+using impl::to_localtime;
+using impl::datetime_string;
 
 } // namespace utl::time
 
