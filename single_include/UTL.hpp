@@ -481,6 +481,10 @@ using impl::from_string;
 #ifndef UTLHEADERGUARD_INTEGRAL
 #define UTLHEADERGUARD_INTEGRAL
 
+#define UTL_INTEGRAL_VERSION_MAJOR 1
+#define UTL_INTEGRAL_VERSION_MINOR 0
+#define UTL_INTEGRAL_VERSION_PATCH 0
+
 // _______________________ INCLUDES _______________________
 
 #include <cassert>     // assert()
@@ -488,44 +492,45 @@ using impl::from_string;
 #include <cstddef>     // size_t
 #include <cstdint>     // uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
 #include <limits>      // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
-#include <stdexcept>   // std::domain_error
+#include <stdexcept>   // domain_error
 #include <string>      // string, to_string()
 #include <type_traits> // enable_if_t<>, is_integral_v<>, is_unsigned_v<>, make_unsigned_t<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
 // With C++20 following functions will be added into 'std::':
-// - cmp_equal()
-// - cmp_not_equal()
-// - cmp_less()
-// - cmp_greater()
-// - cmp_less_equal()
-// - cmp_greater_equal()
+//    - cmp_equal()
+//    - cmp_not_equal()
+//    - cmp_less()
+//    - cmp_greater()
+//    - cmp_less_equal()
+//    - cmp_greater_equal()
+//
 // With C++26 following functions will be added into 'std::':
-// - add_sat()
-// - sub_sat()
-// - mul_sat()
-// - div_sat()
-// - saturate_cast()
+//    - add_sat()
+//    - sub_sat()
+//    - mul_sat()
+//    - div_sat()
+//    - saturate_cast()
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::integral {
+namespace utl::integral::impl {
 
-// ============================
-// --- Implementation utils ---
-// ============================
+// ======================
+// --- SFINAE helpers ---
+// ======================
 
 template <bool Cond>
-using _require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome
+using require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome
 
 template <class T>
-using _require_integral = _require<std::is_integral_v<T>>;
+using require_integral = require<std::is_integral_v<T>>;
 
 template <class T>
-using _require_uint = _require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
+using require_uint = require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
 
-using _ull = unsigned long long;
+using ull = unsigned long long;
 
 // =================================
 // --- Rounding integer division ---
@@ -537,7 +542,7 @@ using _ull = unsigned long long;
 // some good details on the topic can be found in <intdiv> C++26 proposal,
 // see https://gist.github.com/Eisenwave/2a7d7a4e74e99bbb513984107a6c63ef
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T div_floor(T dividend, T divisor) noexcept {
     assert(divisor != T(0));
 
@@ -545,7 +550,7 @@ template <class T, _require_integral<T> = true>
     return dividend / divisor - (dividend % divisor != T(0) && quotient_negative);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T div_ceil(T dividend, T divisor) noexcept {
     assert(divisor != T(0));
 
@@ -553,14 +558,14 @@ template <class T, _require_integral<T> = true>
     return dividend / divisor + (dividend % divisor != T(0) && quotient_positive);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T div_down(T dividend, T divisor) noexcept {
     assert(divisor != T(0));
 
     return dividend / divisor;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T div_up(T dividend, T divisor) noexcept {
     assert(divisor != T(0));
 
@@ -572,21 +577,21 @@ template <class T, _require_integral<T> = true>
 // --- Saturated math ---
 // ======================
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr bool add_overflows(T lhs, T rhs) noexcept {
     if (rhs > T(0) && lhs > std::numeric_limits<T>::max() - rhs) return false;
     if (rhs < T(0) && lhs < std::numeric_limits<T>::min() - rhs) return false;
     return true;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr bool sub_overflows(T lhs, T rhs) noexcept {
     if (rhs < T(0) && lhs > std::numeric_limits<T>::max() + rhs) return false;
     if (rhs > T(0) && lhs < std::numeric_limits<T>::min() + rhs) return false;
     return true;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr bool mul_overflows(T lhs, T rhs) noexcept {
     constexpr auto max = std::numeric_limits<T>::max();
     constexpr auto min = std::numeric_limits<T>::min();
@@ -613,7 +618,7 @@ template <class T, _require_integral<T> = true>
     return false;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr bool div_overflows(T lhs, T rhs) noexcept {
     assert(rhs != T(0));
 
@@ -623,21 +628,21 @@ template <class T, _require_integral<T> = true>
     else return lhs == std::numeric_limits<T>::min() && rhs == T(-1);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T add_sat(T lhs, T rhs) noexcept {
     if (rhs > T(0) && lhs > std::numeric_limits<T>::max() - rhs) return std::numeric_limits<T>::max();
     if (rhs < T(0) && lhs < std::numeric_limits<T>::min() - rhs) return std::numeric_limits<T>::min();
     return lhs + rhs;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T sub_sat(T lhs, T rhs) noexcept {
     if (rhs < T(0) && lhs > std::numeric_limits<T>::max() + rhs) return std::numeric_limits<T>::max();
     if (rhs > T(0) && lhs < std::numeric_limits<T>::min() + rhs) return std::numeric_limits<T>::min();
     return lhs - rhs;
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T mul_sat(T lhs, T rhs) noexcept {
     constexpr auto max = std::numeric_limits<T>::max();
     constexpr auto min = std::numeric_limits<T>::min();
@@ -649,7 +654,7 @@ template <class T, _require_integral<T> = true>
     return lhs * rhs;
 } // see 'mul_overflows()' comments for a detailed explanation
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T div_sat(T lhs, T rhs) noexcept {
     assert(rhs != T(0));
 
@@ -663,7 +668,7 @@ template <class T, _require_integral<T> = true>
 // --- Heterogeneous integer comparators ---
 // =========================================
 
-// Integer comparators that properly handle differently signed integers, become part of 'std' in C++20
+// Integer comparators that properly handle differently signed integers, becomes part of 'std' in C++20
 
 template <class T1, class T2>
 [[nodiscard]] constexpr bool cmp_equal(T1 lhs, T2 rhs) noexcept {
@@ -712,13 +717,13 @@ template <class To, class From>
 
 // Integer-to-integer cast that throws if conversion would overflow/underflow the result,
 // no '[[nodiscard]]' because cast may be used for the side effect of throwing
-template <class To, class From, _require_integral<To> = true, _require_integral<From> = true>
+template <class To, class From, require_integral<To> = true, require_integral<From> = true>
 constexpr To narrow_cast(From value) {
     if (!in_range<To>(value)) throw std::domain_error("narrow_cast() overflows the result.");
     return static_cast<To>(value);
 }
 
-template <class To, class From, _require_integral<To> = true, _require_integral<From> = true>
+template <class To, class From, require_integral<To> = true, require_integral<From> = true>
 [[nodiscard]] constexpr To saturate_cast(From value) noexcept {
     constexpr auto to_min      = std::numeric_limits<To>::min();
     constexpr auto to_max      = std::numeric_limits<To>::max();
@@ -755,12 +760,12 @@ template <class To, class From, _require_integral<To> = true, _require_integral<
     return static_cast<To>(value);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 constexpr auto to_signed(T value) { // no '[[nodiscard]]' because cast may be used for the side effect of throwing
     return narrow_cast<std::make_signed_t<T>>(value);
 }
 
-template <class T, _require_integral<T> = true>
+template <class T, require_integral<T> = true>
 constexpr auto to_unsigned(T value) { // no '[[nodiscard]]' because cast may be used for the side effect of throwing
     return narrow_cast<std::make_unsigned_t<T>>(value);
 }
@@ -774,19 +779,57 @@ namespace literals {
 // Literals for all fixed-size and commonly used integer types, 'narrow_cast()'
 // ensures there is no overflow during initialization from 'unsigned long long'
 // clang-format off
-[[nodiscard]] constexpr auto operator"" _i8  (_ull v) noexcept { return narrow_cast<std::int8_t   >(v); }
-[[nodiscard]] constexpr auto operator"" _u8  (_ull v) noexcept { return narrow_cast<std::uint8_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _i16 (_ull v) noexcept { return narrow_cast<std::int16_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u16 (_ull v) noexcept { return narrow_cast<std::uint16_t >(v); }
-[[nodiscard]] constexpr auto operator"" _i32 (_ull v) noexcept { return narrow_cast<std::int32_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u32 (_ull v) noexcept { return narrow_cast<std::uint32_t >(v); }
-[[nodiscard]] constexpr auto operator"" _i64 (_ull v) noexcept { return narrow_cast<std::int64_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u64 (_ull v) noexcept { return narrow_cast<std::uint64_t >(v); }
-[[nodiscard]] constexpr auto operator"" _sz  (_ull v) noexcept { return narrow_cast<std::size_t   >(v); }
-[[nodiscard]] constexpr auto operator"" _ptrd(_ull v) noexcept { return narrow_cast<std::ptrdiff_t>(v); }
+[[nodiscard]] constexpr auto operator"" _i8  (ull v) noexcept { return narrow_cast<std::int8_t   >(v); }
+[[nodiscard]] constexpr auto operator"" _u8  (ull v) noexcept { return narrow_cast<std::uint8_t  >(v); }
+[[nodiscard]] constexpr auto operator"" _i16 (ull v) noexcept { return narrow_cast<std::int16_t  >(v); }
+[[nodiscard]] constexpr auto operator"" _u16 (ull v) noexcept { return narrow_cast<std::uint16_t >(v); }
+[[nodiscard]] constexpr auto operator"" _i32 (ull v) noexcept { return narrow_cast<std::int32_t  >(v); }
+[[nodiscard]] constexpr auto operator"" _u32 (ull v) noexcept { return narrow_cast<std::uint32_t >(v); }
+[[nodiscard]] constexpr auto operator"" _i64 (ull v) noexcept { return narrow_cast<std::int64_t  >(v); }
+[[nodiscard]] constexpr auto operator"" _u64 (ull v) noexcept { return narrow_cast<std::uint64_t >(v); }
+[[nodiscard]] constexpr auto operator"" _sz  (ull v) noexcept { return narrow_cast<std::size_t   >(v); }
+[[nodiscard]] constexpr auto operator"" _ptrd(ull v) noexcept { return narrow_cast<std::ptrdiff_t>(v); }
 // clang-format on
 
 } // namespace literals
+
+} // namespace utl::integral::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::integral {
+
+using impl::div_floor;
+using impl::div_ceil;
+using impl::div_down;
+using impl::div_up;
+
+using impl::add_overflows;
+using impl::sub_overflows;
+using impl::mul_overflows;
+using impl::div_overflows;
+
+using impl::add_sat;
+using impl::sub_sat;
+using impl::mul_sat;
+using impl::div_sat;
+
+using impl::cmp_equal;
+using impl::cmp_not_equal;
+using impl::cmp_less;
+using impl::cmp_greater;
+using impl::cmp_less_equal;
+using impl::cmp_greater_equal;
+
+using impl::in_range;
+
+using impl::narrow_cast;
+using impl::saturate_cast;
+
+using impl::to_signed;
+using impl::to_unsigned;
+
+namespace literals = impl::literals;
 
 } // namespace utl::integral
 
