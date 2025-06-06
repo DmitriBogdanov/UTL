@@ -78,15 +78,6 @@ namespace generators {
     class ChaCha20     { /* Generator API */ };
 }
 
-// Default global PRNG
-using default_generator_type = generators::Xoshiro256PP;
-using default_result_type    = std::uint64_t;
-
-inline default_generator_type default_generator;
-
-void seed(std::uint64_t seed) noexcept;
-void seed_with_entropy();
-
 // Entropy
 std::seed_seq entropy_seq();
 std::uint32_t entropy();
@@ -94,15 +85,12 @@ std::uint32_t entropy();
 // Distributions
 template <class T>
 struct UniformIntDistribution   { /* same API as std::uniform_int_distribution<T> */  };
-
 template <class T>
 struct UniformRealDistribution  { /* same API as std::uniform_real_distribution<T> */ };
-
 template <class T>
-struct NormalDistribution       { /* same API as std::normal_distribution<T> */       };
-
+struct NormalDistribution       { /* same API as std::normal_distribution<T>       */ };
 template <class T>
-struct ApproxNormalDistribution { /* same API as std::normal_distribution<T> */       };
+struct ApproxNormalDistribution { /* same API as std::normal_distribution<T>       */ };
 
 template <class T, class Gen>
 constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen()));
@@ -304,7 +292,7 @@ Thread-local PRNG automatically seeded with entropy.
 ### Convenient random
 
 > [!Note]
-> This is a `rand()`-like API for various distributions. Uses thread-local random lazily seeded with entropy.
+> This is a `rand()`-like API for various distributions. Uses thread-local PRNG lazily seeded with entropy.
 
 ### Generic
 
