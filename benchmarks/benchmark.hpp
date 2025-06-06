@@ -40,7 +40,7 @@ void benchmark(const char* name, Func lambda) {
 }
 
 template <class Func>
-void benchmark(const std::string &name, Func lambda) {
+void benchmark(const std::string& name, Func lambda) {
     bench.run(name.c_str(), lambda);
 }
 

@@ -10574,176 +10574,233 @@ using impl::choose;
 #ifndef UTLHEADERGUARD_SHELL
 #define UTLHEADERGUARD_SHELL
 
-#define UTL_SHELL_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_SHELL_VERSION_MINOR 1
+#define UTL_SHELL_VERSION_MAJOR 1
+#define UTL_SHELL_VERSION_MINOR 0
 #define UTL_SHELL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
-#include <cstddef>       // size_t
-#include <cstdlib>       // atexit(), system(), rand()
-#include <filesystem>    // fs::remove(), fs::path, fs::exists(), fs::temp_directory_path()
-#include <fstream>       // ofstream, ifstream
-#include <sstream>       // ostringstream
-#include <stdexcept>     // runtime_error
-#include <string>        // string
-#include <string_view>   // string_view
-#include <unordered_set> // unordered_set<>
-#include <vector>        // vector<>
+#include <cstdlib>     // system()
+#include <filesystem>  // fs::remove(), fs::path, fs::exists(), fs::temp_directory_path()
+#include <fstream>     // ofstream, ifstream
+#include <stdexcept>   // runtime_error
+#include <string>      // string, size_t
+#include <string_view> // string_view
+#include <thread>      // thread::id, this_thread::get_id()
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Command line utils that allow simple creation of temporary files and command line
-// calls with stdout and stderr piping (a task surprisingly untrivial in standard C++).
+// RAII handles for temporary file creation, 'std::system()' wrapper to execute shell commands.
 //
-// Not particularly secure, but there's not much we can do about it, executing shell
-// commands in not secure inherently.
+// Running commands while capturing both stdout & stderr is surprisingly difficult to do in standard
+// C++, piping output to temporary files and then reading them seems to be the most portable way since
+// piping works the same way in the vast majority of shells including Windows 'batch'.
+//
+// API tries to be robust, but at the end of the day we're largely at the whim of the system when it comes
+// to filesystem races and shell execution, not much that we could do without hooking to system APIs directly.
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace utl::shell::impl {
 
-// =================================
-// --- Temporary File Generation ---
-// =================================
+// ==================================
+// --- Random filename generation ---
+// ==================================
 
-[[nodiscard]] inline std::string random_ascii_string(std::size_t length) {
+// To generate random filenames we need to generate random characters
+
+// For our use case entropy source has 3 requirements:
+//    1. It should be different on each run
+//    2. It should be different on each thread
+//    3. It should be thread-safe
+// Good statistical quality isn't particularly important.
+std::uint64_t entropy() {
+    const std::uint64_t time_entropy   = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    const std::uint64_t thread_entropy = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    return time_entropy ^ thread_entropy;
+};
+
+// We want to avoid modifying the state of 'std::rand()', so we use a fast & small thread-local PRNG
+constexpr std::uint64_t splitmix64(std::uint64_t state) noexcept {
+    std::uint64_t result = (state += 0x9E3779B97f4A7C15);
+    result               = (result ^ (result >> 30)) * 0xBF58476D1CE4E5B9;
+    result               = (result ^ (result >> 27)) * 0x94D049BB133111EB;
+    return result ^ (result >> 31);
+}
+
+// Since char distribution quality isn't particularly important, we can avoid
+// including the whole <random> and just use a biased remainder formula
+inline char random_char() {
+    thread_local std::uint64_t state = entropy();
+
+    state = splitmix64(state);
+
     constexpr char min_char = 'a';
     constexpr char max_char = 'z';
 
+    return static_cast<char>(min_char + state % std::uint64_t(max_char - min_char + 1));
+}
+
+// In the end we have a pretty fast general-purpose random string function
+inline std::string random_ascii_string(std::size_t length = 20) {
     std::string result(length, '0');
-    for (std::size_t i = 0; i < length; ++i)
-        result[i] = static_cast<char>(min_char + std::rand() % (max_char - min_char + 1));
-    // we don't really care about the quality of random here, and we already include <cstdlib>,
-    // so rand() is fine, otherwise we'd have to include the entirety of <random> for this function.
-    // There's also a whole bunch of issues caused by questionable design <random>, (such as
-    // 'std::uniform_int_distribution' not supporting 'char') for generating random strings properly
-    // (aka faster and thread-safe) there is a much better option in 'utl::random::rand_string()'.
-    // Note that using remainder formula for int distribution is also biased, but here it doesn't matter.
+    for (std::size_t i = 0; i < result.size(); ++i) result[i] = random_char();
     return result;
 }
 
-inline std::unordered_set<std::string> _temp_files; // currently existing temp files
-inline bool                            _temp_files_cleanup_registered = false;
+// =======================
+// --- Temporary files ---
+// =======================
 
-inline void clear_temp_files() {
-    for (const auto& file : _temp_files) std::filesystem::remove(file);
-    _temp_files.clear();
-}
+// RAII handle to a temporary file, based on the filesystem and
+// naming rather than a proper file handle due to following reasons:
+//
+//    1. Some temp. file uses (such as command piping) require file to be closed and then reopened again,
+//       which means we can't have a persistent file handle without sacrificing a major use case
+//
+//    2. Before C++23 there is no portable way to open file in exclusive mode,
+//       which means we will have possible filesystem race regardless of API
+//
+struct TemporaryHandle {
+private:
+    std::filesystem::path filepath;
+    std::string           string;
+    // makes sense to cache the path string, considering that it is immutable and frequently needed
 
-inline void erase_temp_file(const std::string& file) {
-    // we take 'file' as 'std::string&' instead of 'std::string_view' because it is
-    // used to call '.erase()' on the map of 'std::string', which does not take string_view
-    std::filesystem::remove(file);
-    _temp_files.erase(file);
-}
+    explicit TemporaryHandle(std::filesystem::path&& filepath)
+        : filepath(std::move(filepath)), string(this->filepath.string()) {
 
-inline std::string generate_temp_file() {
-    // No '[[nodiscard]]' since the function could still be used to generate files without
-    // actually accessing them (through the returned path) in the same program.
-
-    constexpr auto        filename_prefix = "utl___";
-    constexpr std::size_t max_attempts    = 500; // shouldn't realistically be encountered, but still
-    constexpr std::size_t name_length     = 30;
-
-    // Register std::atexit() if not already registered
-    if (!_temp_files_cleanup_registered) {
-        const bool success             = (std::atexit(clear_temp_files) == 0);
-        _temp_files_cleanup_registered = success;
+        if (!std::ofstream(this->path())) // creates the file
+            throw std::runtime_error("TemporaryHandle(): Could not create {" + this->str() + "}.");
     }
 
-    // Try creating files until unique name is found
-    for (std::size_t i = 0; i < max_attempts; ++i) {
-        const std::filesystem::path temp_directory = std::filesystem::temp_directory_path();
-        const std::string           temp_filename  = filename_prefix + random_ascii_string(name_length) + ".txt";
-        const std::filesystem::path temp_path      = temp_directory / temp_filename;
+public:
+    TemporaryHandle()                       = delete;
+    TemporaryHandle(const TemporaryHandle&) = delete;
+    TemporaryHandle(TemporaryHandle&&)      = default;
 
-        if (std::filesystem::exists(temp_path)) continue;
+    // --- Construction ---
+    // --------------------
 
-        const std::ofstream os(temp_path);
-
-        if (!os)
-            throw std::runtime_error("shell::generate_temp_file(): Could open created temporary file `" +
-                                     temp_path.string() + "`");
-
-        _temp_files.insert(temp_path.string());
-        return temp_path.string();
+    static TemporaryHandle create(std::filesystem::path path) {
+        if (std::filesystem::exists(path))
+            throw std::runtime_error("TemporaryHandle::create(): File {" + path.string() + "} already exists.");
+        return TemporaryHandle(std::move(path));
     }
 
-    throw std::runtime_error("shell::generate_temp_file(): Could no create a unique temporary file in " +
-                             std::to_string(max_attempts) + " attempts.");
-}
+    static TemporaryHandle create() {
+        const std::filesystem::path directory = std::filesystem::temp_directory_path();
 
-// ===================
-// --- Shell Utils ---
-// ===================
+        const auto random_path = [&] { return directory / std::filesystem::path(random_ascii_string()); };
+
+        // Try generating random file names until unique one is found, effectively always happens
+        // on the first attempt since the probability of a name collision is (1/25)^20 ~= 1e-28
+        constexpr std::size_t max_attempts = 50;
+
+        for (std::size_t i = 0; i < max_attempts; ++i) {
+            std::filesystem::path path = random_path();
+
+            if (std::filesystem::exists(path)) continue;
+
+            return TemporaryHandle(std::move(path));
+        }
+
+        throw std::runtime_error("TemporaryHandle::create(): Could not create a unique filename.");
+    }
+
+    static TemporaryHandle overwrite(std::filesystem::path path) { return TemporaryHandle(std::move(path)); }
+
+    static TemporaryHandle overwrite() {
+        auto random_path = std::filesystem::temp_directory_path() / std::filesystem::path(random_ascii_string());
+        return TemporaryHandle(std::move(random_path));
+    }
+
+    // --- Utils ---
+    // -------------
+
+    std::ifstream ifstream(std::ios::openmode mode = std::ios::in) const {
+        std::ifstream file(this->path(), mode); // 'ifstream' always adds 'std::ios::in'
+        if (!file) throw std::runtime_error("TemporaryHandle::ifstream() Could not open {" + this->str() + "}.");
+        return file;
+    }
+
+    std::ofstream ofstream(std::ios::openmode mode = std::ios::out) const {
+        std::ofstream file(this->path(), mode); // 'ofstream' always adds 'std::ios::out'
+        if (!file) throw std::runtime_error("TemporaryHandle::ofstream() Could not open {" + this->str() + "}.");
+        return file;
+    }
+
+    const std::filesystem::path& path() const noexcept { return this->filepath; }
+    const std::string&           str() const noexcept { return this->string; }
+
+    // --- Creation ---
+    // ----------------
+
+    ~TemporaryHandle() {
+        if (!this->filepath.empty()) std::filesystem::remove(this->filepath);
+    }
+};
+
+
+// ======================
+// --- Shell commands ---
+// ======================
+
+// This seems the to be the fastest way of reading a text file
+// into 'std::string' without invoking OS-specific methods
+[[nodiscard]] inline std::string read_file_to_string(const std::string& path) {
+    std::ifstream file(path, std::ios::ate); // open file and immediately seek to the end
+    if (!file.good()) throw std::runtime_error("read_file_to_string(): Could not open file {" + path + ".");
+
+    const auto file_size = file.tellg(); // returns cursor pos, which is the end of file
+    file.seekg(std::ios::beg);           // seek to the beginning
+    std::string chars(file_size, 0);     // allocate string of appropriate size
+    file.read(chars.data(), file_size);  // read into the string
+    return chars;
+}
 
 struct CommandResult {
     int         status; // aka error code
-    std::string stdout_output;
-    std::string stderr_output;
+    std::string out;
+    std::string err;
 };
 
-inline CommandResult run_command(const std::string& command) {
-    // Note 1:
-    // we take 'std::string&' instead of 'std::string_view' because there
-    // has to be a guarantee that contained string is null-terminated
-
-    // Note 2:
-    // Creating temporary files doesn't seem to be ideal, but I'd yet to find
-    // a way to pipe BOTH stdout and stderr directly into the program without
-    // relying on platform-specific API like Unix forks and Windows processes
-
-    // Note 3:
-    // Usage of std::system() is often discouraged due to security reasons,
-    // but it doesn't seem there is a portable way to do better (aka going
-    // back to previous note about platform-specific APIs)
-
-    const auto stdout_file = generate_temp_file();
-    const auto stderr_file = generate_temp_file();
-
-    // Redirect stdout and stderr of the command to temporary files
-    std::ostringstream ss;
-    ss << command.c_str() << " >" << stdout_file << " 2>" << stderr_file;
-    const std::string modified_command = ss.str();
-
-    // Call command
-    const auto status = std::system(modified_command.c_str());
-
-    // Read stdout and stderr from temp files and remove them
-    std::ostringstream stdout_stream;
-    std::ostringstream stderr_stream;
-    stdout_stream << std::ifstream(stdout_file).rdbuf();
-    stderr_stream << std::ifstream(stderr_file).rdbuf();
-    erase_temp_file(stdout_file);
-    erase_temp_file(stderr_file);
-
-    // Return
-    CommandResult result = {status, stdout_stream.str(), stderr_stream.str()};
-
-    return result;
-}
-
-// =========================
-// --- Argc/Argv parsing ---
-// =========================
-
-// This is just "C to C++ string conversion" for argc/argv
+// A function to run shell command & capture it's status, stdout and stderr.
 //
-// Perhaps it could be expanded to proper parsing of standard "CLI options" format
-// (like ordered/unordered flags prefixed with '--', shortcuts prefixed with '-' and etc.)
 
-[[nodiscard]] inline std::string_view get_exe_path(char** argv) {
-    // argc == 1 is a reasonable assumption since the only way to achieve such launch
-    // is to run executable through a null-execv, most command-line programs assume
-    // such scenario to be either impossible or an error on user side
-    return std::string_view(argv[0]);
-}
+// Note 1:
+// Creating temporary files doesn't seem to be ideal, but I'd yet to find
+// a way to pipe BOTH stdout and stderr directly into the program without
+// relying on platform-specific API like Unix forks and Windows processes
+//
+// Note 2:
+// Usage of std::system() is often discouraged due to security reasons,
+// but it doesn't seem there is a portable way to do better (aka going
+// back to previous note about platform-specific APIs)
+//
+inline CommandResult run_command(std::string_view command) {
+    const auto stdout_handle = TemporaryHandle::create();
+    const auto stderr_handle = TemporaryHandle::create();
 
-[[nodiscard]] inline std::vector<std::string_view> get_command_line_args(int argc, char** argv) {
-    std::vector<std::string_view> arguments(argc - 1);
-    for (std::size_t i = 0; i < arguments.size(); ++i) arguments.emplace_back(argv[i]);
-    return arguments;
+    constexpr std::string_view stdout_pipe_prefix = " >";
+    constexpr std::string_view stderr_pipe_prefix = " 2>";
+
+    // Run command while piping out/err to temporary files
+    std::string pipe_command;
+    pipe_command.reserve(command.size() + stdout_pipe_prefix.size() + stdout_handle.str().size() +
+                         stderr_handle.str().size() + stderr_pipe_prefix.size());
+    pipe_command += stdout_pipe_prefix;
+    pipe_command += stdout_handle.str();
+    pipe_command += stderr_pipe_prefix;
+    pipe_command += stderr_handle.str();
+
+    const int status = std::system(pipe_command.c_str());
+
+    // Extract out/err from files
+    std::string out = read_file_to_string(stdout_handle.str());
+    std::string err = read_file_to_string(stderr_handle.str());
+
+    return {status, std::move(out), std::move(err)};
 }
 
 } // namespace utl::shell::impl
@@ -10754,12 +10811,7 @@ namespace utl::shell {
 
 using impl::random_ascii_string;
 
-using impl::generate_temp_file;
-using impl::clear_temp_files;
-using impl::erase_temp_file;
-
-using impl::get_exe_path;
-using impl::get_command_line_args;
+using impl::TemporaryHandle;
 
 using impl::CommandResult;
 using impl::run_command;
