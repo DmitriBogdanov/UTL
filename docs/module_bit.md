@@ -39,7 +39,9 @@ template <class T> constexpr T   rotr(T value, std::size_t shift) noexcept;
 constexpr std::size_t byte_size = CHAR_BIT;
 
 template <class T> constexpr std::size_t size_of;
-template <class T> constexpr std::size_t width(T value) noexcept;
+
+template <class T> constexpr std::size_t    width(T value) noexcept;
+template <class T> constexpr std::size_t popcount(T value) noexcept;
 
 // Enum Bitflags
 template<class E>
@@ -125,9 +127,15 @@ Convenience constant. Evaluates to the size of `T` in bits, which equals `sizeof
 
 Returns the number of significant bits in an integer.
 
-**Note:** Unsigned integers have `ceil(log2(value))` significant bits.
+**Note:** Unsigned integers have `1 + floor(log2(value))` significant bits.
 
-### Enum Bitflags
+> ```cpp
+> template <class T> constexpr std::size_t popcount(T value) noexcept;
+> ```
+
+Returns the number of set bits in an integer.
+
+### Enum bitflags
 
 > ```cpp
 > constexpr Flags::Flags(                       E      flag) noexcept;

@@ -88,18 +88,6 @@ constexpr std::size_t byte_size = CHAR_BIT;
 template <class T>
 constexpr std::size_t size_of = sizeof(T) * byte_size;
 
-// Equivalent to C++20 'std::bit_width', but works with signed integers
-template <class T, require_integral<T> = true>
-[[nodiscard]] constexpr std::size_t width(T value) noexcept {
-    auto        uvalue = static_cast<std::make_unsigned_t<T>>(value);
-    std::size_t count  = 0;
-    while (uvalue) ++count, uvalue >>= 1;
-    return count;
-    // can be done faster if we write in a "nasty" way, see https://graphics.stanford.edu/~seander/bithacks.html
-    // this isn't done because at the end of the day the truly fast way of doing it is though intrinsics directly,
-    // better keep the non-intrinsic implementation clean & generic and hope that compiler realizes what we're doing
-}
-
 // ============================
 // --- Group Bit Operations ---
 // ============================
@@ -136,6 +124,44 @@ template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr T rotr(T value, std::size_t shift) noexcept {
     assert(shift < size_of<T>);
     return lshift(value, std::numeric_limits<T>::digits - shift) | rshift(value, shift);
+}
+
+// ================
+// --- Counters ---
+//  ===============
+
+// Equivalent to C++20 'std::bit_width', but works with signed integers
+template <class T, require_integral<T> = true>
+[[nodiscard]] constexpr std::size_t width(T value) noexcept {
+    auto        uvalue = static_cast<std::make_unsigned_t<T>>(value);
+    std::size_t count  = 0;
+    while (uvalue) ++count, uvalue >>= 1;
+    return count;
+    // can be done faster if we write in a "nasty" way, see https://graphics.stanford.edu/~seander/bithacks.html
+    // this isn't done because at the end of the day the truly fast way of doing it is though intrinsics directly,
+    // better keep the non-intrinsic implementation clean & generic and hope that compiler realizes what we're doing
+}
+
+template <class T, require_integral<T> = true>
+[[nodiscard]] constexpr std::size_t popcount(T value) noexcept {
+    constexpr auto bitmask_1 = T(0x5555555555555555UL);
+    constexpr auto bitmask_2 = T(0x3333333333333333UL);
+    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+
+    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+
+    value = (value & bitmask_1) + (rshift(value, 1) & bitmask_1);
+    value = (value & bitmask_2) + (rshift(value, 2) & bitmask_2);
+    value = (value & bitmask_3) + (rshift(value, 4) & bitmask_3);
+
+    if constexpr (sizeof(T) > 1) value = (value & bitmask_16) + (rshift(value, 8) & bitmask_16);
+    if constexpr (sizeof(T) > 2) value = (value & bitmask_32) + (rshift(value, 16) & bitmask_32);
+    if constexpr (sizeof(T) > 4) value = (value & bitmask_64) + (rshift(value, 32) & bitmask_64);
+
+    return value;
+    // GCC seems to be smart enough to replace this with a built-in
 }
 
 // =================================
@@ -248,7 +274,9 @@ using impl::rotr;
 
 using impl::byte_size;
 using impl::size_of;
+
 using impl::width;
+using impl::popcount;
 
 using impl::Flags;
 
