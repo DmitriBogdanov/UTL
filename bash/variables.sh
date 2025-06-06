@@ -29,4 +29,5 @@ cppcheck_cache_directory=".cache-cppcheck"
 
 compiler="g++" # clang++-11
 test_flags="--rerun-failed --output-on-failure --timeout 60"
+coverage_flags="-T coverage"
 build_jobs="6"

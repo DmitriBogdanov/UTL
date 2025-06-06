@@ -15,6 +15,7 @@ macro(add_utl_test filename)
         -fsanitize=undefined,address,leak
         -Wall -Wextra -Wpedantic -Werror
         -fmax-errors=1
+        --coverage
     )
     # '-O0  -fno-omit-frame-pointer'           => no optimization makes compilation a bit faster
     # '-g3'                                    => leave as much debug info as possible, use '-ggdb3'
@@ -25,11 +26,16 @@ macro(add_utl_test filename)
     #                                             when  triggered, default behavior is to continue
     # '-fsanitize=undefined,address,leak'      => enable sanitizers
     # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors
+    # '-fmax-errors=1'                         => stop after the first error, prevents too much error spam
+    # '--coverage'                             => add instrumentation for coverage analysis, for GCC works as
+    #                                             an alias for '-fprofile-arcs -ftest-coverage' when compiling 
+    #                                             and '-lgcov' when linking
     # see GCC docs: https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html
     #               https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
     
-    target_link_options(${filename} PRIVATE -fsanitize=undefined,address,leak)
+    target_link_options(${filename} PRIVATE -fsanitize=undefined,address,leak --coverage)
     # sanitizers are libraries that should be linked, otherwise we would get "undefined reference to function" errors
+    # same thing with lgcov coverage instrumentation
     
     add_test(
         NAME ${filename}

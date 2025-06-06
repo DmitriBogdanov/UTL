@@ -12,14 +12,15 @@
 #     > bash actions.sh [ACTIONS]
 #   
 #   Actions:
-#     clear   - Clears "build/" folder
-#     config  - Configures CMake with appropriate args
-#     build   - Builds the project (requires configured CMake)
-#     test    - Runs CTest tests (requires successful build)
-#     profile - Runs currently selected executable with Callgrind
+#     clear    - Clears "build/" folder
+#     config   - Configures CMake with appropriate args
+#     build    - Builds the project (requires configured CMake)
+#     test     - Runs CTest tests (requires successful build)
+#     coverage - Runs CTest coverage analysis (requires executed tests)
+#     check    - Runs cppcheck static analysis (requires successful build)
 #   
 #   Usage example:
-#     > bash actions.sh clear config build test  
+#     > bash actions.sh clear config build test
 # _______________________________________________________________________________
 
 # =======================
@@ -61,8 +62,19 @@ command_build() {
 
 command_test() {
     require_command_exists "ctest"
+    # Run tests
     cd $directory_tests
     ctest $test_flags
+    cd ..
+    
+}
+
+command_coverage() {
+    require_command_exists "ctest"
+    # This is a separate step because CTest gets confused about coverage report location
+    # when we run it from the test directory, it trie to look for 'build/DartConfiguration.tcl'
+    cd $directory_build
+    ctest $coverage_flags
     cd ..
 }
 
@@ -117,6 +129,12 @@ do
     if [ "$var" = "test" ]; then
         printf "${ansi_purple}# Action: CMake Test${ansi_reset}\n"
         command_test
+        valid_command=true
+    fi
+    
+    if [ "$var" = "coverage" ]; then
+        printf "${ansi_purple}# Action: Run Coverage Analysis${ansi_reset}\n"
+        command_coverage
         valid_command=true
     fi
     
