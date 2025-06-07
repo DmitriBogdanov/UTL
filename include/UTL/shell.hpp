@@ -26,6 +26,8 @@
 #include <string_view> // string_view
 #include <thread>      // thread::id, this_thread::get_id()
 
+#include <iostream> // TEMP:
+
 // ____________________ DEVELOPER DOCS ____________________
 
 // RAII handles for temporary file creation, 'std::system()' wrapper to execute shell commands.
@@ -219,25 +221,36 @@ struct CommandResult {
 inline CommandResult run_command(std::string_view command) {
     const auto stdout_handle = TemporaryHandle::create();
     const auto stderr_handle = TemporaryHandle::create();
-
+    
     constexpr std::string_view stdout_pipe_prefix = " >";
     constexpr std::string_view stderr_pipe_prefix = " 2>";
 
     // Run command while piping out/err to temporary files
     std::string pipe_command;
     pipe_command.reserve(command.size() + stdout_pipe_prefix.size() + stdout_handle.str().size() +
-                         stderr_handle.str().size() + stderr_pipe_prefix.size());
+                         stderr_handle.str().size() + stderr_pipe_prefix.size() + 4);
+    pipe_command += command;
     pipe_command += stdout_pipe_prefix;
+    pipe_command += '"';
     pipe_command += stdout_handle.str();
+    pipe_command += '"';
     pipe_command += stderr_pipe_prefix;
+    pipe_command += '"';
     pipe_command += stderr_handle.str();
+    pipe_command += '"';
 
     const int status = std::system(pipe_command.c_str());
-
+    
     // Extract out/err from files
     std::string out = read_file_to_string(stdout_handle.str());
     std::string err = read_file_to_string(stderr_handle.str());
-
+    
+    // Remove possible LF/CRLF added by file piping at the end
+    if (!out.empty() && out.back() == '\n') out.resize(out.size() - 1); // LF
+    if (!out.empty() && out.back() == '\r') out.resize(out.size() - 1); // CR
+    if (!err.empty() && err.back() == '\n') err.resize(err.size() - 1); // LF
+    if (!err.empty() && err.back() == '\r') err.resize(err.size() - 1); // CR
+    
     return {status, std::move(out), std::move(err)};
 }
 

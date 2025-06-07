@@ -17,9 +17,9 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-// =======================================
-// --- Tets for "simple" functionality ---
-// =======================================
+// ========================================
+// --- Tests for "simple" functionality ---
+// ========================================
 
 TEST_CASE("Formatting utils perform as expected") {
 
@@ -88,9 +88,9 @@ TEST_CASE("Substring checks") {
     CHECK(!stre::contains("Some \t\r\n rather 17 bizarre TeXt", "15"));
 }
 
-// ========================================
-// --- Tets for "complex" functionality ---
-// ========================================
+// =========================================
+// --- Tests for "complex" functionality ---
+// =========================================
 
 TEST_CASE("Splitting string by delimiter (keep_empty_tokens = false)") {
     { // simplest case

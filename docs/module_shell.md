@@ -9,30 +9,42 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/shell.hpp)
 
-**utl::shell** contains convenience functions for command line and system related operations.
+**utl::shell** is a small header that contains:
+
+- Temporary file creation with [RAII](https://en.cppreference.com/w/cpp/language/raii.html) handles
+- A function to run shell commands while capturing status / stdout / stderr
 
 ## Definitions
 
 ```cpp
-// Temporary file operations
-std::string random_ascii_string(size_t length);
-
-std::string generate_temp_file();
-void clear_temp_files();
-void erase_temp_file(const std::string &file);
-
-// Argc/argv parsing
-std::string_view get_exe_path(char** argv);
-std::vector<std::string_view> get_command_line_args(int argc, char** argv);
-
-// Command line utils
-struct CommandResult {
-    int status;
-    std::string stdout_output;
-    std::string stderr_output;
+// Temporary files
+struct TemporaryHandle {
+    TemporaryHandle()                       = delete;
+    TemporaryHandle(const TemporaryHandle&) = delete;
+    TemporaryHandle(TemporaryHandle&&)      = default;
+    
+    // Construction
+    static TemporaryHandle    create(std::filesystem::path filepath);
+    static TemporaryHandle    create(                              );
+	static TemporaryHandle overwrite(std::filesystem::path filepath);
+    static TemporaryHandle overwrite(                              );
+    
+    // Getters
+    std::ifstream ifstream(std::ios::openmode mode = std::ios::in ) const;
+    std::ofstream ofstream(std::ios::openmode mode = std::ios::out) const;
+    
+    const std::filesystem::path& path() const noexcept;
+    const std::string          &  str() const noexcept;
 };
 
-CommandResult run_command(const std::string &command);
+// Shell commands
+struct CommandResult {
+    int         status;
+    std::string out;
+    std::string err;
+};
+
+CommandResult run_command(const std::string& command);
 ```
 
 ## Methods
