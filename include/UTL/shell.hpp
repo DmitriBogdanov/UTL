@@ -26,8 +26,6 @@
 #include <string_view> // string_view
 #include <thread>      // thread::id, this_thread::get_id()
 
-#include <iostream> // TEMP:
-
 // ____________________ DEVELOPER DOCS ____________________
 
 // RAII handles for temporary file creation, 'std::system()' wrapper to execute shell commands.

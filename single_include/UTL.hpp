@@ -2772,9 +2772,7 @@ template <class Adaptor>
 const auto& underlying_container_cref(const Adaptor& adaptor) {
 
     struct Hack : private Adaptor {
-        using container_type = typename Adaptor::container_type;
-
-        static const container_type& get_container(const Adaptor& adp) {
+        static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
             return adp.*&Hack::c;
             // An extremely hacky yet standard-compliant way of accessing protected member
             // of a class without actually creating any instances of derived class.
@@ -3051,7 +3049,7 @@ struct Stringifier : public StringifierBase<Stringifier> {
     // for individual ints 'std::to_string()' beats 'append_int()' with <charconv> since any reasonable compiler
     // implements it using the same <charconv> routine, but formatted directly into a string upon its creation
 
-    [[nodiscard]] static std::string stringify(std::string&& arg) { return arg; }
+    [[nodiscard]] static std::string stringify(std::string&& arg) { return std::move(arg); }
     // no need to do all the appending stuff for individual r-value strings, just forward them as is
 
     template <class... Args>
@@ -10262,7 +10260,7 @@ public:
         return this->generate_standard_normal(gen) * params.stddev + params.mean;
     }
 
-    constexpr void reset() const noexcept {
+    constexpr void reset() noexcept {
         this->saved           = 0;
         this->saved_available = false;
     }
@@ -10587,8 +10585,6 @@ using impl::choose;
 #include <string>      // string, size_t
 #include <string_view> // string_view
 #include <thread>      // thread::id, this_thread::get_id()
-
-#include <iostream> // TEMP:
 
 // ____________________ DEVELOPER DOCS ____________________
 

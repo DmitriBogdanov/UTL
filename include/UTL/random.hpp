@@ -1271,7 +1271,7 @@ public:
         return this->generate_standard_normal(gen) * params.stddev + params.mean;
     }
 
-    constexpr void reset() const noexcept {
+    constexpr void reset() noexcept {
         this->saved           = 0;
         this->saved_available = false;
     }

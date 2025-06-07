@@ -14,7 +14,6 @@ macro(add_utl_test filename)
         -fno-sanitize-recover=all
         -fsanitize=undefined,address,leak
         -Wall -Wextra -Wpedantic -Werror
-        -fmax-errors=1
         --coverage
     )
     # '-O0  -fno-omit-frame-pointer'           => no optimization makes compilation a bit faster
@@ -25,8 +24,7 @@ macro(add_utl_test filename)
     # '-fno-sanitize-recover=all'              => sanitizers should stop execution (which fails the test)
     #                                             when  triggered, default behavior is to continue
     # '-fsanitize=undefined,address,leak'      => enable sanitizers
-    # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors
-    # '-fmax-errors=1'                         => stop after the first error, prevents too much error spam
+    # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors=
     # '--coverage'                             => add instrumentation for coverage analysis, for GCC works as
     #                                             an alias for '-fprofile-arcs -ftest-coverage' when compiling 
     #                                             and '-lgcov' when linking
