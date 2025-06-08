@@ -21,7 +21,8 @@
 // --- run_command() tests ---
 // ===========================
 
-// We assume Linux using bash or its derivatives as a default shell
+// We assume Linux using bash or its derivatives as a default shell,
+// this also tests temporary files as they are necessary for command to function
 
 #if defined(linux) || defined(__linux__) || defined(__linux)
 

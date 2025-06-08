@@ -84,7 +84,7 @@ std::uint32_t entropy();
 
 // Distributions
 template <class T>
-struct UniformIntDistribution   { /* same API as std::uniform_int_distribution<T> */  };
+struct UniformIntDistribution   { /* same API as std::uniform_int_distribution<T>  */ };
 template <class T>
 struct UniformRealDistribution  { /* same API as std::uniform_real_distribution<T> */ };
 template <class T>
