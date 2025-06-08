@@ -31,40 +31,41 @@ source bash/variables.sh
 source bash/functions.sh
 
 command_clear() {
-    if [ -d "$directory_build" ]; then
-        rm --recursive $directory_build
-        echo "Cleared directory [ $directory_build ]."
+    if [ -d "${directory_build}" ]; then
+        rm -r "${directory_build}"
+        # Note: 'rm --recursive' is a GNU-style extension and isn't supported on MacOS
+        echo "Cleared directory [ \"${directory_build}\" ]."
     else
-        echo "Directory [ $directory_build ] is clear."
+        echo "Directory [ \"${directory_build}\" ] is clear."
     fi
 }
 
 command_config() {
     require_command_exists "cmake"
-    require_command_exists "$compiler"
-    cmake -D CMAKE_CXX_COMPILER=$compiler -B $directory_build -S .
+    require_command_exists "${compiler}"
+    cmake -D CMAKE_CXX_COMPILER="${compiler}" -B "${directory_build}" -S .
 }
 
 command_build() {
     # Invoke script to merge headers for single-include
-    if [ -f "$script_create_single_header" ]; then
+    if [ -f "${script_create_single_header}" ]; then
         printf "${ansi_green}Merging single header include...${ansi_reset}\n"
         bash "$script_create_single_header"
         printf "${ansi_green}Merge complete.${ansi_reset}\n"
     else
-        printf "${ansi_red}# Error: Could not find \"$script_create_single_header\".${ansi_reset}\n"
+        printf "${ansi_red}# Error: Could not find \"${script_create_single_header}\".${ansi_reset}\n"
     fi
     
     # Run CMake build
     require_command_exists "cmake"
-    cmake --build $directory_build --parallel $build_jobs
+    cmake --build "${directory_build}" --parallel ${build_jobs}
 }
 
 command_test() {
     require_command_exists "ctest"
     # Run tests
-    cd $directory_tests
-    ctest $test_flags
+    cd "${directory_tests}"
+    ctest ${test_flags}
     cd ..
     
 }
@@ -73,19 +74,19 @@ command_coverage() {
     require_command_exists "ctest"
     # This is a separate step because CTest gets confused about coverage report location
     # when we run it from the test directory, it trie to look for 'build/DartConfiguration.tcl'
-    cd $directory_build
-    ctest $coverage_flags
+    cd "${directory_build}"
+    ctest ${coverage_flags}
     cd ..
 }
 
 command_check() {
     # Invoke script to run static analyzers
-    if [ -f "$script_run_static_analysis" ]; then
+    if [ -f "${script_run_static_analysis}" ]; then
         printf "${ansi_green}Running static analyzers...${ansi_reset}\n"
-        bash "$script_run_static_analysis"
+        bash "${script_run_static_analysis}"
         printf "${ansi_green}Analysis complete.${ansi_reset}\n"
     else
-        printf "${ansi_red}# Error: Could not find \"$script_run_static_analysis\".${ansi_reset}\n"
+        printf "${ansi_red}# Error: Could not find \"${script_run_static_analysis}\".${ansi_reset}\n"
     fi
 }
 
@@ -108,43 +109,43 @@ for var in "$@"
 do
     valid_command=false
     
-    if [ "$var" = "clear" ]; then
+    if [ "${var}" = "clear" ]; then
         printf "${ansi_purple}# Action: Clear Files${ansi_reset}\n"
         command_clear
         valid_command=true
     fi
 
-    if [ "$var" = "config" ]; then
+    if [ "${var}" = "config" ]; then
         printf "${ansi_purple}# Action: CMake Configure${ansi_reset}\n"
         command_config
         valid_command=true
     fi
 
-    if [ "$var" = "build" ]; then
+    if [ "${var}" = "build" ]; then
         printf "${ansi_purple}# Action: CMake Build${ansi_reset}\n"
         command_build
         valid_command=true
     fi
     
-    if [ "$var" = "test" ]; then
+    if [ "${var}" = "test" ]; then
         printf "${ansi_purple}# Action: CMake Test${ansi_reset}\n"
         command_test
         valid_command=true
     fi
     
-    if [ "$var" = "coverage" ]; then
+    if [ "${var}" = "coverage" ]; then
         printf "${ansi_purple}# Action: Run Coverage Analysis${ansi_reset}\n"
         command_coverage
         valid_command=true
     fi
     
-    if [ "$var" = "check" ]; then
+    if [ "${var}" = "check" ]; then
         printf "${ansi_purple}# Action: Run Static Analysis${ansi_reset}\n"
         command_check
         valid_command=true
     fi
     
-    if [ $valid_command = false ]; then
+    if [ ${valid_command} = false ]; then
         printf "${ansi_red}# Error: Invalid action name -> ${var}${ansi_reset}\n"
         break
     fi

@@ -14,7 +14,7 @@
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 0
+#define UTL_INTEGRAL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -310,16 +310,16 @@ namespace literals {
 // Literals for all fixed-size and commonly used integer types, 'narrow_cast()'
 // ensures there is no overflow during initialization from 'unsigned long long'
 // clang-format off
-[[nodiscard]] constexpr auto operator"" _i8  (ull v) noexcept { return narrow_cast<std::int8_t   >(v); }
-[[nodiscard]] constexpr auto operator"" _u8  (ull v) noexcept { return narrow_cast<std::uint8_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _i16 (ull v) noexcept { return narrow_cast<std::int16_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u16 (ull v) noexcept { return narrow_cast<std::uint16_t >(v); }
-[[nodiscard]] constexpr auto operator"" _i32 (ull v) noexcept { return narrow_cast<std::int32_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u32 (ull v) noexcept { return narrow_cast<std::uint32_t >(v); }
-[[nodiscard]] constexpr auto operator"" _i64 (ull v) noexcept { return narrow_cast<std::int64_t  >(v); }
-[[nodiscard]] constexpr auto operator"" _u64 (ull v) noexcept { return narrow_cast<std::uint64_t >(v); }
-[[nodiscard]] constexpr auto operator"" _sz  (ull v) noexcept { return narrow_cast<std::size_t   >(v); }
-[[nodiscard]] constexpr auto operator"" _ptrd(ull v) noexcept { return narrow_cast<std::ptrdiff_t>(v); }
+[[nodiscard]] constexpr auto operator""_i8  (ull v) noexcept { return narrow_cast<std::int8_t   >(v); }
+[[nodiscard]] constexpr auto operator""_u8  (ull v) noexcept { return narrow_cast<std::uint8_t  >(v); }
+[[nodiscard]] constexpr auto operator""_i16 (ull v) noexcept { return narrow_cast<std::int16_t  >(v); }
+[[nodiscard]] constexpr auto operator""_u16 (ull v) noexcept { return narrow_cast<std::uint16_t >(v); }
+[[nodiscard]] constexpr auto operator""_i32 (ull v) noexcept { return narrow_cast<std::int32_t  >(v); }
+[[nodiscard]] constexpr auto operator""_u32 (ull v) noexcept { return narrow_cast<std::uint32_t >(v); }
+[[nodiscard]] constexpr auto operator""_i64 (ull v) noexcept { return narrow_cast<std::int64_t  >(v); }
+[[nodiscard]] constexpr auto operator""_u64 (ull v) noexcept { return narrow_cast<std::uint64_t >(v); }
+[[nodiscard]] constexpr auto operator""_sz  (ull v) noexcept { return narrow_cast<std::size_t   >(v); }
+[[nodiscard]] constexpr auto operator""_ptrd(ull v) noexcept { return narrow_cast<std::ptrdiff_t>(v); }
 // clang-format on
 
 } // namespace literals

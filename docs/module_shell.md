@@ -73,8 +73,8 @@ Overload **(2)** generates file with a unique name inside the system temporary d
 Does not overwrite existing files in case of a name collision, throws `std::runtime_error` if new file would replace an existing one.
 
 > ```cpp
-> 	static TemporaryHandle overwrite(std::filesystem::path filepath);
->     static TemporaryHandle overwrite(                              );
+> static TemporaryHandle overwrite(std::filesystem::path filepath); // (1)
+> static TemporaryHandle overwrite(                              ); // (2)
 > ```
 
 Overload **(1)** generates temporary file with a given `filepath`.
@@ -88,7 +88,7 @@ Overwrites existing files in case of a name collision.
 > std::ofstream ofstream(std::ios::openmode mode = std::ios::out) const;
 > ```
 
-Returns `std::ifstream` / `std::ofsteam` associated with the temporary file.
+Returns `std::ifstream` / `std::ofstream` associated with the temporary file.
 
 Throws `std::runtime_error` in case of an IO failure.
 
@@ -121,7 +121,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 
 ### Working with temporary files
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:5,positionColumn:1,positionLineNumber:5,selectionStartColumn:1,selectionStartLineNumber:5,startColumn:1,startLineNumber:5),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++const+auto+handle+%3D+utl::shell::TemporaryHandle::overwrite(%22temporary.txt%22)%3B%0A%0A++++//+Write+to+temporary+file%0A++++handle.ofstream()+%3C%3C+%22TEXT%22%3B%0A%0A++++//+Read+from+temporary+file%0A++++std::string+text%3B%0A++++handle.ifstream()+%3E%3E+text%3B%0A++++assert(text+%3D%3D+%22TEXT%22)%3B%0A%0A++++//+Append+some+more+text%0A++++handle.ofstream(std::ios_base::app)+%3C%3C+%22MORE+TEXT%22%3B%0A%0A++++//+Temp.+file+is+deleted+once+handle+is+destroyed%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:29,endLineNumber:15,positionColumn:29,positionLineNumber:15,selectionStartColumn:29,selectionStartLineNumber:15,startColumn:29,startLineNumber:15),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++const+auto+handle+%3D+utl::shell::TemporaryHandle::overwrite(%22temporary.txt%22)%3B%0A%0A++++//+Write+to+temporary+file%0A++++handle.ofstream()+%3C%3C+%22TEXT%22%3B%0A%0A++++//+Read+from+temporary+file%0A++++std::string++++++++++text%3B%0A++++handle.ifstream()+%3E%3E+text%3B%0A%0A++++assert(text+%3D%3D+%22TEXT%22)%3B%0A%0A++++//+Append+some+more+text%0A++++handle.ofstream(std::ios_base::app)+%3C%3C+%22MORE+TEXT%22%3B%0A%0A++++//+Temp.+file+is+deleted+once+handle+is+destroyed%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
 
 ```cpp
 const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
@@ -130,8 +130,9 @@ const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
 handle.ofstream() << "TEXT";
 
 // Read from temporary file
-std::string text;
+std::string          text;
 handle.ifstream() >> text;
+
 assert(text == "TEXT");
 
 // Append some more text
