@@ -9003,7 +9003,7 @@ using impl::Ruler;
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 0
+#define UTL_RANDOM_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -10574,7 +10574,7 @@ using impl::choose;
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 0
+#define UTL_SHELL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 

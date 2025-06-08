@@ -14,7 +14,7 @@
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 0
+#define UTL_SHELL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
