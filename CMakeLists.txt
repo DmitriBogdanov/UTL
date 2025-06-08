@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.9.1)
+cmake_minimum_required(VERSION 3.9.1...3.22.1)
+# should also work with all newer versions, the range specified
+# here is the based in the highest version tested in practice
 
 project(
     UTL
