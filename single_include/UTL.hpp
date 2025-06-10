@@ -885,7 +885,7 @@ namespace literals = impl::literals;
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 0
-#define UTL_JSON_VERSION_PATCH 0
+#define UTL_JSON_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -925,6 +925,17 @@ namespace literals = impl::literals;
 // between JSON and other types seamlessly, which is exactly what we do here, it even accounts for reflection.
 
 // ____________________ IMPLEMENTATION ____________________
+
+// ===================
+// --- Diagnostics ---
+// ===================
+
+#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 200000
+#error "[Problem]: Clang libc++ doesn't support C++17 'std::from_chars()' until version 20."
+#error "[Solution 1]: Update to newer version of libc++ (clang 20+)."
+#error "[Solution 2]: Link another stdlib (for example '-stdlib=libstdc++')"
+#error "[Solution 3]: Replace 'std::from_chars()' with 'fast_float::from_chars()' from [https://github.com/fastfloat/fast_float]."
+#endif
 
 namespace utl::json::impl {
 
