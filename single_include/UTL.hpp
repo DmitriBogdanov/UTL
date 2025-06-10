@@ -884,16 +884,14 @@ namespace literals = impl::literals;
 #define UTLHEADERGUARD_JSON
 
 #define UTL_JSON_VERSION_MAJOR 1
-#define UTL_JSON_VERSION_MINOR 0
-#define UTL_JSON_VERSION_PATCH 1
+#define UTL_JSON_VERSION_MINOR 1
+#define UTL_JSON_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
-#include <array>            // array<>
+#include <array>            // array<>, size_t
 #include <charconv>         // to_chars(), from_chars(), errc
-#include <climits>          // CHAR_BIT
 #include <cmath>            // isfinite()
-#include <cstddef>          // size_t
 #include <cstdint>          // uint8_t, uint16_t, uint32_t
 #include <filesystem>       // create_directories()
 #include <fstream>          // ifstream, ofstream
@@ -910,7 +908,7 @@ namespace literals = impl::literals;
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Reasonably simple (if we discount reflection) parser / serializer, doesn't use any intrinsics or compiler-specific
+// Reasonably simple (discounting reflection) DOM parser / serializer, doesn't use any intrinsics or compiler-specific
 // stuff. Unlike some other implementations, doesn't include the tokenizing step - we parse everything in a single 1D
 // scan over the data, constructing recursive JSON struct on the fly. The main reason we can do this so easily is
 // due to a nice quirk of JSON: when parsing nodes, we can always determine node type based on a single first
@@ -926,15 +924,27 @@ namespace literals = impl::literals;
 
 // ____________________ IMPLEMENTATION ____________________
 
-// ===================
-// --- Diagnostics ---
-// ===================
+// ======================================
+// --- libc++ 'from_chars()' fallback ---
+// ======================================
+
+// Problem:
+//
+// libc++ is extremely behind on C++17 support and doesn't provide floating point 'std::from_chars()' until version 20
+// (which was released in 2025), we need a thread-safe locale-neutral fallback for it. This is mostly a MacOS issue.
+//
+// All float parsing functions before <charconv> are locale-dependent, the only way to have thread safety is through a
+// specific 'std::istringstream' usage with a locally imbued locale. This is extremely slow and gives up roundtrip, but
+// this is necessary to support MacOS. A "proper" solution would be to include a <charconv> reimplementation, but doing
+// this would ~quadruple the size of the library and introduce some licensing questions.
 
 #if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 200000
-#error "[Problem]: Clang libc++ doesn't support C++17 'std::from_chars()' until version 20."
-#error "[Solution 1]: Update to newer version of libc++ (clang 20+)."
-#error "[Solution 2]: Link another stdlib (for example '-stdlib=libstdc++')"
-#error "[Solution 3]: Replace 'std::from_chars()' with 'fast_float::from_chars()' from [https://github.com/fastfloat/fast_float]."
+#define UTL_JSON_FROM_CHARS_FALLBACK
+#endif
+
+#ifdef UTL_JSON_FROM_CHARS_FALLBACK
+#include <locale>  // locale::classic()
+#include <sstream> // istringstream
 #endif
 
 namespace utl::json::impl {
@@ -1633,8 +1643,6 @@ using Null   = Node::null_type;
 
 constexpr std::uint8_t u8(char value) { return static_cast<std::uint8_t>(value); }
 
-static_assert(CHAR_BIT == 8); // we assume a sane platform, perhaps this isn't even necessary
-
 constexpr std::size_t number_of_char_values = 256;
 
 // Lookup table used to check if number should be escaped and get a replacement char at the same time.
@@ -1705,6 +1713,51 @@ constexpr std::array<char, number_of_char_values> lookup_parsed_escaped_chars = 
     res[u8('t')]  = '\t';
     return res;
 }();
+
+// ======================================
+// --- libc++ 'from_chars()' fallback ---
+// ======================================
+
+#ifdef UTL_JSON_FROM_CHARS_FALLBACK
+constexpr std::array<bool, number_of_char_values> lookup_numeric_chars = [] {
+    std::array<bool, number_of_char_values> res{};
+    for (std::uint8_t i = u8('0'); i <= u8('9'); ++i) res[i] = true;
+    res[u8('-')] = true;
+    res[u8('+')] = true;
+    res[u8('e')] = true;
+    res[u8('E')] = true;
+    res[u8('.')] = true;
+    return res;
+}();
+
+// Basically the only thread-safe locale-neutral way of parsing floats that doesn't involve a hand-rolled <charconv>
+// (which takes approx. 4k lines of rather terse code), VERY slow and doesn't provide <charconv> roundtrip guarantees.
+//
+// 'stod()' and 'strtod()' are inherently not thread-safe due to their dependence on a global locale with no thread
+// safety guarantees, many smaller JSON libs fumble this aspect since it's very easy to miss and produces bugs that
+// are difficult to pinpoint. Float parsing situation is rather grim before C++17.
+//
+// For usage convenience we expose the same API as regular 'from_chars()'.
+//
+inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, Number& value) {
+    const char* cursor = first;
+    while (cursor < last && lookup_numeric_chars[u8(*cursor)]) ++cursor; // skip to the first non-numeric char
+
+    std::istringstream iss(std::string(first, cursor));
+    iss.imbue(std::locale::classic());
+    iss >> value;
+
+    const auto error = (iss && iss.eof()) ? std::errc{} : std::errc::invalid_argument;
+    // '.eof()' not set => number wasn't parsed fully
+    // 'iss' is false   => nu
+    if (error != std::errc{}) return {first, error};
+    return {cursor, error};
+}
+#else
+inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, Number& value) {
+    return std::from_chars(first, last, value);
+}
+#endif
 
 // ==========================
 // --- JSON Parsing impl. ---
@@ -2119,8 +2172,8 @@ struct Parser {
 
         Number number_value;
 
-        const auto [numer_end_ptr, error_code] =
-            std::from_chars(this->chars.data() + cursor, this->chars.data() + this->chars.size(), number_value);
+        const auto [numer_end_ptr, error_code] = available_from_chars_impl(
+            this->chars.data() + cursor, this->chars.data() + this->chars.size(), number_value);
 
         // Note:
         // std::from_chars() converts the first complete number it finds in the string,

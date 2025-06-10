@@ -884,6 +884,9 @@ Parsing and serialization also satisfies [C++ `<charconv>`](https://en.cpprefere
 |    98.9% |                0.41 |            2,461.15 |    3.0% |      0.02 | `RapidJSON`
 ```
 
+> [!Important]
+> Clang with `libc++` below version 20 does not implement C++17 `std::to_chars`, forcing the library to fallback onto a significantly slower number parsing routine. This is mostly a MacOS issue. Fallback presence can be detected with `#ifdef UTL_JSON_FROM_CHARS_FALLBACK`.
+
 ### Some thoughts on implementation
 
 The main weak-point of `utl::json` from the performance point of view is parsing  of object-heavy JSONs.
