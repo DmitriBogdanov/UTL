@@ -1,11 +1,11 @@
 // __________ BENCHMARK FRAMEWORK & LIBRARY  __________
 
 #include "benchmark.hpp"
-#include "thirdparty/Eigen/Sparse"
-#include "thirdparty/Eigen/src/Core/Map.h"
-#include "thirdparty/Eigen/src/Core/Matrix.h"
-#include "thirdparty/Eigen/src/SparseCore/SparseMatrix.h"
-#include "thirdparty/Eigen/src/SparseCore/SparseUtil.h"
+
+// Libraries to benchmarks against
+// Eigen
+#include "Eigen/Sparse"
+#include "Eigen/Dense"
 
 #include <array>
 #include <cstddef>

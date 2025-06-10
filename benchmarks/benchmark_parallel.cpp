@@ -7,11 +7,13 @@
 #include <iterator>
 #include <vector>
 
-#ifdef _OPENMP
+// _____________ BENCHMARK IMPLEMENTATION _____________
+
+// #define BENCHMARK_OMP
+
+#ifdef BENCHMARK_OMP
 #include <omp.h>
 #endif
-
-// _____________ BENCHMARK IMPLEMENTATION _____________
 
 // Benchmark for: repeated parallel matrix multiplication
 //    for (repeats) C += A * B;
@@ -73,7 +75,7 @@ void benchmark_matrix_multiplication() {
     // doing the same work and not computing some bogus value
 
     // OpenMP parallel for
-#ifdef _OPENMP
+#ifdef BENCHMARK_OMP
     omp_set_num_threads(thread_count);
     benchmark("OpenMP parallel for", [&]() {
         C = A;
@@ -121,7 +123,7 @@ void benchmark_matrix_multiplication() {
     table::cell("Method", "Control sum");
     table::hline();
     table::cell("Serial", sum_serial);
-#ifdef _OPENMP
+#ifdef BENCHMARK_OMP
     table::cell("OpenMP parallel for", sum_omp);
 #endif
     table::cell("Naive std::async()", sum_std_async);
@@ -177,7 +179,7 @@ void benchmark_sum() {
     });
 
     // OpenMP reduce
-#ifdef _OPENMP
+#ifdef BENCHMARK_OMP
     double sum_omp;
     omp_set_num_threads(thread_count);
     benchmark("OpenMP reduce", [&]() {
@@ -221,7 +223,7 @@ void benchmark_sum() {
     table::cell("Method", "Control sum");
     table::hline();
     table::cell("Serial", sum_serial);
-#ifdef _OPENMP
+#ifdef BENCHMARK_OMP
     table::cell("OpenMP reduce", sum_omp);
 #endif
     table::cell("Naive std::async", sum_async);

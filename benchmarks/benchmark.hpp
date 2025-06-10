@@ -1,3 +1,12 @@
+// __________________________________ CONTENTS ___________________________________
+//
+//    Utils for benchmarking, common includes and 'using namespace' directives.
+//    Intended to reduce boilerplate in the benchmarks, should not be included
+//    anywhere else.
+// _______________________________________________________________________________
+
+// ___________________ MODULE INCLUDES  ___________________
+
 #include "UTL/bit.hpp"
 #include "UTL/enum_reflect.hpp"
 #include "UTL/integral.hpp"
@@ -16,18 +25,18 @@
 #include "UTL/struct_reflect.hpp"
 #include "UTL/table.hpp"
 
+// ____________________ STD INCLUDES  _____________________
+
 #include <chrono>
 #include <complex>
 #include <string>
 #include <utility>
 #include <vector>
 
-#define ANKERL_NANOBENCH_IMPLEMENT
-#include "thirdparty/nanobench.h"
+// __________________ BENCHMARKING UTILS  _________________
 
-// Note:
-// This is a common include for all benchmarks,
-// it exists purely to reduce boilerplate and shouldn't be included anywhere else.
+#define ANKERL_NANOBENCH_IMPLEMENT
+#include "nanobench.h"
 
 #define REPEAT(repeats_) for (int count_ = 0; count_ < repeats_; ++count_)
 #define DO_NOT_OPTIMIZE_AWAY ankerl::nanobench::doNotOptimizeAway
@@ -88,13 +97,13 @@ inline auto rand_string() {
 inline auto rand_vector_of_strings() { return std::vector{rand_string(), rand_string(), rand_string(), rand_string()}; }
 
 // Run some init logic before 'main()' to set up pregenerated values
-struct _init_helper {
-    _init_helper() {
+struct DatagenInitHelper {
+    DatagenInitHelper() {
         pregen_strings.resize(string_pregen_count);
         for (auto& e : pregen_strings)
             e = shell::random_ascii_string(random::uniform(min_string_size, max_string_size));
     }
 };
-inline _init_helper _init;
+inline DatagenInitHelper _init;
 
 } // namespace datagen

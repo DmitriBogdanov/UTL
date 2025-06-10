@@ -10,8 +10,8 @@ project(
 )
 
 # Source
-include_directories(include)
+include_directories("include")
 
 # Tests & Benchmarks
-add_subdirectory(tests)
-add_subdirectory(benchmarks)
+add_subdirectory("tests")
+add_subdirectory("benchmarks")

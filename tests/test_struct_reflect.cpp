@@ -1,9 +1,7 @@
 // _______________ TEST FRAMEWORK & MODULE  _______________
 
-#include <algorithm>
-#include <memory>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "thirdparty/doctest.h"
+#include "doctest.h"
 
 #include "test.hpp"
 
@@ -11,7 +9,8 @@
 
 // _______________________ INCLUDES _______________________
 
-// NONE
+#include <algorithm>
+#include <memory>
 
 // ____________________ DEVELOPER DOCS ____________________
 

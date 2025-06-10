@@ -1,7 +1,7 @@
 // _______________ TEST FRAMEWORK & MODULE  _______________
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "thirdparty/doctest.h"
+#include "doctest.h"
 
 #include "test.hpp"
 

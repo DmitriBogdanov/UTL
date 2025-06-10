@@ -5,11 +5,13 @@ enable_testing()
 macro(add_utl_test filename)
     add_executable(${filename} ${filename}.cpp)
     
+    target_include_directories(${filename} PRIVATE "thirdparty")
+    
     target_compile_features(${filename} PRIVATE cxx_std_17)
     
     target_compile_options(${filename} PRIVATE
         -O0
-        -g3 
+        -g3
         -fno-omit-frame-pointer
         -fno-sanitize-recover=all
         -fsanitize=undefined,address,leak

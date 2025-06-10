@@ -1,6 +1,7 @@
 // __________ BENCHMARK FRAMEWORK & LIBRARY  __________
 
 #include "benchmark.hpp"
+
 #include <array>
 #include <cmath>
 #include <cstdint>

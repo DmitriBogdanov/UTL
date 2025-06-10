@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-
 // _____________ BENCHMARK IMPLEMENTATION _____________
 
 // ==================================

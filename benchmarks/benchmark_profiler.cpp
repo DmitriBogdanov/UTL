@@ -1,5 +1,7 @@
 // __________ BENCHMARK FRAMEWORK & LIBRARY  __________
 
+#include "benchmark.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -12,21 +14,18 @@
 #include <thread>
 #include <variant>
 
-//#define UTL_PROFILER_USE_INTRINSICS_FOR_FREQUENCY 3.3e9 // 3.3 GHz (AMD Ryzen 5 5600H)
-#include "benchmark.hpp"
-
-#include "thirdparty/nanobench.h"
-
-#if defined(__x86_64__)
-#include <x86intrin.h> // testing
-#endif
-
 // ________________ BENCHMARK INCLUDES ________________
 
 #include <cmath>
 #include <vector>
 
 // _____________ BENCHMARK IMPLEMENTATION _____________
+
+// #define BENCHMARK_RDTSC
+
+#ifdef BENCHMARK_RDTSC
+#include <x86intrin.h> // testing
+#endif
 
 const auto compute_value = []() {
     const auto x1 = std::cos(utl::random::uniform_double());
@@ -45,13 +44,13 @@ void benchmark_profiling_overhead() {
     constexpr int repeats = 50'000;
 
     bench.minEpochIterations(10).timeUnit(1ms, "ms").relative(true);
-    
+
     benchmark("Runtime without profiling", [&]() {
         double s = 0.;
         REPEAT(repeats) { s += compute_value(); }
         DO_NOT_OPTIMIZE_AWAY(s);
     });
-    
+
     benchmark("Theoretical best std::chrono profiler", [&]() {
         double                   s = 0.;
         std::chrono::nanoseconds time{};
@@ -63,8 +62,8 @@ void benchmark_profiling_overhead() {
         DO_NOT_OPTIMIZE_AWAY(s);
         DO_NOT_OPTIMIZE_AWAY(time);
     });
-    
-#if defined(__x86_64__)
+
+#ifdef BENCHMARK_RDTSC
     benchmark("Theoretical best __rdtsc() profiler", [&]() {
         double   s = 0.;
         uint64_t time{};
@@ -99,51 +98,21 @@ void test_segment_profiler_precision() {
     UTL_PROFILER_BEGIN(segment_1, "Segment precision test:   50 ms");
     utl::sleep::spinlock(50ms);
     UTL_PROFILER_END(segment_1);
-    
+
     UTL_PROFILER_BEGIN(segment_2, "Segment precision test:   200 ms");
     utl::sleep::spinlock(200ms);
     UTL_PROFILER_END(segment_2);
-    
+
     UTL_PROFILER_BEGIN(segment_3, "Segment precision test:  1000 ms");
     utl::sleep::spinlock(1000ms);
     UTL_PROFILER_END(segment_3);
 }
 
-// double recursive_function(int recursion_depth) {
-//     if (recursion_depth > 2) {
-//         utl::sleep::spinlock(1.25);
-//         return utl::random::rand_double();
-//     }
-
-//     double s1 = 0, s2 = 0, s3 = 0;
-
-//     UTL_PROFILER_EXCLUSIVE("Recursive function (1st branch)") { s1 = recursive_function(recursion_depth + 1); }
-
-//     UTL_PROFILER_EXCLUSIVE("Recursive function (2nd branch)") {
-//         s2 = recursive_function(recursion_depth + 1);
-//         s3 = recursive_function(recursion_depth + 1);
-//     }
-
-//     return s1 + s2 + s3;
-// }
-
-// void test_profiler_recursion_handling() {
-//     double sum = recursive_function(0);
-
-//     DO_NOT_OPTIMIZE_AWAY(sum);
-// }
-
-void computation_1() { std::this_thread::sleep_for(std::chrono::milliseconds(300)); }
-void computation_2() { std::this_thread::sleep_for(std::chrono::milliseconds(200)); }
-void computation_3() { std::this_thread::sleep_for(std::chrono::milliseconds(400)); }
-void computation_4() { std::this_thread::sleep_for(std::chrono::milliseconds(600)); }
-void computation_5() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
-
 int main() {
+
     UTL_PROFILER("Top level profiler")
     benchmark_profiling_overhead();
-    //test_scope_profiler_precision();
-    //test_segment_profiler_precision();
-    //test_profiler_recursion_handling();
-    //utl::profiler::profiler.
+
+    // test_scope_profiler_precision();
+    // test_segment_profiler_precision();
 }
