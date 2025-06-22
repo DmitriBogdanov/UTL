@@ -35,7 +35,7 @@ cmake --build --preset gcc
 Run tests:
 
 ```bash
-ctest --build --preset gcc
+ctest --preset gcc
 ```
 
 Run benchmark:
@@ -46,7 +46,7 @@ Run benchmark:
 
 ## Building with a script
 
-To reduce the tedium of entering commands during development, the repo provides [`actions.sh`](./../actions.sh) script, containing shortcuts for all the actions above.
+To reduce the tedium of entering verbose commands during development, this repo provides [`actions.sh`](./../actions.sh) script, containing shortcuts for all the actions above set up for `gcc` preset.
 
 
 For example, we can clear previous build (if present), configure, build and run tests with a single command:
@@ -61,8 +61,9 @@ bash actions.sh clear config build test
 
 The canonical way of configuring local environment is `CMakeUserPresets.json`, use existing presets as a reference.
 
-Alternatively, it is possible to override a specific variable from an existing preset, for example, to specify `g++13` instead of regular `g++` we can do:
+Alternatively, it is possible to override a specific variable from an existing preset, for example, to specify `g++13` instead of regular `g++` do:
 
 ```bash
 cmake --preset gcc -D CMAKE_CXX_COMPILER="g++13"
 ```
+
