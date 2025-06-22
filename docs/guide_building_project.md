@@ -2,7 +2,7 @@
 
 [<- back to README.md](..)
 
-This project uses [CMake](https://cmake.org) build system.
+This project uses [CMake](https://cmake.org) build system with [presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) as a main way of managing configuration.
 
 Unit testing is done in terms of [doctest](https://github.com/doctest/doctest) framework together with **CMake** testing facilities ([CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html)). See [`tests/`](https://github.com/DmitriBogdanov/UTL/tree/master/tests).
 
@@ -10,34 +10,7 @@ Benchmarks are implemented using the [nanobench](https://github.com/martinus/nan
 
 All tests and benchmarks are compiled with `-Wall -Wextra -Wpedantic -Werror`. Tests also use sanitizers provided by the GCC / LLVM toolchain.
 
-## Building with a script
-
-Clone the repo:
-
-```bash
-git clone https://github.com/DmitriBogdanov/UTL.git &&
-cd "UTL/"
-```
-
-Configure & build the project:
-
-```bash
-bash actions.sh clear config build
-```
-
-Run all tests:
-
-```bash
-bash actions.sh test
-```
-
-Run benchmark:
-
-```bash
-./build/benchmarks/<benchmark_name>
-```
-
-## Building manually
+## Building with CMake
 
 Clone the repo:
 
@@ -71,11 +44,24 @@ Run benchmark:
 ./build/benchmarks/<benchmark_name>
 ```
 
+## Building with a script
+
+To reduce the tedium of entering commands during development, the repo provides [`actions.sh`](./../actions.sh) script, containing shortcuts for all the actions above.
+
+
+For example, we can clear previous build (if present), configure, build and run tests with a single command:
+
+```bash
+bash actions.sh clear config build test
+```
+
 ## Configuring build
 
-**Compiler**, **flags** and **CTest arguments** can be configured in [`CMakePresets.json`](./../CMakePresets.json).
+**Compiler**, **flags** and **CTest arguments** are specified in [`CMakePresets.json`](./../CMakePresets.json).
 
-Alternatively, it is possible to override a specific variable from an existing preset, for example, to specify `g++13` instead of regular `g++`:
+The canonical way of configuring local environment is `CMakeUserPresets.json`, use existing presets as a reference.
+
+Alternatively, it is possible to override a specific variable from an existing preset, for example, to specify `g++13` instead of regular `g++` we can do:
 
 ```bash
 cmake --preset gcc -D CMAKE_CXX_COMPILER="g++13"

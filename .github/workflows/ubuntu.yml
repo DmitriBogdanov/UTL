@@ -1,3 +1,10 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a workflow file for GitHub Actions that runs a matrix of tests
+#    in a Linux environment. The actions is triggered automatically on every
+#    push or pull request. Run results are then repo
+# _______________________________________________________________________________
+
 name: "Run tests: Ubuntu"
 
 run-name: "Build & runs tests on Ubuntu"

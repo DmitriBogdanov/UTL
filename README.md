@@ -3,6 +3,7 @@
 [<img src ="docs/images/icon_semver.svg">](./docs/guide_versioning.md)
 [<img src ="docs/images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="docs/images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/single_include)
+![GitHub Actions status - Ubuntu](https://img.shields.io/github/actions/workflow/status/DmitriBogdanov/UTL/ubuntu.yml?logo=github&label=Ubuntu)
 
 # UTL
 
@@ -61,17 +62,18 @@ Quality goals include:
 
 * Requires **C++17** support
 
-## Third-party tools & libraries
+## Developer toolchain
 
 While the library itself consists of a single header with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in the repo.
 
-| Tool                                                                   | Version      | Used for                                                                                                                                                         |
-| ---------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [clang-format](https://clang.llvm.org/docs/ClangFormat.html)           | **v.14.0.0** | Automatic code formatting                                                                                                                                        |
-| [clangd](https://clangd.llvm.org)                                      | **v.15.0.7** | Language server functionality                                                                                                                                    |
-| [CMake](https://cmake.org)                                             | **v.3.2.11** | Build system, [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html) testing facilities                                                                |
+| Tool                                                         | Version      | Used for                                                     |
+| ------------------------------------------------------------ | ------------ | ------------------------------------------------------------ |
+| [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | **v.14.0.0** | Automatic code formatting                                    |
+| [clangd](https://clangd.llvm.org)                            | **v.15.0.7** | Language server functionality                                |
+| [CMake](https://cmake.org)                                   | **v.3.2.11** | Build system, [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html) testing facilities |
 | [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html) | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) test instrumentation |
-| [cppcheck](https://github.com/danmar/cppcheck)                         | **v.2.7**    | Static analysis                                                                                                                                                  |
+| [cppcheck](https://github.com/danmar/cppcheck)               | **v.2.7**    | Static analysis                                              |
+| [GitHub Actions](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) | **latest**   | Multi-platform [CI testing](https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions) |
 
 | Library                                                | Version            | License                                                                        | Used for                   | Embedded in repo |
 | ------------------------------------------------------ | ------------------ | ------------------------------------------------------------------------------ | -------------------------- | ---------------- |
