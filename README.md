@@ -3,6 +3,7 @@
 [<img src ="docs/images/icon_semver.svg">](./docs/guide_versioning.md)
 [<img src ="docs/images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="docs/images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/single_include)
+
 ![GitHub Actions status - Ubuntu](https://img.shields.io/github/actions/workflow/status/DmitriBogdanov/UTL/ubuntu.yml?logo=github&label=Ubuntu)
 
 # UTL

@@ -1,10 +1,8 @@
-# Project style guide
+# File templates
 
-This file contains specifications that ensure a standardized style of source files, documentation, commits and etc.
+This file contains templates to ensure a standardized style of source files, documentation and etc.
 
-## Source files
-
-### Module template
+## Module template
 
 ```cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DmitriBogdanov/UTL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,7 +54,7 @@ namespace utl::XXXXXXXXXXXX {
 
 Replace `XXXXXXXXXXXX` with **module name**.
 
-### Module tests template
+## Module tests template
 
 ```cpp
 // _______________ TEST FRAMEWORK & MODULE  _______________
@@ -82,9 +80,9 @@ Replace `XXXXXXXXXXXX` with **module name**.
 
 Replace `XXXXXXXXXXXX` with **module name**.
 
-### In-code headers
+## In-code headers
 
-#### Header 1
+### Header 1
 
 ```cpp
 
@@ -94,7 +92,7 @@ Replace `XXXXXXXXXXXX` with **module name**.
 
 ```
 
-#### Header 2
+### Header 2
 
 ```cpp
 
@@ -103,47 +101,9 @@ Replace `XXXXXXXXXXXX` with **module name**.
 
 ```
 
-#### Header 3
+### Header 3
 
 ```cpp
 
 // - Header 3 -
-```
-
-## Documentation
-
-TODO:
-
-## Commit Style
-### Commit types
-
-| Type | Description |
-| - | - |
-| `feat` | New features |
-| `test` | New unit tests |
-| `fix` | Bugfixes |
-| `refactor` | Code refactors |
-| `docs` | Documentation changes |
-| `build` | Build script changes |
-| `chore` | Typo fixes, file renames and etc |
-
-### Commit message format
-
-```
-<type>(<scope>): <summary>.
-// repeat for all changes according to commit types
-// <scope> can be omitted for some minor changes
-// Use <scope> = GLOBAL to signify large sweeping changes that affect the whole project
-```
-
-### Commit message example
-
-```
-feat(mvl): Mostly implemented sparse and dense blocking operations.
-
-chore(): Typo fixes in comments & documentation.
-
-docs(mvl): Fixes some incorrect definitions and wonky SVG rendering.
-
-docs(): Improved table with used tools & libraries.
 ```
