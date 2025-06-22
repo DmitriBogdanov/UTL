@@ -1,12 +1,3 @@
----
-name: Bug report
-about: Create a bug report for this project
-title: "[Bug]"
-labels: bug
-assignees: ''
-
----
-
 #### Describe the bug
 
 A clear and concise description of what the bug is.
@@ -24,6 +15,10 @@ Minimal steps / code to reproduce the behavior:
 
 A clear and concise description of what you expected to happen.
 
+#### Describe the code changes
+
+A high level description of the bugfix.
+
 #### Additional context
 
-Add any other context / screenshots / code examples about the problem here.
+Add any other context / screenshots / code examples about the bugfix here.
