@@ -2,11 +2,6 @@
 
 #include "benchmark.hpp"
 
-// Libraries to benchmarks against
-// Eigen
-#include "Eigen/Sparse"
-#include "Eigen/Dense"
-
 #include <array>
 #include <cstddef>
 #include <set>
@@ -409,14 +404,6 @@ void benchmark_matmul() {
     
     benchmark("dd_matmul_ikj_ii_kk_blocked<32, 32>", [&] { C = dd_matmul_ikj_ii_kk_blocked<32, 32>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_ii_kk_blocked<32, 32>", C.sum());
-
-    // Copy data into Eigen matrices
-    Eigen::MatrixXd A_eigen(N_i, N_k), B_eigen(N_k, N_j), C_eigen;
-    A.for_each([&](double elem, std::size_t i, std::size_t j) { A_eigen(i, j) = elem; });
-    B.for_each([&](double elem, std::size_t i, std::size_t j) { B_eigen(i, j) = elem; });
-
-    benchmark("Eigen::Map<>::operator*", [&] { C_eigen = A_eigen * B_eigen; });
-    control_sums.emplace_back("Eigen::MatrixXd::operator*", C_eigen.sum());
 
     // Print control sums to verify matmul correctness
     table::create({50, 20});

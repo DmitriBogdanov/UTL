@@ -1748,8 +1748,8 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
     iss >> value;
 
     const auto error = (iss && iss.eof()) ? std::errc{} : std::errc::invalid_argument;
-    // '.eof()' not set => number wasn't parsed fully
-    // 'iss' is false   => nu
+    // '.eof()' not set => number wasn't parsed fully (usually due to incorrect format)
+    // 'iss' is false   => number parsing encountered an algorithmic issue  
     if (error != std::errc{}) return {first, error};
     return {cursor, error};
 }

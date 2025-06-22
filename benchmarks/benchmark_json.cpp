@@ -4,14 +4,14 @@
 
 // Libraries to benchmarks against
 // nlohmann
-#include "nlohmann_json.hpp"
+#include "thirdparty/nlohmann_json.hpp"
 // rapidjson
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
+#include "thirdparty/rapidjson/document.h"
+#include "thirdparty/rapidjson/prettywriter.h"
+#include "thirdparty/rapidjson/stringbuffer.h"
+#include "thirdparty/rapidjson/writer.h"
 // picojson
-#include "picojson.h"
+#include "thirdparty/picojson.h"
 
 #include <stdexcept>
 

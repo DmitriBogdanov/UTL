@@ -1,0 +1,65 @@
+{
+    "version": 3,
+    
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Common configuration variables.",
+            "hidden": true,
+            "binaryDir": "build/",
+            "cacheVariables": {
+                "UTL_COMPILE_FEATURES": "cxx_std_17"
+            }
+        },
+        {
+            "name": "gcc",
+            "description": "GCC configuration variables.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=undefined,address,leak;-fno-sanitize-recover=all;--coverage",
+                "UTL_TEST_LINKER_FLAGS": "-fsanitize=undefined,address,leak;--coverage",
+                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror"
+            }
+        }
+    ],
+    
+    "buildPresets": [
+        {
+            "name": "base",
+            "description": "Common build variables.",
+            "hidden": true,
+            "jobs": 4
+        },
+        {
+            "name": "gcc",
+            "configurePreset": "gcc",
+            "inherits": [ "base" ]
+        }
+    ],
+    
+    "testPresets": [
+        {
+            "name": "base",
+            "description": "CTest arguments",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "timeout": 60
+            }
+        },
+        {
+            "name": "gcc",
+            "configurePreset": "gcc",
+            "inherits": [ "base" ]
+        }
+    ]
+}

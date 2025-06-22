@@ -31,19 +31,26 @@ source bash/variables.sh
 source bash/functions.sh
 
 command_clear() {
+    # Clear 'build/'
     if [ -d "${directory_build}" ]; then
-        rm -r "${directory_build}"
-        # Note: 'rm --recursive' is a GNU-style extension and isn't supported on MacOS
-        echo "Cleared directory [ \"${directory_build}\" ]."
+        rm -r "${directory_build}" # Note: 'rm --recursive' is a GNU-style extension and isn't supported on MacOS
+        printf "Cleared directory [ \"${directory_build}\" ].\n"
     else
-        echo "Directory [ \"${directory_build}\" ] is clear."
+        printf "Directory [ \"${directory_build}\" ] is clear.\n"
+    fi
+    
+    # Clear cppcheck cache
+    if [ -d "${cppcheck_cache_directory}" ]; then
+        rm -r "${cppcheck_cache_directory}"
+        printf "Cleared directory [ \"${cppcheck_cache_directory}\" ].\n"
+    else
+        printf "Directory [ \"${cppcheck_cache_directory}\" ] is clear.\n"
     fi
 }
 
 command_config() {
     require_command_exists "cmake"
-    require_command_exists "${compiler}"
-    cmake -D CMAKE_CXX_COMPILER="${compiler}" -B "${directory_build}" -S .
+    cmake --preset "${preset}"
 }
 
 command_build() {
@@ -58,22 +65,19 @@ command_build() {
     
     # Run CMake build
     require_command_exists "cmake"
-    cmake --build "${directory_build}" --parallel ${build_jobs}
+    cmake --build --preset "${preset}"
 }
 
 command_test() {
     require_command_exists "ctest"
-    # Run tests
-    cd "${directory_tests}"
-    ctest ${test_flags}
-    cd ..
+    ctest --preset "${preset}"
     
 }
 
 command_coverage() {
     require_command_exists "ctest"
     # This is a separate step because CTest gets confused about coverage report location
-    # when we run it from the test directory, it trie to look for 'build/DartConfiguration.tcl'
+    # when we run it from the test directory, it tries to look for 'build/DartConfiguration.tcl'
     cd "${directory_build}"
     ctest ${coverage_flags}
     cd ..
@@ -89,15 +93,6 @@ command_check() {
         printf "${ansi_red}# Error: Could not find \"${script_run_static_analysis}\".${ansi_reset}\n"
     fi
 }
-
-# command_profile() {
-#     require_command_exists "valgrind"
-#     require_command_exists "callgrind_annotate"
-#     require_command_exists "kcachegrind"
-#     valgrind --tool=callgrind --dump-line=yes --callgrind-out-file="${directory_temp}callgrind.latest" ./$path_executable
-#     callgrind_annotate --auto=yes --include="source/" "${directory_temp}callgrind.latest" > "${directory_temp}callgrind.annotate.txt"
-#     kcachegrind "./${directory_temp}callgrind.latest"
-# }
 
 # =======================
 # --- Action selector ---

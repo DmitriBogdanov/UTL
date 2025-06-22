@@ -1,0 +1,33 @@
+name: "Run tests: Ubuntu"
+
+run-name: "Build & runs tests on Ubuntu"
+
+on: [ push, pull_request ]
+
+jobs:
+  gcc-matrix:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        cxx: [ g++-11, g++-14 ]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+          
+      - name: "Configure CMake"
+        run: cmake --preset gcc
+        
+      - name: "Build project"
+        run: cmake --build --preset gcc
+        
+      - name: "Run tests"
+        run: ctest --preset gcc
+        
+      - name: "Upload test artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
+          path: "build/"
