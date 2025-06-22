@@ -1,24 +1,24 @@
 # __________________________________ CONTENTS ___________________________________
 #
 #    This is a workflow file for GitHub Actions that runs a matrix of tests
-#    in a Linux environment. The actions is triggered automatically on every
+#    in a MacOS environment. The actions is triggered automatically on every
 #    push or pull request. Run results are then archived as GitHub artifacts.
 #
-#    By default, Ubuntu links to 'libstdc++' stdlib.
+#    By default, MacOS links to 'libc++' stdlib.
 # _______________________________________________________________________________
 
-name: "Run tests: Ubuntu"
+name: "Run tests: MacOS"
 
-run-name: "Build & runs tests on Ubuntu"
+run-name: "Build & runs tests on MacOS"
 
 on: [ push, pull_request ]
 
 jobs:
-  gcc-matrix:
+  clang-matrix:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
-        cxx: [ g++-11, g++-14 ]
+        os: [ macos-latest ]
+        cxx: [ clang++-14, clang++-20 ]
     
     runs-on: ${{ matrix.os }}
     
@@ -27,13 +27,13 @@ jobs:
         uses: actions/checkout@v4
           
       - name: "Configure CMake"
-        run: cmake --preset gcc
+        run: cmake --preset clang
         
       - name: "Build project"
-        run: cmake --build --preset gcc
+        run: cmake --build --preset clang
         
       - name: "Run tests"
-        run: ctest --preset gcc
+        run: ctest --preset clang
         
       - name: "Upload test artifacts"
         uses: actions/upload-artifact@v4

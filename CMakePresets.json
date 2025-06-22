@@ -23,8 +23,19 @@
             "inherits": [ "base" ],
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
-                "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=undefined,address,leak;-fno-sanitize-recover=all;--coverage",
-                "UTL_TEST_LINKER_FLAGS": "-fsanitize=undefined,address,leak;--coverage",
+                "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;--coverage",
+                "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage",
+                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror"
+            }
+        },
+        {
+            "name": "clang",
+            "description": "Clang configuration variables.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;--coverage",
+                "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage",
                 "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror"
             }
         }
@@ -40,6 +51,11 @@
         {
             "name": "gcc",
             "configurePreset": "gcc",
+            "inherits": [ "base" ]
+        },
+        {
+            "name": "clang",
+            "configurePreset": "clang",
             "inherits": [ "base" ]
         }
     ],
@@ -59,6 +75,11 @@
         {
             "name": "gcc",
             "configurePreset": "gcc",
+            "inherits": [ "base" ]
+        },
+        {
+            "name": "clang",
+            "configurePreset": "clang",
             "inherits": [ "base" ]
         }
     ]
