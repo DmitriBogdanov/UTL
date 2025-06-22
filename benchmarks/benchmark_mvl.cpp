@@ -259,9 +259,9 @@ DenseMat dd_matmul_ijk(const DenseMat& left, const DenseMat& right) {
 
 DenseMat dd_matmul_ijk_transposed(const DenseMat& left, DenseMat right) {
     const std::size_t N_i = left.rows(), N_k = left.cols(), N_j = right.cols();
-    
+
     right = right.transposed();
-    
+
     DenseMat res(N_i, N_j, 0.);
 
     for (std::size_t i = 0; i < N_i; ++i)
@@ -288,13 +288,13 @@ DenseMat dd_matmul_ikj(const DenseMat& left, const DenseMat& right) {
 
 DenseMat dd_matmul_ikj_noinit(const DenseMat& left, const DenseMat& right) {
     const std::size_t N_i = left.rows(), N_k = left.cols(), N_j = right.cols();
-    
+
     DenseMat res(N_i, N_j);
-    
+
     for (std::size_t i = 0; i < N_i; ++i) {
         const auto left_i0 = left(i, 0);
         for (std::size_t j = 0; j < N_j; ++j) res(i, j) = left_i0 * right(0, j);
-        
+
         for (std::size_t k = 1; k < N_k; ++k) {
             const auto left_ik = left(i, k);
             for (std::size_t j = 0; j < N_j; ++j) res(i, j) += left_ik * right(k, j);
@@ -327,14 +327,14 @@ DenseMat dd_matmul_ikj_kk_blocked(const DenseMat& left, const DenseMat& right) {
 template <std::size_t block_size_ii, std::size_t block_size_kk>
 DenseMat dd_matmul_ikj_ii_kk_blocked(const DenseMat& left, const DenseMat& right) {
     const std::size_t N_i = left.rows(), N_k = left.cols(), N_j = right.cols();
-    
+
     DenseMat res(N_i, N_j, 0.);
 
     for (std::size_t kk = 0; kk < N_k; kk += block_size_kk) {
         const auto k_extent = std::min(N_k, kk + block_size_kk);
         for (std::size_t ii = 0; ii < N_i; ii += block_size_ii) {
             const auto i_extent = std::min(N_i, ii + block_size_ii);
-            for (std::size_t i = ii; i < i_extent; ++i) {  
+            for (std::size_t i = ii; i < i_extent; ++i) {
                 for (std::size_t k = kk; k < k_extent; ++k) {
                     const auto r = left(i, k);
                     for (std::size_t j = 0; j < N_j; ++j) res(i, j) += r * right(k, j);
@@ -352,32 +352,28 @@ void benchmark_matmul() {
     DenseMat A(N_i, N_k, [] { return random::uniform(-0.1, 0.1); });
     DenseMat B(N_k, N_j, [] { return random::uniform(-0.1, 0.1); });
     DenseMat C(N_i, N_j, 0.);
-    
+
     const auto total_size = A.size() + B.size() + C.size();
 
     log::println("\n\n====== BENCHMARKING ON: dense/dense matmul ======\n");
     log::println("N_i               -> ", N_i);
     log::println("N_k               -> ", N_k);
     log::println("N_j               -> ", N_j);
-    log::println("Data memory usage -> ", math::to_memory_units(total_size * sizeof(double)), " MiB");
+    log::println("Data memory usage -> ", total_size * sizeof(double) / 1e6, " MB");
 
-    bench.minEpochIterations(1)
-        .timeUnit(1ms, "ms")
-        .title("dense/dense matrix multiplication")
-        .relative(true)
-        .warmup(2);
+    bench.minEpochIterations(1).timeUnit(1ms, "ms").title("dense/dense matrix multiplication").relative(true).warmup(2);
 
     std::vector<std::pair<std::string, double>> control_sums;
 
     benchmark("dd_matmul_ikj", [&] { C = dd_matmul_ikj(A, B); });
     control_sums.emplace_back("dd_matmul_ikj", C.sum());
-    
+
     benchmark("dd_matmul_ikj_noinit", [&] { C = dd_matmul_ikj_noinit(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_noinit", C.sum());
 
     benchmark("dd_matmul_ijk", [&] { C = dd_matmul_ijk(A, B); });
     control_sums.emplace_back("dd_matmul_ijk", C.sum());
-    
+
     benchmark("dd_matmul_ijk_transposed", [&] { C = dd_matmul_ijk_transposed(A, B); });
     control_sums.emplace_back("dd_matmul_ijk_transposed", C.sum());
 
@@ -389,19 +385,19 @@ void benchmark_matmul() {
 
     benchmark("dd_matmul_ikj_kk_blocked<16>", [&] { C = dd_matmul_ikj_kk_blocked<16>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_kk_blocked<16>", C.sum());
-    
+
     benchmark("dd_matmul_ikj_kk_blocked<32>", [&] { C = dd_matmul_ikj_kk_blocked<32>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_kk_blocked<32>", C.sum());
-    
+
     benchmark("dd_matmul_ikj_ii_kk_blocked<4, 4>", [&] { C = dd_matmul_ikj_ii_kk_blocked<4, 4>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_ii_kk_blocked<4, 4>", C.sum());
-    
+
     benchmark("dd_matmul_ikj_ii_kk_blocked<8, 8>", [&] { C = dd_matmul_ikj_ii_kk_blocked<8, 8>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_ii_kk_blocked<8, 8>", C.sum());
-    
+
     benchmark("dd_matmul_ikj_ii_kk_blocked<16, 16>", [&] { C = dd_matmul_ikj_ii_kk_blocked<16, 16>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_ii_kk_blocked<16, 16>", C.sum());
-    
+
     benchmark("dd_matmul_ikj_ii_kk_blocked<32, 32>", [&] { C = dd_matmul_ikj_ii_kk_blocked<32, 32>(A, B); });
     control_sums.emplace_back("dd_matmul_ikj_ii_kk_blocked<32, 32>", C.sum());
 
@@ -414,7 +410,7 @@ void benchmark_matmul() {
     table::cell("Benchmark", "Control sum");
     table::hline();
     for (const auto& [name, sum] : control_sums) table::cell(name, sum);
-    
+
     // Notes:
     // Test indicate that there is no benefit whatsoever to manual unrolling as compiler is already
     // pretty good at seeing SIMD opportunities.
@@ -430,13 +426,9 @@ std::string float_stringify_ostringstream(double value) {
     return ss.str();
 }
 
-std::string float_stringify_to_string(double value) {
-    return std::to_string(value);
-}
+std::string float_stringify_to_string(double value) { return std::to_string(value); }
 
-std::string float_stringify_charconv(double value) {
-    return log::stringify(value);
-}
+std::string float_stringify_charconv(double value) { return log::stringify(value); }
 
 void benchmark_stringify() {
     constexpr std::size_t N = 500;
@@ -445,30 +437,26 @@ void benchmark_stringify() {
 
     log::println("\n\n====== BENCHMARKING ON: float stringify ======\n");
     log::println("N                 -> ", N);
-    log::println("Data memory usage -> ", math::to_memory_units(A.size() * sizeof(double)), " MiB");
+    log::println("Data memory usage -> ", A.size() * sizeof(double) / 1e6, " MB");
 
-    bench.minEpochIterations(4)
-        .timeUnit(1ms, "ms")
-        .title("float stringify")
-        .relative(true)
-        .warmup(4);
+    bench.minEpochIterations(4).timeUnit(1ms, "ms").title("float stringify").relative(true).warmup(4);
 
 
     benchmark("Temp. std::ostringstream", [&] {
         std::string buffer;
-        A.for_each([&](double elem){ buffer += float_stringify_ostringstream(elem); });
+        A.for_each([&](double elem) { buffer += float_stringify_ostringstream(elem); });
         DO_NOT_OPTIMIZE_AWAY(buffer);
     });
-    
+
     benchmark("std::to_string()", [&] {
         std::string buffer;
-        A.for_each([&](double elem){ buffer += float_stringify_to_string(elem); });
+        A.for_each([&](double elem) { buffer += float_stringify_to_string(elem); });
         DO_NOT_OPTIMIZE_AWAY(buffer);
     });
 
     benchmark("<charconv>", [&] {
         std::string buffer;
-        A.for_each([&](double elem){ buffer += float_stringify_charconv(elem); });
+        A.for_each([&](double elem) { buffer += float_stringify_charconv(elem); });
         DO_NOT_OPTIMIZE_AWAY(buffer);
     });
 }
@@ -482,12 +470,8 @@ void benchmark_indexation() {
     constexpr std::size_t N = 2000;
 
     double sum = 0;
-    
-    bench.minEpochIterations(4)
-        .timeUnit(1ms, "ms")
-        .title("Dense vector/matrix indexation")
-        .relative(true)
-        .warmup(2);
+
+    bench.minEpochIterations(4).timeUnit(1ms, "ms").title("Dense vector/matrix indexation").relative(true).warmup(2);
 
     benchmark("std::vector::operator[] loop", [&] {
         std::vector<double> vec(N * N, 1.);
@@ -560,24 +544,24 @@ void benchmark_indexation() {
 }
 
 int main() {
-    //benchmark_stringify();
-    
-    
+    // benchmark_stringify();
+
+
     DenseMat A(3, 4, [] { return random::uniform(-0.1, 0.1); });
-    
+
     // Human-readable formats
     log::println(mvl::format::as_vector(A));
     log::println(mvl::format::as_dictionary(A));
     log::println(mvl::format::as_matrix(A));
-    
+
     // Export formats
     log::println(mvl::format::as_raw(A));
     log::println(mvl::format::as_csv(A));
     log::println(mvl::format::as_json(A));
     log::println(mvl::format::as_mathematica(A));
     log::println(mvl::format::as_latex(A));
-    
-    //benchmark_matmul();
-    //benchmark_indexation();
-    // benchmark_simd_unrolling();
+
+    // benchmark_matmul();
+    // benchmark_indexation();
+    //  benchmark_simd_unrolling();
 }

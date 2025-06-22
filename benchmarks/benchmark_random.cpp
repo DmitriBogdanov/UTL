@@ -51,8 +51,8 @@ void benchmark_prngs() {
 
     log::println("\n\n====== BENCHMARKING: PRNG invocation ======\n");
     log::println("N                 -> ", data_size);
-    log::println("Max memory usage -> ", math::to_memory_units(data_size * sizeof(std::uint64_t)), " MiB");
-    log::println("Min memory usage -> ", math::to_memory_units(data_size * sizeof(std::uint16_t)), " MiB");
+    log::println("Max memory usage -> ", data_size * sizeof(std::uint64_t) / 1e6, " MB");
+    log::println("Min memory usage -> ", data_size * sizeof(std::uint16_t) / 1e6, " MB");
 
     bench.title(std::to_string(data_size) + " invocations of PRNG")
         .timeUnit(1ms, "ms")
@@ -273,7 +273,7 @@ void benchmark_distributions_for_prng(const char* name) {
             const uint_dist_mod_1x dist{range};
             for (auto&& e : data) e = min + dist(gen);
         });
-        
+
         benchmark("uint_dist_biased_mult", [&] {
             const uint_dist_biased_mult dist{range};
             for (auto&& e : data) e = min + dist(gen);
@@ -283,7 +283,7 @@ void benchmark_distributions_for_prng(const char* name) {
             const random::UniformIntDistribution dist{min, max};
             for (auto&& e : data) e = dist(gen);
         });
-        
+
         benchmark("uniform<>(min, max)", [&] {
             for (auto&& e : data) e = random::uniform(min, max);
         });
@@ -321,20 +321,20 @@ void benchmark_distributions_for_prng(const char* name) {
             const random::UniformRealDistribution<real> dist{min, max};
             for (auto&& e : data) e = dist(gen);
         });
-        
+
         benchmark("uniform<>(min, max)", [&] {
             for (auto&& e : data) e = random::uniform(min, max);
         });
-        
+
         benchmark("NormalDistribution", [&] {
             random::NormalDistribution<real> dist{5, 4};
             for (auto&& e : data) e = dist(gen);
         });
-        
+
         benchmark("normal<>(mean, stddev)", [&] {
             for (auto&& e : data) e = random::normal<real>(5, 4);
         });
-        
+
         benchmark("normal<>()", [&] {
             for (auto&& e : data) e = random::normal<real>();
         });
@@ -342,10 +342,10 @@ void benchmark_distributions_for_prng(const char* name) {
 
     bench_uints(std::uint64_t(uint_min), std::uint64_t(uint_max));
     bench_uints(std::uint32_t(uint_min), std::uint32_t(uint_max));
-    //bench_uints(std::uint16_t(uint_min), std::uint16_t(uint_max));
-    //bench_uints(std::uint8_t(uint_min), std::uint8_t(uint_max));
+    // bench_uints(std::uint16_t(uint_min), std::uint16_t(uint_max));
+    // bench_uints(std::uint8_t(uint_min), std::uint8_t(uint_max));
 
-    //bench_reals((long double)(real_min), (long double)(real_max));
+    // bench_reals((long double)(real_min), (long double)(real_max));
     bench_reals(double(real_min), double(real_max));
     bench_reals(float(real_min), float(real_max));
 }
@@ -354,32 +354,32 @@ void benchmark_distributions() {
     log::println("\n\n====== BENCHMARKING: distributions ======\n");
     log::println("N                          -> ", data_size);
     log::println("uint range                 -> [", uint_min, ", ", uint_max, "]");
-    log::println("Memory usage (uint64)      -> ", math::to_memory_units(data_size * sizeof(std::uint64_t)), " MiB");
-    log::println("Memory usage (uint32)      -> ", math::to_memory_units(data_size * sizeof(std::uint32_t)), " MiB");
-    log::println("Memory usage (uint16)      -> ", math::to_memory_units(data_size * sizeof(std::uint32_t)), " MiB");
-    log::println("Memory usage (uint8 )      -> ", math::to_memory_units(data_size * sizeof(std::uint8_t)), " MiB");
+    log::println("Memory usage (uint64)      -> ", data_size * sizeof(std::uint64_t) / 1e6, " MB");
+    log::println("Memory usage (uint32)      -> ", data_size * sizeof(std::uint32_t) / 1e6, " MB");
+    log::println("Memory usage (uint16)      -> ", data_size * sizeof(std::uint32_t) / 1e6, " MB");
+    log::println("Memory usage (uint8 )      -> ", data_size * sizeof(std::uint8_t) / 1e6, " MB");
     log::println("real range                 -> [", real_min, ", ", real_max, "]");
-    log::println("Memory usage (long double) -> ", math::to_memory_units(data_size * sizeof(long double)), " MiB");
-    log::println("Memory usage (double     ) -> ", math::to_memory_units(data_size * sizeof(double)), " MiB");
-    log::println("Memory usage (float      ) -> ", math::to_memory_units(data_size * sizeof(float)), " MiB");
+    log::println("Memory usage (long double) -> ", data_size * sizeof(long double) / 1e6, " MB");
+    log::println("Memory usage (double     ) -> ", data_size * sizeof(double) / 1e6, " MB");
+    log::println("Memory usage (float      ) -> ", data_size * sizeof(float) / 1e6, " MB");
 
-    //benchmark_distributions_for_prng<std::minstd_rand>("std::minstd_rand");
-    //benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
-    //benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
-    //benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
-    //benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
+    // benchmark_distributions_for_prng<std::minstd_rand>("std::minstd_rand");
+    // benchmark_distributions_for_prng<std::mt19937>("std::mt19937");
+    // benchmark_distributions_for_prng<std::mt19937_64>("std::mt19937_64");
+    // benchmark_distributions_for_prng<random::generators::RomuMono16>("RomuMono16");
+    // benchmark_distributions_for_prng<random::generators::RomuTrio32>("RomuTrio32");
     benchmark_distributions_for_prng<random::generators::SplitMix32>("SplitMix32");
-    //benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
-    //benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
+    // benchmark_distributions_for_prng<random::generators::Xoshiro128PP>("Xoshiro128++");
+    // benchmark_distributions_for_prng<random::generators::RomuDuoJr64>("RomuDuoJr64");
     benchmark_distributions_for_prng<random::generators::SplitMix64>("SplitMix64");
     benchmark_distributions_for_prng<random::generators::Xoshiro256PP>("Xoshiro256++");
-    //benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");
+    // benchmark_distributions_for_prng<random::generators::ChaCha20>("ChaCha20");
 }
 
 
 int main() {
 
-    //benchmark_prngs();
+    // benchmark_prngs();
     benchmark_distributions();
 
     return 0;

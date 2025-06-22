@@ -42,7 +42,7 @@ void benchmark_matrix_multiplication() {
     log::println("Threads           -> ", thread_count);
     log::println("N                 -> ", N);
     log::println("repeats           -> ", repeats);
-    log::println("Data memory usage -> ", math::to_memory_units(N * N * 3 * sizeof(double)), " MiB");
+    log::println("Data memory usage -> ", N * N * 3 * sizeof(double) / 1e6, " MB");
 
     const auto compute_rows = [&](std::size_t low, std::size_t high) {
         for (std::size_t i = low; i < high; ++i)
@@ -148,7 +148,7 @@ void benchmark_sum() {
     log::println("\n\n====== BENCHMARKING ON: Parallel vector sum ======\n");
     log::println("Threads           -> ", thread_count);
     log::println("N                 -> ", N);
-    log::println("Data memory usage -> ", math::to_memory_units(N * sizeof(double)), " MiB");
+    log::println("Data memory usage -> ", N * sizeof(double) / 1e6, " MB");
 
     const std::vector<double> A(N, 1.);
 

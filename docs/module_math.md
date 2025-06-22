@@ -3,21 +3,22 @@
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/single_include)
 
-# utl::math (experimental)
+# utl::math
 
 [<- to README.md](..)
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/math.hpp)
 
-**utl::math** module adds various math-related functions, main features are:
+**utl::math** header is a collection of various mathematical utils that includes:
 
--  `constexpr` versions of some [`<cmath>`](https://en.cppreference.com/w/cpp/header/cmath) functions
-- Expressive functions to make code look closer to the mathematical notation
-- Some frequently needed, but annoying to implement utils (such as sorting multiple arrays in sync, index casting and etc.)
-- Constrained versions of some math functions that allow faster implementation
-- Index permutations
-- Basic meshing & integration
-- Rough estimates for container memory usage
+- Constants
+- Template math functions
+- Indicator functions, index functions, conversions and etc.
+
+This is useful for simplifying mathematical expressions and template math. All provided implementations are non-throwing `constexpr`.
+
+> [!Note]
+> For a more "complete" mathematical library check out [DmitriBogdanov/GSE](https://github.com/DmitriBogdanov/GSE).
 
 ## Definitions
 
@@ -25,97 +26,44 @@
 // Constants
 namespace constants {
     constexpr double pi      = 3.14159265358979323846;
-    constexpr double two_pi  = 2.  * pi;
+    constexpr double two_pi  = 2.0 * pi;
     constexpr double half_pi = 0.5 * pi;
+	constexpr double inv_pi  = 1.0 / pi;
     constexpr double e       = 2.71828182845904523536;
-    constexpr double phi     = 1.6180339887498948482;
+    constexpr double phi     = 1.61803398874989484820;
 }
 
 // Basic functions
-template <class T> constexpr T   abs(T x) noexcept;
-template <class T> constexpr T  sign(T x) noexcept;
-template <class T> constexpr T bsign(T x) noexcept;
-template <class T> constexpr T   sqr(T x) noexcept;
-template <class T> constexpr T  cube(T x) noexcept;
-template <class T> constexpr T   inv(T x) noexcept;
-
-template <class T> constexpr T      pow(T x, std::size_t p) noexcept;
-template <class T> constexpr T midpoint(T a,           T b) noexcept;
-template <class T> constexpr T  absdiff(T a,           T b) noexcept;
-
-constexpr int signpow(int p) noexcept;
-
-// Indicator functions
+template <class T> constexpr T       abs(T x) noexcept;
+template <class T> constexpr T      sign(T x) noexcept;
+template <class T> constexpr T     bsign(T x) noexcept;
+template <class T> constexpr T       sqr(T x) noexcept;
+template <class T> constexpr T      cube(T x) noexcept;
+template <class T> constexpr T       inv(T x) noexcept;
 template <class T> constexpr T heaviside(T x) noexcept;
 
-template <class Integer> constexpr Integer kronecker_delta(Integer i, Integer j           ) noexcept;
-template <class Integer> constexpr Integer     levi_civita(Integer i, Integer j, Integer k) noexcept;
+template <class T> constexpr T midpoint(T a, T b) noexcept;
+template <class T> constexpr T  absdiff(T a, T b) noexcept;
 
-// Degrees and radians
-template <class Float> constexpr Float deg_to_rad(Float degrees) noexcept;
-template <class Float> constexpr Float rad_to_deg(Float radians) noexcept;
+// Power functions
+template <class T, class U> constexpr T     pow(T x, U p) noexcept;
+template <         class U> constexpr U signpow(     U p) noexcept;
+
+// Index functions
+template <class Integer> constexpr T kronecker_delta(T i, T j     ) noexcept;
+template <class Integer> constexpr T     levi_civita(T i, T j, T k) noexcept;
+
+// Conversions
+template <class T> constexpr T deg_to_rad(T degrees) noexcept;
+template <class T> constexpr T rad_to_deg(T radians) noexcept;
 
 // Sequence operations
 template <class Idx, class Func> constexpr auto  sum(Idx low, Idx high, Func&& func);
 template <class Idx, class Func> constexpr auto prod(Idx low, Idx high, Func&& func);
-
-// Indexation
-template <class Container> auto ssize(const Container& container);
-
-template <class T> constexpr T reverse_idx(T idx, T size) noexcept;
-
-// Permutations
-template <class Array>
-bool is_permutation(const Array& array);
-
-template <class Array, class Permutation = std::initializer_list<std::size_t>>
-void apply_permutation(Array& array, const Permutation& permutation);
-
-template <class Array, class Cmp = std::less<>>
-std::vector<std::size_t> sorting_permutation(const Array& array, Cmp cmp = Cmp());
-
-template <class Array, class... SyncedArrays>
-void sort_together(Array& array, SyncedArrays&... synced_arrays);
-
-// Branchless ternary
-template <class T>
-T      ternary_branchless(bool condition,       T return_if_true,       T return_if_false) noexcept;
-
-template <class Integer>
-Integer ternary_bitselect(bool condition, Integer return_if_true, Integer return_if_false) noexcept;
-
-template <class Integer>
-Integer ternary_bitselect(bool condition, Integer return_if_true  /* returns 0 if false*/) noexcept;
-
-// Meshing
-struct Points {
-    std::size_t count;
-    constexpr explicit Points(std::size_t count);
-};
-
-struct Intervals {
-    std::size_t count;
-    constexpr explicit Intervals(std::size_t count );
-    constexpr          Intervals(Points      points);
-};
-
-template <class Float> std::vector<Float>  linspace(Float L1, Float L2, Intervals N);
-template <class Float> std::vector<Float> chebspace(Float L1, Float L2, Intervals N);
-
-template <class Float, class Func>
-Float integrate_trapezoidal(Func&& f, Float L1, Float L2, Intervals N);
-
-// Memory usage
-enum class MemoryUnit { BYTE, KiB, MiB, GiB, TiB, KB, MB, GB, TB };
-
-template <MemoryUnit units = MemoryUnit::MiB>
-constexpr double to_memory_units(std::size_t bytes) noexcept;
-
-template <MemoryUnit units = MemoryUnit::MiB, class T>
-constexpr double quick_memory_estimate(const T& value);
 ```
 
-All methods have appropriate SFINAE-restrictions, which are omitted in documentation for reduced verbosity.
+> [!Note]
+> All methods have appropriate SFINAE-restrictions, which are omitted in documentation to reduce verbosity.
 
 ## Methods
 
@@ -124,10 +72,11 @@ All methods have appropriate SFINAE-restrictions, which are omitted in documenta
 > ```cpp
 > namespace constants {
 >     constexpr double pi      = 3.14159265358979323846;
->     constexpr double two_pi  = 2.  * pi;
+>     constexpr double two_pi  = 2.0 * pi;
 >     constexpr double half_pi = 0.5 * pi;
+>     constexpr double inv_pi  = 1.0 / pi;
 >     constexpr double e       = 2.71828182845904523536;
->     constexpr double phi     = 1.6180339887498948482;
+>     constexpr double phi     = 1.61803398874989484820;
 > }
 > ```
 
@@ -136,294 +85,160 @@ Basic mathematical constants. In **C++20** most of these get standardized as a p
 ### Basic functions
 
 > ```cpp
-> template <class T> constexpr T   abs(T x) noexcept;
-> template <class T> constexpr T  sign(T x) noexcept;
-> template <class T> constexpr T bsign(T x) noexcept;
-> template <class T> constexpr T   sqr(T x) noexcept;
-> template <class T> constexpr T  cube(T x) noexcept;
-> template <class T> constexpr T   inv(T x) noexcept;
-> ```
-
-Returns $|x|$, $\mathrm{sign} (x)$, $x^2$, $x^3$ or $x^{-1}$ of an appropriate type.
-
-**Note:** `sign()` is a standard sign function which returns $-1$, $0$ or $1$. `bsign()` is a binary variation that returns $1$ instead of $0$.
-
-> ```cpp
-> template <class T> constexpr T      pow(T x, std::size_t p) noexcept;
-> template <class T> constexpr T midpoint(T a,           T b) noexcept;
-> template <class T> constexpr T  absdiff(T a,           T b) noexcept;
-> ```
-
-Returns $x^p$, $\dfrac{a + b}{2}$ or $|a - b|$ of an appropriate type.
-
-> ```cpp
-> constexpr int signpow(int p) noexcept;
-> ```
-
-Returns $-1^p$. Faster than generic `pow` algorithms.
-
-### Indicator functions
-
-> ```cpp
+> template <class T> constexpr T       abs(T x) noexcept;
+> template <class T> constexpr T      sign(T x) noexcept;
+> template <class T> constexpr T     bsign(T x) noexcept;
+> template <class T> constexpr T       sqr(T x) noexcept;
+> template <class T> constexpr T      cube(T x) noexcept;
+> template <class T> constexpr T       inv(T x) noexcept;
 > template <class T> constexpr T heaviside(T x) noexcept;
 > ```
 
-Computes [Heaviside step function](https://en.wikipedia.org/wiki/Heaviside_step_function).
+Returns $|x|$, $\mathrm{sign} (x)$, $x^2$, $x^3$, $x^{-1}$, or $H(x)$. 
+
+`T` can be of any arithmetic type except `bool`.
+
+To reduce integer division surprises, `inv()` also requires a floating point.
+
+**Note 1:** `sign()` is a standard sign function which returns $-1$, $0$ or $1$. `bsign()` is a binary variation that returns $1$ instead of $0$.
+
+**Note 2:** $H(x)$ refers to [Heaviside step function](https://en.wikipedia.org/wiki/Heaviside_step_function).
 
 > ```cpp
-> template <class Integer> constexpr Integer kronecker_delta(Integer i, Integer j) noexcept;
+> template <class T> constexpr T midpoint(T a, T b) noexcept;
+> template <class T> constexpr T  absdiff(T a, T b) noexcept;
+> ```
+
+Returns $\dfrac{a + b}{2}$ or $|a - b|$ of an appropriate type.
+
+`T` can be of any arithmetic type except `bool`.
+
+### Power functions
+
+> ```cpp
+> template <class T, class U> constexpr T     pow(T x, U p) noexcept;
+> template <         class U> constexpr U signpow(     U p) noexcept;
+> ```
+
+Returns $x^p$ or $-1^p$ .
+
+`T` can be of any arithmetic type except `bool`.
+
+`U` can be of any integral type.
+
+**Note:** Computing `signpow(p)` is significantly faster than `std::pow(-1, p)`.
+
+### Index functions
+
+> ```cpp
+> template <class T> constexpr T kronecker_delta(T i, T j) noexcept;
 > ```
 
 Computes [Kronecker delta](https://en.wikipedia.org/wiki/Kronecker_delta) symbol: `1` if `i == j`, `0` otherwise.
 
+`T` can be of any integral type.
+
 > ```cpp
-> template <class Integer> constexpr Integer levi_civita(Integer i, Integer j, Integer k) noexcept;
+> template <class T> constexpr T levi_civita(T i, T j, T k) noexcept;
 > ```
 
 Computes [Levi-Civita](https://en.wikipedia.org/wiki/Levi-Civita_symbol) symbol: `1` if `(i, j, k)` form an [even permutation](https://en.wikipedia.org/wiki/Parity_of_a_permutation), `-1` if `(i, j, k)` form an odd permutation, and `0` if any the adjacent letters are equal.
 
-### Degrees and radians
+`T` can be of any integral type.
+
+### Conversions
 
 > ```cpp
-> template <class Float> constexpr Float deg_to_rad(Float degrees) noexcept;
-> template <class Float> constexpr Float rad_to_deg(Float radians) noexcept;
+> template <class T> constexpr T deg_to_rad(T degrees) noexcept;
+> template <class T> constexpr T rad_to_deg(T radians) noexcept;
 > ```
 
 Converts degrees to radians and back.
 
+`T` can be of any floating point type.
+
 ### Sequence operations
 
 > ```cpp
-> template <class Idx, class Func> constexpr auto  sum(Idx low, Idx high, Func&& func);
-> template <class Idx, class Func> constexpr auto prod(Idx low, Idx high, Func&& func);
+> template <class Idx, class Func> constexpr auto  sum(Idx low, Idx high, Func&& f);
+> template <class Idx, class Func> constexpr auto prod(Idx low, Idx high, Func&& f);
 > ```
 
-Computes $\sum_{i = low}^{high} func(i)$ or $\prod_{i = low}^{high} func(i)$.
+Computes $\sum_{i = low}^{high} f(i)$ or $\prod_{i = low}^{high} f(i)$.
 
-### Indexation
+`Idx` can be of any integral type.
 
-> ```cpp
-> template <class Container> auto ssize(const Container& container);
-> ```
-
-Returns `container.size()` using a corresponding signed type.
-
-Equivalent to C++20 [`std::ssize()`](https://en.cppreference.com/w/cpp/iterator/size).
-
-> ```cpp
-> template <class T> constexpr T reverse_idx(T idx, T size) noexcept;
-> ```
-
-Returns `size - 1 - idx` which corresponds to a reverse index `idx`.
-
-Useful for reversing indexation, especially when working with unsigned indices.
-
-### Permutations
-
-```cpp
-template <class Array>
-bool is_permutation(const Array& array);
-```
-
-Returns whether `array` contains an index permutation.
-
-**Note:** Here an "index permutation" means any permutation of `{0 ... array.size() - 1}`.
-
-```cpp
-template <class Array, class Permutation = std::initializer_list<std::size_t>>
-void apply_permutation(Array& array, const Permutation& permutation);
-```
-
-Applies index permutation to an `array`.
-
-```cpp
-template <class Array, class Cmp = std::less<>>
-std::vector<std::size_t> sorting_permutation(const Array& array, Cmp cmp = Cmp());
-```
-
-Returns index permutation which would make `array` sorted relative to the comparator `cmp`. By default `cmp` corresponds to a regular `<` comparison.
-
-```cpp
-template <class Array, class... SyncedArrays>
-void sort_together(Array& array, SyncedArrays&... synced_arrays);
-```
-
-Sorts `array` and applies the same sorting permutation to all `synced_arrays...`.
-
-**Note:** In layman's terms it sorts two (or more) arrays based on one.
-
-### Branchless ternary
-
-> ```cpp
-> template <class T>
-> T      ternary_branchless(bool condition,       T return_if_true,       T return_if_false) noexcept;
-> 
-> template <class Integer>
-> Integer ternary_bitselect(bool condition, Integer return_if_true, Integer return_if_false) noexcept;
-> 
-> template <class Integer>
-> Integer ternary_bitselect(bool condition, Integer return_if_true  /* returns 0 if false*/) noexcept;
-> ```
-
-Computes branchless `condition ? return_if_true : return_if_false` using properties of arithmetic types. Overloads **(2)** and **(3)** use a more efficient algorithm suitable for integer types. Overload **(3)** simplifies it even more using the `return_if_false == 0` assumption.
-
-**Note:** This is mostly needed for architectures with expensive branches, such as most GPUs. In usual context a regular ternary should be preferred.
-
-### Meshing
-
-> ```cpp
-> struct Points {
->        std::size_t count;
->        constexpr explicit Points(std::size_t count);
-> };
-> 
-> struct Intervals {
->        std::size_t count;
->        constexpr explicit Intervals(std::size_t count );
->        constexpr          Intervals(Points      points);
-> };
-> ```
-
-"Strong typedefs" for grid size in 1D meshing operations, which allows caller to express their intent more clearly.
-
-`Points` implicitly converts to `Intervals` ($N + 1$ points corresponds to $N$ intervals), allowing most meshing functions to accept both types as an input.
-
-> ```cpp
-> template <class Float> std::vector<Float>  linspace(Float L1, Float L2, Intervals N);
-> template <class Float> std::vector<Float> chebspace(Float L1, Float L2, Intervals N);
-> ```
-
-Function **(1)** meshes $[L_1, L_2]$ range into a regular 1D grid with $N$ intervals (which corresponds to $N + 1$ grid points). Similar to `linspace()` from [Matlab](https://www.mathworks.com/products/matlab.html) and [numpy](https://numpy.org). Function **(2)** does the same using a [Chebyshev grid](https://en.wikipedia.org/wiki/Chebyshev_nodes) instead of a regular one.
-
-> ```cpp
-> template <class Float, class Func>
-> Float integrate_trapezoidal(Func&& f, Float L1, Float L2, Intervals N);
-> ```
-
-Numerically computes integral $I_h = \int\limits_{L_1}^{L_2} f(x) dx$ over $N$ integration intervals using [trapezoidal rule](https://en.wikipedia.org/wiki/Trapezoidal_rule).
-
-### Memory usage
-
-> ```cpp
-> enum class MemoryUnit { BYTE, KiB, MiB, GiB, TiB, KB, MB, GB, TB };
-> ```
-
-Enum listing all memory units, see [multi-byte units in SI](https://en.wikipedia.org/wiki/Byte#Multiple-byte_units).
-
-> ```cpp
-> template <MemoryUnit units = MemoryUnit::MiB>
-> constexpr double to_memory_units(std::size_t bytes) noexcept;
-> ```
-
-Converts number of `bytes` to given memory `units`.
-
-> ```cpp
-> template <MemoryUnit units = MemoryUnit::MiB, class T>
-> constexpr double quick_memory_estimate(const T& value);
-> ```
-
-Returns a quick memory usage estimate for `value` using its stack size, `size()`, `capacity()`, `std::tuple_size_v<>` and etc.
-
-Does not expand over the nested containers. This means the estimate has $O(1)$ complexity, but may be inaccurate if `T` is a container of non-POD elements. 
-
-Useful to estimate memory usage of arrays, matrices and other data structures in a human-readable way.
-
-**Note 1:** It is impossible to accurately measure memory usage of something without knowing its implementation or providing a custom allocator that gathers statistics. It is however possible to get a rough estimate which often helps identify the general scale of data.
-
-**Note 2:** Contiguous containers (such as arrays, strings and vectors) are likely to have a perfectly accurate estimate, associative containers (such as maps and sets) and linked containers (such lists, queues and etc.) are likely to be underestimated.
+`noexcept` when `f` is non-throwing.
 
 ## Examples
 
-### Using basic math functions
+### Template math functions
 
-[ [Run this code]() ]
-
-```cpp
-TODO:
-```
-
-Output:
-```
-```
-
-### Using indicator functions
-
-[ [Run this code]() ]
-```cpp
-TODO:
-```
-
-Output:
-```
-```
-
-### Summation & integration
-
-[ [Run this code]() ]
-```cpp
-TODO:
-```
-
-Output:
-```
-```
-
-### Reversing loop indexation
-
-[ [Run this code]() ]
-```cpp
-TODO:
-```
-
-Output:
-```
-```
-
-### Sorting arrays together
-
-[ [Run this code]() ]
-```cpp
-TODO:
-```
-
-Output:
-```
-```
-
-### Meshing and integrating
-
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGe1wAyeAyYAHI%2BAEaYxCBmpAAOqAqETgwe3r56icmOAkEh4SxRMXF2mA6pQgRMxATpPn5ctpj2uQxVNQT5YZHRsbbVtfWZTQqDXcE9RX1mAJS2qF7EyOwc5gDMwcjeWADUJutuCAQE8QogAPQXxEwA7gB0wIQIXhFeSsuyjAT3aCwXABEWIRiHgLKhgOhDKgAG4XOQAFQCFxYTDG0QuWx2mHhSJRTAICHuCHi8QO2BMGgAgpSqcECLtUcEILN9gB2KzU3bc3bvYLAXbMNgKeJMFa8gi0A6cmlcnljAl4ZAAfTRHwIEEZBKQICYEQUPJ5EAAtGzdqyDgDLdyzebpbTDQrHCq1dENVrCSAQMlgAxDbtNRpzft1lbQ9yg3b1jLHdVnaqFOrNajPSB9XhfYbA8HLdbdlxubN7XLuU6lQmkx6dQoAI7Ef0B41mHOhvOSQvFqmxxUuxNu5Par3IV6Yf0m5sW1vh40ADg70Yd8rj5ddtQHqeCMIbmrM90nYYBuw09wArFGY0uexX%2B1WvQhMEwYXhklgd3uQwfuQXz7TF6Xl72lYpjqwLoIk9IQOspC7Ce%2B7Wu2RYLiWuxloBN7AV6eoKPgVBUAG0i7GycHhusP7Un%2BKEAdea63iAiS3FmcSEcRh75mYc6IRe/5Xqu7oYd6GYMPRmq7MasEftaxrfmRNJsla1IcPMtCcCevB%2BBwWikKgnBuNY1goYsyyjhsPCkAQmiKfMADWIBslw9x2WyM7rFIM5mAAbAAnFwGgnvonCSGpFlaZwvDnBoZkWfMcCwDAiAoKgLDxHQ0TkJQfzJfQMTbIYwBcO5GgRTQtAENE5wQBEwURMENQAJ6cKZ1XMMQtUAPIRNo5TmdwvB/GwgitQwtD1RpvBYG8wBuGItDnD1pBYKiRjiKN814MQXV4DCmCzZpmCqOUXilcF9ItMFtB4BENwtR4WDBQQoIsA1vBbcQERJJgAKYItwDnUYUV8AYwAKAAangmC3K18SME9MiCCIYjsFIsPyEoajBboTQGH9piWNY%2BgXeckDzKg8RtLNxpjOglo41YlhcGaxqtWYvCwtEoJYITLLNK0qQuAw7ieA0/j890hTFFkSQpAIwyNAkkttKLvQxKMLQbQIHRDILIzc2r7TjIr0zKwMnQy3oCq1Ab4tcPMCiGSsEhKSpQUrdpHC7KoM7uca7ntjlRj5u59zHkGEC4IQJD7GYLmzLw3VaLM8z3kwWAxFzykcIFpCPSeEXqZprthSAEVx4ppAxfFiynIdaUQBlKXEKErCrB7Xs%2B7sfsCvlQdB7wmD4EQ7N6PwcOiOISPDyjKjqCtGOkLcNzxE9jscKppB5yznCtYd8SHbsqB4S33u%2B1jneB8HAYeEl9eR9HsdRdZICSIHXmSGYXCe75nl2fl/kZ7w2e52CgXWwRdIqjQTqQGy7F7jsTfu5GcJ56brA0DOTyT9f7rGdvnUKYD47L2ZmvIBOCS4QJeskZwkggA%3D%3D) ]
 
 ```cpp
-TEMP:
+using namespace utl;
 
-// Mesh interval [0, PI] into 100 equal intervals => 101 linearly spaced points 
-auto grid_1 = math::linspace(0., math::PI, math::Intervals(100));
-auto grid_2 = math::linspace(0., math::PI, math::Points(   101)); // same as above
+static_assert( math::abs      (-7 ) ==  7  );
+static_assert( math::sign     ( 0 ) ==  0  );
+static_assert( math::bsign    ( 0 ) ==  1  );
+static_assert( math::sqr      (-2 ) ==  4  );
+static_assert( math::cube     (-2 ) == -8  );
+static_assert( math::inv      ( 2.) == 0.5 );
+static_assert( math::heaviside( 2.) ==  1  );
 
-// Get array memory size
-std::cout << "'grid_1' occupies " << math::memory_size<double, math::MemoryUnit::KB>(grid_1.size()) << " KB in memory\n\n";
+static_assert( math::midpoint(3, 5) == 4 );
+static_assert( math::absdiff (4, 7) == 3 );
 
-// Integrate a function over an interval
-auto f = [](double x){ return 4. / (1. + std::tan(x)); };
-double integral = math::integrate_trapezoidal(f, 0., math::PI_HALF, math::Intervals(200));
-std::cout << "Integral evaluates to: " << integral << " (should be ~PI)\n";
+static_assert( math::pow    (2, 7) ==  128 );
+static_assert( math::signpow(  -5) == -1   );
 ```
 
-Output:
-```
-'grid_1' occupies 0.808 KB in memory
+### Index functions
 
-Integral evaluates to: 3.14159 (should be ~PI)
-```
+[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/math.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++static_assert(+math::kronecker_delta(3,+4)+%3D%3D+0+)%3B%0A++++static_assert(+math::kronecker_delta(3,+3)+%3D%3D+1+)%3B%0A%0A++++static_assert(+math::levi_civita(3,+4,+4)+%3D%3D++0+)%3B%0A++++static_assert(+math::levi_civita(3,+4,+5)+%3D%3D++1+)%3B%0A++++static_assert(+math::levi_civita(5,+4,+3)+%3D%3D+-1+)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
 
-### Meshing & memory usage
-
-[ [Run this code]() ]
 ```cpp
-TODO:
+using namespace utl;
+
+static_assert( math::kronecker_delta(3, 4) == 0 );
+static_assert( math::kronecker_delta(3, 3) == 1 );
+
+static_assert( math::levi_civita(3, 4, 4) ==  0 );
+static_assert( math::levi_civita(3, 4, 5) ==  1 );
+static_assert( math::levi_civita(5, 4, 3) == -1 );
 ```
 
-Output:
+### Conversions
+
+[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:5,positionColumn:1,positionLineNumber:5,selectionStartColumn:1,selectionStartLineNumber:5,startColumn:1,startLineNumber:5),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/math.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++static_assert(+math::absdiff(math::deg_to_rad(180.),+math::constants::pi)+%3C+1e-16++)%3B%0A%0A++++static_assert(+math::absdiff(math::rad_to_deg(math::constants::pi),+180.)+%3C+1e-16++)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+
+```cpp
+using namespace utl;
+
+static_assert( math::absdiff(math::deg_to_rad(180.), math::constants::pi) < 1e-16  );
+
+static_assert( math::absdiff(math::rad_to_deg(math::constants::pi), 180.) < 1e-16  );
 ```
+
+### Summation & product
+
+[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:25,endLineNumber:4,positionColumn:25,positionLineNumber:4,selectionStartColumn:25,selectionStartLineNumber:4,startColumn:25,startLineNumber:4),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/math.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++constexpr+auto++sum+%3D+math::sum(+1,+3,+%5B%5D(int+i)%7B+return+math::sqr(i)%3B+%7D)%3B+//+1%5E2+%2B+2%5E2+%2B+3%5E2%0A++++constexpr+auto+prod+%3D+math::prod(1,+3,+%5B%5D(int+i)%7B+return+math::sqr(i)%3B+%7D)%3B+//+1%5E2+*+2%5E2+*+3%5E2%0A%0A++++static_assert(++sum+%3D%3D+1+%2B+4+%2B+9+)%3B%0A++++static_assert(+prod+%3D%3D+1+*+4+*+9+)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+
+```cpp
+using namespace utl;
+
+constexpr auto  sum = math::sum( 1, 3, [](int i){ return math::sqr(i); }); // 1^2 + 2^2 + 3^2
+constexpr auto prod = math::prod(1, 3, [](int i){ return math::sqr(i); }); // 1^2 * 2^2 * 3^2
+
+static_assert(  sum == 1 + 4 + 9 );
+static_assert( prod == 1 * 4 * 9 );
 ```
+
+## Newer standards
+
+Some parts of this header can be replaced with `std` features in newer standards:
+
+- **C++20** adds mathematical constants as [`<numbers>`](https://en.cppreference.com/w/cpp/numeric/constants.html)
+- **C++20** adds [`std::midpoint()`](https://en.cppreference.com/w/cpp/numeric/midpoint.html)
+- **C++23** adds `constexpr` support to [`<cmath>`](https://en.cppreference.com/w/cpp/header/cmath) functions
