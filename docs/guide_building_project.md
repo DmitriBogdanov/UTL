@@ -37,17 +37,6 @@ Run benchmark:
 ./build/benchmarks/<benchmark_name>
 ```
 
-## Configuring build
-
-**Compiler** and **CTest** flags can be selected in [`bash/variables.sh`](./../bash/variables.sh). To do so, edit following lines at the end of the script:
-
-```bash
-compiler="g++"
-test_flags="--rerun-failed --output-on-failure --timeout 60"
-```
-
-**Compilation flags** can be changed in [`tests/CMakeLists.txt`](./../tests/CMakeLists.txt) and [`benchmarks/CMakeLists.txt`](./../benchmarks/CMakeLists.txt).
-
 ## Building manually
 
 Clone the repo:
@@ -60,26 +49,34 @@ cd "UTL/"
 Configure **CMake**:
 
 ```bash
-cmake -D CMAKE_CXX_COMPILER=g++ -B "build/" -S .
+cmake --preset gcc
 ```
 
 Build the project:
 
 ```bash
-bash "bash/create_single_header.sh"
-cmake --build "build/"
+bash "bash/create_single_header.sh" &&
+cmake --build --preset gcc
 ```
 
 Run tests:
 
 ```bash
-cd "build/tests/" &&
-ctest --rerun-failed --output-on-failure --timeout 60 &&
-cd ..
+ctest --build --preset gcc
 ```
 
 Run benchmark:
 
 ```bash
 ./build/benchmarks/<benchmark_name>
+```
+
+## Configuring build
+
+**Compiler**, **flags** and **CTest arguments** can be configured in [`CMakePresets.json`](./../CMakePresets.json).
+
+Alternatively, it is possible to override a specific variable from an existing preset, for example, to specify `g++13` instead of regular `g++`:
+
+```bash
+cmake --preset gcc -D CMAKE_CXX_COMPILER="g++13"
 ```
