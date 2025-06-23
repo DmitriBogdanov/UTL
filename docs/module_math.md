@@ -9,13 +9,15 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/math.hpp)
 
-**utl::math** header is a collection of various mathematical utils that includes:
+**utl::math** header is a collection of mathematical utils that includes:
 
 - Constants
-- Template math functions
-- Indicator functions, index functions, conversions and etc.
+- Template math
+- Non-overflowing functions
+- Index functions
+- Conversions and etc.
 
-This is useful for simplifying mathematical expressions and template math. All provided implementations are non-throwing `constexpr`.
+All implementations `template`, `constexpr` and `noexcept`.
 
 > [!Note]
 > For a more "complete" mathematical library check out [DmitriBogdanov/GSE](https://github.com/DmitriBogdanov/GSE).
@@ -28,7 +30,7 @@ namespace constants {
     constexpr double pi      = 3.14159265358979323846;
     constexpr double two_pi  = 2.0 * pi;
     constexpr double half_pi = 0.5 * pi;
-	constexpr double inv_pi  = 1.0 / pi;
+    constexpr double inv_pi  = 1.0 / pi;
     constexpr double e       = 2.71828182845904523536;
     constexpr double phi     = 1.61803398874989484820;
 }
@@ -42,6 +44,7 @@ template <class T> constexpr T      cube(T x) noexcept;
 template <class T> constexpr T       inv(T x) noexcept;
 template <class T> constexpr T heaviside(T x) noexcept;
 
+// Non-overflowing functions
 template <class T> constexpr T midpoint(T a, T b) noexcept;
 template <class T> constexpr T  absdiff(T a, T b) noexcept;
 
@@ -50,8 +53,8 @@ template <class T, class U> constexpr T     pow(T x, U p) noexcept;
 template <         class U> constexpr U signpow(     U p) noexcept;
 
 // Index functions
-template <class Integer> constexpr T kronecker_delta(T i, T j     ) noexcept;
-template <class Integer> constexpr T     levi_civita(T i, T j, T k) noexcept;
+template <class T> constexpr T kronecker_delta(T i, T j     ) noexcept;
+template <class T> constexpr T     levi_civita(T i, T j, T k) noexcept;
 
 // Conversions
 template <class T> constexpr T deg_to_rad(T degrees) noexcept;
