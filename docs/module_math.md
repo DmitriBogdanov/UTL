@@ -107,14 +107,22 @@ To reduce integer division surprises, `inv()` also requires a floating point.
 
 **Note 2:** $H(x)$ refers to [Heaviside step function](https://en.wikipedia.org/wiki/Heaviside_step_function).
 
+### Non-overflowing functions
+
 > ```cpp
 > template <class T> constexpr T midpoint(T a, T b) noexcept;
 > template <class T> constexpr T  absdiff(T a, T b) noexcept;
 > ```
 
-Returns $\dfrac{a + b}{2}$ or $|a - b|$ of an appropriate type.
+Computes $\dfrac{a + b}{2}$ or $|a - b|$ without potential overflow.
 
 `T` can be of any arithmetic type except `bool`.
+
+Integer `midpoint()` rounds down in case of a fractional result.
+
+**Note 1:** Correctly computing integer / float `midpoint()` is trickier than it might initially seem, naive `(a + b) / 2` formula suffers multiple issues when applied to values near min / max of the given type.
+
+**Note 2:** Compared to integer `std::midpoint()` (which rounds towards `a`), integer `math::midpoint()` (which rounds down) is commutative and faster to compute. Floating point behavior is the same.
 
 ### Power functions
 

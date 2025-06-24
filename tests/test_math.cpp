@@ -36,6 +36,9 @@ TEST_CASE("Template math functions work as expected") {
     static_assert(math::heaviside(-3) == 0);
 
     static_assert(math::midpoint(20, 30) == 25);
+    static_assert(math::midpoint(7, 6) == 6);
+    static_assert(math::midpoint(nl<std::uint8_t>::max(), nl<std::uint8_t>::max()) == nl<std::uint8_t>::max());
+    static_assert(math::midpoint(nl<std::uint8_t>::max(), nl<std::uint8_t>::min()) == 127);
     static_assert(math::absdiff('a', 'b') == char(1));
     static_assert(math::absdiff('b', 'a') == char(1));
     static_assert(math::absdiff(15u, 18u) == 3u);

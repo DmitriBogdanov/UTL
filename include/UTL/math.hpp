@@ -13,12 +13,13 @@
 #define UTLHEADERGUARD_MATH
 
 #define UTL_MATH_VERSION_MAJOR 1
-#define UTL_MATH_VERSION_MINOR 0
+#define UTL_MATH_VERSION_MINOR 1
 #define UTL_MATH_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <cassert>     // assert()
+#include <limits>      // numeric_limits<>
 #include <type_traits> // enable_if_t<>, is_floating_point<>, is_arithmetic<>, is_integral<>, is_same<>, ...
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -111,9 +112,31 @@ template <class T, require_arithmetic<T> = true>
     return static_cast<T>(x > T(0));
 }
 
-template <class T, require_arithmetic<T> = true>
+// Floating point midpoint base on 'libstdc++' implementation,
+// takes care of extreme values
+template <class T, require_float<T> = true>
 [[nodiscard]] constexpr T midpoint(T a, T b) noexcept {
-    return (a + b) * 0.5; // integers will be cast to float then rounded
+    constexpr T low  = std::numeric_limits<T>::min() * 2;
+    constexpr T high = std::numeric_limits<T>::max() / 2;
+
+    const T abs_a = abs(a);
+    const T abs_b = abs(b);
+
+    if (abs_a <= high && abs_b <= high) return (a + b) / 2; // always correctly rounded
+    if (abs_a < low) return a + b / 2;                      // not safe to halve 'a'
+    if (abs_b < low) return b + a / 2;                      // not safe to halve 'b'
+    return a / 2 + b / 2;                                   // correctly rounded for remaining cases
+}
+
+// Non-overflowing integer midpoint is less trivial that it might initially seem, see
+// https://lemire.me/blog/2022/12/06/fast-midpoint-between-two-integers-without-overflow/
+// https://biowpn.github.io/bioweapon/2025/03/23/generalizing-std-midpoint.html
+template <class T, require_int<T> = true>
+[[nodiscard]] constexpr T midpoint(T a, T b) noexcept {
+    return ((a ^ b) >> 1) + (a & b);
+    // fast rounding-down midpoint by Warren (Hacker's Delight section 2.5)
+    // rounding-up version would be '(a | b) - ((a ^ b) >> 1)'
+    // this is faster than C++20 'std::midpoint()' due to a different rounding mode
 }
 
 template <class T, require_arithmetic<T> = true>
@@ -138,11 +161,9 @@ template <class T, class U, require_arithmetic<T> = true, require_int<U> = true>
 [[nodiscard]] constexpr T pow(T x, U p) noexcept {
     if constexpr (std::is_signed_v<T>) {
         return (p < 0) ? T(1) / pow_squaring(x, -p) : pow_squaring(x, p);
-    }
-    else {
+    } else {
         return pow_squaring(x, p); // no need for the branch in unsigned case
     }
-
 }
 
 [[nodiscard]] constexpr int signpow(int p) noexcept { return (p % 2 == 0) ? 1 : -1; }

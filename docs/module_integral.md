@@ -62,16 +62,16 @@ template <class T> constexpr auto to_unsigned(T value);
 
 // Integer literals
 namespace literals {
-    constexpr std::int8_t    operator"" _i8  (unsigned long long v) noexcept;
-    constexpr std::uint8_t   operator"" _u8  (unsigned long long v) noexcept;
-    constexpr std::int16_t   operator"" _i16 (unsigned long long v) noexcept;
-    constexpr std::uint16_t  operator"" _u16 (unsigned long long v) noexcept;
-    constexpr std::int32_t   operator"" _i32 (unsigned long long v) noexcept;
-    constexpr std::uint32_t  operator"" _u32 (unsigned long long v) noexcept;
-    constexpr std::int64_t   operator"" _i64 (unsigned long long v) noexcept;
-    constexpr std::uint64_t  operator"" _u64 (unsigned long long v) noexcept;
-    constexpr std::size_t    operator"" _sz  (unsigned long long v) noexcept;
-    constexpr std::ptrdiff_t operator"" _ptrd(unsigned long long v) noexcept;
+    constexpr std::int8_t    operator""_i8  (unsigned long long v) noexcept;
+    constexpr std::uint8_t   operator""_u8  (unsigned long long v) noexcept;
+    constexpr std::int16_t   operator""_i16 (unsigned long long v) noexcept;
+    constexpr std::uint16_t  operator""_u16 (unsigned long long v) noexcept;
+    constexpr std::int32_t   operator""_i32 (unsigned long long v) noexcept;
+    constexpr std::uint32_t  operator""_u32 (unsigned long long v) noexcept;
+    constexpr std::int64_t   operator""_i64 (unsigned long long v) noexcept;
+    constexpr std::uint64_t  operator""_u64 (unsigned long long v) noexcept;
+    constexpr std::size_t    operator""_sz  (unsigned long long v) noexcept;
+    constexpr std::ptrdiff_t operator""_ptrd(unsigned long long v) noexcept;
 }
 ```
 
@@ -167,16 +167,16 @@ Cast integer to a corresponding signed/unsigned type using `narrow_cast()`.
 
 > ```cpp
 > namespace literals {
->     constexpr std::int8_t    operator"" _i8  (unsigned long long v) noexcept;
->     constexpr std::uint8_t   operator"" _u8  (unsigned long long v) noexcept;
->     constexpr std::int16_t   operator"" _i16 (unsigned long long v) noexcept;
->     constexpr std::uint16_t  operator"" _u16 (unsigned long long v) noexcept;
->     constexpr std::int32_t   operator"" _i32 (unsigned long long v) noexcept;
->     constexpr std::uint32_t  operator"" _u32 (unsigned long long v) noexcept;
->     constexpr std::int64_t   operator"" _i64 (unsigned long long v) noexcept;
->     constexpr std::uint64_t  operator"" _u64 (unsigned long long v) noexcept;
->     constexpr std::size_t    operator"" _sz  (unsigned long long v) noexcept;
->     constexpr std::ptrdiff_t operator"" _ptrd(unsigned long long v) noexcept;
+>     constexpr std::int8_t    operator""_i8  (unsigned long long v) noexcept;
+>     constexpr std::uint8_t   operator""_u8  (unsigned long long v) noexcept;
+>     constexpr std::int16_t   operator""_i16 (unsigned long long v) noexcept;
+>     constexpr std::uint16_t  operator""_u16 (unsigned long long v) noexcept;
+>     constexpr std::int32_t   operator""_i32 (unsigned long long v) noexcept;
+>     constexpr std::uint32_t  operator""_u32 (unsigned long long v) noexcept;
+>     constexpr std::int64_t   operator""_i64 (unsigned long long v) noexcept;
+>     constexpr std::uint64_t  operator""_u64 (unsigned long long v) noexcept;
+>     constexpr std::size_t    operator""_sz  (unsigned long long v) noexcept;
+>     constexpr std::ptrdiff_t operator""_ptrd(unsigned long long v) noexcept;
 > }
 > ```
 
