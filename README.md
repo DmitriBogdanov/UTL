@@ -90,8 +90,9 @@ While the library itself consists of a single header with no embedded dependenci
 
 * `utl::table` rewrite;
 * `utl::log` formatting system rework;
-* `utl::math` cleanup;
-* Vectors, index spans, matrix concat and binary operators for `utl::mvl`;
+* Cleanup, vectors, index spans, matrix concat and binary operators for `utl::mvl`;
+* `utl::random` CBPRNGs and fixed-entropy seeding sequence.
+* Windows CI testing;
 * Test coverage statistics.
 
 ## License
