@@ -14,7 +14,7 @@
 
 #define UTL_SLEEP_VERSION_MAJOR 1
 #define UTL_SLEEP_VERSION_MINOR 0
-#define UTL_SLEEP_VERSION_PATCH 0
+#define UTL_SLEEP_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -41,15 +41,15 @@ namespace utl::sleep::impl {
 // --- Spinlock sleep ---
 // ======================
 
-using _clock = std::chrono::steady_clock;
+using clock = std::chrono::steady_clock;
 
 template <class Rep, class Period>
 void spinlock(std::chrono::duration<Rep, Period> duration) {
-    const auto start_timepoint = _clock::now();
+    const auto start_timepoint = clock::now();
 
     volatile std::uint64_t i = 0;
 
-    while (_clock::now() - start_timepoint < duration) ++i;
+    while (clock::now() - start_timepoint < duration) ++i;
 
     // volatile 'i' prevents standard-compliant compilers from optimizing away the loop,
     // 'std::uint64_t' is large enough to never overflow and even if it hypothetically would,
@@ -96,9 +96,9 @@ void hybrid(std::chrono::duration<Rep, Period> duration) {
 
     while (remaining_duration > err_estimate) {
         // Measure actual system-sleep time
-        const auto start = _clock::now();
+        const auto start = clock::now();
         system(short_sleep_duration);
-        const auto end = _clock::now();
+        const auto end = clock::now();
 
         const ms observed = end - start;
         remaining_duration -= observed;

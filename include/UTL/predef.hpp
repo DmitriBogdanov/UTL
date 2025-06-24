@@ -14,21 +14,17 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 1
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 0
+#define UTL_PREDEF_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
-#include <algorithm>   // fill_n()
-#include <cctype>      // isspace()
-#include <cstdlib>     // exit()
-#include <iostream>    // cerr
-#include <iterator>    // ostreambuf_iterator<>
-#include <new>         // hardware_destructive_interference_size, hardware_constructive_interference_size
-#include <ostream>     // endl
-#include <sstream>     // istringstream
-#include <string>      // string, getline()
+#include <string>      // string, to_string()
 #include <string_view> // string_view
 #include <utility>     // declval<>()
+
+#ifdef __cpp_lib_hardware_interference_size
+#include <new> // hardware_destructive_interference_size, hardware_constructive_interference_size
+#endif
 
 // ____________________ DEVELOPER DOCS ____________________
 
