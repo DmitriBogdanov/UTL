@@ -505,7 +505,7 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 | `std::ranlux48`             | ~4%            | 120 bytes              | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                                   |
 
 > [!Important]
-> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above measured on `AMD Ryzen 5 5600H` with `g++ 11.4.0`. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/benchmark_random.cpp).
+> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above measured on `AMD Ryzen 5 5600H` with `g++ 11.4.0`. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_random/).
 
 > [!Important]
 > Performance is measured in **values per unit of time**, to get a *bytes per unit of time* metric, the measurements can be normalized by a `sizeof(result_type)`, making 32-bit generators effectively two times slower than listed in the table.

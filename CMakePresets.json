@@ -25,7 +25,8 @@
                 "CMAKE_CXX_COMPILER": "g++",
                 "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;--coverage",
                 "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage",
-                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror"
+                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror",
+                "UTL_BENCHMARK_LINKER_FLAGS": ""
             }
         },
         {
@@ -36,7 +37,8 @@
                 "CMAKE_CXX_COMPILER": "clang++",
                 "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;--coverage",
                 "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage",
-                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror"
+                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror",
+                "UTL_BENCHMARK_LINKER_FLAGS": ""
             }
         }
     ],

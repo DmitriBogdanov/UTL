@@ -8,10 +8,11 @@ This file contains standard commit style for this project.
 | ---------- | -------------------------------- |
 | `feat`     | New features                     |
 | `test`     | New unit tests                   |
+| `bench`    | New benchmarks                   |
 | `fix`      | Bugfixes                         |
 | `refactor` | Code refactors                   |
-| `docs`     | Documentation changes            |
 | `build`    | Build script changes             |
+| `docs`     | Documentation changes            |
 | `chore`    | Typo fixes, file renames and etc |
 
 ## Commit message format

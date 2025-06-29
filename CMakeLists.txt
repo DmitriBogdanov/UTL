@@ -8,8 +8,8 @@ project(
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/UTL"
 )
 
-# Source
-include_directories("include")
+# Includes
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Benchmarks
 add_subdirectory("benchmarks")

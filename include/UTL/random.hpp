@@ -1355,8 +1355,7 @@ constexpr T approx_standard_normal(Gen& gen) noexcept {
     if constexpr (sizeof(generated_type) == 8) {
         return approx_standard_normal_from_u64<T>(gen());
     } else if constexpr (sizeof(generated_type) == 4) {
-        return approx_standard_normal_from_u32_pair<T>(static_cast<std::uint32_t>(gen() >> 32),
-                                                       static_cast<std::uint32_t>(gen()));
+        return approx_standard_normal_from_u32_pair<T>(gen(), gen());
     } else {
         static_assert(always_false_v<T>, "ApproxNormalDistribution<> only supports bit-uniform 32/64-bit PRNGs.");
         // we could use a slower fallback for esoteric PRNGs, but I think it's better to explicitly state when "fast

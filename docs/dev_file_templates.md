@@ -54,35 +54,122 @@ namespace utl::XXXXXXXXXXXX {
 
 Replace `XXXXXXXXXXXX` with **module name**.
 
-## Module tests template
+## Test template
 
 ```cpp
-// _______________ TEST FRAMEWORK & MODULE  _______________
+#include "tests/common.hpp"
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "thirdparty/doctest.h"
-
-#include "module_XXXXXXXXXXXX.hpp"
+#include "include/UTL/XXXXXXXXXXXX.hpp"
 
 // _______________________ INCLUDES _______________________
 
-// NOTE: STD INCLUDES
-
-// ____________________ DEVELOPER DOCS ____________________
-
-// NOTE: DOCS
+// None
 
 // ____________________ IMPLEMENTATION ____________________
 
-// NOTE: IMPL
-
+TEST_CASE("TEST_NAME") {
+    // TODO:
+}
 ```
 
 Replace `XXXXXXXXXXXX` with **module name**.
 
-## In-code headers
+**Dependencies on other modules:**
 
-### Header 1
+Not allowed.
+
+**Test cases and naming:**
+
+File can contain multiple test cases with names `<case> / <subcase>` or one case with name `<case>`. Here `<case>` is a a copy of filename, but capitalized and separated with spaces rather than `_` for better readability.
+
+**Reason for not using `SUBCASE()`:**
+
+**1.** Less indentation
+
+**2.** There is not `SUBCASE_TEMPLATE()` to replace `TEST_CASE_TEMPLATE()`, which is frequently needed to test templates
+
+**Difference between case and subcase:**
+
+Subcases should be used when there are multiple test cases relying on the same boilerplate and separating them into different files would cause code duplication. They can also be used for test cases that are too small & granular to warrant a separate file.
+
+## Benchmark template
+
+```cpp
+#include "benchmarks/common.hpp"
+
+#include "include/UTL/XXXXXXXXXXXX.hpp"
+
+// _______________________ INCLUDES _______________________
+
+// UTL dependencies
+// None
+
+// Libraries to benchmarks against
+// None
+
+// Standard headers
+// None
+
+// ____________________ IMPLEMENTATION ____________________
+
+// =================
+// --- Benchmark ---
+// =================
+
+void benchmark_xxx() {
+    // TODO:
+}
+
+// ========================
+// --- Benchmark runner ---
+// ========================
+
+int main() {
+    benchmark_xxx();
+}
+```
+
+Replace `XXXXXXXXXXXX` with **module name**.
+
+**Dependencies on other modules:**
+
+Discouraged, but allowed.
+
+## Example template
+
+```cpp
+#include "include/UTL/XXXXXXXXXXXX.hpp"
+
+int main() {
+    // TODO:
+}
+```
+
+Replace `XXXXXXXXXXXX` with **module name**.
+
+**Dependencies on other modules:**
+
+Allowed if it helps an example, generally should be avoided.
+
+**Godbolt links:**
+
+Online examples should copy the local ones, but with a different include format:
+
+```
+#include <https://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/XXXXXXXXXXXX.hpp>
+```
+
+Docs might contain an even shorter form without `main()`.
+
+Links should be shortened due to some Markdown editor struggling with full links, shortened Godbolt links never expire.
+
+Compiler should be: `x86-64 gcc (trunk)`
+
+Flags should be: `-std=c++17`
+
+# In-code headers
+
+## Header 1
 
 ```cpp
 
@@ -92,7 +179,7 @@ Replace `XXXXXXXXXXXX` with **module name**.
 
 ```
 
-### Header 2
+## Header 2
 
 ```cpp
 
@@ -101,7 +188,7 @@ Replace `XXXXXXXXXXXX` with **module name**.
 
 ```
 
-### Header 3
+## Header 3
 
 ```cpp
 

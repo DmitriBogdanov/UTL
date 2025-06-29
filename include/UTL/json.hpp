@@ -14,7 +14,7 @@
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 0
+#define UTL_JSON_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -532,7 +532,7 @@ public:
     }
 
     template <class T>
-    [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) {
+    [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) const {
         const auto& object = this->get_object();
         const auto  it     = object.find(std::string(key));
         if (it != object.end()) return it->second.get<T>();

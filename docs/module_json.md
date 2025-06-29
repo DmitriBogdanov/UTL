@@ -750,7 +750,7 @@ Output:
 
 ## Tests
 
-`utl::json` parsing was [tested](../tests/test_json.cpp) using the standard [RFC-8259](https://datatracker.ietf.org/doc/html/rfc8259) compliance [testing suite](https://github.com/nst/JSONTestSuite/) with following metrics:
+`utl::json` parsing was [tested](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_json/) using the standard [RFC-8259](https://datatracker.ietf.org/doc/html/rfc8259) compliance [testing suite](https://github.com/nst/JSONTestSuite/) with following metrics:
 
 | Metric | Compliance | Note |
 | - | - | - |
@@ -761,7 +761,7 @@ Parsing and serialization also satisfies [C++ `<charconv>`](https://en.cpprefere
 
 ## Benchmarks
 
-[Benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/benchmark_json.cpp) for parsing and serializing of minimized JSON data corresponding to various entries in the [test suite](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/data). 
+[Benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_json/) for parsing and serializing of minimized JSON data corresponding to various entries in the [test suite](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/data/). 
 
 ```
 ====== BENCHMARKING ON DATA: `strings.json` ======

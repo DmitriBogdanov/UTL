@@ -330,7 +330,7 @@ It is possible to significantly reduce that overhead by using CPU-counter intrin
 #include "UTL/profiler.hpp"                             // will now use 'rdtsc' for timestamps
 ```
 
-This is exceedingly helpful when profiling code on a hot path. Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/benchmark_profiler.cpp) showcasing the difference on particular hardware:
+This is exceedingly helpful when profiling code on a hot path. Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_profiler/) showcasing the difference on particular hardware:
 
 ```
 ======= USING std::chrono ========

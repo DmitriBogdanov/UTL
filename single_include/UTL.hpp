@@ -885,7 +885,7 @@ namespace literals = impl::literals;
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 0
+#define UTL_JSON_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -1403,7 +1403,7 @@ public:
     }
 
     template <class T>
-    [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) {
+    [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) const {
         const auto& object = this->get_object();
         const auto  it     = object.find(std::string(key));
         if (it != object.end()) return it->second.get<T>();
@@ -9971,8 +9971,7 @@ constexpr T approx_standard_normal(Gen& gen) noexcept {
     if constexpr (sizeof(generated_type) == 8) {
         return approx_standard_normal_from_u64<T>(gen());
     } else if constexpr (sizeof(generated_type) == 4) {
-        return approx_standard_normal_from_u32_pair<T>(static_cast<std::uint32_t>(gen() >> 32),
-                                                       static_cast<std::uint32_t>(gen()));
+        return approx_standard_normal_from_u32_pair<T>(gen(), gen());
     } else {
         static_assert(always_false_v<T>, "ApproxNormalDistribution<> only supports bit-uniform 32/64-bit PRNGs.");
         // we could use a slower fallback for esoteric PRNGs, but I think it's better to explicitly state when "fast
