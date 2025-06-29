@@ -133,7 +133,7 @@ double normal_double(                          ); // N(0, 1)
 
 // Convenient random (other)
 template <class T>            T choose(std::initializer_list<T> list);
-template <class Container> auto choose(const Containe&          list);
+template <class Container> auto choose(const Container&         list);
 ```
 
 ## Methods
@@ -367,7 +367,7 @@ When no arguments are passed uses standard mean and deviation.
 
 > ```cpp
 > template <class T>            T choose(std::initializer_list<T> list);
-> template <class Container> auto choose(const Containe&          list);
+> template <class Container> auto choose(const Container&         list);
 > ```
 
 Returns random element from a `list`.
@@ -421,7 +421,7 @@ Exp(4) -> 0.384687
 using namespace utl;
 
 random::generators::SplitMix64 gen{random::entropy()};
-std::chi_squared_distribution distr{2.}; // Chi-squared distribution with a n = 2
+std::chi_squared_distribution distr{2.}; // Chi-squared distribution with N = 2
 
 std::cout << "Random value from distribution -> " << distr(gen) << "\n";
 ```
@@ -440,7 +440,7 @@ template <std::size_t size>
 constexpr auto random_integers(std::uint64_t seed, int min, int max) {
     std::array<int, size> res{};
     utl::random::UniformIntDistribution dist{min, max};
-    utl::random::default_generator_type gen(seed);
+    utl::random::PRNG                   gen(seed);
     for (auto &e : res) e = dist(gen);
     return res;
 }
@@ -505,7 +505,7 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 | `std::ranlux48`             | ~4%            | 120 bytes              | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                                   |
 
 > [!Important]
-> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above measured on `AMD Ryzen 5 5600H` with `g++ 11.4.0`. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_random/).
+> Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above were measured on `AMD Ryzen 5 5600H` with `g++ 11.4.0`. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_random/).
 
 > [!Important]
 > Performance is measured in **values per unit of time**, to get a *bytes per unit of time* metric, the measurements can be normalized by a `sizeof(result_type)`, making 32-bit generators effectively two times slower than listed in the table.
@@ -640,7 +640,7 @@ Such approach however is beyond cumbersome and is rarely used in practice, which
 
 #### Entropy
 
-Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy is a standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, CPU ticks, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
+Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy in the standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, CPU ticks, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
 
 The result of such approach is generally satisfactory, however oftentimes not sufficient for proper cryptographic security.
 

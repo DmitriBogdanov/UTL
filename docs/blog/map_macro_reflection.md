@@ -5,7 +5,7 @@
   * [Binary operators](#binary-operators)
   * [Generic functions that operate on struct members](#generic-functions-that-operate-on-struct-members)
   * [Advanced examples](#advanced-examples)
-- [Why use this over `Boost.PFR` or `Boost.Describe`](#why-use-this-over-boost.pfr or-boost.describe)
+- [Why use this over `Boost.PFR` or `Boost.Describe`](#why-use-this-over-boost.pfr-or-boost.describe)
 - [Why use `Boost.PFR` or `Boost.Describe` over this](#why-use-boost.pfr-or-boost.describe-over-this)
 - [Map-macro implementation](#map-macro-implementation)
 - [Alternative approaches for `enum` reflection](#alternative-approaches-for-enum-reflection)

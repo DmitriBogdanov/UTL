@@ -32,7 +32,7 @@ struct TemporaryHandle {
     // Construction
     static TemporaryHandle    create(std::filesystem::path filepath);
     static TemporaryHandle    create(                              );
-	static TemporaryHandle overwrite(std::filesystem::path filepath);
+    static TemporaryHandle overwrite(std::filesystem::path filepath);
     static TemporaryHandle overwrite(                              );
     
     // Getters
@@ -50,7 +50,7 @@ struct CommandResult {
     std::string err;
 };
 
-CommandResult run_command(const std::string& command);
+CommandResult run_command(std::string_view command);
 ```
 
 ## Methods
@@ -112,10 +112,10 @@ Returns `std::filesystem::path` / `std::string` associated with the temporary fi
 >     std::string err;
 > };
 >
-> CommandResult run_command(const std::string &command);
+> CommandResult run_command(std::string_view command);
 > ```
 
-Runs command using a default system shell (`cmd` for Windows, `bash` for Linux).
+Runs command using a default system shell (`cmd` for Windows, `bash` for Linux, `zsh` for MacOS and some Linux distros).
 
 Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipedia.org/wiki/Standard_streams)) piped from the shell.
 

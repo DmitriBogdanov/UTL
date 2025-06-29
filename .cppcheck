@@ -53,7 +53,7 @@ passedByValue:*
 // - Justification -
 //
 // 'noExplicitConstructor' -> Implicit conversions can be painful but come on, prohibiting any non-explicit
-//                            constructors with 1 argument prevent a lot of convenient conversions from happening
+//                            constructors with 1 argument prevents a lot of convenient conversions from happening
 //
 // 'shadowFunction'        -> I believe shadowing variables in some cases is cleaner:
 //                            > Constructor(T data) : data(data) {}         // short, nice API

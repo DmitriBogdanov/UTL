@@ -24,7 +24,7 @@ Feature summary:
 - C++ wrappers for [`<ctime>`](https://en.cppreference.com/w/cpp/header/ctime) date-time functionality
 
 > [!Note]
-> With **C++20** `<chrono>` gets a native way of handling date-time, last point will no longer be needed.
+> With **C++20** `<chrono>` gets a native way of handling date-time.
 
 ## Definitions
 

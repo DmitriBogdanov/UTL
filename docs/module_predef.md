@@ -222,7 +222,7 @@ Hints (`MSVC`) or forces (`GCC`, `clang` and `ICX`) function inlining using comp
 
 Disables function inlining using compiler built-ins.
 
-**Note**: Compiles to nothing if there is no suitable compiler support.
+**Note**: Compiles to regular `inline` if there is no suitable compiler support.
 
 ```cpp
 #define UTL_PREDEF_ASSUME(condition)
@@ -244,7 +244,7 @@ Equivalent to [C++23 std::unreachable](https://en.cppreference.com/w/cpp/utility
 
 Compiler implementation may use this to optimize impossible code branches away.
 
-**Note**: Compiles to nothing if there is no suitable compiler support.
+**Note**: Even without compiler extensions UB is still raised by invoking an empty function as `[[noreturn]]`.
 
 ### Other utils
 
