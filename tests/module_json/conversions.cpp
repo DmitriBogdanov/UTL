@@ -4,11 +4,14 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <deque>         // deque<>
-#include <forward_list>  // forward_list<>
-#include <list>          // list<>
-#include <set>           // set<>
-#include <unordered_map> // unordered_map<>
+#include <deque>            // deque<>
+#include <forward_list>     // forward_list<>
+#include <initializer_list> // initializer_list<>
+#include <list>             // list<>
+#include <map>              // map<>
+#include <set>              // set<>
+#include <unordered_map>    // unordered_map<>
+#include <vector>           // vector<>
 
 // ____________________ IMPLEMENTATION ____________________
 

@@ -4,7 +4,9 @@
 
 // _______________________ INCLUDES _______________________
 
-// None
+#include <map>           // map<>
+#include <unordered_map> // unordered_map<>
+#include <vector>        // vector<>
 
 // ____________________ IMPLEMENTATION ____________________
 
