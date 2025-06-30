@@ -14,13 +14,14 @@
 
 #define UTL_PARALLEL_VERSION_MAJOR 1
 #define UTL_PARALLEL_VERSION_MINOR 0
-#define UTL_PARALLEL_VERSION_PATCH 0
+#define UTL_PARALLEL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
+#include <array>              // array<>
 #include <condition_variable> // condition_variable
 #include <cstddef>            // size_t
-#include <functional>         // bind()
+#include <functional>         // bind(), plus<>, multiplies<>
 #include <future>             // future<>, packaged_task<>
 #include <mutex>              // mutex, recursive_mutex, lock_guard<>, unique_lock<>
 #include <queue>              // queue<>

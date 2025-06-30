@@ -18,6 +18,6 @@ TEST_CASE("Parser accepts valid") {
     for (const auto& test_suite_entry : fs::directory_iterator(test_suite_path)) {
         std::cout << "Parsing file named: " << test_suite_entry.path() << '\n' << std::flush;
 
-        CHECK_NOTHROW(json::from_file(test_suite_entry.path()));
+        CHECK_NOTHROW(json::from_file(test_suite_entry.path().string()));
     }
 }

@@ -8,6 +8,9 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
+#undef IN  // doctest includes '<windows.h>' which defines empty macros 'IN' and 'OUT',
+#undef OUT // this interferes with a sensible naming scheme so we 'undef' them
+
 enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
 
 TEST_CASE("Enum bitflags / Flag creation") {
@@ -16,23 +19,23 @@ TEST_CASE("Enum bitflags / Flag creation") {
     constexpr auto flags_3 = bit::Flags(IOMode::OUT) | IOMode::APP;
     constexpr auto flags_4 = bit::Flags(IOMode::OUT).add(IOMode::APP);
     constexpr auto flags_5 = bit::Flags<IOMode>{}.add(IOMode::OUT).add(IOMode::APP);
-    
+
     static_assert(flags_1 == flags_2 && flags_2 == flags_3 && flags_3 == flags_4 && flags_4 == flags_5);
 }
 
-TEST_CASE("Enum bitflags / Method chaining") { 
+TEST_CASE("Enum bitflags / Method chaining") {
     auto flags = bit::Flags<IOMode>{};
-    
+
     flags.remove(IOMode::APP);
     flags.add(bit::Flags{IOMode::OUT, IOMode::APP});
-    
+
     CHECK(flags.contains(bit::Flags{IOMode::OUT, IOMode::APP}));
-    
+
     CHECK(flags.contains(IOMode::OUT));
     CHECK(flags.contains(IOMode::APP));
-    
+
     flags.remove(IOMode::APP);
-    
+
     CHECK(flags.contains(IOMode::OUT));
     CHECK(!flags.contains(IOMode::APP));
 }

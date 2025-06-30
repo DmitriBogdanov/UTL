@@ -14,7 +14,7 @@
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 1
+#define UTL_JSON_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -166,7 +166,8 @@ inline bool codepoint_to_utf8(std::string& destination, std::uint32_t cp) {
 [[nodiscard]] inline std::string read_file_to_string(const std::string& path) {
     using namespace std::string_literals;
 
-    std::ifstream file(path, std::ios::ate); // open file and immediately seek to the end
+    std::ifstream file(path, std::ios::ate | std::ios::binary); // open file and immediately seek to the end
+    // opening file as binary allows us to skip pointless newline re-encoding
     if (!file.good()) throw std::runtime_error("Could not open file {"s + path + "."s);
 
     const auto file_size = file.tellg(); // returns cursor pos, which is the end of file
@@ -878,7 +879,7 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
 
     const auto error = (iss && iss.eof()) ? std::errc{} : std::errc::invalid_argument;
     // '.eof()' not set => number wasn't parsed fully (usually due to incorrect format)
-    // 'iss' is false   => number parsing encountered an algorithmic issue  
+    // 'iss' is false   => number parsing encountered an algorithmic issue
     if (error != std::errc{}) return {first, error};
     return {cursor, error};
 }
@@ -892,7 +893,7 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
 // --- JSON Parsing impl. ---
 // ==========================
 
-constexpr unsigned int default_recursion_limit = 1000;
+constexpr unsigned int default_recursion_limit = 100;
 // this recursion limit applies only to parsing from text, conversions from
 // structs & containers are a separate thing and don't really need it as much
 
@@ -976,7 +977,7 @@ struct Parser {
             throw std::runtime_error("JSON parser has exceeded maximum allowed recursion depth of "s +
                                      std::to_string(this->recursion_limit) +
                                      ". If stated depth wasn't caused by an invalid input, "s +
-                                     "recursion limit can be increased with json::set_recursion_limit()."s);
+                                     "recursion limit can be increased in the parser."s);
 
         Node value;
         std::tie(cursor, value) = this->parse_node(cursor);
@@ -1670,7 +1671,7 @@ void assign_node_to_value_recursively(T& value, const Node& node) {
         for (std::size_t i = 0; i < array.size(); ++i) assign_node_to_value_recursively(value[i], array[i]);
     } else if constexpr (is_bool_like_v<T>) value = node.get_bool();
     else if constexpr (is_null_like_v<T>) value = node.get_null();
-    else if constexpr (is_numeric_like_v<T>) value = node.get_number();
+    else if constexpr (is_numeric_like_v<T>) value = static_cast<T>(node.get_number());
     else if constexpr (is_reflected_struct<T>) value = node.to_struct<T>();
     else static_assert(always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
 }

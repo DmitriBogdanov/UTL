@@ -885,7 +885,7 @@ namespace literals = impl::literals;
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 1
+#define UTL_JSON_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -1037,7 +1037,8 @@ inline bool codepoint_to_utf8(std::string& destination, std::uint32_t cp) {
 [[nodiscard]] inline std::string read_file_to_string(const std::string& path) {
     using namespace std::string_literals;
 
-    std::ifstream file(path, std::ios::ate); // open file and immediately seek to the end
+    std::ifstream file(path, std::ios::ate | std::ios::binary); // open file and immediately seek to the end
+    // opening file as binary allows us to skip pointless newline re-encoding
     if (!file.good()) throw std::runtime_error("Could not open file {"s + path + "."s);
 
     const auto file_size = file.tellg(); // returns cursor pos, which is the end of file
@@ -1749,7 +1750,7 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
 
     const auto error = (iss && iss.eof()) ? std::errc{} : std::errc::invalid_argument;
     // '.eof()' not set => number wasn't parsed fully (usually due to incorrect format)
-    // 'iss' is false   => number parsing encountered an algorithmic issue  
+    // 'iss' is false   => number parsing encountered an algorithmic issue
     if (error != std::errc{}) return {first, error};
     return {cursor, error};
 }
@@ -1763,7 +1764,7 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
 // --- JSON Parsing impl. ---
 // ==========================
 
-constexpr unsigned int default_recursion_limit = 1000;
+constexpr unsigned int default_recursion_limit = 100;
 // this recursion limit applies only to parsing from text, conversions from
 // structs & containers are a separate thing and don't really need it as much
 
@@ -1847,7 +1848,7 @@ struct Parser {
             throw std::runtime_error("JSON parser has exceeded maximum allowed recursion depth of "s +
                                      std::to_string(this->recursion_limit) +
                                      ". If stated depth wasn't caused by an invalid input, "s +
-                                     "recursion limit can be increased with json::set_recursion_limit()."s);
+                                     "recursion limit can be increased in the parser."s);
 
         Node value;
         std::tie(cursor, value) = this->parse_node(cursor);
@@ -2541,7 +2542,7 @@ void assign_node_to_value_recursively(T& value, const Node& node) {
         for (std::size_t i = 0; i < array.size(); ++i) assign_node_to_value_recursively(value[i], array[i]);
     } else if constexpr (is_bool_like_v<T>) value = node.get_bool();
     else if constexpr (is_null_like_v<T>) value = node.get_null();
-    else if constexpr (is_numeric_like_v<T>) value = node.get_number();
+    else if constexpr (is_numeric_like_v<T>) value = static_cast<T>(node.get_number());
     else if constexpr (is_reflected_struct<T>) value = node.to_struct<T>();
     else static_assert(always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
 }
@@ -6513,13 +6514,14 @@ return_type operator*(const L& left, const R& right) {
 
 #define UTL_PARALLEL_VERSION_MAJOR 1
 #define UTL_PARALLEL_VERSION_MINOR 0
-#define UTL_PARALLEL_VERSION_PATCH 0
+#define UTL_PARALLEL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
+#include <array>              // array<>
 #include <condition_variable> // condition_variable
 #include <cstddef>            // size_t
-#include <functional>         // bind()
+#include <functional>         // bind(), plus<>, multiplies<>
 #include <future>             // future<>, packaged_task<>
 #include <mutex>              // mutex, recursive_mutex, lock_guard<>, unique_lock<>
 #include <queue>              // queue<>
@@ -8630,7 +8632,7 @@ using impl::Ruler;
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 1
+#define UTL_RANDOM_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -9576,7 +9578,7 @@ constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
         res = common_type(gen()) - prng_min;
     }
 
-    return min + res;
+    return static_cast<T>(min + res);
 
     // Note 1:
     // 'static_cast<>()' preserves bit pattern of signed/unsigned integers of the same size as long as
@@ -9592,6 +9594,9 @@ constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
     // 'prng_range + 1' overflowing into '0' when 'prng_range' is equal to 'type_range'. Falling into this runtime
     // branch requires 'prng_range < range <= type_range' making such situation impossible, here we simply clamp the
     // value to 'type_range' so it doesn't overflow and trip the compiler when analyzing constexpr for potential UB.
+    
+    // Note 3:
+    // 'static_cast<T>()' in return is functionally useless, but prevents some false positive warnings on MSVC
 }
 
 // 'static_cast<>()' preserves bit pattern of signed/unsigned integers of the same size as long as
@@ -9940,10 +9945,10 @@ template <class T>
 [[nodiscard]] constexpr T approx_standard_normal_from_u32_pair(std::uint32_t major, std::uint32_t minor) noexcept {
     constexpr T delta = T(1) / T(4294967296); // (1 / 2^32)
 
-    T x = popcount(major); // random binomially distributed integer 0 to 32
-    x += minor * delta;    // linearly fill the gaps between integers
-    x -= T(16.5);          // re-center around 0 (the mean should be 16+0.5)
-    x *= T(0.3535534);     // scale to ~1 standard deviation
+    T x = T(popcount(major)); // random binomially distributed integer 0 to 32
+    x += minor * delta;       // linearly fill the gaps between integers
+    x -= T(16.5);             // re-center around 0 (the mean should be 16+0.5)
+    x *= T(0.3535534);        // scale to ~1 standard deviation
     return x;
 
     // 'x' now has a mean of 0, stddev very close to 1, and lies strictly in [-5.833631, 5.833631] range,

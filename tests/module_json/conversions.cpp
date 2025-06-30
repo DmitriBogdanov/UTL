@@ -93,7 +93,6 @@ TEST_CASE_TEMPLATE("Conversions / To-JSON-number", T, //
                    double,                            //
                    int,                               //
                    unsigned int,                      //
-                   std::size_t,                       //
                    long double,                       //
                    char                               //
 ) {

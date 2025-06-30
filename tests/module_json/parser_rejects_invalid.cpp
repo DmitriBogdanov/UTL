@@ -34,7 +34,7 @@ TEST_CASE("Parser rejects invalid") {
     for (const auto& test_suite_entry : fs::directory_iterator(test_suite_path)) {
         std::cout << "Parsing file named: " << test_suite_entry.path() << std::endl;
 
-        if (!acceptable_cases.count(test_suite_entry.path().filename()))
-            CHECK_THROWS(json::from_file(test_suite_entry.path()));
+        if (!acceptable_cases.count(test_suite_entry.path().filename().string()))
+            CHECK_THROWS(json::from_file(test_suite_entry.path().string()));
     }
 }

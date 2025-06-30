@@ -121,13 +121,14 @@ int main() {
     BENCHMARK_DISTRIBUTION_FOR_PRNG(          UintBiasedBigMulDist<std::uint16_t>, random::generators::SplitMix32);
     
     bench.title("8-bit uint distribution | SplitMix64");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG( std::uniform_int_distribution< std::uint8_t>, random::generators::SplitMix64);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::UniformIntDistribution< std::uint8_t>, random::generators::SplitMix64);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(          UintBiasedBigMulDist< std::uint8_t>, random::generators::SplitMix64);
     
     bench.title(" 8-bit uint distribution | SplitMix32");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG( std::uniform_int_distribution< std::uint8_t>, random::generators::SplitMix32);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::UniformIntDistribution< std::uint8_t>, random::generators::SplitMix32);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(          UintBiasedBigMulDist< std::uint8_t>, random::generators::SplitMix32);
     // clang-format on
+
+    // Note: 'std::uniform_int_distribution<>' does not support 8-bit integers, GCC and Clang
+    //       still allow it, MSVC has a static assert explicitly prohibiting the instantiation
 }

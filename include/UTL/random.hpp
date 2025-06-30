@@ -14,7 +14,7 @@
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 1
+#define UTL_RANDOM_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -960,7 +960,7 @@ constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
         res = common_type(gen()) - prng_min;
     }
 
-    return min + res;
+    return static_cast<T>(min + res);
 
     // Note 1:
     // 'static_cast<>()' preserves bit pattern of signed/unsigned integers of the same size as long as
@@ -976,6 +976,9 @@ constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
     // 'prng_range + 1' overflowing into '0' when 'prng_range' is equal to 'type_range'. Falling into this runtime
     // branch requires 'prng_range < range <= type_range' making such situation impossible, here we simply clamp the
     // value to 'type_range' so it doesn't overflow and trip the compiler when analyzing constexpr for potential UB.
+    
+    // Note 3:
+    // 'static_cast<T>()' in return is functionally useless, but prevents some false positive warnings on MSVC
 }
 
 // 'static_cast<>()' preserves bit pattern of signed/unsigned integers of the same size as long as
@@ -1324,10 +1327,10 @@ template <class T>
 [[nodiscard]] constexpr T approx_standard_normal_from_u32_pair(std::uint32_t major, std::uint32_t minor) noexcept {
     constexpr T delta = T(1) / T(4294967296); // (1 / 2^32)
 
-    T x = popcount(major); // random binomially distributed integer 0 to 32
-    x += minor * delta;    // linearly fill the gaps between integers
-    x -= T(16.5);          // re-center around 0 (the mean should be 16+0.5)
-    x *= T(0.3535534);     // scale to ~1 standard deviation
+    T x = T(popcount(major)); // random binomially distributed integer 0 to 32
+    x += minor * delta;       // linearly fill the gaps between integers
+    x -= T(16.5);             // re-center around 0 (the mean should be 16+0.5)
+    x *= T(0.3535534);        // scale to ~1 standard deviation
     return x;
 
     // 'x' now has a mean of 0, stddev very close to 1, and lies strictly in [-5.833631, 5.833631] range,
