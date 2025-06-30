@@ -235,14 +235,14 @@ TEST_CASE("Matrix constructors & methods derived from storage::AbstractIndexable
     SUBCASE("Matrix .for_each() (with idx) test") {
         // Fill matrix elements with their corresponding 1D indexes and check that it is correct
         auto matrix = mvl::Matrix<int>(3, 5);
-        matrix.for_each([](int& element, std::size_t idx) { element = idx; });
+        matrix.for_each([](int& element, std::size_t idx) { element = static_cast<int>(idx); });
         for (std::size_t i = 0; i < matrix.size(); ++i) CHECK(matrix[i] == i);
     }
 
     SUBCASE("Matrix .for_each() (with i, j) test") {
         // Fill matrix elements with their corresponding 1D indexes and check that it is correct
         auto matrix = mvl::Matrix<int>(3, 5);
-        matrix.for_each([](int& element, std::size_t i, std::size_t j) { element = 10 * i + j; });
+        matrix.for_each([](int& element, std::size_t i, std::size_t j) { element = static_cast<int>(10 * i + j); });
         for (std::size_t i = 0; i < matrix.rows(); ++i)
             for (std::size_t j = 0; j < matrix.cols(); ++j) CHECK(matrix(i, j) == (10 * i + j));
     }
@@ -469,9 +469,10 @@ TEST_CASE("Matrix views behave as expected") {
         CHECK(view.data() == matrix.data());
         // Try abusing function chains
         int sum = 1;
-        CHECK(matrix.for_each([&](const int& element, std::size_t idx) { sum *= element * (idx + 1); })
-                  .for_each([&](const int& element, std::size_t) { sum -= element; })
-                  .back() == 4);
+        CHECK(
+            matrix.for_each([&](const int& element, std::size_t idx) { sum *= static_cast<int>(element * (idx + 1)); })
+                .for_each([&](const int& element, std::size_t) { sum -= element; })
+                .back() == 4);
         CHECK(sum == 566); // computed by hand
     }
 }
@@ -482,7 +483,7 @@ TEST_CASE("Iterators behave as expected") {
 
     SUBCASE("Const iterator works") {
         mvl::Matrix<int> matrix(4, 5);
-        matrix.for_each([](int& element, std::size_t idx) { element = idx; });
+        matrix.for_each([](int& element, std::size_t idx) { element = static_cast<int>(idx); });
         const auto& cref = matrix;
         // Check that all filled values are read the same when const-iterating though
         std::size_t idx  = 0;
@@ -506,7 +507,7 @@ TEST_CASE("Iterators behave as expected") {
         CHECK(cref.crbegin() < cref.crend()); // it1 < it2
         CHECK(cref.crend() > cref.crbegin()); // it1 > it2
         // Iterate in reverse
-        matrix.for_each([&](int& element, std::size_t idx) { element = idx; }); // [ 0 .. N-1 ]
+        matrix.for_each([&](int& element, std::size_t idx) { element = static_cast<int>(idx); }); // [ 0 .. N-1 ]
         for (auto it = matrix.rbegin(); it != matrix.rend(); ++it)
             CHECK(matrix.rend() - 1 - it == *it); // true for how we filled matrix
         // note that reverse_iterator also reverses the logic of 'it1 - it2', makes sense because '.crbegin() <
@@ -521,7 +522,7 @@ TEST_CASE("Iterators behave as expected") {
         for (auto& element : matrix) element = 7;
         for (const auto& element : matrix) CHECK(element == 7);
         // Check basic operations of random access iterator
-        matrix.for_each([](int& element, std::size_t idx) { element = idx; });
+        matrix.for_each([](int& element, std::size_t idx) { element = static_cast<int>(idx); });
         CHECK(*matrix.begin() == matrix.front());              // *it
         CHECK(matrix.end() - matrix.begin() == matrix.size()); // it - it
         CHECK(*(matrix.begin() + 1) == 1);                     // it + n
@@ -539,7 +540,9 @@ TEST_CASE("Iterators behave as expected") {
         CHECK(matrix.rend() > matrix.rbegin()); // it1 > it2
         // Check that algorithms works
         // std::sort
-        matrix.for_each([&](int& element, std::size_t idx) { element = matrix.size() - 1 - idx; }); // [ N-1 .. 0 ]
+        matrix.for_each([&](int& element, std::size_t idx) {
+            element = static_cast<int>(matrix.size() - 1 - idx);
+        });                                      // [ N-1 .. 0 ]
         std::sort(matrix.begin(), matrix.end()); // becomes [ 0 ... N-1 ]
         matrix.for_each([&](int& element, std::size_t idx) { CHECK(element == idx); });
         // std::fill + std::accumulate
@@ -549,7 +552,9 @@ TEST_CASE("Iterators behave as expected") {
         matrix.for_each([&](const int& element) { sum_2 += element; });
         CHECK(sum_1 == sum_2);
         // Iterate in reverse
-        matrix.for_each([&](int& element, std::size_t idx) { element = matrix.size() - 1 - idx; }); // [ N-1 .. 0 ]
+        matrix.for_each([&](int& element, std::size_t idx) {
+            element = static_cast<int>(matrix.size() - 1 - idx);
+        }); // [ N-1 .. 0 ]
         for (auto it = matrix.rbegin(); it != matrix.rend(); ++it)
             CHECK(it - matrix.rbegin() == *it); // true for how we filled matrix
     }
@@ -561,7 +566,7 @@ TEST_CASE("Col-major ordering and transposition behave as expected") {
 
     SUBCASE("matrix.transposed() behaves as expected") {
         mvl::Matrix<int> matrix(3, 5, 0);
-        matrix.for_each([](int& element, std::size_t i, std::size_t j) { element = 1000 * i + j; });
+        matrix.for_each([](int& element, std::size_t i, std::size_t j) { element = static_cast<int>(1000 * i + j); });
         // Transpose
         auto matrixT = matrix.transposed();
         // Check sizes

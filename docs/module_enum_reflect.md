@@ -16,6 +16,9 @@
 
 **utl::enum_reflect** is a lean `enum` reflection library based around the [map-macro](https://github.com/swansontec/map-macro).
 
+> [!Important]
+> When compiling with [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B) use [`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor) to enable standard-compliant preprocessor. Default MSVC preprocessor is notoriously non-compliant due to legacy reasons and might not handle macro expansion properly.
+
 ## Definitions
 
 ```cpp

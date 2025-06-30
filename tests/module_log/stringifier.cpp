@@ -102,8 +102,8 @@ TEST_CASE("Stringifier / Floats") {
 }
 
 TEST_CASE("Stringifier / std::complex") {
-    CHECK(log::stringify(std::complex{1, 2}) == "1 + 2 i");
-    CHECK(log::stringify(std::complex{4, 0}) == "4 + 0 i");
+    CHECK(log::stringify(std::complex<double>{1, 2}) == "1 + 2 i");
+    CHECK(log::stringify(std::complex<double>{4, 0}) == "4 + 0 i");
 }
 
 TEST_CASE("Stringifier / Arrays") {
