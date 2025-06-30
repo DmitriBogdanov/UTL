@@ -145,6 +145,7 @@ inline const clock::time_point program_entry_time_point = clock::now();
 
 utl_log_define_trait(has_real, std::declval<T>().real());
 utl_log_define_trait(has_imag, std::declval<T>().imag());
+utl_log_define_trait(has_string, std::declval<T>().string());
 utl_log_define_trait(has_begin, std::declval<T>().begin());
 utl_log_define_trait(has_end, std::declval<T>().end());
 utl_log_define_trait(has_input_it, std::next(std::declval<T>().begin()));
@@ -309,6 +310,11 @@ struct StringifierBase {
     }
 
     template <class T>
+    static void append_path(std::string& buffer, const T& value) {
+        buffer += value.string();
+    }
+
+    template <class T>
     static void append_string(std::string& buffer, const T& value) {
         buffer += value;
     }
@@ -416,6 +422,8 @@ private:
             derived::append_bool(buffer, value);
         // Char
         else if constexpr (std::is_same_v<T, char>) derived::append_string(buffer, value);
+        // 'std::filesystemp::path'-like
+        else if constexpr (has_string_v<T>) derived::append_path(buffer, value);
         // 'std::string_view'-convertible (most strings and string-like types)
         else if constexpr (std::is_convertible_v<T, std::string_view>) derived::append_string(buffer, value);
         // 'std::string'-convertible (some "nastier" string-like types, mainly 'std::path')
@@ -465,11 +473,7 @@ private:
 struct Stringifier : public StringifierBase<Stringifier> {
     using base = StringifierBase<Stringifier>;
 
-    // template <class... Args>
-    // [[nodiscard]] static std::string stringify(Args&&... args) {
-    //     return StringifierBase::stringify(std::forward<Args>(args)...);
-    // }
-
+    // Optimization overloads
     using base::stringify;
 
     [[nodiscard]] static std::string stringify(int arg) { return std::to_string(arg); }
@@ -479,7 +483,7 @@ struct Stringifier : public StringifierBase<Stringifier> {
     [[nodiscard]] static std::string stringify(unsigned long arg) { return std::to_string(arg); }
     [[nodiscard]] static std::string stringify(unsigned long long arg) { return std::to_string(arg); }
     // for individual ints 'std::to_string()' beats 'append_int()' with <charconv> since any reasonable compiler
-    // implements it using the same <charconv> routine, but formatted directly into a string upon its creation
+    // implements it using the same <charconv> routine, but formatted directly into the string upon its creation
 
     [[nodiscard]] static std::string stringify(std::string&& arg) { return std::move(arg); }
     // no need to do all the appending stuff for individual r-value strings, just forward them as is

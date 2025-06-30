@@ -35,9 +35,11 @@ void generate_test_data() {
         for (auto& ch : str) ch = random::uniform('a', 'z');
 
         // Add some escapes at random
-        if (!str.empty() && random::uniform_double() < 0.1)
-            str.at(random::uniform_uint(0, str.size() - 1)) =
+        if (!str.empty() && random::uniform_double() < 0.1) {
+            const auto max_pos = static_cast<random::Uint>(str.size() - 1);
+            str.at(random::uniform_uint(0, max_pos)) =
                 random::choose({'"', '\\', '/', '\b', '\f', '\n', '\r', '\t'});
+        }
     }
 
     json::Node(strings).to_file("benchmarks/data/strings.json");
