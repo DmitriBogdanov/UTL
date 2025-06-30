@@ -40,6 +40,16 @@
                 "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror",
                 "UTL_BENCHMARK_LINKER_FLAGS": ""
             }
+        },
+        {
+            "name": "msvc",
+            "description": "MSVC configuration variables.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "UTL_TEST_FLAGS": "/W3;/Zc:preprocessor",
+                "UTL_TEST_LINKER_FLAGS": "",
+                "UTL_BENCHMARK_FLAGS": "/W3;/Zc:preprocessor"
+            }
         }
     ],
     
@@ -58,6 +68,11 @@
         {
             "name": "clang",
             "configurePreset": "clang",
+            "inherits": [ "base" ]
+        },
+        {
+            "name": "msvc",
+            "configurePreset": "msvc",
             "inherits": [ "base" ]
         }
     ],
@@ -82,6 +97,11 @@
         {
             "name": "clang",
             "configurePreset": "clang",
+            "inherits": [ "base" ]
+        },
+        {
+            "name": "msvc",
+            "configurePreset": "msvc",
             "inherits": [ "base" ]
         }
     ]

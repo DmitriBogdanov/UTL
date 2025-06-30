@@ -1,0 +1,44 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a workflow file for GitHub Actions that runs a matrix of tests
+#    in a Windows environment. The actions is triggered automatically on every
+#    push or pull request. Run results are then archived as GitHub artifacts.
+#
+#    By default, Windows links to 'STL' stdlib.
+# _______________________________________________________________________________
+
+name: "Run tests: Windows"
+
+run-name: "Build & runs tests on Windows"
+
+on: [ push, pull_request ]
+
+jobs:
+  msvc-matrix:
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        # 'windows-latest' uses corresponding year's MSVC as a default toolchain,
+        # see https://github.com/actions/virtual-environments
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+          
+      - name: "Configure CMake"
+        run: cmake --preset msvc
+        
+      - name: "Build project"
+        run: cmake --build --preset msvc
+        
+      - name: "Run tests"
+        run: ctest --preset msvc -C Debug
+        # Visual Studio is a multi-configuration generator, we need to specify one for the run
+        
+      - name: "Upload test artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
+          path: "build/"
