@@ -21,7 +21,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     UTL
-    GIT_REPOSITORY https://github.com/DmitriBogdanov/private-git-test.git
+    GIT_REPOSITORY https://github.com/DmitriBogdanov/UTL.git
     GIT_TAG        v4.0.3
 )
 

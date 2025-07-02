@@ -40,8 +40,8 @@ Quality goals include:
 | [**utl::integral**](./docs/module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc. |
 | [**utl::json**](./docs/module_json.md)                     | JSON parsing, serializing & reflection                       |
 | [**utl::log**](./docs/module_log.md)                       | Logging library                                              |
-| [**utl::math**](./docs/module_math.md)                     | Math-related utilities                                       |
-| [**utl::mvl**](./docs/module_mvl.md)                       | Flexible API for vector and matrix operations                |
+| [**utl::math**](./docs/module_math.md)                     | Additional math functions                                    |
+| [**utl::mvl**](./docs/module_mvl.md)                       | Generalized matrix & vector containers                       |
 | [**utl::parallel**](./docs/module_parallel.md)             | Thread pool, async tasks, parallel for, parallel reductions and etc. |
 | [**utl::predef**](./docs/module_predef.md)                 | Detection of architectures, compilers, platforms and etc.    |
 | [**utl::profiler**](./docs/module_profiler.md)             | Call graph & thread profiling                                |
@@ -90,12 +90,12 @@ While the library itself consists of a single header with no embedded dependenci
 
 ## Work in progress
 
-* `utl::table` rewrite;
-* `utl::log` formatting system rework;
-* Cleanup, vectors, index spans, matrix concat and binary operators for `utl::mvl`;
-* `utl::random` CBPRNGs and fixed-entropy seeding sequence.
-* Windows CI testing;
-* Test coverage statistics.
+* `utl::table` rewrite
+* `utl::log` formatting rework
+* `utl::mvl` large scale refactor and v1.0.0 release
+* `utl::random` CBPRNGs and fixed-entropy seeding sequence
+* Test coverage statistics
+* Build verification for examples
 
 ## License
 

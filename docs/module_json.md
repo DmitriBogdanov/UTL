@@ -34,19 +34,19 @@
 
 ## Feature Support
 
-| Feature | Implementation | Notes |
-| - | - | - |
-| Parsing | ✔ |  |
-| Serialization | ✔ |  |
-| JSON Formatting | ✔ |  |
-| JSON Validation | ✔ | Almost complete[¹](#tests) validation with proper error messages through exceptions |
-| Unicode Support | ✔ | Supports UTF-8 |
-| Control Character Escape Sequences | ✔ |  |
-| Unicode Escape Sequences | ✔ | Full support including UTF-16 surrogate pairs |
-| Trait-based Type Conversions | ✔ |  |
-| Structure Reflection | ✔ | Recursive reflection including nested types and containers[²](#complex-structure-reflection) |
-| Compile-time JSON Schema | ✘ | Outside the project scope, can be emulated with reflection |
-| Lazy Node Loading | ✘ | Outside the project scope |
+| Feature                            | Implementation | Notes                                                                                        |
+| ---------------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
+| Parsing                            | ✔              |                                                                                              |
+| Serialization                      | ✔              |                                                                                              |
+| JSON Formatting                    | ✔              |                                                                                              |
+| JSON Validation                    | ✔              | Almost complete[¹](#tests) validation with proper error messages through exceptions          |
+| Unicode Support                    | ✔              | Supports UTF-8                                                                               |
+| Control Character Escape Sequences | ✔              |                                                                                              |
+| Unicode Escape Sequences           | ✔              | Full support including UTF-16 surrogate pairs                                                |
+| Trait-based Type Conversions       | ✔              |                                                                                              |
+| Structure Reflection               | ✔              | Recursive reflection including nested types and containers[²](#complex-structure-reflection) |
+| Compile-time JSON Schema           | ✘              | Outside the project scope, can be emulated with reflection                                   |
+| Lazy Node Loading                  | ✘              | Outside the project scope                                                                    |
 
 ## Definitions
 
@@ -139,8 +139,8 @@ using Bool   = Node::bool_type;
 using Null   = Node::null_type;
 
 // Parsing
-Node                    from_string(const std::string& chars   , unsigned int recursion_limit = 1000);
-Node                    from_file  (const std::string& filepath, unsigned int recursion_limit = 1000);
+Node                    from_string(const std::string& chars   , unsigned int recursion_limit = 100);
+Node                    from_file  (const std::string& filepath, unsigned int recursion_limit = 100);
 template <class T> Node from_struct(const           T& value   );
 
 Node literals::operator""_utl_json(const char* c_str, std::size_t c_str_size);
@@ -324,7 +324,7 @@ Type `T` must be reflected with `UTL_JSON_REFLECT()` macro, otherwise compilatio
 ### Parsing
 
 > ```cpp
-> Node from_string(const std::string& buffer, unsigned int recursion_limit = 1000);
+> Node from_string(const std::string& buffer, unsigned int recursion_limit = 100);
 > ```
 
 Parses JSON from a given string `buffer`.
@@ -332,7 +332,7 @@ Parses JSON from a given string `buffer`.
 **Note:** JSON parsers need recursion depth limit to prevent malicious inputs (such as 100'000+ nested object opening braces) from causing stack overflows, instead we get a controllable `std::runtime_error`.
 
 > ```cpp
-> Node from_file(const std::string& filepath, unsigned int recursion_limit = 1000);
+> Node from_file(const std::string& filepath, unsigned int recursion_limit = 100);
 > ```
 
 Parses JSON from the file at `filepath`.
