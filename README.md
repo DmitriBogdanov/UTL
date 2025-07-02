@@ -57,6 +57,7 @@ Quality goals include:
 ## See also
 
 * [How to include only specific modules when using amalgamated header](./docs/guide_selecting_modules.md)
+* [Fetching the library with CMake `FetchContent()`](./docs/guide_fetching_library.md)
 * [Names reserved for implementation](./docs/guide_reserved_names.md)
 * [Building tests & benchmarks](./docs/guide_building_project.md)
 * [Semantic versioning](./docs/guide_versioning.md)

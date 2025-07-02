@@ -3,19 +3,36 @@ cmake_minimum_required(VERSION 3.21.0...3.22.1)
 
 project(
     UTL
-    VERSION 3.0.0
+    VERSION 4.0.2
     DESCRIPTION "Collection of self-contained header-only libraries for C++17."
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/UTL"
 )
 
-# Includes
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# Declare library
+add_library(utl_lib_include        INTERFACE)
+add_library(utl_lib_single_include INTERFACE)
 
-# Benchmarks
-add_subdirectory("benchmarks")
+target_include_directories(utl_lib_include        INTERFACE "${PROJECT_SOURCE_DIR}/include"       )
+target_include_directories(utl_lib_single_include INTERFACE "${PROJECT_SOURCE_DIR}/single_include")
 
-# Tests
-include(CTest)
-enable_testing() # should be called before adding 'tests/' directory
+target_compile_features(utl_lib_include        INTERFACE cxx_std_17)
+target_compile_features(utl_lib_single_include INTERFACE cxx_std_17)
 
-add_subdirectory("tests")
+add_library(UTL::include        ALIAS utl_lib_include       )
+add_library(UTL::single_include ALIAS utl_lib_single_include)
+
+# Build benchmarks / examples / tests if project is top-level
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
+
+    # Benchmarks
+    add_subdirectory("benchmarks")
+    
+    # Examples
+    # add_subdirectory("examples")
+    
+    # Tests
+    include(CTest)
+    enable_testing() # should be called before adding 'tests/' directory
+    
+    add_subdirectory("tests")
+endif()

@@ -5,9 +5,10 @@ function(utl_add_test file_name)
     
     add_executable(${target_name} ${file_name}.cpp)
     
-    target_compile_features(${target_name} PRIVATE ${UTL_COMPILE_FEATURES} )
-    target_compile_options (${target_name} PRIVATE ${UTL_TEST_FLAGS}       )
-    target_link_options    (${target_name} PRIVATE ${UTL_TEST_LINKER_FLAGS})
+    target_compile_features   (${target_name} PRIVATE ${UTL_COMPILE_FEATURES} )
+    target_compile_options    (${target_name} PRIVATE ${UTL_TEST_FLAGS}       )
+    target_link_options       (${target_name} PRIVATE ${UTL_TEST_LINKER_FLAGS})
+    target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}     )
     
     add_test(
         NAME ${target_name}
