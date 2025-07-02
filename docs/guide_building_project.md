@@ -2,13 +2,11 @@
 
 [<- back to README.md](..)
 
-This project uses [CMake](https://cmake.org) build system with [presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) as a main way of managing configuration.
+This project uses [CMake](https://cmake.org) build system with [presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) as a main way of managing platform-dependent configuration.
 
-Unit testing is done in terms of [doctest](https://github.com/doctest/doctest) framework together with **CMake** testing facilities ([CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html)). See [`tests/`](https://github.com/DmitriBogdanov/UTL/tree/master/tests).
+All [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks), [tests](https://github.com/DmitriBogdanov/UTL/tree/master/tests) and [examples](https://github.com/DmitriBogdanov/UTL/tree/master/examples) are split into granular targets following a similar directory structure, these targets are built as a part of the [CI pipeline](https://docs.github.com/en/actions/concepts/overview/about-continuous-integration-with-github-actions) specified in GitHub [workflows](https://github.com/DmitriBogdanov/UTL/tree/master/.github/workflows).
 
-Benchmarks are implemented using the [nanobench](https://github.com/martinus/nanobench) library. See [`benchmarks/`](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks).
-
-All tests and benchmarks are compiled with `-Wall -Wextra -Wpedantic -Werror`. Tests also use sanitizers provided by the GCC / LLVM toolchain.
+For tests we use a built-in CMake test runner [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html).
 
 ## Building with CMake
 
@@ -67,3 +65,12 @@ Alternatively, it is possible to override a specific variable from an existing p
 cmake --preset gcc -D CMAKE_CXX_COMPILER="g++13"
 ```
 
+## Notes on the toolchain
+
+All developer targets are compiled with `-Wall -Wextra -Wpedantic -Werror`. Tests also use sanitizers provided by the GCC / LLVM toolchain.
+
+CI pipeline is set up to test all 3 major compilers (`GCC`, `clang`, `MSVC`) with different standard libs (`libstdc++`, `libc++`, `STL`) on different operation systems (`Ubuntu`, `MacOS`, `Windows`).
+
+For testing we use [doctest](https://github.com/doctest/doctest) framework wrapped in [`tests/common.hpp`](https://github.com/DmitriBogdanov/UTL/blob/master/tests/common.hpp).
+
+For benchmarks we use [nanobench](https://github.com/martinus/nanobench) framework wrapped in [`benchmarks/common.hpp`](https://github.com/DmitriBogdanov/UTL/blob/master/benchmarks/common.hpp)

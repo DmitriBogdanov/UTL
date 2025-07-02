@@ -1,6 +1,8 @@
 # Fetching the library with CMake `FetchContent()`
 
-While header-only libraries can be trivially included without any use of the build system, some users might prefer to manage their dependencies in a unified manned through CMake. For this purpose UTL provides two `INTERFACE` targets:
+[<- back to README.md](..)
+
+While header-only libraries can be trivially included without any use of the build system, some users might prefer to manage their dependencies in a unified manner through CMake. For this purpose UTL provides two `INTERFACE` targets:
 
 ```cmake
 UTL::include
