@@ -14,7 +14,7 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/profiler.hpp)
 
-**utl::profiler** is single-include solution for localized profiling, it features simple macros to measure how much time is taken by a certain scope / expression / code segment. Profiler automatically builds a call graph for all profiled functions and prints a nicely formatted table for every thread. See [examples](#examples).
+**utl::profiler** is a single-include solution for localized profiling. It features simple macros to measure how much time is taken by a certain scope / expression / code segment. The profiler automatically builds a call graph for all profiled functions and prints a nicely formatted table for every thread. See the [examples](#examples).
 
 Key features:
 
