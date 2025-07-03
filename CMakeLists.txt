@@ -27,12 +27,11 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
     # Benchmarks
     add_subdirectory("benchmarks")
     
-    # Examples
-    # add_subdirectory("examples")
-    
-    # Tests
+    # Tests & examples
     include(CTest)
-    enable_testing() # should be called before adding 'tests/' directory
+    enable_testing() # should be called before adding directories with tests
     
     add_subdirectory("tests")
+    add_subdirectory("examples")
+    
 endif()

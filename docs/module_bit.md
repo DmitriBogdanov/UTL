@@ -206,7 +206,7 @@ Comparison operators, effectively same as comparing the underlying value.
 
 ### Working with individual bits
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++constexpr+std::uint8_t+x+%3D+19%3B+//+19+~+00010011%0A++++//+human-readable+notation+is+big-endian,+which+means+bits+are+indexed+right-to-left%0A%0A++++//+Read+bits%0A++++static_assert(bit::get(x,+0)+%3D%3D+1)%3B%0A++++static_assert(bit::get(x,+1)+%3D%3D+1)%3B%0A++++static_assert(bit::get(x,+2)+%3D%3D+0)%3B%0A++++static_assert(bit::get(x,+3)+%3D%3D+0)%3B%0A++++static_assert(bit::get(x,+4)+%3D%3D+1)%3B%0A++++static_assert(bit::get(x,+5)+%3D%3D+0)%3B%0A++++static_assert(bit::get(x,+6)+%3D%3D+0)%3B%0A++++static_assert(bit::get(x,+7)+%3D%3D+0)%3B%0A%0A++++//+Modify+bits%0A++++static_assert(bit::set(++x,+2)+%3D%3D+23)%3B+//+23+~+00010111%0A++++static_assert(bit::clear(x,+0)+%3D%3D+18)%3B+//+18+~+00010010%0A++++static_assert(bit::flip(+x,+1)+%3D%3D+17)%3B+//+17+~+00010001%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:65.37859007832898,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:34.621409921671024,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/xorGove9Y) ]
 
 ```cpp
 using namespace utl;
@@ -232,7 +232,7 @@ static_assert(bit::flip( x, 1) == 17); // 17 ~ 00010001
 
 ### General usage
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:13,endLineNumber:3,positionColumn:13,positionLineNumber:3,selectionStartColumn:13,selectionStartLineNumber:3,startColumn:13,startLineNumber:3),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++constexpr+std::uint8_t+x+%3D+19%3B+//+19+~+00010011%0A%0A++++//+Group+bit+operations%0A++++static_assert(bit::rotl(++x,+6)+%3D%3D+196)%3B+//+196+~+11000100%0A++++static_assert(bit::rotr(++x,+1)+%3D%3D+137)%3B+//+137+~+10001001%0A++++static_assert(bit::lshift(x,+6)+%3D%3D+192)%3B+//+192+~+11000000%0A++++static_assert(bit::rshift(x,+1)+%3D%3D+++9)%3B+//+++9+~+00001001%0A%0A++++//+Getters%0A++++static_assert(bit::width(x)+%3D%3D+5)%3B+//+00010011+has+5+significant+bits%0A%0A++++static_assert(bit::size_of%3Cstd::uint16_t%3E+%3D%3D+16)%3B%0A++++static_assert(bit::size_of%3Cstd::uint32_t%3E+%3D%3D+32)%3B%0A++++static_assert(bit::size_of%3Cstd::uint64_t%3E+%3D%3D+64)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:65.37859007832898,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:34.621409921671024,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/3ac5YK11s) ]
 
 ```cpp
 using namespace utl;
@@ -255,7 +255,7 @@ static_assert(bit::size_of<std::uint64_t> == 64);
 
 ### Using enum bitflags
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:53,endLineNumber:20,positionColumn:53,positionLineNumber:20,selectionStartColumn:53,selectionStartLineNumber:20,startColumn:53,startLineNumber:20),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Ausing+namespace+utl%3B%0A%0A//+Bitflag-suitable+enum+class%0Aenum+class+IOMode+%7B+IN+%3D+1+%3C%3C+0,+OUT+%3D+1+%3C%3C+1,+APP+%3D+1+%3C%3C+2+%7D%3B%0A%0A//+Function+taking+enum+flags%0Avoid+open_file(bit::Flags%3CIOMode%3E+flags)+%7B%0A++++if+(flags.contains(IOMode::IN)+)+log::println(%22++%3E+File+opened+for+reading%22++)%3B%0A++++if+(flags.contains(IOMode::OUT))+log::println(%22++%3E+File+opened+for+writing%22++)%3B%0A++++if+(flags.contains(IOMode::APP))+log::println(%22++%3E+File+opened+for+appending%22)%3B%0A%7D%0A%0Aint+main()+%7B%0A++++log::println(%22Opening+file+with+OUT:%22)%3B%0A++++open_file(IOMode::OUT)%3B%0A%0A++++log::println(%22Opening+file+with+OUT+%7C+APP:%22)%3B%0A++++open_file(bit::Flags%7BIOMode::OUT,+IOMode::APP%7D)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:65.37859007832898,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:34.621409921671024,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/7GqojMWjW) ]
 
 ```cpp
 using namespace utl;
@@ -265,17 +265,17 @@ enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
 
 // Function taking enum flags
 void open_file(bit::Flags<IOMode> flags) {
-    if (flags.contains(IOMode::IN) ) log::println("  > File opened for reading"  );
-    if (flags.contains(IOMode::OUT)) log::println("  > File opened for writing"  );
-    if (flags.contains(IOMode::APP)) log::println("  > File opened for appending");
+    if (flags.contains(IOMode::IN) ) std::cout << "  > File opened for reading   \n";
+    if (flags.contains(IOMode::OUT)) std::cout << "  > File opened for writing   \n";
+    if (flags.contains(IOMode::APP)) std::cout << "  > File opened for appending \n";
 }
 
 // ...
 
-log::println("Opening file with OUT:");
+std::cout << "Opening file with OUT:       \n";
 open_file(IOMode::OUT);
 
-log::println("Opening file with OUT | APP:");
+std::cout << "Opening file with OUT | APP: \n";
 open_file(bit::Flags{IOMode::OUT, IOMode::APP});
 ```
 
@@ -290,7 +290,7 @@ Opening file with OUT | APP:
 
 ### Additional bitflag examples
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++//+Bitflag-suitable+enum+class%0A++++enum+class+IOMode+%7B+IN+%3D+1+%3C%3C+0,+OUT+%3D+1+%3C%3C+1,+APP+%3D+1+%3C%3C+2+%7D%3B%0A%0A++++//+Simple+yet+flexible+API,+same+thing+can+be+accomplished%0A++++//+both+with+classic+bit-wise+semantics+and+with+built-in+methods.%0A++++//+Underneath+it!'s+just+a+strongly+typed+integer+so+there+is+no+performance+impact%0A++++constexpr+auto+flags_1+%3D+bit::Flags%7BIOMode::OUT,+IOMode::APP%7D%3B%0A++++constexpr+auto+flags_2+%3D+bit::Flags(IOMode::OUT)+%7C+bit::Flags(IOMode::APP)%3B%0A++++constexpr+auto+flags_3+%3D+bit::Flags(IOMode::OUT)+%7C+IOMode::APP%3B%0A++++constexpr+auto+flags_4+%3D+bit::Flags(IOMode::OUT).add(IOMode::APP)%3B%0A++++constexpr+auto+flags_5+%3D+bit::Flags%3CIOMode%3E%7B%7D.add(IOMode::OUT).add(IOMode::APP)%3B%0A%0A++++static_assert(flags_1+%3D%3D+flags_2+%26%26+flags_2+%3D%3D+flags_3+%26%26+flags_3+%3D%3D+flags_4+%26%26+flags_4+%3D%3D+flags_5)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:65.37859007832898,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:34.621409921671024,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/8zbqPo4va) ]
 
 ```cpp
 using namespace utl;
