@@ -40,7 +40,7 @@ jobs:
         with:
           name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
           path: |
-            "build/Testing/"
-            "build/CMakeCache.txt"
-            "build/compile_commands.json"
-            "build/DartConfiguration.tcl"
+            build/
+            !build/benchmarks/
+            !build/examples/
+            !build/tests/
