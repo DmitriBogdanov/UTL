@@ -39,4 +39,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
-          path: "build/"
+          path: |
+            "build/Testing/"
+            "build/CMakeCache.txt"
+            "build/compile_commands.json"
+            "build/DartConfiguration.tcl"
