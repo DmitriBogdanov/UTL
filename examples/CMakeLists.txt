@@ -5,10 +5,10 @@ function(utl_add_example file_name)
     
     add_executable(${target_name} ${file_name}.cpp)
     
-    target_compile_features   (${target_name} PRIVATE ${UTL_COMPILE_FEATURES}    )
-    target_compile_options    (${target_name} PRIVATE ${UTL_EXAMPLE_FLAGS}       )
-    target_link_options       (${target_name} PRIVATE ${UTL_EXAMPLE_LINKER_FLAGS})
-    target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}        )
+    target_compile_features   (${target_name} PRIVATE ${UTL_COMPILE_FEATURES} )
+    target_compile_options    (${target_name} PRIVATE ${UTL_TEST_FLAGS}       )
+    target_link_options       (${target_name} PRIVATE ${UTL_TEST_LINKER_FLAGS})
+    target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}     )
     
     add_test(
         NAME ${target_name}
@@ -30,3 +30,10 @@ utl_add_example("module_integral/integral_literals")
 utl_add_example("module_integral/narrow_cast")
 utl_add_example("module_integral/saturated_math")
 utl_add_example("module_integral/sign_conversion")
+utl_add_example("module_json/complex_structure_reflection")
+utl_add_example("module_json/error_handling")
+utl_add_example("module_json/formatting")
+utl_add_example("module_json/getters")
+utl_add_example("module_json/parse_serialize_json")
+utl_add_example("module_json/setters_and_type_conversions")
+utl_add_example("module_json/structure_reflection")
