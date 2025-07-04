@@ -13,10 +13,12 @@ function(utl_add_example file_name)
     add_test(
         NAME ${target_name}
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     ) # all examples double as tests
     
 endfunction()
+
+# Note: Unlike tests, examples don't use root as a working directory since they don't have a need
+#       to read any pre-existing data, but might create temporary files themselves
 
 # Examples
 utl_add_example("module_bit/additional_bitflag_examples")
@@ -37,3 +39,6 @@ utl_add_example("module_json/getters")
 utl_add_example("module_json/parse_serialize_json")
 utl_add_example("module_json/setters_and_type_conversions")
 utl_add_example("module_json/structure_reflection")
+utl_add_example("module_log/logging_to_multiple_sinks")
+utl_add_example("module_log/logging_to_the_terminal")
+utl_add_example("module_log/printing_and_stringification")

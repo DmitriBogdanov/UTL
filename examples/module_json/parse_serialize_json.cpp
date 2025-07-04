@@ -16,10 +16,10 @@ int main() {
     config["time_steps"]           = 500;
     config["time_period"]          = 1.24709e+2;
     
-    config.to_file("temp/config.json");
+    config.to_file("config.json");
     
     // Parse JSON
-    config = json::from_file("temp/config.json");
+    config = json::from_file("config.json");
     
     std::cout << config.to_string();
 }

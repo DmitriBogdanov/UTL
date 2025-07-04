@@ -388,7 +388,7 @@ Evaluates to `true` if `T` was reflected with `UTL_JSON_REFLECT()`, `false` othe
 
 ### Parse/serialize JSON
 
-[ [Run this code](https://godbolt.org/z/4cvd1j57T) ]
+[ [Run this code](https://godbolt.org/z/aEja9Gf1E) ]
 
 ```cpp
 using namespace utl;
@@ -404,10 +404,10 @@ config["scaling_functions"]    = { "identity", "log10" };
 config["time_steps"]           = 500;
 config["time_period"]          = 1.24709e+2;
 
-config.to_file("temp/config.json");
+config.to_file("config.json");
 
 // Parse JSON
-config = json::from_file("temp/config.json");
+config = json::from_file("config.json");
 
 std::cout << config.to_string();
 ```
