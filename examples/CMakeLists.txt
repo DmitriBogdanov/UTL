@@ -39,10 +39,23 @@ utl_add_example("module_json/getters")
 utl_add_example("module_json/parse_serialize_json")
 utl_add_example("module_json/setters_and_type_conversions")
 utl_add_example("module_json/structure_reflection")
-utl_add_example("module_log/logging_to_multiple_sinks")
-utl_add_example("module_log/logging_to_the_terminal")
-utl_add_example("module_log/printing_and_stringification")
+# TODO: Add 'module_log/' examples after the rewrite
 utl_add_example("module_math/conversions")
 utl_add_example("module_math/index_functions")
 utl_add_example("module_math/summation_and_product")
 utl_add_example("module_math/template_math_functions")
+# TODO: Add 'module_mvl/' examples after the rewrite
+utl_add_example("module_parallel/launching_async_tasks_with_future")
+utl_add_example("module_parallel/launching_async_tasks")
+utl_add_example("module_parallel/parallel_for_loop")
+utl_add_example("module_parallel/reducing_over_a_binary_operation")
+# TODO: 'module_predef/'
+# TODO: 'module_profiler/'
+# TODO: 'module_progressbar/'
+# TODO: 'module_random/'
+# TODO: 'module_shell/'
+# TODO: 'module_sleep/'
+# TODO: 'module_stre/'
+# TODO: 'module_struct_reflect/'
+# TODO: Add 'module_table/' examples after the rewrite
+# TODO: 'module_time/'

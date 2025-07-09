@@ -356,7 +356,7 @@ Pre-defined binary operations for `parallel::reduce()`.
 
 ### Launching async tasks
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++const+std::string+message+%3D+%22%3Csome+hypothetically+very+large+message%3E%22%3B%0A%0A++++//+Log+the+message+asynchronously%0A++++parallel::task(%5B%26%5D%7B+std::ofstream(%22log.txt%22)+%3C%3C+message%3B+%7D)%3B%0A%0A++++//+...+do+some+other+work+in+the+meantime+...%0A%0A++++//+Destructor+will+automatically+wait+for+the+task+to+finish+before+exiting+!'main()!',%0A++++//+otherwise+you+can+wait+manually%0A++++parallel::wait_for_tasks()%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/Y3fan7Tzo) ]
 
 ```cpp
 using namespace utl;
@@ -368,18 +368,18 @@ parallel::task([&]{ std::ofstream("log.txt") << message; });
 
 // ... do some other work in the meantime ...
 
-// Destructor will automatically wait for the task to finish before exiting 'main()',
-// otherwise you can wait manually
+// Destructor will automatically wait for ongoing tasks to finish
+// before exiting 'main()', we can also trigger the wait manually
 parallel::wait_for_tasks();
 ```
 
 ### Launching async tasks with future
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:7,positionColumn:1,positionLineNumber:7,selectionStartColumn:1,selectionStartLineNumber:7,startColumn:1,startLineNumber:7),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Adouble+some_heavy_computation(double+x)+%7B%0A++++std::this_thread::sleep_for(std::chrono::seconds(1))%3B%0A++++return+x+%2B+32.%3B%0A%7D%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++//+Lauch+the+computation+asynchronously+and+get+its+future%0A++++auto+future+%3D+parallel::task_with_future(some_heavy_computation,+10.)%3B%0A%0A++++//+...+do+some+other+work+in+the+meantime+...%0A%0A++++//+Get+the+value+from+std::future,+if+the+task+isn!'t+finished+it+will+wait+for+it+to+finish%0A++++const+double+result+%3D+future.get()%3B%0A%0A++++assert(+result+%3D%3D+42.+)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/Gc1ejha3x) ]
 
 ```cpp
 double some_heavy_computation(double x) {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     return x + 32;
 }
 
@@ -392,7 +392,7 @@ auto future = parallel::task_with_future(some_heavy_computation, 10);
 
 // ... do some other work in the meantime ...
 
-// Get the value from std::future, if the task isn't finished it will wait for it to finish
+// Get the value from std::future, this will wait until the task is finished
 const double result = future.get();
 
 assert( result == 42 );
@@ -400,7 +400,8 @@ assert( result == 42 );
 
 ### Parallel for loop
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:53,endLineNumber:3,positionColumn:53,positionLineNumber:3,selectionStartColumn:53,selectionStartLineNumber:3,startColumn:53,startLineNumber:3),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Adouble+f(double+x)+%7B+return+std::exp(std::sin(x))%3B+%7D%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++std::vector%3Cdouble%3E+vals(1!'000!'000,+0.5)%3B%0A%0A++++//+(optional)+Select+the+number+of+threads+%0A++++parallel::set_thread_count(8)%3B%0A%0A++++//+Apply+f()+to+all+elements+of+the+vector%0A++++parallel::for_loop(vals,+%5B%26%5D(auto+low,+auto+high)+%7B%0A++++++++for+(auto+it+%3D+low%3B+it+!!%3D+high%3B+%2B%2Bit)+*it+%3D+f(*it)%3B%0A++++%7D)%3B%0A%0A++++//+Apply+f()+to+the+fist+half+of+the+vector%0A++++parallel::for_loop(parallel::IndexRange%3Cstd::size_t%3E%7B0,+vals.size()+/+2%7D,+%5B%26%5D(auto+low,+auto+high)+%7B%0A++++++++for+(auto+i+%3D+low%3B+i+!!%3D+high%3B+%2B%2Bi)+vals%5Bi%5D+%3D+f(vals%5Bi%5D)%3B%0A%7D)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/xq9G9138q) ]
+
 ```cpp
 double f(double x) { return std::exp(std::sin(x)); }
 
@@ -408,7 +409,7 @@ double f(double x) { return std::exp(std::sin(x)); }
 
 using namespace utl;
 
-std::vector<double> vals(1'000'000, 0.5);
+std::vector<double> vals(400'000, 0.5);
 
 // (optional) Select the number of threads 
 parallel::set_thread_count(8);
@@ -424,24 +425,24 @@ parallel::for_loop(parallel::IndexRange<std::size_t>{0, vals.size() / 2}, [&](au
 });
 ```
 
-### Reducing a range over a binary operation
+### Reducing over a binary operation
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:53,endLineNumber:18,positionColumn:1,positionLineNumber:6,selectionStartColumn:53,selectionStartLineNumber:18,startColumn:1,startLineNumber:6),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Adouble+f(double+x)+%7B+return+std::exp(std::sin(x))%3B+%7D%0A%0Aint+main()+%7B%0A++++using+namespace+utl%3B%0A%0A++++const+std::vector%3Cdouble%3E+vals(5!'000!'000,+2)%3B%0A%0A++++//+Reduce+container+over+a+binary+operation%0A++++const+double+sum+%3D+parallel::reduce(vals,+parallel::sum%3Cdouble%3E())%3B%0A%0A++++assert(+sum+%3D%3D+5!'000!'000+*+2+)%3B%0A%0A++++//+Reduce+range+over+a+binary+operation%0A++++const+double+subrange_sum+%3D+parallel::reduce(parallel::Range%7Bvals.begin()+%2B+100,+vals.end()%7D,+parallel::sum%3Cdouble%3E())%3B%0A%0A++++assert(+subrange_sum+%3D%3D+(5!'000!'000+-+100)+*+2+)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/54KToWo8E) ]
 
 ```cpp
 using namespace utl;
 
-const std::vector<double> vals(5'000'000, 2);
+const std::vector<double> vals(200'000, 2);
 
 // Reduce container over a binary operation
 const double sum = parallel::reduce(vals, parallel::sum<double>());
 
-assert( sum == 5'000'000 * 2 );
+assert( sum == 200'000 * 2 );
 
 // Reduce range over a binary operation
 const double subrange_sum = parallel::reduce(parallel::Range{vals.begin() + 100, vals.end()}, parallel::sum<>());
 
-assert( subrange_sum == (5'000'000 - 100) * 2 );
+assert( subrange_sum == (200'000 - 100) * 2 );
 ```
 
 ## Benchmarks
