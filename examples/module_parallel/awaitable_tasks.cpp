@@ -10,12 +10,12 @@ double some_heavy_computation(double x) {
 int main() {
     using namespace utl;
 
-    // Launch the computation asynchronously and get its future
-    auto future = parallel::task_with_future(some_heavy_computation, 10);
+    // Launch asynchronous computation
+    auto future = parallel::awaitable_task(some_heavy_computation, 10);
 
-    // ... do some other work in the meantime ...
+    // ... do some work in the meantime ...
 
-    // Get the value from std::future, this will wait until the task is finished
+    // Await the result
     const double result = future.get();
 
     assert( result == 42 );

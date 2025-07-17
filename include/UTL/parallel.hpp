@@ -12,508 +12,647 @@
 #ifndef UTLHEADERGUARD_PARALLEL
 #define UTLHEADERGUARD_PARALLEL
 
-#define UTL_PARALLEL_VERSION_MAJOR 1
+#define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 0
-#define UTL_PARALLEL_VERSION_PATCH 1
+#define UTL_PARALLEL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
-#include <array>              // array<>
 #include <condition_variable> // condition_variable
-#include <cstddef>            // size_t
-#include <functional>         // bind(), plus<>, multiplies<>
-#include <future>             // future<>, packaged_task<>
-#include <mutex>              // mutex, recursive_mutex, lock_guard<>, unique_lock<>
-#include <queue>              // queue<>
+#include <functional>         // plus<>, multiplies<>, function<>
+#include <future>             // future<>, promise<>
+#include <memory>             // shared_ptr<>
+#include <mutex>              // mutex, scoped_lock<>, unique_lock<>
+#include <optional>           // optional<>, nullopt
+#include <queue>              // queue<>, deque<>, size_t
+#include <stdexcept>          // current_exception, runtime_error
 #include <thread>             // thread
-#include <type_traits>        // decay_t<>, invoke_result_t<>
 #include <utility>            // forward<>()
-#include <vector>             // vector
+#include <vector>             // vector<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
 // Library API resembles a minimalistic version of Intel TBB.
 //
-// In C++20 'std::jthread' can be used to simplify code a bit, no reason not to do so.
+// Work-stealing summary:
 //
-// In C++20 'unroll<>()' template can be improved to take index as a template-lambda-explicit-argument
-// rather than a regular arg, ensuring its constexpr'ness. This may lead to a slight performance boost
-// as current automatic unrolling doesn't propagate constexpr'ness of indexation as well.
+// We use several queues:
+//    - All  thread have a global task queue
+//    - Each thread has  a local  task deque
+// Tasks go into different queues depending on their source:
+//    - Work queued from a     pool thread => recursive task, goes to the front of current deque
+//    - Work queued from a non-pool thread => regular   task, goes to the back  of global  queue
+// When threads are looking for work they search in 3 steps:
+//    1. Check local dequeue,  work here can be popped from the front
+//    2. Check other dequeues, work here can be stolen from the back
+//    3. Check global queue,   work here can be popped from the front
+// To resolve recursive deadlocks we use a custom future:
+//    - Recursive task calls '.wait()' on its future => pop / steal work from local deques until finished
+//
+// Ideally we would want to use a different algorithm with Chase-Lev lock-free local SPMC queues for work-stealing,
+// and a global lock-free MPMC queue for outside tasks, however properly implementing such queues is a task of
+// incredible complexity, which is further exacerbated by the fact that 'std::function' has a potentially throwing
+// move-assignment, which disqualifies it from ~80% of existing lock-free queue implementations.
+//
+// After a long research it seems that proper work-stealing thread pools are only really implemented by huge task
+// graph projects such as IntelTBB and Taskflow with most of the standard syncronization primitives rewritten.
+// All stand-alone implementations that I'm aware of will either:
+//    a) Deadlock for recursive tasks                  (~90% of implementations )
+//    b) Require manual resolution of recursive tasks  (remaining ~10%          )
+//    c) Pull in huge dependencies                     (in addition to the above)
+//    d) Contain potential deadlocks                   (in addition to the above)
+//
+// In newer standards several improvement can be made in terms of implementation:
+//    - In C++20 'std::jthread' can be used to simplify joining and add stop tokens
+//    - In C++23 'std::move_only_function<>' can be used as a more efficient task type,
+//      however this still doesn't resolve the issue of throwing move assignment
+//    - In C++20 atomic wait / semaphores / barriers can be used to improve efficiency
+//      of some syncronization
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace utl::parallel::impl {
 
-// =============
-// --- Utils ---
-// =============
+// ============================
+// --- Thread introspection ---
+// ============================
 
-template <class T, class Mutex = std::mutex>
-class MutexProtected {
-    T             value;
-    mutable Mutex mutex;
+namespace this_thread {
 
-public:
-    MutexProtected() = default;
-    MutexProtected(const T& value) : value(value), mutex() {}
-    MutexProtected(T&& value) : value(std::move(value)), mutex() {}
+inline thread_local std::optional<std::size_t> worker_index    = std::nullopt;
+inline thread_local std::optional<void*>       thread_pool_ptr = std::nullopt;
 
-    template <class Func>
-    decltype(auto) apply(Func&& func) const {
-        const std::lock_guard lock(this->mutex);
-        return std::forward<Func>(func)(this->value);
-    }
+[[nodiscard]] inline std::optional<std::size_t> get_index() noexcept { return worker_index; }
+[[nodiscard]] inline std::optional<void*>       get_pool() noexcept { return thread_pool_ptr; }
 
-    template <class Func>
-    decltype(auto) apply(Func&& func) {
-        const std::lock_guard lock(this->mutex);
-        return std::forward<Func>(func)(this->value);
-    }
+}; // namespace this_thread
 
-    [[nodiscard]] T&& release() { return std::move(this->value); }
-};
-
-[[nodiscard]] inline std::size_t max_thread_count() noexcept {
-    const std::size_t detected_threads = std::thread::hardware_concurrency();
-    return detected_threads ? detected_threads : 1;
-    // 'hardware_concurrency()' returns '0' if it can't determine the number of threads,
-    // in this case we can reasonably assume there is a single thread available
-}
-
-// No reason to include the entirety of <algorithm> just for 2 one-liner functions,
-// so we implement 'std::size_t' min/max here
-[[nodiscard]] constexpr std::size_t min_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? b : a; }
-[[nodiscard]] constexpr std::size_t max_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? a : b; }
-
-// Template for automatic loop unrolling.
-//
-// It is used in 'parallel::reduce()' to (optionally) speed up a tight loop while leaving the user
-// with ability to easily control that unrolling. By default NO unrolling is used.
-//
-// Benchmarks indicate speedups ~130% to ~400% depending on CPU, compiler and options
-// large unrolling (32) seems to be the best on benchmarks, however it may bloat the binary
-// and take over too many branch predictor slots in case of min/max reductions, 4-8 seems
-// like a reasonable sweet spot for most machines.
-//
-// One may think that it is a job of compiler to perform such optimizations, yet even with
-// GCC '-Ofast -funroll-all-loop' and GCC unroll pragmas it fails to do them reliably.
-//
-// The reason it fails to do so is pretty clear for '-O2' and below - strictly speaking, most binary
-// operations on floats are non-commutative (sum depends on the order of addition, for example), however
-// since reduction is inherently not-order-preserving there is no harm in reordering operations some more
-// and unrolling the loop so compiler will be able to use SIMD if it sees it as possible (which it often does).
-//
-// Why vectorization of simple loops still tends to fail with '-Ofast' which reduces conformance and
-// allows reordering of math operations is unclear, but this is how it happens when actually measured.
-//
-template <class T, T... indices, class F>
-constexpr void unroll_impl(std::integer_sequence<T, indices...>, F&& f) {
-    (f(std::integral_constant<T, indices>{}), ...);
-}
-template <class T, T count, class F>
-constexpr void unroll_expr(F&& f) {
-    unroll_impl(std::make_integer_sequence<T, count>{}, std::forward<F>(f));
+[[nodiscard]] inline std::size_t hardware_concurrency() noexcept {
+    const std::size_t     detected_count = std::thread::hardware_concurrency();
+    constexpr std::size_t fallback_count = 4;
+    return detected_count ? detected_count : fallback_count;
+    // if 'hardware_concurrency()' struggles to determine the number of threads, we fallback onto a reasonable default
 }
 
 // ===================
 // --- Thread pool ---
 // ===================
 
-// A simple single-queue task threadpool, takes arbitrary callables as tasks,
-// returns optional futures, supports pausing. Work stealing would probably be better
-// in a general case, however it complicates the implementation quite noticeably and
-// doesn't provide much measurable benefit under the API of this module.
+class ThreadPool;
 
-// Note:
-// We don't use 'MutexProtected' here to make implementation a bit more decoupled, plus such idiom isn't nearly as
-// convenient once we enter the realm of non-trivial syncronization with recursive mutexes and condition variables.
+namespace ws_this_thread { // same this as thread introspection from public API, but more convenient for internal use
+inline thread_local ThreadPool* thread_pool_ptr = nullptr;
+inline thread_local std::size_t worker_index    = std::size_t(-1);
+}; // namespace ws_this_thread
 
 class ThreadPool {
+    using task_type         = std::function<void()>;
+    using global_queue_type = std::queue<task_type>;
+    using local_queue_type  = std::deque<task_type>;
+
+    std::vector<std::thread> workers;
+    std::mutex               workers_mutex;
+
+    global_queue_type global_queue;
+    std::mutex        global_queue_mutex;
+
+    std::vector<local_queue_type> local_queues;
+    std::vector<std::mutex>       local_queues_mutexes;
+
+    std::condition_variable task_available_cv;
+    std::condition_variable task_done_cv;
+    std::mutex              task_mutex;
+
+    std::size_t tasks_running = 0; // protected by task mutex
+    std::size_t tasks_pending = 0;
+
+    bool waiting     = false; // protected by task mutex
+    bool terminating = true;
+
 private:
-    std::vector<std::thread>     threads;
-    mutable std::recursive_mutex thread_mutex;
+    void spawn_workers(std::size_t count) {
+        this->workers              = std::vector<std::thread>(count);
+        this->local_queues         = std::vector<local_queue_type>(count);
+        this->local_queues_mutexes = std::vector<std::mutex>(count);
+        {
+            const std::scoped_lock task_lock(this->task_mutex);
+            this->terminating = false;
+        }
+        for (std::size_t i = 0; i < count; ++i) this->workers[i] = std::thread([this, i] { this->worker_main(i); });
+    }
 
-    std::queue<std::packaged_task<void()>> tasks{};
-    mutable std::mutex                     task_mutex;
+    void terminate_workers() {
+        {
+            const std::scoped_lock polling_lock(this->task_mutex);
+            this->terminating = true;
+        }
+        this->task_available_cv.notify_all();
 
-    std::condition_variable task_cv;          // used to notify changes to the task queue
-    std::condition_variable task_finished_cv; // used to notify of finished tasks
+        for (std::size_t i = 0; i < this->workers.size(); ++i)
+            if (this->workers[i].joinable()) this->workers[i].join();
+    }
 
-    // Signals
-    bool stopping = false; // signal for workers to shut down '.worker_main()'
-    bool paused   = false; // signal for workers to not pull new tasks from the queue
-    bool waiting  = false; // signal for workers that they should notify 'task_finished_cv' when
-                           // finishing a task, which is used to implement 'wait for tasks' methods
-
-    int tasks_running = 0; // number of tasks currently executed by workers
-
-    // Main function for worker threads,
-    // here workers wait for the queue, pull new tasks from it and run them
-    void thread_main() {
-        bool task_was_finished = false;
+    void worker_main(std::size_t worker_index) {
+        this_thread::thread_pool_ptr    = this;
+        this_thread::worker_index       = worker_index;
+        ws_this_thread::thread_pool_ptr = this;
+        ws_this_thread::worker_index    = worker_index;
 
         while (true) {
-            std::unique_lock<std::mutex> task_lock(this->task_mutex);
+            std::unique_lock task_lock(this->task_mutex);
 
-            if (task_was_finished) {
-                --this->tasks_running;
-                if (this->waiting) this->task_finished_cv.notify_all();
-                // no need to set 'task_was_finished' back to 'false',
-                // the only way we get back into this condition is if another task was finished
-            }
+            // Wake up thread pool 'wait()' if necessary
+            if (this->waiting && !this->tasks_pending && !this->tasks_running) this->task_done_cv.notify_all();
 
-            // Pool isn't destructing, isn't paused and there are tasks available in the queue
-            //    => continue execution, a new task from the queue and start executing it
-            // otherwise
-            //    => unlock the mutex and wait until a new task is submitted,
-            //       pool is unpaused or destruction is initiated
-            this->task_cv.wait(task_lock, [&] { return this->stopping || (!this->paused && !this->tasks.empty()); });
+            // Tasks pending       => continue execution and pull tasks to execute
+            // Pool is terminating => continue execution and break out of the main loop
+            // otherwise           => wait
+            this->task_available_cv.wait(task_lock, [this] { return this->terminating || this->tasks_pending; });
 
-            if (this->stopping) break; // escape hatch for thread destruction
+            // Terminate if necessary
+            if (this->terminating) break;
 
-            // Pull a new task from the queue and start executing it
-            std::packaged_task<void()> task_to_execute = std::move(this->tasks.front());
-            this->tasks.pop();
-            ++this->tasks_running;
             task_lock.unlock();
 
-            task_to_execute(); // NOTE: Should I catch exceptions here?
-            task_was_finished = true;
+            // Try to pull in a task
+            task_type task;
+            if (this->try_pop_local(task) || this->try_steal(task) || this->try_pop_global(task)) {
+                task_lock.lock();
+                --this->tasks_pending;
+                ++this->tasks_running;
+                task_lock.unlock();
+
+                task();
+
+                task_lock.lock();
+                --this->tasks_running;
+                task_lock.unlock();
+            }
+        }
+
+        this_thread::thread_pool_ptr    = std::nullopt;
+        this_thread::worker_index       = std::nullopt;
+        ws_this_thread::thread_pool_ptr = nullptr;
+        ws_this_thread::worker_index    = std::size_t(-1);
+    }
+
+    void execute_recursive_tasks() {
+        task_type task;
+        while (this->try_pop_local(task) || this->try_steal(task)) {
+            this->task_mutex.lock();
+            --this->tasks_pending;
+            ++this->tasks_running;
+            this->task_mutex.unlock();
+
+            task();
+
+            this->task_mutex.lock();
+            --this->tasks_running;
+            this->task_mutex.unlock();
         }
     }
 
-    void start_threads(std::size_t worker_count_increase) {
-        const std::lock_guard thread_lock(this->thread_mutex);
-        // the mutex has to be recursive because we call '.start_threads()' inside '.set_num_threads()'
-        // which also locks 'worker_mutex', if mutex wan't recursive we would deadlock trying to lock
-        // it a 2nd time on the same thread.
+    bool try_pop_local(task_type& task) {
+        const std::scoped_lock local_queue_lock(this->local_queues_mutexes[ws_this_thread::worker_index]);
 
-        // NOTE: It feels like '.start_threads()' can be split into '.start_threads()' and
-        // '.start_threads_assuming_locked()' which would remove the need for recursive mutex
+        auto& local_queue = this->local_queues[ws_this_thread::worker_index];
 
-        for (std::size_t i = 0; i < worker_count_increase; ++i)
-            this->threads.emplace_back(&ThreadPool::thread_main, this);
+        if (local_queue.empty()) return false;
+
+        task = std::move(local_queue.front());
+        local_queue.pop_front();
+        return true;
     }
 
-    void stop_all_threads() {
-        const std::lock_guard thread_lock(this->thread_mutex);
+    bool try_steal(task_type&) {
+        //
+        return false;
+    }
 
-        {
-            const std::lock_guard task_lock(this->task_mutex);
-            this->stopping = true;
-            this->task_cv.notify_all();
-        } // signals to all threads that they should stop running
+    bool try_pop_global(task_type& task) {
+        const std::scoped_lock global_queue_lock(this->global_queue_mutex);
 
-        for (auto& worker : this->threads)
-            if (worker.joinable()) worker.join();
-        // 'joinable()' checks in needed so we don't try to join the master thread
+        if (this->global_queue.empty()) return false;
 
-        this->threads.clear();
+        task = std::move(this->global_queue.front());
+        this->global_queue.pop();
+        return true;
     }
 
 public:
-    // --- Construction ---
-    // --------------------
+    explicit ThreadPool(std::size_t count = std::thread::hardware_concurrency()) { this->spawn_workers(count); }
 
-    ThreadPool() = default;
-
-    explicit ThreadPool(std::size_t thread_count) { this->start_threads(thread_count); }
-
-    ~ThreadPool() {
-        this->unpause();
-        this->wait_for_tasks();
-        this->stop_all_threads();
+    ~ThreadPool() noexcept {
+        try {
+            this->wait();
+            this->terminate_workers();
+        } catch (...) {} // no throwing from the destructor
     }
 
-    // --- Threads ---
-    // ---------------
+    template <class T = void>
+    struct future_type {
+        std::future<T> future;
 
-    [[nodiscard]] std::size_t get_thread_count() const {
-        const std::lock_guard thread_lock(this->thread_mutex);
-        return this->threads.size();
-    }
-
-    void set_thread_count(std::size_t thread_count) {
-        this->wait_for_tasks(); // all threads need to be free
-
-        const std::size_t current_thread_count = this->get_thread_count();
-
-        if (thread_count == current_thread_count) return;
-        // 'quick escape' so we don't experience too much slowdown when the user calls '.set_thread_count()' repeatedly
-
-        if (thread_count > current_thread_count) {
-            this->start_threads(thread_count - current_thread_count);
-        } else {
-            this->stop_all_threads();
-            {
-                const std::lock_guard task_lock(this->task_mutex);
-                this->stopping = false;
-            }
-            this->start_threads(thread_count);
-            // It is possible to improve implementation by making the pool shrink by joining only the necessary amount
-            // of threads instead of recreating the the whole pool, however that task is non-trivial and would likely
-            // require a more granular signaling with one flag per thread instead of a global 'stopping' flag.
+        void fallthrough() const {
+            if (ws_this_thread::thread_pool_ptr) ws_this_thread::thread_pool_ptr->execute_recursive_tasks();
         }
+
+    public:
+        future_type(std::future<T>&& future) : future(std::move(future)) {} // conversion from regular future
+        future_type& operator=(std::future<T>&& future) {
+            this->future = std::move(future);
+            return *this;
+        }
+
+        using is_recursive = void;
+
+        auto get() {
+            this->fallthrough();
+            return this->future.get();
+        }
+
+        bool valid() const noexcept { return this->future.valid(); }
+
+        void wait() const {
+            this->fallthrough();
+            this->future.wait();
+        }
+
+        template <class Rep, class Period>
+        std::future_status wait_for(const std::chrono::duration<Rep, Period>& timeout_duration) const {
+            this->fallthrough();
+            return this->future.wait_for(timeout_duration);
+        }
+
+        template <class Clock, class Duration>
+        std::future_status wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time) const {
+            this->fallthrough();
+            return this->future.wait_until(timeout_time);
+        }
+    };
+
+    void set_thread_count(std::size_t count) {
+        if (ws_this_thread::thread_pool_ptr == this)
+            throw std::runtime_error("Cannot resize thread pool from its own pool thread.");
+
+        this->wait();
+        this->terminate_workers();
+        this->spawn_workers(count);
     }
 
-    // --- Task queue ---
-    // ------------------
+    [[nodiscard]] std::size_t get_thread_count() noexcept { return this->workers.size(); }
 
-    template <class Func, class... Args>
-    void add_task(Func&& func, Args&&... args) {
-        const std::lock_guard task_lock(this->task_mutex);
-        this->tasks.emplace(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
-        this->task_cv.notify_one(); // wakes up one thread (if possible) so it can pull the new task
-    }
-
-    template <class Func, class... Args,
-              class FuncReturnType = std::invoke_result_t<std::decay_t<Func>, std::decay_t<Args>...>>
-    [[nodiscard]] std::future<FuncReturnType> add_task_with_future(Func&& func, Args&&... args) {
-#if defined(_MSC_VER) || defined(_MSC_FULL_VER)
-        // MSVC messed up implementation of 'std::packaged_task<>' so it is not movable (which,
-        // according to the standard, it should be) and they can't fix it for 7 (and counting) years
-        // because fixing the bug would change the ABI. See this thread about the bug report:
-        // https://developercommunity.visualstudio.com/t/unable-to-move-stdpackaged-task-into-any-stl-conta/108672
-        // As a workaround we wrap the packaged task into a shared pointer and add another layer of packaging.
-        auto new_task = std::make_shared<std::packaged_task<FuncReturnType()>>(
-            std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
-        this->add_task([new_task] { (*new_task)(); }); // horrible
-        return new_task->get_future();
-#else
-        std::packaged_task<FuncReturnType()> new_task(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
-        auto                                 future = new_task.get_future();
-        this->add_task(std::move(new_task));
-        return future;
-#endif
-    }
-
-    void wait_for_tasks() {
+    void wait() {
         std::unique_lock task_lock(this->task_mutex);
+
         this->waiting = true;
-        this->task_finished_cv.wait(task_lock, [&] { return this->tasks.empty() && this->tasks_running == 0; });
+        this->task_done_cv.wait(task_lock, [this] { return !this->tasks_pending && !this->tasks_running; });
         this->waiting = false;
     }
 
-    void clear_task_queue() {
-        const std::lock_guard task_lock(this->task_mutex);
-        this->tasks = {}; // for some reason 'std::queue' has no '.clear()', complexity O(N)
+    template <class F, class... Args>
+    void detached_task(F&& f, Args&&... args) {
+        auto closure = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+
+        // Recursive tasks
+        if (ws_this_thread::thread_pool_ptr == this) {
+            const std::scoped_lock local_queue_lock(this->local_queues_mutexes[ws_this_thread::worker_index]);
+            this->local_queues[ws_this_thread::worker_index].push_front(std::move(closure));
+        }
+        // Regular tasks
+        else {
+            const std::scoped_lock global_queue_mutex(this->global_queue_mutex);
+            this->global_queue.emplace(std::move(closure));
+        }
+
+        const std::scoped_lock task_lock(this->task_mutex);
+        ++this->tasks_pending;
+        this->task_available_cv.notify_one();
     }
 
-    // --- Pausing ---
-    // ---------------
+    template <class F, class... Args, class R = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>
+    future_type<R> awaitable_task(F&& f, Args&&... args) {
+        auto closure = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
 
-    void pause() {
-        const std::lock_guard task_lock(this->task_mutex);
-        this->paused = true;
-    }
+        const std::shared_ptr<std::promise<R>> promise = std::make_shared<std::promise<R>>();
+        // ideally we could just move promise into a lambda and use it as is, however that makes the lambda
+        // non-copyable (since promise itself is move-only) which doesn't work with 'std::function<>', this
+        // is fixed in C++23 with 'std::move_only_function<>'
 
-    void unpause() {
-        const std::lock_guard task_lock(this->task_mutex);
-        this->paused = false;
-        this->task_cv.notify_all();
-    }
+        future_type<R> future = promise->get_future();
 
-    [[nodiscard]] bool is_paused() const {
-        const std::lock_guard task_lock(this->task_mutex);
-        return this->paused;
+        this->detached_task([closure = std::move(closure), promise = std::move(promise)]() mutable {
+            try {
+                if constexpr (std::is_void_v<R>) {
+                    closure();
+                    promise->set_value();
+                } else {
+                    promise->set_value(closure());
+                } // 'promise->set_value(f())' when 'f()' returns 'void' is a compile error, so we use a workaround
+            } catch (...) {
+                try {
+                    promise->set_exception(std::current_exception()); // this may still throw
+                } catch (...) {}
+            }
+        });
+
+        return future;
     }
 };
 
-// =====================================
-// --- Static thread pool operations ---
-// =====================================
+template <class T = void>
+using Future = ThreadPool::future_type<T>;
 
-inline ThreadPool& static_thread_pool() {
-    // no '[nodiscard]' since a call to this function might be used to initialize a threadpool
-    static ThreadPool pool(max_thread_count());
-    return pool;
-}
+// ==============
+// --- Ranges ---
+// ==============
 
-[[nodiscard]] inline std::size_t get_thread_count() { return static_thread_pool().get_thread_count(); }
+// --- SFINAE helpers ---
+// ----------------------
 
-inline void set_thread_count(std::size_t thread_count) { static_thread_pool().set_thread_count(thread_count); }
+template <bool Cond>
+using require = std::enable_if_t<Cond, bool>;
 
-// ================
-// --- Task API ---
-// ================
+template <class T, class... Args>
+using require_invocable = require<std::is_invocable_v<T, Args...>>;
+// this is simple convenience
 
-template <class Func, class... Args>
-void task(Func&& func, Args&&... args) {
-    static_thread_pool().add_task(std::forward<Func>(func), std::forward<Args>(args)...);
-}
+template <class T, class = void>
+struct has_iter : std::false_type {};
+template <class T>
+struct has_iter<T, std::void_t<decltype(std::declval<typename T::iterator>())>> : std::true_type {};
 
-template <class Func, class... Args>
-auto task_with_future(Func&& func, Args&&... args)
-    -> std::future<std::invoke_result_t<std::decay_t<Func>, std::decay_t<Args>...>> {
-    return static_thread_pool().add_task_with_future(std::forward<Func>(func), std::forward<Args>(args)...);
-}
+template <class T, class = void>
+struct has_const_iter : std::false_type {};
+template <class T>
+struct has_const_iter<T, std::void_t<decltype(std::declval<typename T::const_iterator>())>> : std::true_type {};
 
-inline void wait_for_tasks() { static_thread_pool().wait_for_tasks(); }
+template <class T>
+using require_has_some_iter = require<has_iter<T>::value || has_const_iter<T>::value>;
+// needed to restrict template 'Range' constructor from a container, otherwise it takes priority over copy / move ctors
 
-// =======================
-// --- Parallel ranges ---
-// =======================
+template <class T, class = void>
+struct is_recursive : std::false_type {};
+template <class T>
+struct is_recursive<T, std::void_t<decltype(std::declval<typename T::is_recursive>())>> : std::true_type {};
+template <class T>
+constexpr bool is_recursive_v = is_recursive<T>::value;
+
+// --- Utils ---
+// -------------
+
+[[nodiscard]] constexpr std::size_t min_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? b : a; }
+[[nodiscard]] constexpr std::size_t max_size(std::size_t a, std::size_t b) noexcept { return (b < a) ? a : b; }
+// no reason to include the entirety of <algorithm> just for 2 one-liners
 
 constexpr std::size_t default_grains_per_thread = 4;
-// by default we distribute 4 tasks per thread, this number is purely empirical.
-// We don't want to split up work into too many tasks (like with 'grain_size = 1')
-// yet we want it to be a bit more granular than doing 1 task per thread since
-// that would be horrible if tasks are noticeably uneven.
+// by default we distribute 4 tasks per thread, this number is purely empirical. We don't want to split up
+// work into too many tasks (like with 'grain_size = 1'), yet we want it to be a bit more granular than
+// doing 1 task per thread since that would be horrible if tasks are noticeably uneven.
 
-// Note:
-// In range constructors we intentionally allow some possibly narrowing conversions like 'it1 - it2' to 'size_t'
-// for better compatibility with containers that can use large ints as their difference type
+// --- Range ---
+// -------------
 
-template <class Idx>
-struct IndexRange {
-    Idx         first;
-    Idx         last;
-    std::size_t grain_size;
-
-    IndexRange() = delete;
-    constexpr IndexRange(Idx first, Idx last, std::size_t grain_size)
-        : first(first), last(last), grain_size(grain_size) {}
-    IndexRange(Idx first, Idx last)
-        : IndexRange(first, last, max_size(1, (last - first) / (get_thread_count() * default_grains_per_thread))){};
-};
-
-template <class Iter>
+template <class It>
 struct Range {
-    Iter        begin;
-    Iter        end;
+    It          begin;
+    It          end;
     std::size_t grain_size;
 
     Range() = delete;
-    constexpr Range(Iter begin, Iter end, std::size_t grain_size) : begin(begin), end(end), grain_size(grain_size) {}
-    Range(Iter begin, Iter end)
-        : Range(begin, end, max_size(1, (end - begin) / (get_thread_count() * default_grains_per_thread))) {}
+
+    constexpr Range(It begin, It end, std::size_t grain_size) : begin(begin), end(end), grain_size(grain_size) {}
+
+    Range(It begin, It end)
+        : Range(begin, end, max_size(1, (end - begin) / (hardware_concurrency() * default_grains_per_thread))) {}
 
 
-    template <class Container>
+    template <class Container, require<has_const_iter<Container>::value> = true>
     Range(const Container& container) : Range(container.begin(), container.end()) {}
 
-    template <class Container>
+    template <class Container, require<has_iter<Container>::value> = true>
     Range(Container& container) : Range(container.begin(), container.end()) {}
 }; // requires random-access iterator, but no good way to express that before C++20 concepts
 
-// User-defined deduction guides
-//
-// By default, template constructors cannot deduce template argument 'Iter',
-// however it is possible to define a custom deduction guide and achieve what we want
-//
-// See: https://en.cppreference.com/w/cpp/language/class_template_argument_deduction#User-defined_deduction_guides
+// CTAD for deducing iterator range from a container
 template <class Container>
 Range(const Container& container) -> Range<typename Container::const_iterator>;
 
 template <class Container>
 Range(Container& container) -> Range<typename Container::iterator>;
 
-// ==========================
-// --- 'Parallel for' API ---
-// ==========================
+// --- Index range ---
+// -------------------
 
-template <class Idx, class Func>
-void for_loop(IndexRange<Idx> range, Func&& func) {
-    for (Idx i = range.first; i < range.last; i += range.grain_size)
-        task(std::forward<Func>(func), i, min_size(i + range.grain_size, range.last));
+template <class Idx = std::ptrdiff_t>
+struct IndexRange {
+    Idx         first;
+    Idx         last;
+    std::size_t grain_size;
 
-    wait_for_tasks();
-}
+    IndexRange() = delete;
 
-template <class Iter, class Func>
-void for_loop(Range<Iter> range, Func&& func) {
-    for (Iter i = range.begin; i < range.end; i += range.grain_size)
-        task(std::forward<Func>(func), i, i + min_size(range.grain_size, range.end - i));
+    constexpr IndexRange(Idx first, Idx last, std::size_t grain_size)
+        : first(first), last(last), grain_size(grain_size) {}
 
-    wait_for_tasks();
-}
+    IndexRange(Idx first, Idx last)
+        : IndexRange(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {}
 
-template <class Container, class Func>
-void for_loop(Container&& container, Func&& func) {
-    for_loop(Range{std::forward<Container>(container)}, std::forward<Func>(func));
-}
+    template <class Idx1, class Idx2>
+    constexpr IndexRange(Idx1 first, Idx2 last, std::size_t grain_size)
+        : first(first), last(last), grain_size(grain_size) {}
 
-// =============================
-// --- 'Parallel reduce' API ---
-// =============================
+    template <class Idx1, class Idx2>
+    IndexRange(Idx1 first, Idx2 last)
+        : IndexRange(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {}
+};
 
-constexpr std::size_t default_unroll = 1;
+// Note: It is common to have a ranges from 'int' to 'std::size_t' (for example 'IndexRange{0, vec.size()}'),
+//       in such cases we assume 'std::ptrdiff_t' as a reasonable default
 
-template <std::size_t unroll = default_unroll, class BinaryOp, class Iter, class T = typename Iter::value_type>
-auto reduce(Range<Iter> range, BinaryOp&& op) -> T {
+// =================
+// --- Scheduler ---
+// =================
 
-    MutexProtected<T> result = *range.begin;
-    // we have to start from the 1st element and not 'T{}' because there is no guarantee
-    // than doing so would be correct for some non-trivial 'T' and 'op'
+// There is a ton of boilerplate since we need a whole bunch of convenience overloads
+// (ranges / index ranges / containers, blocked functions / iteration functions, etc.),
+// but conceptually it's all quite simple we end up with 2 overloads for tasks,
+// 6+6+3=15 overloads for parallel-for and 4+4+2=10 overloads for reduce
 
-    for_loop(Range<Iter>{range.begin + 1, range.end, range.grain_size}, [&](Iter low, Iter high) {
-        const std::size_t range_size = high - low;
+#define utl_parallel_assert_message                                                                                    \
+    "Awaitable loops require recursive task support from the 'future_type' of 'Scheduler' backend. "                   \
+    "Future can signal such support by  providing a 'using is_recursive = void' member typedef."
+// 'static_assert()' only supports string literals, cannot use constexpr variable here, assert itself
+// shouldn't be included in the macro as it makes error messages uglier due to macro expansion
 
-        // Execute unrolled loop if unrolling is enabled and the range is sufficiently large
-        if constexpr (unroll > 1)
-            if (range_size > unroll) {
-                // (parallel section) Compute partial result (unrolled for SIMD)
-                // Reduce unrollable part
-                std::array<T, unroll> partial_results;
-                unroll_expr<std::size_t, unroll>([&](std::size_t j) { partial_results[j] = *(low + j); });
-                Iter it = low + unroll;
-                for (; it < high - unroll; it += unroll)
-                    unroll_expr<std::size_t, unroll>(
-                        [&, it](std::size_t j) { partial_results[j] = op(partial_results[j], *(it + j)); });
-                // Reduce remaining elements
-                for (; it < high; ++it) partial_results[0] = op(partial_results[0], *it);
-                // Collect the result
-                for (std::size_t i = 1; i < partial_results.size(); ++i)
-                    partial_results[0] = op(partial_results[0], partial_results[i]);
+template <class Backend = ThreadPool>
+struct Scheduler {
+    ThreadPool backend; // underlying thread pool // TEMP: Remove after finalizing Impl.
 
-                // (critical section) Add partial result to the global one
-                result.apply([&](auto&& res) { res = op(std::forward<decltype(res)>(res), partial_results[0]); });
+    template <class T = void>
+    using future_type = typename Backend::template future_type<T>;
 
-                return; // skip the non-unrolled version
-            }
+    // --- Task API ---
+    // ----------------
 
-        // Fallback onto a regular reduction loop otherwise
-        // (parallel section) Compute partial result
-        T partial_result = *low;
-        for (auto it = low + 1; it != high; ++it) partial_result = op(partial_result, *it);
+    template <class F, class... Args>
+    void detached_task(F&& f, Args&&... args) {
+        this->backend.detached_task(std::forward<F>(f), std::forward<Args>(args)...);
+    }
 
-        // (critical section) Add partial result to the global one
-        result.apply([&](auto&& res) { res = op(std::forward<decltype(res)>(res), partial_result); });
-    });
+    template <class F, class... Args, class R = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>
+    future_type<R> awaitable_task(F&& f, Args&&... args) {
+        return this->backend.awaitable_task(std::forward<F>(f), std::forward<Args>(args)...);
+    }
 
-    // Note 1:
-    // We could also collect results into an array of partial results and then reduce it on the
-    // main thread at the end, but that leads to a much less clean implementation and doesn't
-    // seem to be measurably faster.
+    // --- Parallel-for API ---
+    // ------------------------
 
-    // Note 2:
-    // 'if constexpr (unroll > 1)' ensures that unrolling logic will have no effect
-    //  whatsoever on the non-unrolled version of the template, it will not even compile.
+    // - 'Range' overloads (6) -
 
-    return result.release();
-}
+    template <class It, class F, require_invocable<F, It, It> = true> // blocked loop iteration overload
+    void detached_loop(Range<It> range, F&& f) {
+        for (It it = range.begin; it < range.end; it += range.grain_size)
+            this->detached_task(f, it, it + min_size(range.grain_size, range.end - it));
+        // 'min_size(...)' bit takes care of the unevenly sized tail segment
+    }
 
-template <std::size_t unroll = default_unroll, class BinaryOp, class Container>
-auto reduce(Container&& container, BinaryOp&& op) -> typename std::decay_t<Container>::value_type {
-    return reduce<unroll>(Range{std::forward<Container>(container)}, std::forward<BinaryOp>(op));
-}
+    template <class It, class F, require_invocable<F, It> = true> // single loop iteration overload
+    void detached_loop(Range<It> range, F&& f) {
+        auto iterate_block = [f = std::forward<F>(f)](It low, It high) { // combine individual index
+            for (It it = low; it < high; ++it) f(it);                    // calls into blocks and forward
+        };                                                               // into a blocked loop iteration overload
+        this->detached_loop(range, std::move(iterate_block));
+    }
 
-// --- Pre-defined binary ops ---
-// ------------------------------
+    template <class It, class F, require_invocable<F, It, It> = true>
+    void blocking_loop(Range<It> range, F&& f) {
+        std::vector<future_type<>> futures;
+
+        for (It it = range.begin; it < range.end; it += range.grain_size)
+            futures.emplace_back(this->awaitable_task(f, it, it + min_size(range.grain_size, range.end - it)));
+
+        for (auto& future : futures) future.wait();
+    }
+
+    template <class It, class F, require_invocable<F, It> = true>
+    void blocking_loop(Range<It> range, F&& f) {
+        auto iterate_block = [f = std::forward<F>(f)](It low, It high) {
+            for (It it = low; it < high; ++it) f(it);
+        };
+        this->blocking_loop(range, std::move(iterate_block));
+    }
+
+    template <class It, class F, require_invocable<F, It, It> = true>
+    future_type<> awaitable_loop(Range<It> range, F&& f) {
+        static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
+
+        auto submit_loop = [this, range, f = std::forward<F>(f)] { this->blocking_loop(range, f); };
+        return this->awaitable_task(std::move(submit_loop));
+        // to wait for multiple tasks we need a vector of futures, since logically we want API to return regular
+        // 'future_type<>' rather than some composite construct, we can wrap block awaiting into another task
+        // that will "merge" all those futures into a single one for the user, this requires recursive task
+        // support from the backend so it's provided conditionally
+    }
+
+    template <class It, class F, require_invocable<F, It> = true>
+    future_type<> awaitable_loop(Range<It> range, F&& f) {
+        static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
+
+        auto iterate_block = [f = std::forward<F>(f)](It low, It high) {
+            for (It it = low; it < high; ++it) f(it);
+        };
+        return this->awaitable_loop(range, std::move(iterate_block));
+    }
+
+    // - 'IndexRange' overloads (6) -
+
+    template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
+    void detached_loop(IndexRange<Idx> range, F&& f) {
+        for (Idx i = range.first; i < range.last; i += range.grain_size)
+            this->detached_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last)));
+    }
+
+    template <class Idx, class F, require_invocable<F, Idx> = true>
+    void detached_loop(IndexRange<Idx> range, F&& f) {
+        auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
+            for (Idx i = low; i < high; ++i) f(i);
+        };
+        this->detached_loop(range, std::move(iterate_block));
+    }
+
+    template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
+    void blocking_loop(IndexRange<Idx> range, F&& f) {
+        std::vector<future_type<>> futures;
+
+        for (Idx i = range.first; i < range.last; i += range.grain_size)
+            futures.emplace_back(
+                this->awaitable_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last))));
+
+        for (auto& future : futures) future.wait();
+    }
+
+    template <class Idx, class F, require_invocable<F, Idx> = true>
+    void blocking_loop(IndexRange<Idx> range, F&& f) {
+        auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
+            for (Idx i = low; i < high; ++i) f(i);
+        };
+        this->blocking_loop(range, std::move(iterate_block));
+    }
+
+    template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
+    future_type<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+        static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
+
+        auto submit_loop = [this, range, f = std::forward<F>(f)] { this->blocking_loop(range, f); };
+        return this->awaitable_task(std::move(submit_loop));
+    }
+
+    template <class Idx, class F, require_invocable<F, Idx> = true>
+    future_type<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+        static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
+
+        auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
+            for (Idx i = low; i < high; ++i) f(i);
+        };
+        return this->awaitable_loop(range, std::move(iterate_block));
+    }
+
+    // - 'Container' overloads (3) -
+
+    template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true> // without SFINAE reqs
+    void detached_loop(Container&& container, F&& f) {                                         // such overloads would
+        this->detached_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));    // always get picked
+    }                                                                                          // over others
+
+    template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
+    void blocking_loop(Container&& container, F&& f) {
+        this->blocking_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));
+    }
+
+    template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
+    future_type<> awaitable_loop(Container&& container, F&& f) {
+        return this->awaitable_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));
+    }
+
+    // TODO: Reductions
+};
+
+#undef utl_parallel_assert_message
+
+// =========================
+// --- Binary operations ---
+// =========================
 
 // Note 1:
-// Defining binary operations as free-standing functions has a huge negative
-// effect on parallel::reduce performance, for example on 4 threads:
-//    binary op is 'sum'        => speedup ~90%-180%
-//    binary op is 'struct sum' => speedup ~370%
-// This is caused by failed inlining and seems to be the reason why standard library implements
-// 'std::plus' as a functor class and not a free-standing function. I spent 2 hours of my life
-// and 4 rewrites of 'parallel::reduce()' on this.
+// Binary operations should be implemented as functors similarly to 'std::plus<>',
+// defining them as free-standing functions poses a huge challenge for inlining due
+// to function pointer indirection, this can cause x2-x4 performance degradation.
 
 // Note 2:
-// 'sum' & 'prod' can are just aliases for standard functors, 'min' & 'max' on the other hand
-// require custom, implementation. Note the '<void>' specialization for transparent functors,
-// see https://en.cppreference.com/w/cpp/utility/functional
+// Sum / prod can be defined as aliases for standard functors. Min / max require custom implementation.
+// Note the '<void>' specialization for transparent functors, see "transparent function objects" on
+// https://en.cppreference.com/w/cpp/functional.html
 
 template <class... Args>
 using sum = std::plus<Args...>; // without variadic 'Args...' we wouldn't be able to alias 'std::plus<>'
@@ -559,31 +698,127 @@ struct max<void> {
     using is_transparent = std::less<>::is_transparent;
 };
 
+// =======================
+// --- Global executor ---
+// =======================
+
+// A convenient copy of the threadpool & scheduler API hooked up to a global lazily-initialized thread pool
+
+auto& global_scheduler() {
+    static Scheduler scheduler;
+    return scheduler;
+}
+
+// --- Thread pool API ---
+// -----------------------
+
+void set_thread_count(std::size_t count = hardware_concurrency()) {
+    global_scheduler().backend.set_thread_count(count);
+}
+
+std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
+
+// --- Scheduler API ---
+// ---------------------
+
+// Note: We could significantly reduce boilerplate by just using a macro to define functions forwarding everything to
+//       global scheduler and returning auto, however this messes up LSP autocomplete for users, so we do it manually
+
+// - Task API -
+
+template <class F, class... Args>
+void detached_task(F&& f, Args&&... args) {
+    global_scheduler().detached_task(std::forward<F>(f), std::forward<Args>(args)...);
+}
+
+template <class F, class... Args, class R = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>
+Future<R> awaitable_task(F&& f, Args&&... args) {
+    return global_scheduler().awaitable_task(std::forward<F>(f), std::forward<Args>(args)...);
+}
+
+// - Parallel-for API -
+
+template <class It, class F>
+void detached_loop(Range<It> range, F&& f) {
+    global_scheduler().detached_loop(range, std::forward<F>(f));
+}
+
+template <class It, class F>
+void blocking_loop(Range<It> range, F&& f) {
+    global_scheduler().blocking_loop(range, std::forward<F>(f));
+}
+
+template <class It, class F>
+auto awaitable_loop(Range<It> range, F&& f) {
+    return global_scheduler().awaitable_loop(range, std::forward<F>(f));
+}
+
+template <class Idx, class F>
+void detached_loop(IndexRange<Idx> range, F&& f) {
+    global_scheduler().detached_loop(range, std::forward<F>(f));
+}
+
+template <class Idx, class F>
+void blocking_loop(IndexRange<Idx> range, F&& f) {
+    global_scheduler().blocking_loop(range, std::forward<F>(f));
+}
+
+template <class Idx, class F>
+Future<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+    return global_scheduler().awaitable_loop(range, std::forward<F>(f));
+}
+
+template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
+void detached_loop(Container&& container, F&& f) {
+    global_scheduler().detached_loop(std::forward<Container>(container), std::forward<F>(f));
+}
+
+template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
+void blocking_loop(Container&& container, F&& f) {
+    global_scheduler().blocking_loop(std::forward<Container>(container), std::forward<F>(f));
+}
+
+template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
+Future<> awaitable_loop(Container&& container, F&& f) {
+    return global_scheduler().awaitable_loop(std::forward<Container>(container), std::forward<F>(f));
+}
+
+// TODO: Reductions
+
 } // namespace utl::parallel::impl
 
 // ______________________ PUBLIC API ______________________
 
 namespace utl::parallel {
 
+using impl::Scheduler;
 using impl::ThreadPool;
-
-using impl::static_thread_pool;
-using impl::get_thread_count;
-using impl::set_thread_count;
+using impl::Future;
 
 using impl::Range;
 using impl::IndexRange;
-
-using impl::task;
-using impl::task_with_future;
-using impl::wait_for_tasks;
-using impl::for_loop;
-using impl::reduce;
 
 using impl::sum;
 using impl::prod;
 using impl::min;
 using impl::max;
+
+using impl::set_thread_count;
+using impl::get_thread_count;
+
+using impl::detached_task;
+using impl::awaitable_task;
+
+using impl::detached_loop;
+using impl::blocking_loop;
+using impl::awaitable_loop;
+
+// using impl::blocking_reduce;
+// using impl::awaitable_reduce;
+
+namespace this_thread = impl::this_thread;
+
+using impl::hardware_concurrency;
 
 } // namespace utl::parallel
 

@@ -45,10 +45,14 @@ utl_add_example("module_math/index_functions")
 utl_add_example("module_math/summation_and_product")
 utl_add_example("module_math/template_math_functions")
 # TODO: Add 'module_mvl/' examples after the rewrite
-utl_add_example("module_parallel/launching_async_tasks_with_future")
-utl_add_example("module_parallel/launching_async_tasks")
+utl_add_example("module_parallel/awaitable_parallel_loop_with_specific_grain_size")
+utl_add_example("module_parallel/awaitable_tasks")
+utl_add_example("module_parallel/detached_tasks")
 utl_add_example("module_parallel/parallel_for_loop")
-utl_add_example("module_parallel/reducing_over_a_binary_operation")
+utl_add_example("module_parallel/recursive_tasks")
+# utl_add_example("module_parallel/reducing_over_a_binary_operation")
+utl_add_example("module_parallel/thread_introspection")
+utl_add_example("module_parallel/using_a_local_thread_pool")
 # TODO: 'module_predef/'
 # TODO: 'module_profiler/'
 # TODO: 'module_progressbar/'

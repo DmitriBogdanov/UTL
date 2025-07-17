@@ -33,6 +33,7 @@
 # Ignore build & temporary directories regardless of their contents
 .cache/
 .cache-cppcheck/
+.vscode/
 build/
 temp/
 snippets/
