@@ -24,17 +24,26 @@
 // --- Utils ---
 // =============
 
-// --- Throw-checking ---
-// ----------------------
+// --- Printing ---
+// ----------------
 
-// template <class Func>
-// [[nodiscard]] bool check_if_throws(Func f) noexcept {
-//     bool throws = false;
-//     try {
-//         f();
-//     } catch (...) { throws = true; }
-//     return throws;
-// }
+template <class... Args>
+void println(Args... args) {
+    std::ostringstream oss;
+    (oss << ... << args) << std::endl;
+    std::cout << oss.str(); // prevents message intermixing when writing from multiple threads
+}
+
+// --- Repeating ---
+// -----------------
+
+template <class Func>
+void repeat(std::size_t repeats, Func&& func) {
+    for (std::size_t i = 1; i <= repeats; ++i) {
+        println("--------- Try ", i, " ---------");
+        func();
+    }
+}
 
 // --- Shortened numeric limits ---
 // --------------------------------

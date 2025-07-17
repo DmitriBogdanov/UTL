@@ -15,5 +15,5 @@ int main() {
         return future_prev_1.get() + future_prev_2.get();
     };
     
-    assert( fibonacci(12) == 144 );
+    assert( fibonacci(8) == 21 );
 }

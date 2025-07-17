@@ -718,6 +718,8 @@ void set_thread_count(std::size_t count = hardware_concurrency()) {
 
 std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
 
+void wait() { global_scheduler().backend.wait(); }
+
 // --- Scheduler API ---
 // ---------------------
 
@@ -805,6 +807,7 @@ using impl::max;
 
 using impl::set_thread_count;
 using impl::get_thread_count;
+using impl::wait;
 
 using impl::detached_task;
 using impl::awaitable_task;

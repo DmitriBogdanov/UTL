@@ -12,5 +12,5 @@ int main() {
     
     // ... do some work in the meantime ...
     
-    // Destructor will automatically wait for ongoing tasks to finish before exiting 'main()'
+    parallel::wait(); // wait for tasks to complete
 }
