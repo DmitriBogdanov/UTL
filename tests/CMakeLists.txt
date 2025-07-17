@@ -12,7 +12,7 @@ function(utl_add_test file_name)
     
     add_test(
         NAME ${target_name}
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors --success
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
     
@@ -42,6 +42,7 @@ utl_add_test("module_log/custom_stringifier")
 utl_add_test("module_log/stringifier")
 utl_add_test("module_log/styling")
 utl_add_test("module_mvl/experimental")
+utl_add_test("module_parallel/fuzzing")
 utl_add_test("module_parallel/parallel_for_api")
 utl_add_test("module_parallel/thread_pool_basics")
 utl_add_test("module_random/mean_min_max_sanity")

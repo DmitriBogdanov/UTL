@@ -8,9 +8,9 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-constexpr std::size_t repeats = 4;
+constexpr std::size_t repeats = 1;
 // we run tests multiple times to increase the chance of catching race conditions,
-// this is usually kept low for CI build, and can be increased locally for better coverage
+// this is usually kept low for CI builds, can be increased locally for better coverage
 
 constexpr std::size_t threads = 7;    // weird number of threads
 constexpr std::size_t N       = 1367; // prime number to make things never evenly divisible

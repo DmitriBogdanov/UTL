@@ -10,7 +10,7 @@
 
 constexpr std::size_t repeats = 10;
 // we run tests multiple times to increase the chance of catching race conditions
-// this is usually kept low for CI build, and can be increased locally for better coverage
+// this is usually kept low for CI builds, can be increased locally for better coverage
 
 TEST_CASE("Threadpool basics / Construct and resize") {
     repeat(repeats, [] {
