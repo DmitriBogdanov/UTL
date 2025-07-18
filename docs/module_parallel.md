@@ -357,7 +357,7 @@ Returns [`std::nullopt`](https://en.cppreference.com/w/cpp/utility/optional/null
 
 ### Detached tasks
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/KGj7Kq1se) ]
 
 ```cpp
 using namespace utl;
@@ -374,7 +374,7 @@ parallel::wait(); // wait for tasks to complete
 
 ### Awaitable tasks
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/TeWPvfa8o) ]
 
 ```cpp
 double some_heavy_computation(double x) {
@@ -399,7 +399,7 @@ assert( result == 42 );
 
 ### Parallel for loop
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/Kzq3jhEhh) ]
 
 ```cpp
 double f(double x) { return std::exp(std::sin(x)); }
@@ -427,7 +427,7 @@ parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int low, int high) {
 
 ### Reducing over a binary operation
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/fzn1P5WYh) ]
 
 ```cpp
 using namespace utl;
@@ -447,7 +447,7 @@ assert( subrange_sum == (200'000 - 100) * 2 );
 
 ### Using a local thread pool
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/rqPv16eMf) ]
 
 ```cpp
 using namespace utl;
@@ -462,11 +462,12 @@ pool.set_thread_count(0); // will wait for the tasks, join all threads and relea
 Output:
 
 ```
+Hello from the task
 ```
 
 ### Recursive tasks
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/49M48W4sc) ]
 
 ```cpp
 using namespace utl;
@@ -486,7 +487,7 @@ assert( fibonacci(8) == 21 );
 
 ### Awaitable parallel loop with specific grain size
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/fddxr5e84) ]
 
 ```cpp
 using namespace utl;
@@ -513,7 +514,7 @@ for (std::size_t i = 0; i < 200'000; ++i) assert( c[i] == a[i] + b[i] );
 
 ### Thread introspection
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/E4MedbavK) ]
 
 ```cpp
 using namespace utl;
@@ -537,6 +538,8 @@ std_future.wait();
 Output:
 
 ```
+I am a thread [0] in the pool [0x5f0c90a781f0]
+Am I a pool thread? -> false
 ```
 
 ## Motivation
