@@ -512,7 +512,7 @@ struct Scheduler {
 
     template <class It, class F, require_invocable<F, It, It> = true> // blocked loop iteration overload
     void detached_loop(Range<It> range, F&& f) {
-        for (It it = range.begin; it < range.end; it += range.grain_size)
+        for (It it = range.begin; it < range.end; it += min_size(range.grain_size, range.end - it))
             this->detached_task(f, it, it + min_size(range.grain_size, range.end - it));
         // 'min_size(...)' bit takes care of the unevenly sized tail segment
     }
@@ -529,7 +529,7 @@ struct Scheduler {
     void blocking_loop(Range<It> range, F&& f) {
         std::vector<future_type<>> futures;
 
-        for (It it = range.begin; it < range.end; it += range.grain_size)
+        for (It it = range.begin; it < range.end; it += min_size(range.grain_size, range.end - it))
             futures.emplace_back(this->awaitable_task(f, it, it + min_size(range.grain_size, range.end - it)));
 
         for (auto& future : futures) future.wait();
