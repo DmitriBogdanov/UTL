@@ -6991,10 +6991,17 @@ struct IndexRange {
 
 template <class Backend = ThreadPool>
 struct Scheduler {
-    ThreadPool backend; // underlying thread pool // TEMP: Remove after finalizing Impl.
+
+    // --- Backend ---
+    // ---------------
+
+    Backend backend; // underlying thread pool
 
     template <class T = void>
     using future_type = typename Backend::template future_type<T>;
+
+    template <class... Args>
+    explicit Scheduler(Args&&... args) : backend(std::forward<Args>(args)...) {}
 
     // --- Task API ---
     // ----------------
@@ -7139,7 +7146,46 @@ struct Scheduler {
         return this->awaitable_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));
     }
 
-    // TODO: Reductions
+    // --- Parallel-reduce API ---
+    // ---------------------------
+
+    // - 'Range' overloads (2) -
+
+    template <class It, class Op, class R = typename It::value_type>
+    R blocking_reduce(Range<It> range, Op&& op) {
+        if (range.begin == range.end) throw std::runtime_error("Reduction over an empty range is undefined");
+
+        R          result = *range.begin;
+        std::mutex result_mutex;
+
+        this->blocking_loop(Range<It>{range.begin + 1, range.end}, [&](It low, It high) {
+            R partial_result = *low;
+            for (auto it = low + 1; it != high; ++it) partial_result = op(partial_result, *it);
+
+            const std::scoped_lock result_lock(result_mutex);
+            result = op(result, partial_result);
+        });
+
+        return result;
+    }
+
+    template <class It, class Op, class R = typename It::value_type>
+    future_type<R> awaitable_reduce(Range<It> range, Op&& op) {
+        auto submit_reduce = [this, range, op = std::forward<Op>(op)] { return this->blocking_reduce(range, op); };
+        return this->awaitable_task(std::move(submit_reduce));
+    }
+
+    // - 'Container' overloads (2) -
+
+    template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
+    R blocking_reduce(Container&& container, Op&& op) {
+        return this->blocking_reduce(Range{std::forward<Container>(container)}, std::forward<Op>(op));
+    }
+
+    template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
+    future_type<R> awaitable_reduce(Container&& container, Op&& op) {
+        return this->awaitable_reduce(Range{std::forward<Container>(container)}, std::forward<Op>(op));
+    }
 };
 
 #undef utl_parallel_assert_message
@@ -7164,7 +7210,7 @@ using sum = std::plus<Args...>; // without variadic 'Args...' we wouldn't be abl
 template <class... Args>
 using prod = std::multiplies<Args...>;
 
-template <class T>
+template <class T = void>
 struct min {
     constexpr const T& operator()(const T& lhs, const T& rhs) const noexcept(noexcept((lhs < rhs) ? lhs : rhs)) {
         return (lhs < rhs) ? lhs : rhs;
@@ -7183,7 +7229,7 @@ struct min<void> {
     using is_transparent = std::less<>::is_transparent;
 };
 
-template <class T>
+template <class T = void>
 struct max {
     constexpr const T& operator()(const T& lhs, const T& rhs) const noexcept(noexcept((lhs < rhs) ? rhs : lhs)) {
         return (lhs < rhs) ? rhs : lhs;
@@ -7289,7 +7335,25 @@ Future<> awaitable_loop(Container&& container, F&& f) {
     return global_scheduler().awaitable_loop(std::forward<Container>(container), std::forward<F>(f));
 }
 
-// TODO: Reductions
+template <class It, class Op, class R = typename It::value_type>
+R blocking_reduce(Range<It> range, Op&& op) {
+    return global_scheduler().blocking_reduce(range, std::forward<Op>(op));
+}
+
+template <class It, class Op, class R = typename It::value_type>
+Future<R> awaitable_reduce(Range<It> range, Op&& op) {
+    return global_scheduler().awaitable_reduce(range, std::forward<Op>(op));
+}
+
+template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
+R blocking_reduce(Container&& container, Op&& op) {
+    return global_scheduler().blocking_reduce(std::forward<Container>(container), std::forward<Op>(op));
+}
+
+template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
+Future<R> awaitable_reduce(Container&& container, Op&& op) {
+    return global_scheduler().awaitable_reduce(std::forward<Container>(container), std::forward<Op>(op));
+}
 
 } // namespace utl::parallel::impl
 
@@ -7320,8 +7384,8 @@ using impl::detached_loop;
 using impl::blocking_loop;
 using impl::awaitable_loop;
 
-// using impl::blocking_reduce;
-// using impl::awaitable_reduce;
+using impl::blocking_reduce;
+using impl::awaitable_reduce;
 
 namespace this_thread = impl::this_thread;
 

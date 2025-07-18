@@ -35,9 +35,14 @@ It implements classic building blocks of concurrent algorithms such as tasks, pa
 // Scheduler
 template <class Backend = ThreadPool>
 struct Scheduler {
+    // Backend
     Backend backend; // underlying thread pool
     
-    template <class T = void> using future_type = typename Backend::future_type<T>;
+    template <class T = void>
+    using future_type = typename Backend::future_type<T>;
+    
+    template <class... Args>
+    explicit Scheduler(Args&&... args);
     
     // Task API
     template <class F, class... Args>           void  detached_task(F&& f, Args&&... args);
@@ -286,9 +291,9 @@ Alias for `ThreadPool::future_type<T>` placed at the namespace level.
 
 A lightweight struct representing an **iterator range**.
 
-Constructor **(2)** creates a range spanning begin to end and selects grain size automatically, which is **recommended in most cases**.
+Constructor **(2)** creates a range spanning `begin` to `end` and selects grain size automatically, which is **recommended in most cases**.
 
-Constructor **(3)** allows manual selection of grain_size.
+Constructor **(3)** allows manual selection of `grain_size`.
 
 Constructors **(4)** and **(5)** create a range spanning `container.begin()` to `container.end()` for any container that supports standard member types `Container::iterator` and `Container::const_iterator`. Grain size is selected automatically.
 
@@ -352,6 +357,12 @@ Returns [`std::nullopt`](https://en.cppreference.com/w/cpp/utility/optional/null
 **Note 1:** Similar to functions from [`std::this_thread`](https://en.cppreference.com/w/cpp/header/thread.html).
 
 **Note 2:** Can be supported by any custom thread pool, assuming it sets the appropriate variables.
+
+> ```cpp
+> std::size_t hardware_concurrency() noexcept;
+> ```
+
+Same thing as [`std::thread::hardware_concurrency()`](https://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency.html), but instead of returning `0` when the number of threads can't be determined, it returns `4` as a fallback.
 
 ## Examples
 
