@@ -10950,22 +10950,24 @@ using impl::hybrid;
 
 #define UTL_STRE_VERSION_MAJOR 1
 #define UTL_STRE_VERSION_MINOR 0
-#define UTL_STRE_VERSION_PATCH 0
+#define UTL_STRE_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // transform()
 #include <cctype>      // tolower(), toupper()
-#include <cstddef>     // size_t
 #include <stdexcept>   // invalid_argument
-#include <string>      // string
+#include <string>      // string, size_t
 #include <string_view> // string_view
 #include <vector>      // vector<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
 // String utils. Nothing fancy, basic stuff, however there is a lot of really bad implementations
-// found online, which is why I'd rather put an effort get them right once and be done with it.
+// posted online, which is why I'd rather put an effort to get them right once and be done with it.
+//
+// Functions that can reuse the storage of an 'r-value' argument take 'std::string' by value,
+// otherwise we taking 'std::string_view' is the most sensible way.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -10975,23 +10977,18 @@ namespace utl::stre::impl {
 // --- Trimming ---
 // ================
 
-template <class T>
-[[nodiscard]] std::string trim_left(T&& str, char trimmed_char = ' ') {
-    std::string res = std::forward<T>(str);            // when 'str' is an r-value, we can avoid the copy
-    res.erase(0, res.find_first_not_of(trimmed_char)); // seems to be the fastest way of doing it
-    return res;
+[[nodiscard]] inline std::string trim_left(std::string str, char trimmed_char = ' ') {
+    str.erase(0, str.find_first_not_of(trimmed_char));
+    return str;
 }
 
-template <class T>
-[[nodiscard]] std::string trim_right(T&& str, char trimmed_char = ' ') {
-    std::string res = std::forward<T>(str);
-    res.erase(res.find_last_not_of(trimmed_char) + 1);
-    return res;
+[[nodiscard]] inline std::string trim_right(std::string str, char trimmed_char = ' ') {
+    str.erase(str.find_last_not_of(trimmed_char) + 1);
+    return str;
 }
 
-template <class T>
-[[nodiscard]] std::string trim(T&& str, char trimmed_char = ' ') {
-    return trim_right(trim_left(std::forward<T>(str), trimmed_char), trimmed_char);
+[[nodiscard]] inline std::string trim(std::string str, char trimmed_char = ' ') {
+    return trim_right(trim_left(std::move(str), trimmed_char), trimmed_char);
 }
 
 // ===============
@@ -11036,35 +11033,31 @@ template <class T>
 [[nodiscard]] inline std::string pad_with_leading_zeroes(unsigned int number, std::size_t length = 12) {
     const std::string number_str = std::to_string(number);
 
-    if (length > number_str.size()) {
-        std::string res;
-        res.reserve(length);
-        res.append(length - number_str.size(), '0');
-        res += number_str;
-        return res;
-    } else return number_str;
+    if (length <= number_str.size()) return number_str;
+
+    std::string res;
+    res.reserve(length);
+    res.append(length - number_str.size(), '0');
+    res += number_str;
+    return res;
     // we do this instead of using 'std::ostringstream' with 'std::setfill('0')' + 'std::setw()'
-    // so we don't need streams as a dependency. Plus it is faster that way.
+    // so we don't need streams as a dependency, plus it is faster that way.
 }
 
 // ========================
 // --- Case conversions ---
 // ========================
 
-template <class T>
-[[nodiscard]] std::string to_lower(T&& str) {
-    std::string res = std::forward<T>(str); // when 'str' is an r-value, we can avoid the copy
-    std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c) { return std::tolower(c); });
-    return res;
+[[nodiscard]] inline std::string to_lower(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    return str;
     // note that 'std::tolower()', 'std::toupper()' can only apply to unsigned chars, calling it on signed char
     // is UB. Implementation above was directly taken from https://en.cppreference.com/w/cpp/string/byte/tolower
 }
 
-template <class T>
-[[nodiscard]] std::string to_upper(T&& str) {
-    std::string res = std::forward<T>(str);
-    std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c) { return std::toupper(c); });
-    return res;
+[[nodiscard]] inline std::string to_upper(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+    return str;
 }
 
 // ========================
@@ -11091,19 +11084,16 @@ template <class T>
 // --- Token manipulation ---
 // ==========================
 
-template <class T>
-[[nodiscard]] std::string replace_all_occurrences(T&& str, std::string_view from, std::string_view to) {
-    std::string res = std::forward<T>(str);
-
+[[nodiscard]] inline std::string replace_all_occurrences(std::string str, std::string_view from, std::string_view to) {
     std::size_t i = 0;
-    while ((i = res.find(from, i)) != std::string::npos) { // locate substring to replace
-        res.replace(i, from.size(), to);                   // replace
+    while ((i = str.find(from, i)) != std::string::npos) { // locate substring to replace
+        str.replace(i, from.size(), to);                   // replace
         i += to.size();                                    // step over the replaced region
     }
     // Note: Not stepping over the replaced regions causes self-similar replacements
     // like "123" -> "123123" to fall into an infinite loop, we don't want that.
 
-    return res;
+    return str;
 }
 
 // Note:

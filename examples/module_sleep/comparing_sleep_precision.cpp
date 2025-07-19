@@ -8,7 +8,7 @@ int main() {
     constexpr int repeats        = 6;
     constexpr ms  sleep_duration = ms(16.67);
     
-    const auto measure_time = [](auto sleep_function) {
+    const auto measure_time = [&](auto sleep_function) {
         for (int i = 0; i < repeats; ++i) {
             const auto start = std::chrono::steady_clock::now();
             sleep_function(sleep_duration);

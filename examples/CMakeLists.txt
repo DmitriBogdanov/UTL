@@ -69,7 +69,12 @@ utl_add_example("module_random/using_custom_prngs_with_random")
 utl_add_example("module_shell/running_shell_commands")
 utl_add_example("module_shell/working_with_temporary_files")
 utl_add_example("module_sleep/comparing_sleep_precision")
-# TODO: 'module_stre/'
+utl_add_example("module_stre/converting_string_case")
+utl_add_example("module_stre/other_utilities")
+utl_add_example("module_stre/padding_strings")
+utl_add_example("module_stre/substring_checks")
+utl_add_example("module_stre/token_manipulation")
+utl_add_example("module_stre/trimming_strings")
 # TODO: 'module_struct_reflect/'
 # TODO: Add 'module_table/' examples after the rewrite
 # TODO: 'module_time/'
