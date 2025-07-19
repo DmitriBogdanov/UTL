@@ -14,7 +14,7 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/sleep.hpp)
 
-**utl::sleep** implements precise sleep functions.
+**utl::sleep** is a header implementing precise sleep functions.
 
 The main feature is a hybrid sleep function that uses a combination of system sleep, busy-waiting and some statistics to wait with an accuracy close to that of a spinlock, while keeping the thread free most of the time.
 
@@ -23,20 +23,20 @@ The idea is largely based on [this](https://blat-blatnik.github.io/computerBear/
 ## Definitions
 
 ```cpp
-template <class Rep, class Period> void system(  std::chrono::duration<Rep, Period> duration);
+template <class Rep, class Period> void system  (std::chrono::duration<Rep, Period> duration);
 template <class Rep, class Period> void spinlock(std::chrono::duration<Rep, Period> duration);
-template <class Rep, class Period> void hybrid(  std::chrono::duration<Rep, Period> duration);
+template <class Rep, class Period> void hybrid  (std::chrono::duration<Rep, Period> duration);
 ```
 
 ## Methods
 
 > ```cpp
-> template <class Rep, class Period> void system(  std::chrono::duration<Rep, Period> duration);
+> template <class Rep, class Period> void system  (std::chrono::duration<Rep, Period> duration);
 > template <class Rep, class Period> void spinlock(std::chrono::duration<Rep, Period> duration);
-> template <class Rep, class Period> void hybrid(  std::chrono::duration<Rep, Period> duration);
+> template <class Rep, class Period> void hybrid  (std::chrono::duration<Rep, Period> duration);
 > ```
 
-Three sleep implementations functionally similar to [`std::this_thread::sleep_for()`](https://en.cppreference.com/w/cpp/thread/sleep_for), which cover different ranges of use-cases. Below is a summary table of their properties:
+3 sleep implementations functionally similar to [`std::this_thread::sleep_for()`](https://en.cppreference.com/w/cpp/thread/sleep_for), with different precision / CPU time tradeoffs:
 
 | Sleep        | Precision    | CPU usage | Description                                                  |
 | ------------ | ------------ | --------- | ------------------------------------------------------------ |
@@ -48,7 +48,7 @@ Three sleep implementations functionally similar to [`std::this_thread::sleep_fo
 
 ### Comparing sleep precision
 
-[ [Run this code](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGe1wAyeAyYAHI%2BAEaYxCAA7KQADqgKhE4MHt6%2BekkpjgJBIeEsUTHxdpgOaUIETMQEGT5%2BXLaY9nkM1bUEBWGR0XG2NXUNWc0KQ93BvcX9sQCUtqhexMjsHOYAzMHI3lgA1CYbbggEBAkKIAD0l8RMAO4AdMCECF4RXkorsowED2gslwAIixCMQ8BZUMB0IZUAA3S5yAAqAUuLCY42ilxSRnoAH1trtMAjkQ8EAkEodsCYNABBak0j7BYB7FgKA4bQF7cboEAoBDEASoXnoZZMdqHNzoJYReikLkEHkgEG0Wh4SmHKy0%2BloBgY1QJYh7YIEPbETAJTBitl7G229mcgBsGu1Aj1BpZ1oU9HNuJFt3a9o9EC4DoeDvmzq1tONLKYwQgcwOsU1NLtOvGeyYXiILMtCmWmFxjjYgZMAFYrGXARAszmvZgfVQvAxKgJEyZk/S7Xb%2BIaIDG8IGNBqjey3KbzZaCAoR9ZrHh253ad2V3t0yba6h5V1A9zech%2BYLeRimOgAJ64naoZAAa15DFQdwTkdTq7t9cbzdbDAgH4SvtFdo5hfN801dDdsy3VxbUOTk9z5AUH2PAhLXPS9aGvO8QAfJ9gI2FNQNteC0GzMcJSDaCAFptzqOY/iWQQEzIo4DjMMwPXLNwGHMMwQNXDtAS7GDYkE/D6SEm1iKWE0JXInihG9BImT2Xs9hDMNYg9B5OO4tiXwk%2BVFRImSjjkvSyy4yirK5RTjzPDEWCYm0rMonSeL4m02HRAsizwNgIGzWhj1skAFHslCWAlKU3llQzeWVVVKTwgiYOXIiFX3aTmPHdyLIYFybIbBJjyUhgMNvJiXLcvSxLSzy8x84tMACgggtCkKFFK8qbyi6VYvghK1Q2bBkoMgypNI2SWNyyzrL/XkEDPCIwXQJy9iqvL3Nq196u8s1fP8wLgqKhalpW3qYswOUBroRLhtGrURPpDgFiCjgy14PwOC0UghQ4Nw50sLklhWTBWI2HhSAITQXoWO9Yi4B4EdiAAOCHJBRswHQATi4DQy30ThJE%2BmHfs4XgLg0KGYYWOBYBgRAUFQFglPoMgKAgf5Wf6HZDGAEMNCpmhaBQ4gLggCJSYiYJajPThIel5hiDPAB5CJtAqaHuF4f42EEFWyrl77eCwd5gDcMRaAubXSCwNEcTWH78DNSpYUwa2fswVQKmzR3eGNVpSdVZbZY8LBSYIMEWHl3g3eICJkkwQFMHt4BVSMGm%2BAMYAFAANTwTA7hVi0vsh/hBBEMR2CkGRBEUFR1GN0hdGaAwM9MSxrH0PAIguSAFlQBJ2mtyjuVgjurEsLhNMolWzF4OFohW934AWcpvxcBh3E8Rp/C3noihKbJklSAQRiaRIT/aA%2B%2BhiMZWk1qoJnPvR1/aTo6hvmY78GLoX7GCYX8j5cDXiDVYEhXqcA%2BqQL6P0/p7FUCjB0lEHSSDXG3Zk6kNAPA0HsCAuBCAkHBiA3gWstBzAWAgVC/QEyEw4MTUg0cyxU1gQvcmtgQBUzIS9UgdNGbSQSNmcglAuZ0GiKEVgaxEHINQegvmalQzYM9vgIgK09Dl2EKIcQNcNH1zUKTFupA7i3GKtrSB70SZNz%2BirbMgiTSoCoAgpBKC0G8yMAonBOC8EeBZmIw0mwSHU2NhQ0gd5JChhxpIMwXAkH42xgjEMdCGFMJYaTP6FNOFBPIXDEAZgUYPDydEh0KMyzTw2BoFG2Nwl0I2JYuB7DuEhLevPGBaSGk0wWHHFIzhJBAA%3D%3D) ]
+[ [Run this code](https://godbolt.org/z/vTfq318oc) ]
 
 ```cpp
 using ms = std::chrono::duration<double, std::milli>;
@@ -56,7 +56,7 @@ using ms = std::chrono::duration<double, std::milli>;
 constexpr int repeats        = 6;
 constexpr ms  sleep_duration = ms(16.67);
 
-const auto measure_time = [](auto sleep_function) {
+const auto measure_time = [&](auto sleep_function) {
     for (int i = 0; i < repeats; ++i) {
         const auto start = std::chrono::steady_clock::now();
         sleep_function(sleep_duration);

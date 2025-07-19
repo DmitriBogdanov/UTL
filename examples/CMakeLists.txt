@@ -68,8 +68,7 @@ utl_add_example("module_random/getting_random_values")
 utl_add_example("module_random/using_custom_prngs_with_random")
 utl_add_example("module_shell/running_shell_commands")
 utl_add_example("module_shell/working_with_temporary_files")
-# TODO: 'module_shell/'
-# TODO: 'module_sleep/'
+utl_add_example("module_sleep/comparing_sleep_precision")
 # TODO: 'module_stre/'
 # TODO: 'module_struct_reflect/'
 # TODO: Add 'module_table/' examples after the rewrite
