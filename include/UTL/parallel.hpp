@@ -13,12 +13,13 @@
 #define UTLHEADERGUARD_PARALLEL
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
-#define UTL_PARALLEL_VERSION_MINOR 0
+#define UTL_PARALLEL_VERSION_MINOR 1
 #define UTL_PARALLEL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <condition_variable> // condition_variable
+#include <cstdint>            // uint64_t
 #include <functional>         // plus<>, multiplies<>, function<>
 #include <future>             // future<>, promise<>
 #include <memory>             // shared_ptr<>
@@ -32,42 +33,35 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Library API resembles a minimalistic version of Intel TBB.
-//
 // Work-stealing summary:
 //
-// We use several queues:
-//    - All  thread have a global task queue
-//    - Each thread has  a local  task deque
-// Tasks go into different queues depending on their source:
-//    - Work queued from a     pool thread => recursive task, goes to the front of current deque
-//    - Work queued from a non-pool thread => regular   task, goes to the back  of global  queue
-// When threads are looking for work they search in 3 steps:
-//    1. Check local dequeue,  work here can be popped from the front
-//    2. Check other dequeues, work here can be stolen from the back
-//    3. Check global queue,   work here can be popped from the front
-// To resolve recursive deadlocks we use a custom future:
-//    - Recursive task calls '.wait()' on its future => pop / steal work from local deques until finished
+//    - We use several queues:
+//         - All  threads have a global task queue
+//         - Each thread  has  a local  task deque
+//    - Tasks go into different queues depending on their source:
+//         - Work queued from a     pool thread => recursive task, goes to the front of current deque
+//         - Work queued from a non-pool thread => external  task, goes to the back  of global  queue
+//    - When threads are looking for work they search in 3 steps:
+//         1. Check local dequeue,  work here can be popped from the front
+//         2. Check other dequeues, work here can be stolen from the back
+//         3. Check global queue,   work here can be popped from the front
+//    - To resolve recursive deadlocks we use a custom future:
+//         - Recursive task calls '.wait()' on its future => pop / steal work from local deques until finished
 //
 // Ideally we would want to use a different algorithm with Chase-Lev lock-free local SPMC queues for work-stealing,
 // and a global lock-free MPMC queue for outside tasks, however properly implementing such queues is a task of
 // incredible complexity, which is further exacerbated by the fact that 'std::function' has a potentially throwing
 // move-assignment, which disqualifies it from ~80% of existing lock-free queue implementations.
 //
-// After a long research it seems that proper work-stealing thread pools are only really implemented by huge task
-// graph projects such as IntelTBB and Taskflow with most of the standard syncronization primitives rewritten.
-// All stand-alone implementations that I'm aware of will either:
-//    a) Deadlock for recursive tasks                  (~90% of implementations )
-//    b) Require manual resolution of recursive tasks  (remaining ~10%          )
-//    c) Pull in huge dependencies                     (in addition to the above)
-//    d) Contain potential deadlocks                   (in addition to the above)
-//
-// In newer standards several improvement can be made in terms of implementation:
+// Newer standards would enable several improvements in terms of implementation:
 //    - In C++20 'std::jthread' can be used to simplify joining and add stop tokens
 //    - In C++23 'std::move_only_function<>' can be used as a more efficient task type,
 //      however this still doesn't resolve the issue of throwing move assignment
 //    - In C++20 atomic wait / semaphores / barriers can be used to improve efficiency
 //      of some syncronization
+//
+// It is also possible to add task priority with a bit of constexpr logic and possibly reduce locking
+// in some parts of the scheduling, this is a work fo future releases.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -104,6 +98,15 @@ namespace ws_this_thread { // same this as thread introspection from public API,
 inline thread_local ThreadPool* thread_pool_ptr = nullptr;
 inline thread_local std::size_t worker_index    = std::size_t(-1);
 }; // namespace ws_this_thread
+
+std::size_t splitmix64() noexcept {
+    thread_local std::uint64_t state = ws_this_thread::worker_index;
+
+    std::uint64_t result = (state += 0x9E3779B97f4A7C15);
+    result               = (result ^ (result >> 30)) * 0xBF58476D1CE4E5B9;
+    result               = (result ^ (result >> 27)) * 0x94D049BB133111EB;
+    return static_cast<std::size_t>(result ^ (result >> 31));
+} // very fast & simple PRNG
 
 class ThreadPool {
     using task_type         = std::function<void()>;
@@ -224,8 +227,21 @@ private:
         return true;
     }
 
-    bool try_steal(task_type&) {
-        //
+    bool try_steal(task_type& task) {
+        for (std::size_t attempt = 0; attempt < this->workers.size(); ++attempt) {
+            const std::size_t i = splitmix64() % this->workers.size();
+
+            const std::scoped_lock local_queue_lock(this->local_queues_mutexes[i]);
+
+            auto& local_queue = this->local_queues[i];
+
+            if (local_queue.empty()) continue;
+
+            task = std::move(local_queue.front());
+            local_queue.pop_front();
+            return true;
+        }
+
         return false;
     }
 
@@ -295,12 +311,18 @@ public:
         if (ws_this_thread::thread_pool_ptr == this)
             throw std::runtime_error("Cannot resize thread pool from its own pool thread.");
 
+        const std::scoped_lock workers_lock(this->workers_mutex);
+
         this->wait();
         this->terminate_workers();
         this->spawn_workers(count);
     }
 
-    [[nodiscard]] std::size_t get_thread_count() noexcept { return this->workers.size(); }
+    [[nodiscard]] std::size_t get_thread_count() {
+        const std::scoped_lock workers_lock(this->workers_mutex);
+
+        return this->workers.size();
+    }
 
     void wait() {
         std::unique_lock task_lock(this->task_mutex);

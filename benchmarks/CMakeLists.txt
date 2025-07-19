@@ -19,6 +19,7 @@ utl_add_benchmark("module_log/stringification")
 utl_add_benchmark("module_mvl/experimental")
 # utl_add_benchmark("module_parallel/parallel_repeated_matmul") // TODO:
 # utl_add_benchmark("module_parallel/parallel_vector_sum")
+utl_add_benchmark("module_parallel/thread_pool_comparison")
 # utl_add_benchmark("module_profiler/profiling_overhead")
 utl_add_benchmark("module_random/normal_distributions")
 utl_add_benchmark("module_random/prngs")

@@ -79,14 +79,16 @@ While the library itself consists of a single header with no embedded dependenci
 | [cppcheck](https://github.com/danmar/cppcheck)               | **v.2.7**    | Static analysis                                              |
 | [GitHub Actions](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) | **latest**   | Multi-platform [CI testing](https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions) |
 
-| Library                                                | Version            | License                                                                        | Used for                   | Embedded in repo |
-| ------------------------------------------------------ | ------------------ | ------------------------------------------------------------------------------ | -------------------------- | ---------------- |
-| [doctest](https://github.com/doctest/doctest)          | **v.2.4.11**       | [MIT](https://github.com/doctest/doctest/blob/master/LICENSE.txt)              | Unit testing               | ✔                |
-| [nanobench](https://github.com/martinus/nanobench)     | **v.4.3.11**       | [MIT](https://github.com/martinus/nanobench/blob/master/LICENSE)               | Benchmarking               | ✔                |
-| [nlohmann json](https://github.com/nlohmann/json)      | **v.3.11.3**       | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT)               | Benchmark comparison       | ✔                |
-| [PicoJSON](https://github.com/kazuho/picojson)         | **v.1.3.0**        | [BSD-2](https://github.com/kazuho/picojson/blob/master/LICENSE)                | Benchmark comparison       | ✔                |
-| [RapidJSON](https://github.com/Tencent/rapidjson)      | **v.1.1.0**        | [MIT, BSD, JSON](https://github.com/Tencent/rapidjson/blob/master/license.txt) | Benchmark comparison       | ✔                |
-| [JSONTestSuite](https://github.com/nst/JSONTestSuite/) | **commit 1ef36fa** | [MIT](https://github.com/nst/JSONTestSuite/blob/master/LICENSE)                | JSON Validation test suite | ✔                |
+| Library                                                      | Version            | License                                                      | Used for                   | Embedded in repo |
+| ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ | -------------------------- | ---------------- |
+| [doctest](https://github.com/doctest/doctest)                | **v.2.4.11**       | [MIT](https://github.com/doctest/doctest/blob/master/LICENSE.txt) | Unit testing               | ✔                |
+| [nanobench](https://github.com/martinus/nanobench)           | **v.4.3.11**       | [MIT](https://github.com/martinus/nanobench/blob/master/LICENSE) | Benchmarking               | ✔                |
+| [nlohmann json](https://github.com/nlohmann/json)            | **v.3.11.3**       | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) | Benchmark comparison       | ✔                |
+| [PicoJSON](https://github.com/kazuho/picojson)               | **v.1.3.0**        | [BSD-2](https://github.com/kazuho/picojson/blob/master/LICENSE) | Benchmark comparison       | ✔                |
+| [RapidJSON](https://github.com/Tencent/rapidjson)            | **v.1.1.0**        | [MIT, BSD, JSON](https://github.com/Tencent/rapidjson/blob/master/license.txt) | Benchmark comparison       | ✔                |
+| [JSONTestSuite](https://github.com/nst/JSONTestSuite/)       | **commit 1ef36fa** | [MIT](https://github.com/nst/JSONTestSuite/blob/master/LICENSE) | JSON Validation test suite | ✔                |
+| [BS::thread_pool](https://github.com/bshoshany/thread-pool)  | **v.5.0.0**        | [MIT](https://github.com/bshoshany/thread-pool/blob/master/LICENSE.txt) | Benchmark comparison       | ✔                |
+| [progschj/ThreadPool](https://github.com/progschj/ThreadPool) | **commit 9a42ec1** | [zlib](https://github.com/progschj/ThreadPool/blob/master/COPYING) | Benchmark comparison       | ✔                |
 
 ## Work in progress
 

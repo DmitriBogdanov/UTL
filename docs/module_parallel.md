@@ -19,9 +19,11 @@
 It implements classic building blocks of concurrent algorithms such as tasks, parallel for, reductions and etc. and provides a sane thread pool implementation with work-stealing and recursive parallelism support, in summary:
 
 - Tasks, parallel loops and reductions
-- Work-stealing thread pool
+- Work-stealing thread pool with fully thread-safe API
 - Support for recursive parallelism
 - Focus on simple & uniform API
+- Small (~`600` lines of code)
+- Portable (no platform-specific code of any kind)
 
 > [!Tip]
 > [Benchmarks](#benchmarks) and [usage examples](#examples) can be found at the bottom.
@@ -76,7 +78,7 @@ struct ThreadPool {
      
     // Threading
     void        set_thread_count(std::size_t count = hardware_concurrency());
-    std::size_t get_thread_count() const noexcept;
+    std::size_t get_thread_count();
     
     // Task queuing
     template <class F, class... Args>           void  detached_task(F&& f, Args&&... args);
@@ -130,7 +132,7 @@ std::size_t hardware_concurrency() noexcept;
 ```
 
 > [!Important]
-> There is no tight coupling between the `Scheduler<>` and the `ThreadPool`, other implementation may be used assuming they provide the 2 methods for submitting tasks.
+> There is no tight coupling between the `Scheduler<>` and the `ThreadPool`, other implementations may be used assuming they provide the 2 methods for submitting tasks.
 
 ## Methods
 
@@ -150,7 +152,7 @@ Launches asynchronous task to execute callable `f` with arguments `args...`.
 > template <class F, class... Args> future_type<R> awaitable_task(F&& f, Args&&... args);
 > ```
 
-Launches asynchronous task to execute callable `f` with arguments `args...` and returns its [`std::future`](https://en.cppreference.com/w/cpp/thread/future).
+Launches asynchronous task to execute callable `f` with arguments `args...` and returns its future.
 
 #### Parallel-for API
 
@@ -180,7 +182,7 @@ Loop body `f` can be defined in two ways:
 
 Detached / blocking / awaitable parallel-for loop over an **index range**.
 
-Like in the iterator case, loop body `f` can be defined both for a single iteration and as block.
+Like in the iterator case, loop body `f` can be defined both for a single iteration and as a block.
 
 > ```cpp
 > template <class Container, class F>          void  detached_loop(Container&& container, F&& f);
@@ -190,7 +192,7 @@ Like in the iterator case, loop body `f` can be defined both for a single iterat
 
 Detached / blocking / awaitable parallel-for loop over an **iterator range** spanning `container.begin()` to `container.end()`.
 
-Like in the iterator case, loop body `f` can be defined both for a single iteration and as block.
+Like in the usual case, loop body `f` can be defined both for a single iteration and as a block.
 
 #### Parallel-reduce API
 
@@ -203,7 +205,7 @@ Detached / blocking / awaitable parallel reduction over a binary operator `op` o
 
 Binary operator `op` is defined by the signature `T(const T&, const T&)` where `T` corresponds to iterator `::value_type`.
 
-**Note:** Most commonly used to compute vector sum / product / min / max in parallel, see [pre-defined binary operation](#binary-operations).
+**Note:** Most commonly used to compute vector sum / product / min / max in parallel, see [pre-defined binary operations](#binary-operations).
 
 > ```cpp
 > template <class Container, class Op>             R   blocking_reduce(Container&& container, Op&& op);
@@ -230,10 +232,12 @@ Creates thread pool with `count` threads.
 
 Changes the number of threads in the thread pool.
 
-**Note:** This method will block & wait for all in-flight tasks to be completed before resizing the thread pool.
+**Note 1:** This method will block & wait for all in-flight tasks to be completed before resizing the thread pool.
+
+**Note 2:** This and all the other thread pool methods are thread-safe, the pool can be resized from any number of external threads concurrently and no tasks will be lost. If called from a thread inside the pool itself (which would be a logical deadlock causing the thread to wait for its own termination)  throws [`std::runtime_error`](https://en.cppreference.com/w/cpp/error/runtime_error.html).
 
 > ```cpp
-> std::size_t get_thread_count() const noexcept;
+> std::size_t get_thread_count();
 > ```
 
 Returns number of threads in the thread pool.
@@ -250,7 +254,7 @@ Launches asynchronous task to execute callable `f` with arguments `args...`.
 > template <class F, class... Args> future_type<R> awaitable_task(F&& f, Args&&... args);
 > ```
 
-Launches asynchronous task to execute callable `f` with arguments `args...` and returns its [`std::future`](https://en.cppreference.com/w/cpp/thread/future).
+Launches asynchronous task to execute callable `f` with arguments `args...` and returns its future.
 
 > ```cpp
 > void wait();
@@ -266,7 +270,7 @@ Blocks current thread until all in-flight tasks are completed.
 
 A thin wrapper around [`std::future`](https://en.cppreference.com/w/cpp/thread/future) used by the thread pool. Exposes the same API as a standard future and can be constructed from it.
 
-This future allows the usage of recursive await-able tasks. When waited with `get()` / `wait()` / `wait_for()` / `wait_until()` instead of just blocking it first looks for recursive work to do in the meantime.
+This future allows the usage of recursive awaitable tasks. When waited with `get()` / `wait()` / `wait_for()` / `wait_until()` instead of just blocking it first looks for recursive work to do in the meantime.
 
 > ```cpp
 > template <class T = void>
@@ -331,7 +335,7 @@ template<> struct  min<void> { template<class T, class U> constexpr auto operato
 template<> struct  max<void> { template<class T, class U> constexpr auto operator()(T&& lhs, T&& rhs) const; }
 ```
 
-Pre-defined binary operations for `parallel::reduce()`.
+Pre-defined binary operations for parallel reductions.
 
 **Note 1:** All functors will be `noexcept` if possible.
 
@@ -559,11 +563,11 @@ Am I a pool thread? -> false
 
 Naive use of [std::async](https://en.cppreference.com/w/cpp/thread/async) and [std::thread](https://en.cppreference.com/w/cpp/thread/thread) suffers greatly from the overhead of thread creation, this overhead makes small tasks (under a few ms) largely inefficient and introduces a great degree of performance instability. 
 
-[Thread pools](https://en.wikipedia.org/wiki/Thread_pool) are a classic solution to this problem. There are many existing implementations in C++, most of them tend to use a shared-queue design. This approach is easy to implement and works for simple parallelization, however it doesn't scale well as tasks get more granular.
+[Thread pools](https://en.wikipedia.org/wiki/Thread_pool) are a classic solution to this problem. There are many existing implementations in C++, most of them tend to use a shared-queue design. This approach is easy to implement and works for simple parallelization, however it doesn't really function for scatter-gather workloads with nested subtasks.
 
-There is also a problem of recursive workloads, something as simple as splitting a task into awaitable subtasks will deadlock the **vast majority** of thread pool implementations found online (even the ones that do implement work-stealing as they tend to work only with detached recursion), which was the initial motivation behind writing this library.
+Something as simple as splitting a task into awaitable subtasks will deadlock the **vast majority** of thread pool implementations found online (even the ones that do implement work-stealing as they tend to work only with detached recursion), which was the initial motivation behind writing this library.
 
-### Why work-stealing
+### What is work-stealing
 
 Large concurrency frameworks such as [OpenMP](https://en.wikipedia.org/wiki/OpenMP) and [Intel TBB](https://github.com/uxlfoundation/oneTBB) tend to use work-stealing design where each thread keeps its own queue of tasks and steals work from the backs of other queues when its own queue gets exhausted. Such approach introduces a whole slew of potential benefits:
 
@@ -578,26 +582,60 @@ All of this makes work-stealing a rather good general case solution as it tends 
 
 ## Benchmarks
 
- `utl::parallel` does not claim to be superior to vendor-optimized concurrency frameworks, what it does is expose a simple threading API with a concise (~800 L.O.C.) implementation written entirely in standard C++17. As of now this niche seems to be rather empty as there is almost no stand-alone thread pools supporting recursion.
+ `utl::parallel` does not claim to be superior to vendor-optimized concurrency frameworks, what it does is expose a simple threading API with a concise (~`600` L.O.C.) implementation written entirely in standard C++17. As of now this niche seems to be rather empty as there is almost no stand-alone thread pools supporting recursion.
 
-Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_parallel/) comparing performance of `utl::parallel` with other thread pools, frameworks and standard approaches on various tasks:
+Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_parallel/) comparing performance of `utl::parallel::ThreadPool` with `std::async` and some other thread pools. For comparison we will use [bshoshany/thread-pool](https://github.com/bshoshany/thread-pool) and [progschj/ThreadPool](https://github.com/progschj/ThreadPool) as those two seem to be the most popular stand-alone thread pool implementations.
 
-#### Recursive task graph
-
-#### Uneven tasks with some recursion
+> [!Important]
+> Consequent benchmarks were measured on a `6`-core `AMD Ryzen 5 5600H` with hyper-threading disabled. Compiled with `g++ 11.4.0` at `-O2`. Ideal speedup from parallelization would be `600%`.
 
 #### Uneven non-recursive tasks
 
-| Approach                     | Speedup | Notes                                   |
-| ---------------------------- | ------- | --------------------------------------- |
-| Serial                       | `100%`  | Reference                               |
-| `std::thread`                | `xxx%`  | Unstable results due to thread creation |
-| `std::async()`               | `xxx%`  | Unstable results due to thread creation |
-| `parallel::awaitable_task()` | `xxx%`  |                                         |
-| `BS::thread_pool`            | `xxx%`  |                                         |
-| `progschj/ThreadPool`        | `xxx%`  |                                         |
+**Scenario 1: Small tasks.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly. `std::async()` performs extremely poorly due to the overhead of thread creating overshadowing the actual work. Thread pools perform about the same, results might fluctuate a bit depending on the run.
 
-#### Even non-recursive tasks
+```
+| relative |               ms/op |                op/s |    err% |     total | Small non-recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
+|   100.0% |               50.09 |               19.97 |    0.1% |     12.12 | `Serial`
+|   214.0% |               23.40 |               42.73 |    0.8% |     12.11 | `std::async()`
+|   573.3% |                8.74 |              114.47 |    0.4% |     11.84 | `parallel::ThreadPool`
+|   570.2% |                8.78 |              113.84 |    0.9% |     11.81 | `BS::thread_pool`
+|   565.6% |                8.86 |              112.92 |    1.2% |     11.83 | `progschj/ThreadPool`
+```
+
+**Scenario 2: Large tasks.** Submit `1000` tasks busy-waiting for `1000` to `3000` microseconds randomly. Since workload is large enough to overshadow the overhead of thread creation and scheduling, `std::async()` more-or-less catches up to the thread pools. This only becomes the case once average task duration is over a millisecond.
+
+```
+| relative |               ms/op |                op/s |    err% |     total | Large non-recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
+|   100.0% |            1,999.59 |                0.50 |    0.5% |     21.94 | `Serial`
+|   564.2% |              354.42 |                2.82 |    0.7% |     11.37 | `std::async()`
+|   597.0% |              334.96 |                2.99 |    0.4% |     11.41 | `parallel::ThreadPool`
+|   594.0% |              336.65 |                2.97 |    0.3% |     11.43 | `BS::thread_pool`
+|   593.4% |              336.95 |                2.97 |    0.2% |     11.45 | `progschj/ThreadPool`
+```
+
+#### Uneven recursive tasks
+
+**Scenario 1: Shallow recursion.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly and then spawning & awaiting another such task with a `70%` chance. `std::async()` gets the job done, but experiences significant slowdown. `BS::thread_pool` and `progschj/ThreadPool` **deadlock due to recursion**.
+
+```
+| relative |               ms/op |                op/s |    err% |     total | Shallow recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:------------------------
+|   100.0% |              167.20 |                5.98 |    0.7% |     12.04 | `Serial`
+|   161.1% |              103.80 |                9.63 |    5.1% |     12.10 | `std::async()`
+|   583.0% |               28.68 |               34.87 |    0.3% |     12.09 | `parallel::ThreadPool`
+```
+
+**Scenario 1: Deep recursion.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly and then spawning & awaiting another **2** such tasks with a `49%` chance. This rate means on average tasks recursively expand into `50` different subtasks.
+
+```
+| relative |               ms/op |                op/s |    err% |     total | Deep recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:---------------------
+|   100.0% |              183.88 |                5.44 |    0.6% |     12.29 | `Serial`
+|   154.7% |              118.83 |                8.42 |    6.8% |     11.94 | `std::async()`
+|   565.1% |               32.54 |               30.73 |    1.2% |     11.90 | `parallel::ThreadPool`
+```
 
 ### Questions & answers
 
@@ -607,7 +645,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 **Q:** Are there any improvement to be made in terms of performance?
 
-**A:** "Ideal" work-stealing executor would likely use a global lock-free MPMC queue for external tasks and per-thread Chase-Lev SPMC lock-free queues for task stealing. "Ideal" thread pool would also use a custom implementation of `std::function<>` (something closer to `std::move_only_function<>` from C++23). Unfortunately all of those things are highly complex and there are very few clean and correct implementations out there. A proper lock-free MPMC queue implementation with exception correctness would be higher in size and complexity than this entire library, the same applies to custom delegates and SPMC queues, which is why they are usually pulled in as dependencies. This implementation tries to do the best it can while keeping the thread pool logic simple enough to be copy-pastable into a different project.
+**A:** Indeed. "Ideal" work-stealing executor would likely use a global lock-free MPMC queue for external tasks and per-thread Chase-Lev SPMC lock-free queues for task stealing. "Ideal" thread pool would also use a custom implementation of `std::function<>` (something closer to `std::move_only_function<>` from C++23). Unfortunately all of those things are highly complex and there are very few clean and correct implementations out there. A proper lock-free MPMC queue implementation with exception correctness alone would be higher in size and complexity than this entire library, the same applies to custom delegates and SPMC queues, which is why they are usually pulled in as dependencies. This implementation tries to do the best it can while keeping the thread pool logic simple enough to be copy-pastable into a different project. Additional gains can also be made by getting rid of `wait()` and making the API a bit more rigid. It is also likely that some locks can be replaced with atomics.
 
 **Q:** Is it possible to cause deadlocks?
 
@@ -615,7 +653,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 **Q:** How was this library tested?
 
-**A:** It has a wide [testing suite]() covering multiple algorithms and use cases that runs with Thread Sanitizer (GCC / clang), Address Sanitizer (GCC / clang / MSVC) and Undefined Behavior Sanitizer (GCC / clang) on all major platforms. Tests also include some reasonable fuzzing.
+**A:** It has a wide [testing suite](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel) covering multiple algorithms and use cases that runs with on all major platforms. GCC & clang build run under ASan, TSan and UBSan. Tests also include some reasonable fuzzing.
 
 **Q:** Why no benchmarks against [Leopard](https://github.com/hosseinmoein/Leopard), [riften::ThiefPool](https://github.com/ConorWilliams/Threadpool) and [dp::thread_pool](https://github.com/DeveloperPaul123/thread-pool)?
 

@@ -44,12 +44,54 @@ TEST_CASE("Fuzzing / Thread pool creation") {
         parallel::ThreadPool pool(init_size);
         REQUIRE(pool.get_thread_count() == init_size);
 
-        const std::size_t    size_1 = thread_count_dist(gen);
+        const std::size_t size_1 = thread_count_dist(gen);
         pool.set_thread_count(size_1);
         REQUIRE(pool.get_thread_count() == size_1);
 
-        const std::size_t    size_2 = thread_count_dist(gen);
+        const std::size_t size_2 = thread_count_dist(gen);
         pool.set_thread_count(size_2);
         REQUIRE(pool.get_thread_count() == size_2);
+    });
+}
+
+TEST_CASE("Fuzzing / Modifying thread pool from multiple threads") {
+    // Resizes thread pool concurrently from multiple threads, while submitting more tasks at the same time,
+    // if thread pool API is really thread-safe, the pool should complete all the submitted tasks and not
+    // cause any memory or threading issues, this is a stress-test that would fail most existing thread pools
+
+    std::mt19937                               gen(16);
+    std::uniform_int_distribution<std::size_t> thread_count_dist{1, 7};
+
+    constexpr std::size_t modifying_threads = 12;
+    constexpr std::size_t tasks_per_thread  = 20;
+
+    using namespace std::chrono_literals;
+
+    repeat(repeats, [&] {
+        parallel::ThreadPool pool(4);
+
+        std::atomic<std::size_t> tasks_completed = 0;
+
+        // Spawn multiple threads with 'std::async()' and have them concurrently enqueue
+        // tasks into the pool while resizing it from multiple threads at the same time
+        std::vector<std::future<void>> futures;
+
+        for (std::size_t i = 0; i < modifying_threads; ++i) {
+            const std::size_t pool_threads = thread_count_dist(gen);
+
+            futures.emplace_back(std::async([&pool, &tasks_completed, pool_threads] {
+                for (std::size_t i = 0; i < tasks_per_thread; ++i)
+                    pool.detached_task([&] {
+                        std::this_thread::sleep_for(1ms);
+                        ++tasks_completed;
+                    });
+
+                pool.set_thread_count(pool_threads);
+            }));
+        }
+
+        for (auto& future : futures) future.wait();
+
+        REQUIRE(tasks_completed == modifying_threads * tasks_per_thread);
     });
 }
