@@ -146,7 +146,7 @@ Global profiler object.
 > [!Note]
 > Online compiler explorer may be a little weird when it comes to sleep & time measurement precision.
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:2,positionColumn:1,positionLineNumber:2,selectionStartColumn:1,selectionStartLineNumber:2,startColumn:1,startLineNumber:2),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Ausing+namespace+std::chrono_literals%3B%0A%0Avoid+computation_1()+%7B+std::this_thread::sleep_for(300ms)%3B+%7D%0Avoid+computation_2()+%7B+std::this_thread::sleep_for(200ms)%3B+%7D%0Avoid+computation_3()+%7B+std::this_thread::sleep_for(400ms)%3B+%7D%0Avoid+computation_4()+%7B+std::this_thread::sleep_for(600ms)%3B+%7D%0Avoid+computation_5()+%7B+std::this_thread::sleep_for(100ms)%3B+%7D%0A%0Aint+main()+%7B%0A++++//+Profile+a+scope%0A++++UTL_PROFILER_SCOPE(%22Computation+1+-+5%22)%3B%0A++++computation_1()%3B%0A++++computation_2()%3B%0A%0A++++//+Profile+an+expression%0A++++UTL_PROFILER(%22Computation+3%22)+computation_3()%3B%0A%0A++++//+Profile+a+code+segment%0A++++UTL_PROFILER_BEGIN(comp_45,+%22Computation+4+-+5%22)%3B%0A++++computation_4()%3B%0A++++computation_5()%3B%0A++++UTL_PROFILER_END(comp_45)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/n4e54vdo5) ]
 
 ```cpp
 using namespace std::chrono_literals;
@@ -180,7 +180,7 @@ Output:
 
 ### Profiling recursion
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:12,positionColumn:1,positionLineNumber:12,selectionStartColumn:1,selectionStartLineNumber:12,startColumn:1,startLineNumber:12),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Avoid+recursive(int+depth+%3D+0)+%7B%0A++++if+(depth+%3E+4)+%7B%0A++++++++std::this_thread::sleep_for(std::chrono::milliseconds(50))%3B%0A++++++++return%3B%0A++++%7D%0A++++%0A++++UTL_PROFILER(%221st+recursion+branch%22)+recursive(depth+%2B+1)%3B%0A++++UTL_PROFILER(%222nd+recursion+branch%22)+recursive(depth+%2B+2)%3B%0A%7D%0A%0Aint+main()+%7B%0A++++recursive()%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/vYqaz91jY) ]
 
 ```cpp
 void recursive(int depth = 0) {
@@ -207,7 +207,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_parallel.md) to represent a parallel section concisely.
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:5,positionColumn:1,positionLineNumber:5,selectionStartColumn:1,selectionStartLineNumber:5,startColumn:1,startLineNumber:5),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Ausing+namespace+utl%3B%0Ausing+namespace+std::chrono_literals%3B%0A%0Aint+main()+%7B%0A++++//+Run+loop+on+the+main+thread%0A++++UTL_PROFILER(%22Single-threaded+loop%22)%0A++++for+(int+i+%3D+0%3B+i+%3C+30%3B+%2B%2Bi)+std::this_thread::sleep_for(10ms)%3B%0A%0A++++//+Run+the+same+loop+on+3+threads%0A++++parallel::set_thread_count(3)%3B%0A%0A++++UTL_PROFILER(%22Multi-threaded+loop%22)%0A++++parallel::for_loop(parallel::IndexRange%7B0,+30%7D,+%5B%5D(int+low,+int+high)%7B%0A++++++++UTL_PROFILER(%22Worker+thread+loop%22)%0A++++++++for+(int+i+%3D+low%3B+i+%3C+high%3B+%2B%2Bi)+std::this_thread::sleep_for(10ms)%3B%0A++++%7D)%3B%0A%0A++++parallel::set_thread_count(0)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/3fexeW638) ]
 
 ```cpp
 using namespace utl;
@@ -221,7 +221,7 @@ for (int i = 0; i < 30; ++i) std::this_thread::sleep_for(10ms);
 parallel::set_thread_count(3);
 
 UTL_PROFILER("Multi-threaded loop")
-parallel::for_loop(parallel::IndexRange{0, 30}, [](int low, int high){
+parallel::blocking_loop(parallel::IndexRange{0, 30}, [](int low, int high){
     UTL_PROFILER("Worker thread loop")
     for (int i = low; i < high; ++i) std::this_thread::sleep_for(10ms);
 });
@@ -238,7 +238,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_parallel.md) to represent detached section concisely.
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:13,endLineNumber:6,positionColumn:13,positionLineNumber:6,selectionStartColumn:13,selectionStartLineNumber:6,startColumn:13,startLineNumber:6),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Ausing+namespace+utl%3B%0Ausing+namespace+std::chrono_literals%3B%0A%0Aint+main()+%7B%0A++++parallel::set_thread_count(2)%3B%0A%0A++++//+Detached+task%0A++++UTL_PROFILER(%22Uploading+task+1%22)%0A++++parallel::task(%5B%5D%7B%0A++++++++UTL_PROFILER(%22Detached+task+1:+part+1%22)+std::this_thread::sleep_for(700ms)%3B%0A++++%7D)%3B%0A%0A++++//+Detached+task+with+explicit+result+upload%0A++++UTL_PROFILER(%22Uploading+task+2%22)%0A++++parallel::task(%5B%5D%7B%0A++++++++UTL_PROFILER(%22Detached+task+2:+part+1%22)+std::this_thread::sleep_for(50ms)%3B%0A++++++++UTL_PROFILER(%22Detached+task+2:+part+2%22)+std::this_thread::sleep_for(50ms)%3B%0A%0A++++++++//+Manually+upload+results+to+the+main+thread,%0A++++++++//+otherwise+results+get+collected+once+the+thread+joins%0A++++++++profiler::profiler.upload_this_thread()%3B%0A%0A++++++++UTL_PROFILER(%22Detached+task+2:+part+3%22)+std::this_thread::sleep_for(500ms)%3B%0A++++%7D)%3B%0A%0A++++//+Wait+a+little+so+the+2nd+task+has+time+to+reach+manual+upload%0A++++UTL_PROFILER(%22Waiting+for+task+2+to+be+partially+done%22)%0A++++std::this_thread::sleep_for(200ms)%3B%0A%0A++++//+Format+results+explicitly%0A++++profiler::profiler.print_at_exit(false)%3B%0A%0A++++std::cout+%3C%3C+profiler::profiler.format_results()%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/o6ojTv8oc) ]
 
 ```cpp
 using namespace utl;
@@ -248,13 +248,13 @@ parallel::set_thread_count(2);
 
 // Detached task
 UTL_PROFILER("Uploading task 1")
-parallel::task([]{
+parallel::detached_task([]{
     UTL_PROFILER("Detached task 1: part 1") std::this_thread::sleep_for(700ms);
 });
 
 // Detached task with explicit result upload
 UTL_PROFILER("Uploading task 2")
-parallel::task([]{
+parallel::detached_task([]{
     UTL_PROFILER("Detached task 2: part 1") std::this_thread::sleep_for(50ms);
     UTL_PROFILER("Detached task 2: part 2") std::this_thread::sleep_for(50ms);
 
@@ -281,7 +281,7 @@ Output:
 
 ### Custom style & exporting results to a file
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:5,positionColumn:1,positionLineNumber:5,selectionStartColumn:1,selectionStartLineNumber:5,startColumn:1,startLineNumber:5),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Ausing+namespace+utl%3B%0Ausing+namespace+std::chrono_literals%3B%0A%0Aint+main()+%7B%0A++++//+Profile+something%0A++++UTL_PROFILER(%22Loop%22)%0A++++for+(int+i+%3D+0%3B+i+%3C+10%3B+%2B%2Bi)+%7B%0A++++++++UTL_PROFILER(%221st+half+of+the+loop%22)+std::this_thread::sleep_for(10ms)%3B%0A++++++++UTL_PROFILER(%222nd+half+of+the+loop%22)+std::this_thread::sleep_for(10ms)%3B%0A++++%7D%0A%0A++++//+Disable+automatic+printing%0A++++profiler::profiler.print_at_exit(false)%3B%0A%0A++++//+Disable+colors,+remove+indent,+format+to+string%0A++++profiler::Style+style%3B%0A++++style.color++%3D+false%3B%0A++++style.indent+%3D+0%3B%0A%0A++++const+std::string+results+%3D+profiler::profiler.format_results(style)%3B%0A%0A++++//+Export+to+file+%26+console%0A++++std::ofstream(%22profiling_results.txt%22)+%3C%3C+results%3B%0A++++std::cout++++++++++++++++++++++++++++++%3C%3C+results%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/f3483G995) ]
 
 ```cpp
 using namespace utl;

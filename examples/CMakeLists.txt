@@ -50,13 +50,17 @@ utl_add_example("module_parallel/awaitable_tasks")
 utl_add_example("module_parallel/detached_tasks")
 utl_add_example("module_parallel/parallel_for_loop")
 utl_add_example("module_parallel/recursive_tasks")
-# utl_add_example("module_parallel/reducing_over_a_binary_operation")
+utl_add_example("module_parallel/reducing_over_a_binary_operation")
 utl_add_example("module_parallel/thread_introspection")
 utl_add_example("module_parallel/using_a_local_thread_pool")
 utl_add_example("module_predef/compilation_summary")
 utl_add_example("module_predef/conditional_compilation")
 utl_add_example("module_predef/optimization_macros")
-# TODO: 'module_profiler/'
+utl_add_example("module_profiler/custom_style_and_exporting_results_to_a_file")
+utl_add_example("module_profiler/profiling_code_segment")
+utl_add_example("module_profiler/profiling_detached_threads_and_uploading_results")
+utl_add_example("module_profiler/profiling_parallel_section")
+utl_add_example("module_profiler/profiling_recursion")
 # TODO: 'module_progressbar/'
 # TODO: 'module_random/'
 # TODO: 'module_shell/'
