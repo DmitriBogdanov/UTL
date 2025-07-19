@@ -61,7 +61,8 @@ utl_add_example("module_profiler/profiling_code_segment")
 utl_add_example("module_profiler/profiling_detached_threads_and_uploading_results")
 utl_add_example("module_profiler/profiling_parallel_section")
 utl_add_example("module_profiler/profiling_recursion")
-# TODO: 'module_progressbar/'
+utl_add_example("module_progressbar/progress_bar_with_custom_style")
+utl_add_example("module_progressbar/progress_bar")
 # TODO: 'module_random/'
 # TODO: 'module_shell/'
 # TODO: 'module_sleep/'
