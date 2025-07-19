@@ -66,6 +66,8 @@ utl_add_example("module_progressbar/progress_bar")
 utl_add_example("module_random/constexpr_random")
 utl_add_example("module_random/getting_random_values")
 utl_add_example("module_random/using_custom_prngs_with_random")
+utl_add_example("module_shell/running_shell_commands")
+utl_add_example("module_shell/working_with_temporary_files")
 # TODO: 'module_shell/'
 # TODO: 'module_sleep/'
 # TODO: 'module_stre/'

@@ -11,7 +11,7 @@
 // We assume Linux using bash or its derivatives as a default shell,
 // this also tests temporary files as they are necessary for 'run_command()' to function
 
-#if defined(linux) || defined(__linux__) || defined(__linux)
+#ifdef __linux__
 
 TEST_CASE("Shell commands / Capture stdout") {
     const auto res = shell::run_command("echo TEXT");

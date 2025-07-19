@@ -126,7 +126,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 
 ### Working with temporary files
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:29,endLineNumber:15,positionColumn:29,positionLineNumber:15,selectionStartColumn:29,selectionStartLineNumber:15,startColumn:29,startLineNumber:15),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++const+auto+handle+%3D+utl::shell::TemporaryHandle::overwrite(%22temporary.txt%22)%3B%0A%0A++++//+Write+to+temporary+file%0A++++handle.ofstream()+%3C%3C+%22TEXT%22%3B%0A%0A++++//+Read+from+temporary+file%0A++++std::string++++++++++text%3B%0A++++handle.ifstream()+%3E%3E+text%3B%0A%0A++++assert(text+%3D%3D+%22TEXT%22)%3B%0A%0A++++//+Append+some+more+text%0A++++handle.ofstream(std::ios_base::app)+%3C%3C+%22MORE+TEXT%22%3B%0A%0A++++//+Temp.+file+is+deleted+once+handle+is+destroyed%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/ovKooPsEd) ]
 
 ```cpp
 const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
@@ -149,15 +149,19 @@ handle.ofstream(std::ios_base::app) << "MORE TEXT";
 ### Running shell commands
 
 > [!Warning]
-> Online compiler explorer does not work with `std::system`, failing the command is expected.
+> Online compiler explorer does not support `std::system`, failing the `[ Run this code ]` is expected.
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:34,endLineNumber:8,positionColumn:34,positionLineNumber:8,selectionStartColumn:34,selectionStartLineNumber:8,startColumn:34,startLineNumber:8),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/single_include/UTL.hpp%3E%0A%0Aint+main()+%7B%0A++++const+auto+res+%3D+utl::shell::run_command(%22echo+TEXT%22)%3B%0A++++//+usually+used+to+invoke+scripts+and+other+executables%0A%0A++++assert(res.status+%3D%3D++++++0)%3B%0A++++assert(res.out++++%3D%3D+%22TEXT%22)%3B%0A++++assert(res.err++++%3D%3D+++++%22%22)%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/csnMvEc67) ]
 
 ```cpp
+#ifdef __linux__
+
 const auto res = utl::shell::run_command("echo TEXT");
 // usually used to invoke scripts and other executables
 
 assert(res.status ==      0);
 assert(res.out    == "TEXT");
 assert(res.err    ==     "");
+
+#endif
 ```
