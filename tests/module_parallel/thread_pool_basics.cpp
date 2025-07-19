@@ -50,7 +50,7 @@ TEST_CASE("Threadpool basics / Detached tasks with no arguments") {
     repeat(repeats, [] {
         parallel::ThreadPool pool(3);
 
-        std::vector<int> vec(20);
+        std::vector<std::size_t> vec(20);
         for (std::size_t i = 0; i < vec.size(); ++i) pool.detached_task([i, &vec] { vec[i] = i * i; });
         pool.wait();
 

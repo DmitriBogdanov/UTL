@@ -23,7 +23,7 @@ TEST_CASE("Fuzzing / Detached task loss") {
     repeat(repeats, [&] {
         parallel::ThreadPool pool(thread_count_dist(gen));
 
-        std::vector<int> vec(vector_size_dist(gen));
+        std::vector<std::size_t> vec(vector_size_dist(gen));
         for (std::size_t i = 0; i < vec.size(); ++i) pool.detached_task([i, &vec] { vec[i] = i * i; });
 
         pool.wait();
@@ -79,7 +79,7 @@ TEST_CASE("Fuzzing / Modifying thread pool from multiple threads") {
         for (std::size_t i = 0; i < modifying_threads; ++i) {
             const std::size_t pool_threads = thread_count_dist(gen);
 
-            futures.emplace_back(std::async([&pool, &tasks_completed, pool_threads] {
+            futures.emplace_back(std::async([=, &pool, &tasks_completed] {
                 for (std::size_t i = 0; i < tasks_per_thread; ++i)
                     pool.detached_task([&] {
                         std::this_thread::sleep_for(1ms);
