@@ -594,7 +594,9 @@ public:
         } else if constexpr (is_null_like_v<T>) {
             this->data.emplace<null_type>(value);
         } else if constexpr (is_numeric_like_v<T>) {
-            this->data.emplace<number_type>(value);
+            this->data.emplace<number_type>(static_cast<number_type>(value));
+            // cast silences possible 'size_t' -> 'double' conversion warnings,
+            // conversion is deliberate and documented even if it might lose the upper 9 bits
         } else {
             static_assert(always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
         }

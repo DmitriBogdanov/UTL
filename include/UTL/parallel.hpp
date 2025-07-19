@@ -598,7 +598,7 @@ struct Scheduler {
 
     template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
     void detached_loop(IndexRange<Idx> range, F&& f) {
-        for (Idx i = range.first; i < range.last; i += range.grain_size)
+        for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
             this->detached_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last)));
     }
 
@@ -614,7 +614,7 @@ struct Scheduler {
     void blocking_loop(IndexRange<Idx> range, F&& f) {
         std::vector<future_type<>> futures;
 
-        for (Idx i = range.first; i < range.last; i += range.grain_size)
+        for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
             futures.emplace_back(
                 this->awaitable_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last))));
 

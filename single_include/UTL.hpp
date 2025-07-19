@@ -1465,7 +1465,9 @@ public:
         } else if constexpr (is_null_like_v<T>) {
             this->data.emplace<null_type>(value);
         } else if constexpr (is_numeric_like_v<T>) {
-            this->data.emplace<number_type>(value);
+            this->data.emplace<number_type>(static_cast<number_type>(value));
+            // cast silences possible 'size_t' -> 'double' conversion warnings,
+            // conversion is deliberate and documented even if it might lose the upper 9 bits
         } else {
             static_assert(always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
         }
@@ -7102,7 +7104,7 @@ struct Scheduler {
 
     template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
     void detached_loop(IndexRange<Idx> range, F&& f) {
-        for (Idx i = range.first; i < range.last; i += range.grain_size)
+        for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
             this->detached_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last)));
     }
 
@@ -7118,7 +7120,7 @@ struct Scheduler {
     void blocking_loop(IndexRange<Idx> range, F&& f) {
         std::vector<future_type<>> futures;
 
-        for (Idx i = range.first; i < range.last; i += range.grain_size)
+        for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
             futures.emplace_back(
                 this->awaitable_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last))));
 
