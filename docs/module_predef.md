@@ -259,7 +259,7 @@ Returns a string containing a detailed summary of compilation details based on t
 
 ### Conditional compilation
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:20,endLineNumber:3,positionColumn:1,positionLineNumber:3,selectionStartColumn:20,selectionStartLineNumber:3,startColumn:1,startLineNumber:3),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/predef.hpp%3E%0A%0A%23include+%3Ciostream%3E%0A%0Aint+main()+%7B%0A++++%23if+defined(UTL_PREDEF_COMPILER_IS_GCC)+%7C%7C+defined(UTL_PREDEF_COMPILER_IS_CLANG)%0A++++std::cout+%3C%3C+%22Running+Clang+or+GCC%22%3B%0A++++%23elif+defined(UTL_PREDEF_COMPILER_IS_MSVC)%0A++++std::cout+%3C%3C+%22Running+MSVC%22%3B%0A++++%23else%0A++++std::cout+%3C%3C+%22Running+some+other+compiler%22%3B%0A++++%23endif%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/1TvKEqaYY) ]
 
 ```cpp
 #if defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
@@ -278,25 +278,27 @@ Running Clang or GCC
 
 ### Optimization macros
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:4,positionColumn:1,positionLineNumber:4,selectionStartColumn:1,selectionStartLineNumber:4,startColumn:1,startLineNumber:4),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/predef.hpp%3E%0A%0Aenum+class+State+%7B+YES,+NO+%7D%3B%0A%0AUTL_PREDEF_FORCE_INLINE+//+tells+compiler+to+always+inline+the+function%0Astd::string+to_string(State+value)+%7B%0A++++switch+(value)+%7B%0A++++++++case+State::YES:+return+%22YES%22%3B%0A++++++++case+State::NO+:+return+%22NO%22+%3B%0A++++++++default:+utl::predef::unreachable()%3B%0A++++++++//+tells+compiler+that+!'default!'+case+will+never+be+executed%0A++++%7D%0A%7D%0A%0Aint+main()+%7B%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ]
 
 ```cpp
 enum class State { YES, NO };
 
-UTL_PREDEF_FORCE_INLINE // tells compiler to always inline the function
-std::string to_string(State value) {
+UTL_PREDEF_FORCE_INLINE std::string to_string(State value) {
     switch (value) {
         case State::YES: return "YES";
         case State::NO : return "NO" ;
-        default: utl::predef::unreachable();
-        // tells compiler that 'default' case will never be executed
+        default:         utl::predef::unreachable();
     }
 }
+
+// ...
+
+assert( to_string(State::YES) == "YES" );
 ```
 
 ### Compilation summary
 
-[ [Run this code](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:4,positionColumn:1,positionLineNumber:4,selectionStartColumn:1,selectionStartLineNumber:4,startColumn:1,startLineNumber:4),source:'%23include+%3Chttps://raw.githubusercontent.com/DmitriBogdanov/UTL/master/include/UTL/predef.hpp%3E%0A%0A%23include+%3Ciostream%3E%0A%0Aint+main()+%7B%0A++++std::cout+%3C%3C+utl::predef::compilation_summary()%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:71.71783148269105,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:clang1600,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-std%3Dc%2B%2B17+-O2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+clang+16.0.0+(Editor+%231)',t:'0')),header:(),l:'4',m:50,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+clang+16.0.0',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+clang+16.0.0+(Compiler+%231)',t:'0')),k:46.69421860597116,l:'4',m:50,n:'0',o:'',s:0,t:'0')),k:28.282168517308946,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4) ]
+[ [Run this code](https://godbolt.org/z/PGYreYKor) ]
 
 ```cpp
 std::cout << utl::predef::compilation_summary();
@@ -307,7 +309,9 @@ Output:
 Compiler:          GNU C/C++ Compiler
 Platform:          Linux
 Architecture:      x86-64
+L1 cache line (D): 64
+L1 cache line (C): 64
 Compiled in DEBUG: false
 Compiled under OS: true
-Compilation date:  Dec  1 2024 03:47:20
+Compilation date:  Jul 19 2025 12:25:37
 ```

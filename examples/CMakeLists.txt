@@ -53,7 +53,9 @@ utl_add_example("module_parallel/recursive_tasks")
 # utl_add_example("module_parallel/reducing_over_a_binary_operation")
 utl_add_example("module_parallel/thread_introspection")
 utl_add_example("module_parallel/using_a_local_thread_pool")
-# TODO: 'module_predef/'
+utl_add_example("module_predef/compilation_summary")
+utl_add_example("module_predef/conditional_compilation")
+utl_add_example("module_predef/optimization_macros")
 # TODO: 'module_profiler/'
 # TODO: 'module_progressbar/'
 # TODO: 'module_random/'

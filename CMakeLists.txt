@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.21.0...3.22.1)
 
 project(
     UTL
-    VERSION 5.1.0
+    VERSION 5.1.1
     DESCRIPTION "Collection of self-contained header-only libraries for C++17."
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/UTL"
 )
 
-# Declare library
+# Declare the library
 add_library(utl_lib_include        INTERFACE)
 add_library(utl_lib_single_include INTERFACE)
 

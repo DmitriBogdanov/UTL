@@ -14,7 +14,7 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 2
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 0
+#define UTL_PREDEF_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -328,11 +328,11 @@ constexpr bool debug =
     buffer += '\n';
 
 #ifdef __cpp_lib_hardware_interference_size
-    buffer += "L1 cache line (D):  ";
+    buffer += "L1 cache line (D): ";
     buffer += std::to_string(std::hardware_destructive_interference_size);
     buffer += '\n';
 
-    buffer += "L1 cache line (C):  ";
+    buffer += "L1 cache line (C): ";
     buffer += std::to_string(std::hardware_constructive_interference_size);
     buffer += '\n';
 #endif // not (currently) implemented in GCC / clang despite being a C++17 feature
