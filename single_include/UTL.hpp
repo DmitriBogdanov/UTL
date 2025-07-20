@@ -6520,7 +6520,7 @@ return_type operator*(const L& left, const R& right) {
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 0
+#define UTL_PARALLEL_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -6531,7 +6531,7 @@ return_type operator*(const L& left, const R& right) {
 #include <memory>             // shared_ptr<>
 #include <mutex>              // mutex, scoped_lock<>, unique_lock<>
 #include <optional>           // optional<>, nullopt
-#include <queue>              // queue<>, deque<>, size_t
+#include <queue>              // queue<>, deque<>, size_t, ptrdiff_t
 #include <stdexcept>          // current_exception, runtime_error
 #include <thread>             // thread
 #include <utility>            // forward<>()
@@ -6825,6 +6825,11 @@ public:
     }
 
     [[nodiscard]] std::size_t get_thread_count() {
+        if (ws_this_thread::thread_pool_ptr == this) return this->workers.size();
+        // calls from inside the pool shouldn't lock, otherwise we could deadlock the thread by trying to
+        // query the thread count while the pool was instructed to resize, worker count is constant during
+        // a worker lifetime so it's safe to query without a lock anyways
+
         const std::scoped_lock workers_lock(this->workers_mutex);
 
         return this->workers.size();

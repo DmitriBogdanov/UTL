@@ -203,7 +203,7 @@ Like in the usual case, loop body `f` can be defined both for a single iteration
 
 Detached / blocking / awaitable parallel reduction over a binary operator `op` over an **iterator range**.
 
-Binary operator `op` is defined by the signature `T(const T&, const T&)` where `T` corresponds to iterator `::value_type`.
+Binary operator `op` is defined by the signature `T(const T&, const T&)` where `T` corresponds to the iterator `::value_type`.
 
 **Note:** Most commonly used to compute vector sum / product / min / max in parallel, see [pre-defined binary operations](#binary-operations).
 
@@ -240,7 +240,7 @@ Changes the number of threads in the thread pool.
 > std::size_t get_thread_count();
 > ```
 
-Returns number of threads in the thread pool.
+Returns the number of threads in the thread pool.
 
 #### Task queuing
 
@@ -576,9 +576,7 @@ Large concurrency frameworks such as [OpenMP](https://en.wikipedia.org/wiki/Open
 3. Pushing/executing local tasks in the Last-In-First-Out (LIFO) order is likely to keep work hot in cache  
 4. Stealing in the First-In-First-Out (FIFO) order is likely to pull larger tasks (as they will be closer to the recursion root), minimizing contention over small task scheduling
 
-Recursive workloads in general are also quite difficult to sensibly implement with a single queue which is why work-stealing approach is usually used.
-
-All of this makes work-stealing a rather good general case solution as it tends to perform well on most workloads.
+Recursive workloads in general are also quite difficult to sensibly implement with a single queue which is why work-stealing approach is usually used. All of this makes work-stealing a rather good general case solution as it tends to perform well on most workloads.
 
 ## Benchmarks
 
@@ -645,15 +643,15 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 **Q:** Are there any improvement to be made in terms of performance?
 
-**A:** Indeed. "Ideal" work-stealing executor would likely use a global lock-free MPMC queue for external tasks and per-thread Chase-Lev SPMC lock-free queues for task stealing. "Ideal" thread pool would also use a custom implementation of `std::function<>` (something closer to `std::move_only_function<>` from C++23). Unfortunately all of those things are highly complex and there are very few clean and correct implementations out there. A proper lock-free MPMC queue implementation with exception correctness alone would be higher in size and complexity than this entire library, the same applies to custom delegates and SPMC queues, which is why they are usually pulled in as dependencies. This implementation tries to do the best it can while keeping the thread pool logic simple enough to be copy-pastable into a different project. Additional gains can also be made by getting rid of `wait()` and making the API a bit more rigid. It is also likely that some locks can be replaced with atomics.
+**A:** Indeed. "Ideal" work-stealing executor would likely use a global lock-free MPMC queue for external tasks and per-thread Chase-Lev SPMC lock-free queues for task stealing. "Ideal" thread pool would also use a custom implementation of `std::function<>` (something closer to `std::move_only_function<>` from C++23). Unfortunately all of those things are highly complex and there are very few clean and correct implementations out there. A proper lock-free MPMC queue implementation with exception correctness alone would be higher in size and complexity than this entire library, the same applies to custom delegates and SPMC queues, which is why they are often pulled in as dependencies. This implementation tries to do the best it can while keeping the thread pool logic simple enough to be copy-pastable into a different project. Additional gains can also be made by getting rid of `wait()` and making the API a bit more rigid. It is also likely that some locks can be replaced with atomics.
 
-**Q:** Is it possible to cause deadlocks?
+**Q:** Is it possible to deadlock the pool?
 
-**A:** Only by manually introducing an inter-thread dependency on a shared resource, in which case the deadlock is logical and no thread pool design could possibly prevent this.
+**A:** Deadlocks caused by the thread pool design itself shouldn't be possible. Logical deadlocks caused by a cyclical inter-thread dependency are still possible, but this is a user-level bug since no thread pool design could possibly prevent this.
 
 **Q:** How was this library tested?
 
-**A:** It has a wide [testing suite](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel) covering multiple algorithms and use cases that runs with on all major platforms. GCC & clang build run under ASan, TSan and UBSan. Tests also include some reasonable fuzzing.
+**A:** It has a wide [testing suite](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel) covering multitude of use cases that runs with on all major platforms. GCC & clang builds run under ASan, TSan (locally) and UBSan. Tests also include some reasonable fuzzing.
 
 **Q:** Why no benchmarks against [Leopard](https://github.com/hosseinmoein/Leopard), [riften::ThiefPool](https://github.com/ConorWilliams/Threadpool) and [dp::thread_pool](https://github.com/DeveloperPaul123/thread-pool)?
 

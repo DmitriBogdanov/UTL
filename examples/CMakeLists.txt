@@ -75,6 +75,11 @@ utl_add_example("module_stre/padding_strings")
 utl_add_example("module_stre/substring_checks")
 utl_add_example("module_stre/token_manipulation")
 utl_add_example("module_stre/trimming_strings")
+utl_add_example("module_struct_reflect/basic_reflection")
+utl_add_example("module_struct_reflect/debug_printing_with_utl_log")
+utl_add_example("module_struct_reflect/field_and_entry_views")
+utl_add_example("module_struct_reflect/iterating_over_a_generic_tuple")
+utl_add_example("module_struct_reflect/using_reflection_to_define_binary_operations")
 # TODO: 'module_struct_reflect/'
 # TODO: Add 'module_table/' examples after the rewrite
 # TODO: 'module_time/'
