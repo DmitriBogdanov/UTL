@@ -6545,12 +6545,12 @@ return_type operator*(const L& left, const R& right) {
 //         - All  threads have a global task queue
 //         - Each thread  has  a local  task deque
 //    - Tasks go into different queues depending on their source:
-//         - Work queued from a     pool thread => recursive task, goes to the front of current deque
-//         - Work queued from a non-pool thread => external  task, goes to the back  of global  queue
+//         - Work queued from a     pool thread => recursive task, goes to the front of local  deque
+//         - Work queued from a non-pool thread => external  task, goes to the back  of global queue
 //    - When threads are looking for work they search in 3 steps:
-//         1. Check local dequeue,  work here can be popped from the front
-//         2. Check other dequeues, work here can be stolen from the back
-//         3. Check global queue,   work here can be popped from the front
+//         1. Check local  deque,  work here can be popped from the front
+//         2. Check other  deques, work here can be stolen from the back
+//         3. Check global queue,  work here can be popped from the front
 //    - To resolve recursive deadlocks we use a custom future:
 //         - Recursive task calls '.wait()' on its future => pop / steal work from local deques until finished
 //
@@ -6567,7 +6567,7 @@ return_type operator*(const L& left, const R& right) {
 //      of some syncronization
 //
 // It is also possible to add task priority with a bit of constexpr logic and possibly reduce locking
-// in some parts of the scheduling, this is a work fo future releases.
+// in some parts of the scheduling, this is a work for future releases.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -6605,7 +6605,7 @@ inline thread_local ThreadPool* thread_pool_ptr = nullptr;
 inline thread_local std::size_t worker_index    = std::size_t(-1);
 }; // namespace ws_this_thread
 
-std::size_t splitmix64() noexcept {
+inline std::size_t splitmix64() noexcept {
     thread_local std::uint64_t state = ws_this_thread::worker_index;
 
     std::uint64_t result = (state += 0x9E3779B97f4A7C15);
@@ -6737,6 +6737,8 @@ private:
         for (std::size_t attempt = 0; attempt < this->workers.size(); ++attempt) {
             const std::size_t i = splitmix64() % this->workers.size();
 
+            if (i == ws_this_thread::worker_index) continue; // don't steal from yourself
+
             const std::scoped_lock local_queue_lock(this->local_queues_mutexes[i]);
 
             auto& local_queue = this->local_queues[i];
@@ -6847,19 +6849,21 @@ public:
     void detached_task(F&& f, Args&&... args) {
         auto closure = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
 
-        // Recursive tasks
+        // Recursive task
         if (ws_this_thread::thread_pool_ptr == this) {
             const std::scoped_lock local_queue_lock(this->local_queues_mutexes[ws_this_thread::worker_index]);
             this->local_queues[ws_this_thread::worker_index].push_front(std::move(closure));
         }
-        // Regular tasks
+        // Regular task
         else {
             const std::scoped_lock global_queue_mutex(this->global_queue_mutex);
             this->global_queue.emplace(std::move(closure));
         }
 
-        const std::scoped_lock task_lock(this->task_mutex);
-        ++this->tasks_pending;
+        {
+            const std::scoped_lock task_lock(this->task_mutex);
+            ++this->tasks_pending;
+        }
         this->task_available_cv.notify_one();
     }
 
@@ -7163,7 +7167,7 @@ struct Scheduler {
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true> // without SFINAE reqs
     void detached_loop(Container&& container, F&& f) {                                         // such overloads would
         this->detached_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));    // always get picked
-    }                                                                                          // over others
+    }                                                                                          // over the others
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
     void blocking_loop(Container&& container, F&& f) {
@@ -7233,11 +7237,11 @@ struct Scheduler {
 // Note the '<void>' specialization for transparent functors, see "transparent function objects" on
 // https://en.cppreference.com/w/cpp/functional.html
 
-template <class... Args>
-using sum = std::plus<Args...>; // without variadic 'Args...' we wouldn't be able to alias 'std::plus<>'
+template <class T = void>
+using sum = std::plus<T>;
 
-template <class... Args>
-using prod = std::multiplies<Args...>;
+template <class T = void>
+using prod = std::multiplies<T>;
 
 template <class T = void>
 struct min {
@@ -11773,7 +11777,7 @@ using impl::BOOL;
 
 #define UTL_TIME_VERSION_MAJOR 1
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 0
+#define UTL_TIME_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -12009,7 +12013,7 @@ inline std::tm to_localtime(const std::time_t& time) {
 
     // Adjusting reference moment by 'time - reference_time' makes it equal to the current time moment,
     // it is now invalid due to seconds overflowing the allowed range
-    reference_tm.tm_sec += time - reference_time;
+    reference_tm.tm_sec += static_cast<int>(time - reference_time);
     // 'std::time_t' is an arithmetic type, although not defined, this is almost always an
     // integral value holding the number of seconds since Epoch (see cppreference). This is
     // why we can substract them and add into the seconds.

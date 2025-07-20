@@ -15,7 +15,7 @@
 
 #define UTL_TIME_VERSION_MAJOR 1
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 0
+#define UTL_TIME_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -251,7 +251,7 @@ inline std::tm to_localtime(const std::time_t& time) {
 
     // Adjusting reference moment by 'time - reference_time' makes it equal to the current time moment,
     // it is now invalid due to seconds overflowing the allowed range
-    reference_tm.tm_sec += time - reference_time;
+    reference_tm.tm_sec += static_cast<int>(time - reference_time);
     // 'std::time_t' is an arithmetic type, although not defined, this is almost always an
     // integral value holding the number of seconds since Epoch (see cppreference). This is
     // why we can substract them and add into the seconds.
