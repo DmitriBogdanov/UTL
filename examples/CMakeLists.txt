@@ -80,6 +80,8 @@ utl_add_example("module_struct_reflect/debug_printing_with_utl_log")
 utl_add_example("module_struct_reflect/field_and_entry_views")
 utl_add_example("module_struct_reflect/iterating_over_a_generic_tuple")
 utl_add_example("module_struct_reflect/using_reflection_to_define_binary_operations")
-# TODO: 'module_struct_reflect/'
 # TODO: Add 'module_table/' examples after the rewrite
-# TODO: 'module_time/'
+utl_add_example("module_time/accumulate_time")
+utl_add_example("module_time/get_elapsed_time")
+utl_add_example("module_time/get_local_date_and_time")
+utl_add_example("module_time/set_timers")

@@ -14,7 +14,7 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/time.hpp)
 
-**utl::time** implements some simple additions to make [`<chrono>`](https://en.cppreference.com/w/cpp/header/chrono)  less verbose for some common use cases.
+**utl::time** is a header implementing some simple additions to make [`<chrono>`](https://en.cppreference.com/w/cpp/header/chrono)  less verbose for some common use cases.
 
 Feature summary:
 
@@ -41,7 +41,7 @@ struct SplitDuration {
 };
 
 template <class Rep, class Period>
-SplitDuration unit_split(std::chrono::duration<Rep, Period> val);
+SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
 
 template <class Rep, class Period>
 std::string to_string(std::chrono::duration<Rep, Period> value, std::size_t relevant_units = 3);
@@ -134,7 +134,7 @@ POD struct representing duration split into individual units.
 
 > ```cpp
 > template <class Rep, class Period>
-> SplitDuration unit_split(std::chrono::duration<Rep, Period> val);
+> SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
 >    ```
 
 Splits given duration into distinct units.
@@ -233,7 +233,7 @@ Starts timer with duration `length`.
 > void stop() noexcept;
 >```
 
-Stops the timer returning it to a default state.
+Stops the timer, returning it to a default state.
 
 > ```cpp
 > duration    elapsed()        const;
@@ -264,7 +264,7 @@ Returns time elapsed since last `start()` as a formatted `std::string`.
 >bool finished() const;
 >```
 
-Returns `true` if elapsed time is larger than timer length, `false` otherwise.
+Returns `true` if elapsed time is larger than the timer length, `false` otherwise.
 
 >```cpp
 >bool running() const noexcept;
@@ -305,7 +305,7 @@ Thread-safe just like the previous function.
 
 ### Get elapsed time
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/o5nMvdMa9) ]
 
 ```cpp
 using namespace utl;
@@ -331,7 +331,7 @@ Output:
 
 ### Accumulate time
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/48dsP9qsq) ]
 
 ```cpp
 using namespace utl;
@@ -358,7 +358,7 @@ Output:
 
 ### Set timers
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/7vf36rTh1) ]
 
 ```cpp
 using namespace utl;
@@ -378,7 +378,7 @@ Counted to 42286547 while looping for 1 sec 0 ms 0 us
 
 ### Get local date & time
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/1E455Gv7G) ]
 
 ```cpp
 using namespace utl;
@@ -398,9 +398,9 @@ Current datetime: 2025-03-18 04:14:13
 
 ## Motivation
 
-Most of the things implemented in this module are quite simple to do using a native `<chrono>` API, however a lot of the time simple and common use cases require a rather hefty amount of boilerplate or tends to be implemented incorrectly by most examples found online.
+Most of the things implemented in this module are quite simple to do using a native `<chrono>` API, however a lot of the time simple and common use cases require a rather hefty amount of boilerplate or tend to be implemented incorrectly by most examples found online.
 
-Below are some of the "motivating examples" showcasing that:
+Below are some of the "motivating examples" showcasing that problem:
 
 ### Get elapsed time as `double`
 
@@ -446,10 +446,10 @@ const auto time_ns = std::chrono::nanoseconds(time_ms);
 **`utl::time`:**
 
 ```cpp
-const auto time_ms = time::ms(1700);
+const auto time_ms  = time::ms(1700);
 
 const auto time_sec = time::sec(time_ms);
-const auto time_ns = time::ns(time_ms);
+const auto time_ns  = time::ns (time_ms);
 
 // no loss of precision regardless of units, all conversions happen seamlessly
 ```
