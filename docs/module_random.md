@@ -19,7 +19,7 @@
 - Make random friendlier for the "naive" use without compromising on quality
 - Improve random performance
 
-The module was created during my ongoing work on a thesis that uses [stochastic differential equations](https://en.wikipedia.org/wiki/Stochastic_differential_equation) and [Monte—Carlo method](https://en.wikipedia.org/wiki/Monte_Carlo_method) to model explosive heat transfer in a turbulent flow.
+The module was created during my past work on a thesis that used [stochastic differential equations](https://en.wikipedia.org/wiki/Stochastic_differential_equation) and [Monte—Carlo method](https://en.wikipedia.org/wiki/Monte_Carlo_method) to model explosive heat transfer in a turbulent flow.
 
 It implements several random bit generators seamlessly compatible with [&lt;random&gt;](https://en.cppreference.com/w/cpp/header/random):
 

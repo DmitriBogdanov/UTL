@@ -69,7 +69,7 @@ Quality goals include:
 
 ## Developer toolchain
 
-While the library itself consists of a single header with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in the repo.
+While the library itself consists of isolated headers with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in the repo.
 
 | Tool                                                                                                   | Version      | Used for                                                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |

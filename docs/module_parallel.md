@@ -343,7 +343,7 @@ Pre-defined binary operations for parallel reductions.
 
 ### Global scheduler
 
-For user convenience all `Sheduler<>` and `ThreadPool` methods are also doubled at the namespace scope, in which case they use a global lazily-initialized `Scheduler<>` with a `ThreadPool` backend. See [examples](#examples).
+For user convenience all `Scheduler<>` and `ThreadPool` methods are also doubled at the namespace scope, in which case they use a global lazily-initialized `Scheduler<>` with a `ThreadPool` backend. See [examples](#examples).
 
 ### Thread introspection
 
@@ -651,7 +651,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 **Q:** How was this library tested?
 
-**A:** It has a wide [testing suite](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel) covering multitude of use cases that runs with on all major platforms. GCC & clang builds run under ASan, TSan (locally) and UBSan. Tests also include some reasonable fuzzing.
+**A:** It has a wide [testing suite](https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel) covering a multitude of use cases that runs in CI on all major platforms. GCC & clang builds run under ASan, TSan (locally) and UBSan. Tests also include some reasonable fuzzing.
 
 **Q:** Why no benchmarks against [Leopard](https://github.com/hosseinmoein/Leopard), [riften::ThiefPool](https://github.com/ConorWilliams/Threadpool) and [dp::thread_pool](https://github.com/DeveloperPaul123/thread-pool)?
 
