@@ -199,22 +199,6 @@ private:
         ws_this_thread::worker_index    = std::size_t(-1);
     }
 
-    void execute_recursive_tasks() {
-        task_type task;
-        while (this->try_pop_local(task) || this->try_steal(task)) {
-            this->task_mutex.lock();
-            --this->tasks_pending;
-            ++this->tasks_running;
-            this->task_mutex.unlock();
-
-            task();
-
-            this->task_mutex.lock();
-            --this->tasks_running;
-            this->task_mutex.unlock();
-        }
-    }
-
     bool try_pop_local(task_type& task) {
         const std::scoped_lock local_queue_lock(this->local_queues_mutexes[ws_this_thread::worker_index]);
 
@@ -239,8 +223,8 @@ private:
 
             if (local_queue.empty()) continue;
 
-            task = std::move(local_queue.front());
-            local_queue.pop_front();
+            task = std::move(local_queue.back());
+            local_queue.pop_back();
             return true;
         }
 
@@ -272,8 +256,31 @@ public:
         std::future<T> future;
 
         void fallthrough() const {
-            if (ws_this_thread::thread_pool_ptr) ws_this_thread::thread_pool_ptr->execute_recursive_tasks();
+            ThreadPool* pool = ws_this_thread::thread_pool_ptr;
+            
+            if (!pool) return;
+            
+            // Execute recursive tasks from local queues until this future is ready
+            task_type task;
+            while (pool->try_pop_local(task) || pool->try_steal(task)) {
+                pool->task_mutex.lock();
+                --pool->tasks_pending;
+                ++pool->tasks_running;
+                pool->task_mutex.unlock();
+            
+                task();
+            
+                pool->task_mutex.lock();
+                --pool->tasks_running;
+                pool->task_mutex.unlock();
+                
+                if (this->is_ready()) return;
+            }
         }
+        
+    bool is_ready() const {
+        return this->future.wait_for(std::chrono::seconds{0}) == std::future_status::ready;
+    }
 
     public:
         future_type(std::future<T>&& future) : future(std::move(future)) {} // conversion from regular future
