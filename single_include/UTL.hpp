@@ -11784,7 +11784,7 @@ using impl::BOOL;
 
 #define UTL_TIME_VERSION_MAJOR 1
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 1
+#define UTL_TIME_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -11838,7 +11838,7 @@ struct SplitDuration {
 };
 
 template <class Rep, class Period>
-[[nodiscard]] SplitDuration unit_split(std::chrono::duration<Rep, Period> val) {
+[[nodiscard]] constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> val) {
     // for some reason 'duration_cast<>()' is not 'noexcept'
     const auto hours = std::chrono::duration_cast<std::chrono::hours>(val);
     const auto min   = std::chrono::duration_cast<std::chrono::minutes>(val - hours);
