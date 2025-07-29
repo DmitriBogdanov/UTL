@@ -41,7 +41,7 @@ struct SplitDuration {
 };
 
 template <class Rep, class Period>
-SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
+constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
 
 template <class Rep, class Period>
 std::string to_string(std::chrono::duration<Rep, Period> value, std::size_t relevant_units = 3);
@@ -134,7 +134,7 @@ POD struct representing duration split into individual units.
 
 > ```cpp
 > template <class Rep, class Period>
-> SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
+> constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
 >    ```
 
 Splits given duration into distinct units.

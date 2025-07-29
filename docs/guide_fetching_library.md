@@ -68,7 +68,7 @@ int main() {
 
 **Q: Does this library set any CMake options or variables?**
 
-**A:** No, `CMakeLists.txt` only exposes two interface targets.
+**A:** The library operates exclusively on targets, no global variables are ever set.
 
 **Q: What if I'm using an older commit that doesn't correspond to the current documentation?**
 

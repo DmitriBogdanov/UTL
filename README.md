@@ -66,6 +66,7 @@ Quality goals include:
 ## Requirements
 
 * Requires **C++17** support
+* Some headers require a compliant preprocessor flag ([`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor)) when using [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B), such headers specify it in the docs
 
 ## Developer toolchain
 
@@ -91,15 +92,16 @@ While the library itself consists of isolated headers with no embedded dependenc
 | [BS::thread_pool](https://github.com/bshoshany/thread-pool)   | **v.5.0.0**        | [MIT](https://github.com/bshoshany/thread-pool/blob/master/LICENSE.txt)        | Benchmark comparison       | ✔                |
 | [progschj/ThreadPool](https://github.com/progschj/ThreadPool) | **commit 9a42ec1** | [zlib](https://github.com/progschj/ThreadPool/blob/master/COPYING)             | Benchmark comparison       | ✔                |
 
-## Work in progress
+## Roadmap
 
 * Reach zero warnings at MSVC `/W4`
-* Possibly provide PCH target for internal and external use
-* `utl::table` rewrite
-* `utl::log` formatting rework
-* `utl::mvl` large scale refactor and v1.0.0 release
-* `utl::random` CBPRNGs and fixed-entropy seeding sequence
-* Test coverage statistics
+* Create packages for `Conan` and `vcpkg`
+* Possibly provide PCH targets for internal and external use
+* Set up better test coverage statistics
+* `utl::table` v1.0.0 release, involves a full rewrite
+* `utl::log` v1.0.0 release, involves a formatting rework and better parametrization
+* `utl::mvl` v1.0.0 release, involves a large scale refactor and several bug fixes
+* `utl::random` v3.0.0 release, includes CBPRNGs and fixed-entropy seeding sequence
 
 ## License
 

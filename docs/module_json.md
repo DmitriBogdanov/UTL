@@ -893,7 +893,7 @@ Parsing and serialization also satisfies [C++ `<charconv>`](https://en.cpprefere
 ```
 
 > [!Important]
-> Clang with `libc++` below version 20 does not implement C++17 `std::to_chars`, forcing the library to fallback onto a significantly slower number parsing routine. This is mostly a MacOS issue. Fallback presence can be detected with `#ifdef UTL_JSON_FROM_CHARS_FALLBACK`.
+> Clang with `libc++` below version 20 does not implement C++17 `std::from_chars`, forcing the library to fallback onto a significantly slower number parsing routine. This is mostly a MacOS issue. Fallback presence can be detected with `#ifdef UTL_JSON_FROM_CHARS_FALLBACK`.
 
 ### Some thoughts on implementation
 
@@ -901,7 +901,7 @@ The main weak-point of `utl::json` from the performance point of view is parsing
 
 Unfortunately, the issue is mostly caused by `std::map` insertion & iteration, which dominates the runtime. A truly suitable for the purpose container doesn't really exist in the standard library, and would need a custom implementation like in `RapidJSON`, which would reduce the standard library interoperability thus going against the main purpose of this library which is simplicity of use.
 
-Flat maps maps seem like the way to go, slotting in a custom flat map implementation into `json::_object_type_impl` allowed `utl::json` to beat `RapidJSON` on all serializing tasks and significantly closed the gap of `database.json` parsing:
+Flat maps maps seem like the way to go, slotting in a custom flat map implementation into `impl::object_type_impl` allowed `utl::json` to beat `RapidJSON` on all serializing tasks and significantly closed the gap of `database.json` parsing:
 
 ```
 // Using associative wrapper for std::vector of pairs instead of std::map we can bridge the performance gap.
