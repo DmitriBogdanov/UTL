@@ -30,7 +30,7 @@ Useful numerical work with visualization and reports. Main design goals:
 
 Below is a quick usage showcase:
 
-| Code                                          | Output                                          |
+| Code                                          | Formats to                                      |
 | --------------------------------------------- | ----------------------------------------------- |
 | ![Image](./images/table_code_ascii.png)       | ![Image](./images/table_output_ascii.png)       |
 | ![Image](./images/table_code_markdown.png)    | ![Image](./images/table_output_markdown.png)    |
