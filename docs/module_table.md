@@ -280,7 +280,7 @@ A thin wrapper around the floating-point `value` used to specify its format. See
 
 ### ASCII table
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/WG48hPnq4) ]
 
 ```cpp
 utl::table::ASCII tb(4);
@@ -308,7 +308,7 @@ Output:
 
 ### Markdown table
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/3TGb9b4c3) ]
 
 ```cpp
 utl::table::Markdown tb({"Task", "Time", "Error", "Done"});
@@ -330,7 +330,7 @@ Output:
 
 ### LaTeX table
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/8cje1dKh1) ]
 
 ```cpp
 utl::table::LaTeX tb(4);
@@ -360,7 +360,7 @@ Output:
 
 ### Mathematica table
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/3dKsK1G9G) ]
 
 ```cpp
 utl::table::Mathematica tb(4);
@@ -387,7 +387,7 @@ Grid[{
 
 ### CSV table
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/rEhxozzMY) ]
 
 ```cpp
 utl::table::CSV tb(4);
@@ -409,7 +409,7 @@ Output:
 
 ### Floating-point formatting
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/TMxqM7ez4) ]
 
 ```cpp
 using namespace utl;
@@ -433,9 +433,9 @@ Output:
 | Seidel | 6.7e-06 |
 ```
 
-### Filling table cell-by-cell
+### Building tables cell-by-cell
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/hP617d11W) ]
 
 ```cpp
 utl::table::Markdown tb({"Method", "Error", "Converged"});
