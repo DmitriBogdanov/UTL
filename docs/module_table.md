@@ -17,10 +17,10 @@
 **utl::table** is a small header for exporting data to various tabular formats, it supports:
 
 - ASCII
-- Markdown
-- LaTeX
-- Mathematica
-- CSV
+- [Markdown](https://en.wikipedia.org/wiki/Markdown)
+- [LaTeX](https://en.wikipedia.org/wiki/LaTeX)
+- [Mathematica](https://en.wikipedia.org/wiki/Wolfram_(software))
+- [CSV](https://en.wikipedia.org/wiki/Comma-separated_values)
 
 Useful numerical work with visualization and reports. Main design goals:
 
