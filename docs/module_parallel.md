@@ -19,7 +19,7 @@
 It implements classic building blocks of concurrent algorithms such as tasks, parallel for, reductions and etc. and provides a sane thread pool implementation with work-stealing and recursive parallelism support, in summary:
 
 - Tasks, parallel loops and reductions
-- Work-stealing thread pool with fully thread-safe API
+- Work-stealing thread pool with a fully thread-safe API
 - Support for recursive parallelism
 - Focus on simple & uniform API
 - Small (~`600` lines of code)
@@ -502,7 +502,7 @@ assert( fibonacci(8) == 21 );
 
 ### Awaitable parallel loop with specific grain size
 
-[ [Run this code](https://godbolt.org/z/98dYz9Eaa) ]
+[ [Run this code](https://godbolt.org/z/7Msqjn6s9) ]
 
 ```cpp
 using namespace utl;
@@ -512,7 +512,7 @@ std::vector<int> b(200'000, 13);
 std::vector<int> c(200'000,  0);
 
 // Launch the task to compute { c = a + b } in parallel, we know this
-// workload is very even so we can use coarser grains that by default
+// workload is very even so we can use coarser grains than by default
 const std::size_t grain_size = 200'000 / parallel::get_thread_count();
 
 auto future = parallel::awaitable_loop(parallel::IndexRange<std::size_t>{0, 200'000, grain_size},
@@ -589,7 +589,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 #### Uneven non-recursive tasks
 
-**Scenario 1: Small tasks.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly. `std::async()` performs extremely poorly due to the overhead of thread creating overshadowing the actual work. Thread pools perform about the same, results might fluctuate a bit depending on the run.
+**Scenario 1: Small tasks.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly. `std::async()` performs extremely poorly due to the overhead of thread creation overshadowing the actual work. Thread pools perform about the same, results might fluctuate a bit depending on the run.
 
 ```
 | relative |               ms/op |                op/s |    err% |     total | Small non-recursive tasks
@@ -601,7 +601,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |   565.6% |                8.86 |              112.92 |    1.2% |     11.83 | `progschj/ThreadPool`
 ```
 
-**Scenario 2: Large tasks.** Submit `1000` tasks busy-waiting for `1000` to `3000` microseconds randomly. Since workload is large enough to overshadow the overhead of thread creation and scheduling, `std::async()` more-or-less catches up to the thread pools. This only becomes the case once average task duration is over a millisecond.
+**Scenario 2: Large tasks.** Submit `1000` tasks busy-waiting for `1000` to `3000` microseconds randomly. Since workload is large enough to overshadow the overhead of thread creation and scheduling, `std::async()` more-or-less catches up to the thread pools. This only becomes the case once the average task duration is over a millisecond.
 
 ```
 | relative |               ms/op |                op/s |    err% |     total | Large non-recursive tasks
@@ -625,7 +625,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |   583.0% |               28.68 |               34.87 |    0.3% |     12.09 | `parallel::ThreadPool`
 ```
 
-**Scenario 1: Deep recursion.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly and then spawning & awaiting another **2** such tasks with a `49%` chance. This rate means on average tasks recursively expand into `50` different subtasks.
+**Scenario 2: Deep recursion.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly and then spawning & awaiting another **2** such tasks with a `49%` chance. This rate means on average tasks recursively expand into `50` different subtasks.
 
 ```
 | relative |               ms/op |                op/s |    err% |     total | Deep recursive tasks

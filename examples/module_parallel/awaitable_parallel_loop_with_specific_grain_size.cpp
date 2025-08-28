@@ -10,7 +10,7 @@ int main() {
     std::vector<int> c(200'000,  0);
     
     // Launch the task to compute { c = a + b } in parallel, we know this
-    // workload is very even so we can use coarser grains that by default
+    // workload is very even so we can use coarser grains than by default
     const std::size_t grain_size = 200'000 / parallel::get_thread_count();
     
     auto future = parallel::awaitable_loop(parallel::IndexRange<std::size_t>{0, 200'000, grain_size},
