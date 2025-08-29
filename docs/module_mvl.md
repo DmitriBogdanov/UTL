@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/mvl.hpp)
+[<- to implementation.hpp](../include/UTL/mvl.hpp)
 
 **utl::mvl** (aka **M**atrix **V**iew **L**ibrary) implements generic classes for dense/strided/sparse vectors, matrices and views.
 
@@ -20,9 +20,6 @@ Unlike most existing matrix implementations, **mvl** focuses on data-oriented ma
 
 > [!Important]
 > Due to rather extensive API, seeing [usage examples](#declaring-and-indexing-a-matrix) first might be helpful.
-
-> [!Tip]
-> Use GitHub's built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) to navigate this page.
 
 ## Class structure
 
@@ -947,7 +944,7 @@ self& operator=(const GenericTensor<...>&  other);
 
 Converting copy constructor/assignment operator for tensors that have different types.
 
-Copy-conversion freely converts over the boundaries of `type`, `ownership`, `checking` and `layout`. It may use non-trivial logic to perform a "logical copy" for matrices with different APIs, such as, for example, convert sparse matrix to dense by cloning all the sparse contents and setting the other elements to default value, or, for example, construct sparse matrix from dense by filtering out all default-initialized elements and using the remainder as sparse contents (see an [example](#example-7-working-with-sparse-matrices) of working with sparse matrices).
+Copy-conversion freely converts over the boundaries of `type`, `ownership`, `checking` and `layout`. It may use non-trivial logic to perform a "logical copy" for matrices with different APIs, such as, for example, convert sparse matrix to dense by cloning all the sparse contents and setting the other elements to default value, or, for example, construct sparse matrix from dense by filtering out all default-initialized elements and using the remainder as sparse contents (see an [example](#working-with-sparse-matrices) of working with sparse matrices).
 
 ```cpp
 template <Checking other_checking>

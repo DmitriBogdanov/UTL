@@ -1,8 +1,8 @@
-[<img src ="docs/images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="docs/images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
-[<img src ="docs/images/icon_semver.svg">](docs/guide_versioning.md)
-[<img src ="docs/images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
-[<img src ="docs/images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
+[<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
+[<img src ="images/icon_semver.svg">](guide_versioning.md)
+[<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
+[<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
 [<img src ="https://img.shields.io/github/actions/workflow/status/DmitriBogdanov/UTL/windows.yml?logo=github&label=Windows">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
 [<img src ="https://img.shields.io/github/actions/workflow/status/DmitriBogdanov/UTL/ubuntu.yml?logo=github&label=Ubuntu">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
@@ -12,9 +12,9 @@
 
 **UTL** is a collection of small self-contained libraries aimed at prototyping with minimal boilerplate. Most of the modules were created during my work in gamedev and math research projects.
 
-For the ease of integration, all libraries are distributed as **individual headers**, which can be found [**here**](include/UTL).
+For the ease of integration, all libraries are distributed as **individual headers**, which can be found [**here**](../include/UTL).
 
-The entire collection can also be downloaded as an [**amalgamated single-header**](single_include/UTL.hpp).
+The entire collection can also be downloaded as an [**amalgamated single-header**](../single_include/UTL.hpp).
 
 ## Design goals
 
@@ -34,34 +34,34 @@ Quality goals include:
 
 ## Modules & documentation
 
-| Module                                                   | Short description                                                    |
-| -------------------------------------------------------- | -------------------------------------------------------------------- |
-| [**utl::bit**](docs/module_bit.md)                       | Bit-twiddling, enum bitflags                                         |
-| [**utl::enum_reflect**](docs/module_enum_reflect.md)     | Enum reflection                                                      |
-| [**utl::integral**](docs/module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc.      |
-| [**utl::json**](docs/module_json.md)                     | JSON parsing, serializing & reflection                               |
-| [**utl::log**](docs/module_log.md)                       | Logging library                                                      |
-| [**utl::math**](docs/module_math.md)                     | Additional math functions                                            |
-| [**utl::mvl**](docs/module_mvl.md)                       | Generalized matrix & vector containers                               |
-| [**utl::parallel**](docs/module_parallel.md)             | Thread pool, async tasks, parallel for, parallel reductions and etc. |
-| [**utl::predef**](docs/module_predef.md)                 | Detection of architectures, compilers, platforms and etc.            |
-| [**utl::profiler**](docs/module_profiler.md)             | Call graph & thread profiling                                        |
-| [**utl::progressbar**](docs/module_progressbar.md)       | Progress bars for CLI apps                                           |
-| [**utl::random**](docs/module_random.md)                 | PRNGs & random number generation                                     |
-| [**utl::shell**](docs/module_shell.md)                   | Shell commands and temporary files                                   |
-| [**utl::sleep**](docs/module_sleep.md)                   | Precise sleep implementations                                        |
-| [**utl::stre**](docs/module_stre.md)                     | Efficient implementations of common string utils                     |
-| [**utl::struct_reflect**](docs/module_struct_reflect.md) | Struct reflection                                                    |
-| [**utl::table**](docs/module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables            |
-| [**utl::time**](docs/module_time.md)                     | Floating-point time, timers, stopwatches, datetime                   |
+| Module                                                     | Short description                                            |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| [**utl::bit**](module_bit.md)                       | Bit-twiddling, enum bitflags                                 |
+| [**utl::enum_reflect**](module_enum_reflect.md)     | Enum reflection                                              |
+| [**utl::integral**](module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc. |
+| [**utl::json**](module_json.md)                     | JSON parsing, serializing & reflection                       |
+| [**utl::log**](module_log.md)                       | Logging library                                              |
+| [**utl::math**](module_math.md)                     | Additional math functions                                    |
+| [**utl::mvl**](module_mvl.md)                       | Generalized matrix & vector containers                       |
+| [**utl::parallel**](module_parallel.md)             | Thread pool, async tasks, parallel for, parallel reductions and etc. |
+| [**utl::predef**](module_predef.md)                 | Detection of architectures, compilers, platforms and etc.    |
+| [**utl::profiler**](module_profiler.md)             | Call graph & thread profiling                                |
+| [**utl::progressbar**](module_progressbar.md)       | Progress bars for CLI apps                                   |
+| [**utl::random**](module_random.md)                 | PRNGs & random number generation                             |
+| [**utl::shell**](module_shell.md)                   | Shell commands and temporary files                           |
+| [**utl::sleep**](module_sleep.md)                   | Precise sleep implementations                                |
+| [**utl::stre**](module_stre.md)                     | Efficient implementations of common string utils             |
+| [**utl::struct_reflect**](module_struct_reflect.md) | Struct reflection                                            |
+| [**utl::table**](module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables    |
+| [**utl::time**](module_time.md)                     | Floating-point time, timers, stopwatches, datetime           |
 
 ## See also
 
-* [How to include only specific modules when using amalgamated header](docs/guide_selecting_modules.md)
-* [Fetching the library with CMake `FetchContent()`](docs/guide_fetching_library.md)
-* [Names reserved for implementation](docs/guide_reserved_names.md)
-* [Building tests & benchmarks](docs/guide_building_project.md)
-* [Semantic versioning](docs/guide_versioning.md)
+* [How to include only specific modules when using amalgamated header](guide_selecting_modules.md)
+* [Fetching the library with CMake `FetchContent()`](guide_fetching_library.md)
+* [Names reserved for implementation](guide_reserved_names.md)
+* [Building tests & benchmarks](guide_building_project.md)
+* [Semantic versioning](guide_versioning.md)
 
 ## Requirements
 
@@ -104,4 +104,4 @@ While the library itself consists of isolated headers with no embedded dependenc
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the MIT License - see the [LICENSE.md](../LICENSE.md) for details.

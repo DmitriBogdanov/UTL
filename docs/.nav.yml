@@ -1,0 +1,40 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a meta file for the 'mkdocs-awesome-nav' MkDocs plugin, it allows
+#    us to manually specify navigation structure and order (by default the order
+#    is alphabetic and sections correspond to directories).
+#
+#    It would be nice to use directories as intended, however there is already
+#    plenty of places linking the docs files directly, so we can't move them
+#    without breaking the URLs, so the flat file structure is here to stay.
+# _______________________________________________________________________________
+
+nav:
+  - "Home": index.md
+  - "Modules":
+    - "utl::bit"            : module_bit.md
+    - "utl::enum_reflect"   : module_enum_reflect.md
+    - "utl::integral"       : module_integral.md
+    - "utl::json"           : module_json.md
+    - "utl::log"            : module_log.md
+    - "utl::math"           : module_math.md
+    - "utl::mvl"            : module_mvl.md
+    - "utl::parallel"       : module_parallel.md
+    - "utl::predef"         : module_predef.md
+    - "utl::profiler"       : module_profiler.md
+    - "utl::progressbar"    : module_progressbar.md
+    - "utl::random"         : module_random.md
+    - "utl::shell"          : module_shell.md
+    - "utl::sleep"          : module_sleep.md
+    - "utl::stre"           : module_stre.md
+    - "utl::struct_reflect" : module_struct_reflect.md
+    - "utl::table"          : module_table.md
+    - "utl::time"           : module_time.md
+  - Guides:
+    - "Selecting modules"           : guide_selecting_modules.md
+    - "Fetching the library"        : guide_fetching_library.md
+    - "Reserved names"              : guide_reserved_names.md
+    - "Building tests & benchmarks" : guide_building_project.md
+    - "Semantic versioning"         : guide_versioning.md
+  - "Blog":
+    - "Emulating reflection with a map-macro" : blog/map_macro_reflection.md 

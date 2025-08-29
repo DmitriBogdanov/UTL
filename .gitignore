@@ -20,6 +20,8 @@
 # > Scripts
 !*.txt
 !*.sh
+!*.js
+!*.css
 # > Docs
 !*.md
 !*.svg

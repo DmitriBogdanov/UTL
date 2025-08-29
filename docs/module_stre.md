@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/stre.hpp)
+[<- to implementation.hpp](../include/UTL/stre.hpp)
 
 **utl::stre** (aka **str**ing **e**xpansions) header contains implementations of most commonly used string utils.
 
@@ -144,7 +144,7 @@ Repeats given character or string a given number of times and returns the result
 std::string escape_control_chars(std::string_view str);
 ```
 
-Escapes all control & non-printable characters in the string `str` using standard C++ notation (see [corresponding example](#using-other-utilities) for a better idea).
+Escapes all control & non-printable characters in the string `str` using standard C++ notation (see [corresponding example](#other-utilities) for a better idea).
 
 Useful when printing strings to the terminal during logging & debugging.
 

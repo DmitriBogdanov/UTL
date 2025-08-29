@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/parallel.hpp)
+[<- to implementation.hpp](../include/UTL/parallel.hpp)
 
 **utl::parallel** module is a lightweight threading library providing API somewhat similar to [Intel TBB](https://github.com/uxlfoundation/oneTBB).
 
@@ -27,9 +27,6 @@ It implements classic building blocks of concurrent algorithms such as tasks, pa
 
 > [!Tip]
 > [Benchmarks](#benchmarks) and [usage examples](#examples) can be found at the bottom.
-
-> [!Tip]
-> Use GitHub's built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) to navigate this page.
 
 ## Definitions
 

@@ -1,0 +1,99 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a MkDocs Material config for automatically deployed GitHub Pages,
+#    see https://squidfunk.github.io/mkdocs-material/
+# _______________________________________________________________________________
+
+# ============
+# --- Core ---
+# ============
+
+site_name: "UTL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collection of self-contained header-only libraries for C++17"
+# larger spacing gives a nicer look to the title, since HTML collapses repeated
+# whitespace by default, we use a non-breaking-space character instead, this could
+# probably achieved in a more flexible way using overrides
+
+site_url: https://dmitribogdanov.github.io/UTL/
+
+repo_url: https://github.com/DmitriBogdanov/UTL
+
+repo_name: DmitriBogdanov/UTL
+
+# ===========================
+# --- Markdown extensions ---
+# ===========================
+
+# We need 3 extensions:
+#    1. Github-flavor callouts
+#    2. LaTeX
+#    3. Code blocks nested in block quotes
+#
+# Default 'admonition' plugin uses a different syntax so it's not suitable for callouts.
+# Thankfully, we can still achieve it with 3rd party plugins.
+#
+# [install 3rd party plugins]: 'pip install markdown-callouts'
+
+markdown_extensions:
+  - github-callouts      # enables Github-flavour callouts
+  - pymdownx.arithmatex: # enables KaTeX parser
+      generic: true      #
+  - pymdownx.superfences # enables nesting of code and content blocks
+
+extra_javascript:
+  - mkdocs/mathjax.js                                # standard Mathjax includes
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js #
+  - mkdocs/modification/navigation_title.js          # sets navigation title separately from the header
+  - mkdocs/modification/relative_links.js            # adjusts relative links to work with the website
+
+# =========================
+# --- Style & structure ---
+# =========================
+
+# [install 3rd party plugins]: 'pip install mkdocs-awesome-nav'
+
+plugins:
+  - offline     # enables HTML with relative paths
+  - search      # enables search function
+  - awesome-nav # enables navigation hierarchy specified by '.nav.yml' rather than directory structure
+
+theme:
+  name: material
+  
+  icon:
+    logo: material/tools
+    repo: fontawesome/brands/github
+  
+  # Color palette with a light/dark mode toggle
+  palette:
+    # Dark mode (default)
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to light mode
+      primary: black
+      accent: light blue
+    # Light mode
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+      primary: deep purple
+      accent: purple
+      
+  features:
+    - toc.follow        # makes the sidebar automatically scroll to keep current TOC heading visible
+    - content.code.copy # add copy button to code blocks
+    - search.suggest    # adds greyed-out suggestion to the search
+
+# Footer configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DmitriBogdanov
+      
+copyright: Copyright &copy; 2023 Dmitri Bogdanov
+
+# Fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+extra_css:
+  - mkdocs/callouts.css
+  - mkdocs/width.css

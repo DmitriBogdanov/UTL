@@ -2,7 +2,7 @@
 
 [<- back to README.md](..)
 
-While using [individual headers](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL) is generally more robust, the amalgamated [`UTL.hpp`](./../single_include/UTL.hpp) still allows selection of individual libraries to include (for example, to reduce compile times when only some of the modules are needed).
+While using [individual headers](../include/UTL) is generally more robust, the amalgamated [`UTL.hpp`](../single_include/UTL.hpp) still allows selection of individual libraries to include (for example, to reduce compile times when only some of the modules are needed).
 
 This is achievable by declaring `#define UTL_PICK_MODULES` and `#define <module_identifier>` for all necessary modules before including the library header, see [examples](#selecting-specific-modules).
 

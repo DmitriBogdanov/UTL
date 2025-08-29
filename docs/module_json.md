@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/json.hpp)
+[<- to implementation.hpp](../include/UTL/json.hpp)
 
 **utl::json** module aims to provide an intuitive JSON manipulation API similar to [nlohmann_json](https://github.com/nlohmann/json) while being a bit more lightweight and providing better performance. Key features are:
 
@@ -28,9 +28,6 @@
 
 > [!Note]
 > Despite rather competitive performance, considerably faster parsing can be achieved with custom formatters, SIMD and unordered key optimizations (see [simdjson](https://github.com/simdjson/simdjson), [Glaze](https://github.com/stephenberry/glaze), [RapidJSON](https://github.com/Tencent/rapidjson)  and [yyjson](https://github.com/ibireme/yyjson)), this, however often comes at the expense of user convenience (like with *RapidJSON*) or features (*simdjson* is parser-only, *yyjson* is `C` and doesn't include reflection, *Glaze* has it all, but requires [C++23](https://en.cppreference.com/w/cpp/23)).
-
-> [!Tip]
-> Use GitHub's built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) to navigate this page.
 
 ## Feature Support
 

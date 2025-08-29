@@ -1,0 +1,14 @@
+/*
+__________________________________ CONTENTS ___________________________________
+
+   Custom MkDocs width configuration, default is a bit too narrow for code
+   blocks. The cutoff should generally isolate laptop / desktop screens from
+   mobile devices (where we want 100% since sidebars are hidden).
+_______________________________________________________________________________
+*/
+
+@media screen and (min-width: 1224px) {
+    .md-grid {
+        max-width: 83%
+    }
+}

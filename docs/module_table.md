@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/table.hpp)
+[<- to implementation.hpp](../include/UTL/table.hpp)
 
 **utl::table** is a small header for exporting data to various tabular formats, it supports:
 
@@ -30,13 +30,13 @@ Useful numerical work with visualization and reports. Main design goals:
 
 Below is a quick usage showcase:
 
-| Code                                          | Formats to                                      |
-| --------------------------------------------- | ----------------------------------------------- |
-| ![Image](./images/table_code_ascii.png)       | ![Image](./images/table_output_ascii.png)       |
-| ![Image](./images/table_code_markdown.png)    | ![Image](./images/table_output_markdown.png)    |
-| ![Image](./images/table_code_latex.png)       | ![Image](./images/table_output_latex.png)       |
-| ![Image](./images/table_code_mathematica.png) | ![Image](./images/table_output_mathematica.png) |
-| ![Image](./images/table_code_csv.png)         | ![Image](./images/table_output_csv.png)         |
+| Code                                        | Formats to                                    |
+| ------------------------------------------- | --------------------------------------------- |
+| ![Image](images/table_code_ascii.png)       | ![Image](images/table_output_ascii.png)       |
+| ![Image](images/table_code_markdown.png)    | ![Image](images/table_output_markdown.png)    |
+| ![Image](images/table_code_latex.png)       | ![Image](images/table_output_latex.png)       |
+| ![Image](images/table_code_mathematica.png) | ![Image](images/table_output_mathematica.png) |
+| ![Image](images/table_code_csv.png)         | ![Image](images/table_output_csv.png)         |
 
 ## Definitions
 
@@ -183,7 +183,7 @@ Adds one or several cells to the table with `args` as their contents.
 
 **Note 1:** To allow export of hand-written LaTeX expressions, there are no specific restrictions on imposed strings in the table.
 
-**Note 2:** Integer and floating point numbers will be formated as proper LaTeX formulas. This includes numbers in scientific and hex notation.
+**Note 2:** Integer and floating point numbers will be formatted as proper LaTeX formulas. This includes numbers in scientific and hex notation.
 
 > ```cpp
 > void hline();

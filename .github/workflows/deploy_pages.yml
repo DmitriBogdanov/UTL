@@ -1,0 +1,59 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a workflow file for GitHub Actions builds and publishes a copy of
+#    documentation built with MkDocs Material as a static website.
+#
+#    This workflow is effectively a refactored version of
+#    the sample  provided  by MkDocs Material documentation:
+#    https://squidfunk.github.io/mkdocs-material/publishing-your-site/
+# _______________________________________________________________________________
+
+name: "Deploy Github Pages"
+
+on:
+  push:
+    branches:
+      - master 
+
+permissions:
+  contents: write
+  
+jobs:
+
+  deploy:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      
+      - name: "Configure bot credentials"
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      
+      - name: "Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      
+      - name: "Get cache id"    
+        run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
+      
+      - name: "Cache/restore the environment"
+        uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: ~/.cache 
+          restore-keys: |
+            mkdocs-material-
+      
+      - name: "Install dependencies with Pip"
+        run: |
+          pip install mkdocs-material
+          pip install markdown-callouts
+          pip install mkdocs-awesome-nav
+        
+      - name: "Deploy to the Github Pages"
+        run: mkdocs gh-deploy --force

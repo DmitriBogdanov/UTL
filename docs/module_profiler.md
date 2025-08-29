@@ -1,5 +1,5 @@
 [<img src ="images/icon_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/icon_license_mit.svg">](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md)
+[<img src ="images/icon_license_mit.svg">](../LICENSE.md)
 [<img src ="images/icon_semver.svg">](guide_versioning.md)
 [<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/icon_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
@@ -12,7 +12,7 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/profiler.hpp)
+[<- to implementation.hpp](../include/UTL/profiler.hpp)
 
 **utl::profiler** is a single-include solution for localized profiling. It features simple macros to measure how much time is taken by a certain scope / expression / code segment. The profiler automatically builds a call graph for all profiled functions and prints a nicely formatted table for every thread. See the [examples](#examples).
 
@@ -23,7 +23,7 @@ Key features:
 - No reliance on system APIs
 - [Supports multi-threading](#profiling-parallel-section) & recursion
 - Supports [CPU-counter timestamps](#reducing-overhead-with-x86-intrinsics)
-- [Can export results at any point](#profiling-detached-threads-&-uploading-results) of the program
+- [Can export results at any point](#profiling-detached-threads-uploading-results) of the program
 - Can be [fully disabled](#disabling-profiling)
 
 Below is an output example from profiling a JSON parser:
@@ -205,7 +205,7 @@ Output:
 ### Profiling parallel section
 
 > [!Note]
-> In this example we will use [utl::parallel](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_parallel.md) to represent a parallel section concisely.
+> In this example we will use [utl::parallel](module_parallel.md) to represent a parallel section concisely.
 
 [ [Run this code](https://godbolt.org/z/3fexeW638) ]
 
@@ -236,7 +236,7 @@ Output:
 ### Profiling detached threads & uploading results
 
 > [!Note]
-> In this example we will use [utl::parallel](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_parallel.md) to represent detached section concisely.
+> In this example we will use [utl::parallel](module_parallel.md) to represent detached section concisely.
 
 [ [Run this code](https://godbolt.org/z/o6ojTv8oc) ]
 

@@ -9,7 +9,7 @@ UTL::include
 UTL::single_include
 ```
 
-corresponding to [`include/`](https://github.com/DmitriBogdanov/UTL/tree/master/include) and [`single_include/`](https://github.com/DmitriBogdanov/UTL/tree/master/single_include) directories.
+corresponding to [`include/`](../include) and [`single_include/`](../single_include) directories.
 
 ## `FetchContent()` example
 
