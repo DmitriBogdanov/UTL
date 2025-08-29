@@ -8,7 +8,7 @@
 # --- Core ---
 # ============
 
-site_name: "UTL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collection of self-contained header-only libraries for C++17"
+site_name: "UTL"
 # larger spacing gives a nicer look to the title, since HTML collapses repeated
 # whitespace by default, we use a non-breaking-space character instead, this could
 # probably achieved in a more flexible way using overrides
@@ -58,6 +58,8 @@ plugins:
 
 theme:
   name: material
+  
+  favicon: images/icon_site_logo.ico
   
   icon:
     logo: material/tools

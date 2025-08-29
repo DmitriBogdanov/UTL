@@ -25,6 +25,7 @@
 # > Docs
 !*.md
 !*.svg
+!*.ico
 !*.jpg
 !*.png
 # > Data
