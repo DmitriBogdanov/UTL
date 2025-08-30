@@ -33,5 +33,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
     
     add_subdirectory("tests")
     add_subdirectory("examples")
+    add_subdirectory("auxiliary") # generating data & figures for documentation
     
 endif()

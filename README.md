@@ -62,6 +62,7 @@ Quality goals include:
 * [Names reserved for implementation](docs/guide_reserved_names.md)
 * [Building tests & benchmarks](docs/guide_building_project.md)
 * [Semantic versioning](docs/guide_versioning.md)
+* [Reproducing figures](docs/guide_reproducing_figures.md)
 
 ## Requirements
 

@@ -22,6 +22,7 @@
 !*.sh
 !*.js
 !*.css
+!*.py
 # > Docs
 !*.md
 !*.svg

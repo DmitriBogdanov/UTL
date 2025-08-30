@@ -562,11 +562,11 @@ In general, most statistical issues fall into following groups:
 
 The most famous example of low-quality random is IBM's [RANDU](https://en.wikipedia.org/wiki/RANDU) (a variation of the same [LCG](https://en.wikipedia.org/wiki/Linear_congruential_generator) used by most `C` programmers to this day) which was widely used in 1960s and 1970s for the lack of a better knowledge.
 
-As a simplest showcase of its flaws, let's generate `10000` random points in a $[0, 1]^3$ cube, each points will generate with coordinates `{ randu(), randu(), randu() }`. After plotting the resulting picture and looking at it from a correct angle, we can clearly see that all points fall into just **12** distinct planes:
+As a simplest showcase of its flaws, let's generate `10000` random points in a $[0, 1]^3$ cube, each points will generate with coordinates `{ randu(), randu(), randu() }`. After plotting the resulting picture and looking at it from a correct angle, we can clearly see that all points fall into just **15** distinct planes:
 
-<img src ="images/random_3d_points_angle.svg">
+[<img src ="images/random_spectral_test_angle.svg">](guide_reproducing_figures.md)
 
-<img src ="images/random_3d_points_above.svg">
+]<img src ="images/random_spectral_test_above.svg">](guide_reproducing_figures.md)
 
 What we just observed is called "failing the [spectral test](https://en.wikipedia.org/wiki/Spectral_test) at an extremely low dimension", and for RANDU that dimension is **3**. Such quality is clearly not something one would want in their Monte—Carlo simulation with "random" realizations.
 
@@ -578,13 +578,13 @@ While RANDU algorithm is no longer in use today, its family of algorithms (LCG) 
 
 **Note:** Since nothing in the standard specifies how `rand()` should be implemented it is generally not something one could rely upon, in most cases it's LCG, sometimes it's [linear-feedback shift register](https://en.wikipedia.org/wiki/Linear-feedback_shift_register) which is a little better.
 
-We can easily demonstrate a significant correlation of successive seeds in the default implementation by creating a $200 \times 160$ matrix of random `1`s and `0`s, while re-seeding the generator with `i` at the beginning of each row `i`. This will lead to a following image:
+We can easily demonstrate a significant correlation of successive seeds in the default implementation by creating a $160 \times 200$ matrix of random `1`s and `0`s, while re-seeding the generator with `i` at the beginning of each row `i`. This will lead to a following image:
 
-<img src ="images/random_grayscale_minstd_rand.svg">
+[<img src ="images/random_seed_correlation_minstd_rand.svg">](guide_reproducing_figures.md)
 
 Using `std::mt19937` (or any other even slightly sensible engine) will not lead to such an horrific correlation, we get a visually uniform image:
 
-<img src ="images/random_grayscale_mt19937.svg">
+[<img src ="images/random_seed_correlation_mt19937.svg">](guide_reproducing_figures.md)
 
 In practice, something like this would be encountered during any stochastic simulation where each run is simulated with a new seed.
 
@@ -654,4 +654,4 @@ Most non-uniform distributions transform their inputs with slow non-linear funct
 
 Below is an example of an empirical [PDF](https://en.wikipedia.org/wiki/Probability_density_function) produced by a regular `NormalDistribution<>` and an  `ApproxNormalDistribution<>` which is about **3–4 times faster** to compute.
 
-<img src ="images/random_normal_approximation.svg">
+[<img src ="images/random_approx_distributions.svg">](guide_reproducing_figures.md)
