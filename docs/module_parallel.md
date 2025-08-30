@@ -652,4 +652,4 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 
 **Q:** Why no benchmarks against [Leopard](https://github.com/hosseinmoein/Leopard), [riften::ThiefPool](https://github.com/ConorWilliams/Threadpool) and [dp::thread_pool](https://github.com/DeveloperPaul123/thread-pool)?
 
-**A:** All of these require **C++20** to build, which is above the required standard for building this repo. `riften::ThiefPool` also includes several dependencies. Out of these 3 implementation, recursive workload seems to only be supported by `Leopard` and even that requires some algorithm adjustments on user-side with `run_task()` needing to be called in the right places to avoid a deadlock.
+**A:** All of these require **C++20** to build, which is above the required standard for building this repo. `riften::ThiefPool` also includes several dependencies. Out of these 3 implementations, recursive workload seems to only be supported by `Leopard` and even that requires some algorithm adjustments on user-side with `run_task()` needing to be called in the right places to avoid a deadlock.

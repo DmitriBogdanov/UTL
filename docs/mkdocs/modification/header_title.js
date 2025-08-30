@@ -23,8 +23,6 @@
     if (spans.length === 0) return;
     let span = spans[0];
     
-    console.log(span.innerHTML.toString());
-    
     if (span.innerHTML.includes('UTL')) {
         let separator = document.createElement('span');
         separator.setAttribute('class', 'md-ellipsis');

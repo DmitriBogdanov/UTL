@@ -30,11 +30,11 @@ nav:
     - "utl::struct_reflect" : module_struct_reflect.md
     - "utl::table"          : module_table.md
     - "utl::time"           : module_time.md
-  - Guides:
+  - "Guides":
     - "Selecting modules"           : guide_selecting_modules.md
     - "Fetching the library"        : guide_fetching_library.md
     - "Reserved names"              : guide_reserved_names.md
     - "Building tests & benchmarks" : guide_building_project.md
     - "Semantic versioning"         : guide_versioning.md
   - "Blog":
-    - "Emulating reflection with a map-macro" : blog/map_macro_reflection.md 
+    - "Map-macro: Emulating reflection" : blog/map_macro_reflection.md 

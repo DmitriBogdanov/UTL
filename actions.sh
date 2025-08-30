@@ -94,6 +94,11 @@ command_check() {
     fi
 }
 
+command_docs() {
+    require_command_exists "mkdocs"
+    mkdocs serve
+}
+
 # =======================
 # --- Action selector ---
 # =======================
@@ -137,6 +142,12 @@ do
     if [ "${var}" = "check" ]; then
         printf "${ansi_purple}# Action: Run Static Analysis${ansi_reset}\n"
         command_check
+        valid_command=true
+    fi
+    
+    if [ "${var}" = "docs" ]; then
+        printf "${ansi_purple}# Action: Build local documentation${ansi_reset}\n"
+        command_docs
         valid_command=true
     fi
     

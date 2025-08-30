@@ -12,7 +12,7 @@
 - [Alternative approaches for `struct` reflection](#alternative-approaches-for-struct-reflection)
 - [Related libraries](#related-libraries)
 
-# Simple reflection using a map-macro
+# Map-macro: emulating reflection
 
 [License](../../LICENSE.md)
 
@@ -46,10 +46,10 @@ The implementation of this macro is attached at the [end](#map-macro-implementat
 Now, one could spend plenty of time figuring out all the preprocessor magic behind the macro, but what I believe is a more important question is: **"What does this give us?"**. From my perspective — an almost perfect tool to implement codegen macros for reflection.
 
 > [!Note]
-> Strictly speaking, we will be dealing with a way of providing types with non-intrusive introspection metadata, rather than a proper reflection. A battle-tested implementation of this mechanism is provided [Boost.Desribe](https://github.com/boostorg/describe), since the end goals are the same the term "reflection" will be used for conciseness.
+> Strictly speaking, we will be dealing with a way of providing types with non-intrusive introspection metadata, rather than a proper reflection. A battle-tested implementation of this mechanism is provided [Boost.Describe](https://github.com/boostorg/describe), since the end goals are the same the term "reflection" will be used for conciseness.
 
 > [!Note]
-> Ultimately, proper reflection can only be supported at the language level, everything we do before C++26 is trying to bolt-in a language feature using various work-arounds.
+> Ultimately, proper reflection can only be supported at the language level, everything we do before C++26 is trying to bolt-in a language feature using various workarounds.
 
 ## `enum` reflection
 
@@ -110,7 +110,7 @@ constexpr to_string(Enum e) {
 template<class Enum>
 constexpr from_string(std::string_view str) {
     for (const auto& [name, val] : meta<Enum>::entries) if (str == name) return val;
-    throw std::out_of_range("String does not corresond to a value in enum.")
+    throw std::out_of_range("String does not correspond to a value in enum.")
 }
 ```
 
@@ -379,21 +379,21 @@ Some other libraries implement reflection using template metadata fields, inheri
 
 ## Related libraries
 
-| Library                                                      | Description                                                  | Reflection method         |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------- |
-| [magic_enum](https://github.com/Neargye/magic_enum)          | C++17 feature-rich enum reflection                           | "Pretty function" parsing |
-| [static_enum](https://github.com/KonanM/static_enum)         | C++17 minimalistic enum reflection                           | "Pretty function" parsing |
-| [utl::enum_reflect](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_enum_reflect.md) | C++17 minimalistic enum reflection                           | Map-macro                 |
-| [visit_struct](https://github.com/cbeck88/visit_struct)      | C++11 minimalistic structure reflection                      | Map-macro                 |
-| [selfaware](https://github.com/jckarter/selfaware)           | C++11 minimalistic structure reflection                      | Macros & template meta    |
-| [utl::struct_reflect](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_struct_reflect.md) | C++17 minimalistic structure reflection                      | Map-macro                 |
-| [Glaze](https://github.com/stephenberry/glaze)               | C++23 serialization library that also includes reflection    | "Pretty function" parsing |
-| [reflectcpp](https://github.com/getml/reflect-cpp)           | C++20 serialization library that also includes reflection    | "Pretty function" parsing |
-| [Boost.Hana](https://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/index.html) | C++14 metaprogramming library that also includes reflection  | Macros & template meta    |
-| [Boost.Describe](https://github.com/boostorg/describe)       | C++14 reflection library providing very similar API to the one described here | Map-macro                 |
-| [Boost.PFR](https://github.com/boostorg/pfr)                 | C++14 structure reflection library that doesn't require registration macros | Custom                    |
+| Library                                                                                                | Description                                                                   | Reflection method         |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------- |
+| [magic_enum](https://github.com/Neargye/magic_enum)                                                    | C++17 feature-rich enum reflection                                            | "Pretty function" parsing |
+| [static_enum](https://github.com/KonanM/static_enum)                                                   | C++17 minimalistic enum reflection                                            | "Pretty function" parsing |
+| [utl::enum_reflect](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_enum_reflect.md)     | C++17 minimalistic enum reflection                                            | Map-macro                 |
+| [visit_struct](https://github.com/cbeck88/visit_struct)                                                | C++11 minimalistic structure reflection                                       | Map-macro                 |
+| [selfaware](https://github.com/jckarter/selfaware)                                                     | C++11 minimalistic structure reflection                                       | Macros & template meta    |
+| [utl::struct_reflect](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_struct_reflect.md) | C++17 minimalistic structure reflection                                       | Map-macro                 |
+| [Glaze](https://github.com/stephenberry/glaze)                                                         | C++23 serialization library that also includes reflection                     | "Pretty function" parsing |
+| [reflectcpp](https://github.com/getml/reflect-cpp)                                                     | C++20 serialization library that also includes reflection                     | "Pretty function" parsing |
+| [Boost.Hana](https://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/index.html)                      | C++14 metaprogramming library that also includes reflection                   | Macros & template meta    |
+| [Boost.Describe](https://github.com/boostorg/describe)                                                 | C++14 reflection library providing very similar API to the one described here | Map-macro                 |
+| [Boost.PFR](https://github.com/boostorg/pfr)                                                           | C++14 structure reflection library that doesn't require registration macros   | Custom                    |
 
-| Library                                              | Description                                                  |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
+| Library                                              | Description                                                                        |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | [map-macro](https://github.com/swansontec/map-macro) | A clean implementation of the map-macro that inspired this post in the first place |
 
