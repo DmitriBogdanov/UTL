@@ -34,26 +34,26 @@ Quality goals include:
 
 ## Modules & documentation
 
-| Module                                                     | Short description                                            |
-| ---------------------------------------------------------- | ------------------------------------------------------------ |
-| [**utl::bit**](module_bit.md)                       | Bit-twiddling, enum bitflags                                 |
-| [**utl::enum_reflect**](module_enum_reflect.md)     | Enum reflection                                              |
-| [**utl::integral**](module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc. |
-| [**utl::json**](module_json.md)                     | JSON parsing, serializing & reflection                       |
-| [**utl::log**](module_log.md)                       | Logging library                                              |
-| [**utl::math**](module_math.md)                     | Additional math functions                                    |
-| [**utl::mvl**](module_mvl.md)                       | Generalized matrix & vector containers                       |
+| Module                                              | Short description                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------------- |
+| [**utl::bit**](module_bit.md)                       | Bit-twiddling, enum bitflags                                         |
+| [**utl::enum_reflect**](module_enum_reflect.md)     | Enum reflection                                                      |
+| [**utl::integral**](module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc.      |
+| [**utl::json**](module_json.md)                     | JSON parsing, serializing & reflection                               |
+| [**utl::log**](module_log.md)                       | Logging library                                                      |
+| [**utl::math**](module_math.md)                     | Additional math functions                                            |
+| [**utl::mvl**](module_mvl.md)                       | Generalized matrix & vector containers                               |
 | [**utl::parallel**](module_parallel.md)             | Thread pool, async tasks, parallel for, parallel reductions and etc. |
-| [**utl::predef**](module_predef.md)                 | Detection of architectures, compilers, platforms and etc.    |
-| [**utl::profiler**](module_profiler.md)             | Call graph & thread profiling                                |
-| [**utl::progressbar**](module_progressbar.md)       | Progress bars for CLI apps                                   |
-| [**utl::random**](module_random.md)                 | PRNGs & random number generation                             |
-| [**utl::shell**](module_shell.md)                   | Shell commands and temporary files                           |
-| [**utl::sleep**](module_sleep.md)                   | Precise sleep implementations                                |
-| [**utl::stre**](module_stre.md)                     | Efficient implementations of common string utils             |
-| [**utl::struct_reflect**](module_struct_reflect.md) | Struct reflection                                            |
-| [**utl::table**](module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables    |
-| [**utl::time**](module_time.md)                     | Floating-point time, timers, stopwatches, datetime           |
+| [**utl::predef**](module_predef.md)                 | Detection of architectures, compilers, platforms and etc.            |
+| [**utl::profiler**](module_profiler.md)             | Call graph & thread profiling                                        |
+| [**utl::progressbar**](module_progressbar.md)       | Progress bars for CLI apps                                           |
+| [**utl::random**](module_random.md)                 | PRNGs & random number generation                                     |
+| [**utl::shell**](module_shell.md)                   | Shell commands and temporary files                                   |
+| [**utl::sleep**](module_sleep.md)                   | Precise sleep implementations                                        |
+| [**utl::stre**](module_stre.md)                     | Efficient implementations of common string utils                     |
+| [**utl::struct_reflect**](module_struct_reflect.md) | Struct reflection                                                    |
+| [**utl::table**](module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables            |
+| [**utl::time**](module_time.md)                     | Floating-point time, timers, stopwatches, datetime                   |
 
 ## See also
 
@@ -81,6 +81,8 @@ While the library itself consists of isolated headers with no embedded dependenc
 | [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)                                 | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) test instrumentation |
 | [cppcheck](https://github.com/danmar/cppcheck)                                                         | **v.2.7**    | Static analysis                                                                                                                                                  |
 | [GitHub Actions](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) | **latest**   | Multi-platform [CI testing](https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions)                            |
+| [MkDocs Material](https://squidfunk.github.io/mkdocs-material/)                                        | **latest**   | Building the website                                                                                                                                             |
+| [Matplotlib](https://matplotlib.org/)                                                                  | **latest**   | Data visualization                                                                                                                                               |
 
 | Library                                                       | Version            | License                                                                        | Used for                   | Embedded in repo |
 | ------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------ | -------------------------- | ---------------- |

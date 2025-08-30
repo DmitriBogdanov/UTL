@@ -490,23 +490,23 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 
 ### Overview of available PRNGs
 
-| Generator                   | Performance    | Memory                 | Result type     | Quality | Period                 | Motivation                        |
-| --------------------------- | -------------- | ---------------------- | --------------- | ------- | ---------------------- | --------------------------------- |
-| `RomuMono16`                | ~500% | 4 bytes                | `std::uint16_t` | ★★☆☆☆   | $\approx 2^{32}$       | Fastest 16-bit PRNG **⁽¹⁾** |
-| `RomuTrio32`                | ~470%        | 12 bytes               | `std::uint32_t` | ★★☆☆☆   | **Chaotic** **⁽²⁾**         | Fastest 32-bit PRNG               |
-| `SplitMix32`                | ~540%          | 4 bytes                | `std::uint32_t` | ★★★☆☆   | $2^{32}$               | Smallest state 32-bit PRNG        |
-| `Xoshiro128PP`              | ~375%          | 16 bytes               | `std::uint32_t` | ★★★★☆   | $2^{128} − 1$          | Best all purpose 32-bit PRNG      |
-| `RomuDuoJr64`               | ~600%          | 16 bytes | `std::uint64_t` | ★★☆☆☆   | **Chaotic**            | Fastest 64-bit PRNG               |
-| `SplitMix64`                | ~540%          | 8 bytes                | `std::uint64_t` | ★★★★☆   | $2^{64}$               | Smallest state 64-bit PRNG        |
-| `Xoshiro256PP`              | ~385%          | 32 bytes               | `std::uint64_t` | ★★★★☆   | $2^{256} − 1$          | Best all purpose 64-bit PRNG      |
-| `ChaCha8` **⁽³⁾** | ~125%          | 120 bytes              | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG     |
-| `ChaCha12`                  | ~105%          | 120 bytes              | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG     |
-| `ChaCha20`                  | ~70%           | 120 bytes              | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG     |
-| `std::minstd_rand`          | 100%           | 8 bytes                | `std::uint64_t` | ★☆☆☆☆   | $2^{31} − 1$           |                                   |
-| `rand()` | ~80%           | **Platform-dependent** **⁽⁴⁾** | `int`           | ★☆☆☆☆   | **Platform-dependent** |                                   |
-| `std::mt19937`              | ~105%          | 5000 bytes             | `std::uint32_t` | ★★★☆☆   | $2^{19937} − 1$        |                                   |
-| `std::knuth_b`              | ~55%           | 2064 bytes             | `std::uint64_t` | ★★☆☆☆   | $2^{31} − 1$           |                                   |
-| `std::ranlux48`             | ~4%            | 120 bytes              | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                                   |
+| Generator          | Performance | Memory                         | Result type     | Quality | Period                 | Motivation                    |
+| ------------------ | ----------- | ------------------------------ | --------------- | ------- | ---------------------- | ----------------------------- |
+| `RomuMono16`       | ~500%       | 4 bytes                        | `std::uint16_t` | ★★☆☆☆   | $\approx 2^{32}$       | Fastest 16-bit PRNG **⁽¹⁾**   |
+| `RomuTrio32`       | ~470%       | 12 bytes                       | `std::uint32_t` | ★★☆☆☆   | **Chaotic** **⁽²⁾**    | Fastest 32-bit PRNG           |
+| `SplitMix32`       | ~540%       | 4 bytes                        | `std::uint32_t` | ★★★☆☆   | $2^{32}$               | Smallest state 32-bit PRNG    |
+| `Xoshiro128PP`     | ~375%       | 16 bytes                       | `std::uint32_t` | ★★★★☆   | $2^{128} − 1$          | Best all purpose 32-bit PRNG  |
+| `RomuDuoJr64`      | ~600%       | 16 bytes                       | `std::uint64_t` | ★★☆☆☆   | **Chaotic**            | Fastest 64-bit PRNG           |
+| `SplitMix64`       | ~540%       | 8 bytes                        | `std::uint64_t` | ★★★★☆   | $2^{64}$               | Smallest state 64-bit PRNG    |
+| `Xoshiro256PP`     | ~385%       | 32 bytes                       | `std::uint64_t` | ★★★★☆   | $2^{256} − 1$          | Best all purpose 64-bit PRNG  |
+| `ChaCha8` **⁽³⁾**  | ~125%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `ChaCha12`         | ~105%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `ChaCha20`         | ~70%        | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `std::minstd_rand` | 100%        | 8 bytes                        | `std::uint64_t` | ★☆☆☆☆   | $2^{31} − 1$           |                               |
+| `rand()`           | ~80%        | **Platform-dependent** **⁽⁴⁾** | `int`           | ★☆☆☆☆   | **Platform-dependent** |                               |
+| `std::mt19937`     | ~105%       | 5000 bytes                     | `std::uint32_t` | ★★★☆☆   | $2^{19937} − 1$        |                               |
+| `std::knuth_b`     | ~55%        | 2064 bytes                     | `std::uint64_t` | ★★☆☆☆   | $2^{31} − 1$           |                               |
+| `std::ranlux48`    | ~4%         | 120 bytes                      | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                               |
 
 > [!Important]
 > Performance ratings are **relative to the commonly used  `std::minstd_rand` / `rand()`**.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above were measured on `AMD Ryzen 5 5600H` with `g++ 11.4.0`. Benchmarks can be found [here](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_random/).
@@ -528,13 +528,13 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 
 Random quality ratings are as follows:
 
-| Quality rating | Usage                            | Quality description                                          |
-| -------------- | -------------------------------- | ------------------------------------------------------------ |
+| Quality rating | Usage                            | Quality description                                                                                                                                                                             |
+| -------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ★★★★★          | Suitable for cryptography        | Cryptographically secure, satisfies [CSPRNG](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator) requirements, this usually comes at the price of performance |
-| ★★★★☆          | Suitable for most use cases      | No significant issues in qualitative testing, passes [TestU01 Big Crush](https://simul.iro.umontreal.ca/testu01/tu01.html) |
-| ★★★☆☆          | Suitable for most use cases      | No significant issues in qualitative testing, might fail a few tests on Big Crush |
-| ★★☆☆☆          | Suitable for simple applications | Significant flaws in statistical quality in certain aspects  |
-| ★☆☆☆☆          | Suitable for simple applications | Significant flaws in statistical quality all-around          |
+| ★★★★☆          | Suitable for most use cases      | No significant issues in qualitative testing, passes [TestU01 Big Crush](https://simul.iro.umontreal.ca/testu01/tu01.html)                                                                      |
+| ★★★☆☆          | Suitable for most use cases      | No significant issues in qualitative testing, might fail a few tests on Big Crush                                                                                                               |
+| ★★☆☆☆          | Suitable for simple applications | Significant flaws in statistical quality in certain aspects                                                                                                                                     |
+| ★☆☆☆☆          | Suitable for simple applications | Significant flaws in statistical quality all-around                                                                                                                                             |
 
 ### Why RNG quality matters
 

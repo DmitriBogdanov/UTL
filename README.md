@@ -55,6 +55,9 @@ Quality goals include:
 | [**utl::table**](docs/module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables            |
 | [**utl::time**](docs/module_time.md)                     | Floating-point time, timers, stopwatches, datetime                   |
 
+> [!Tip]
+> Documentation is more convenient when viewed from the [website](https://dmitribogdanov.github.io/UTL/).
+
 ## See also
 
 * [How to include only specific modules when using amalgamated header](docs/guide_selecting_modules.md)
@@ -81,6 +84,8 @@ While the library itself consists of isolated headers with no embedded dependenc
 | [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)                                 | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) test instrumentation |
 | [cppcheck](https://github.com/danmar/cppcheck)                                                         | **v.2.7**    | Static analysis                                                                                                                                                  |
 | [GitHub Actions](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) | **latest**   | Multi-platform [CI testing](https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions)                            |
+| [MkDocs Material](https://squidfunk.github.io/mkdocs-material/)                                        | **latest**   | Building the website                                                                                                                                             |
+| [Matplotlib](https://matplotlib.org/)                                                                  | **latest**   | Data visualization                                                                                                                                               |
 
 | Library                                                       | Version            | License                                                                        | Used for                   | Embedded in repo |
 | ------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------ | -------------------------- | ---------------- |
