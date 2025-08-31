@@ -566,7 +566,7 @@ As a simplest showcase of its flaws, let's generate `10000` random points in a $
 
 [<img src ="images/random_spectral_test_angle.svg">](guide_reproducing_figures.md)
 
-]<img src ="images/random_spectral_test_above.svg">](guide_reproducing_figures.md)
+[<img src ="images/random_spectral_test_above.svg">](guide_reproducing_figures.md)
 
 What we just observed is called "failing the [spectral test](https://en.wikipedia.org/wiki/Spectral_test) at an extremely low dimension", and for RANDU that dimension is **3**. Such quality is clearly not something one would want in their Monte—Carlo simulation with "random" realizations.
 

@@ -89,6 +89,10 @@ theme:
     # - navigation.instant          # dispatches internal links without refresh (makes loading feel smoother)
     # - navigation.instant.progress # shows loading bar if page load takes over 400ms
 
+# [! Warning !]: Instant navigation changes all relative 'href' links, which breaks current link replacement rules.
+#                Since it also prevents page reload tracking & replacing links going outside the website (aka to repo)
+#                becomes significantly more difficult.
+
 # Footer configuration
 extra:
   social:
