@@ -86,8 +86,8 @@ theme:
     - toc.follow                  # makes the sidebar automatically scroll to keep current TOC heading visible
     - content.code.copy           # adds copy button to code blocks
     - search.suggest              # adds greyed-out suggestion to the search
-    - navigation.instant          # dispatches internal links without refresh (makes loading feel smoother)
-    - navigation.instant.progress # shows loading bar if page load takes over 400ms
+    # - navigation.instant          # dispatches internal links without refresh (makes loading feel smoother)
+    # - navigation.instant.progress # shows loading bar if page load takes over 400ms
 
 # Footer configuration
 extra:

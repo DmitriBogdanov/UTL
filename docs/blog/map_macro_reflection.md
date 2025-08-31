@@ -14,8 +14,6 @@
 
 # Map-macro: emulating reflection
 
-[License](../../LICENSE.md)
-
 Recently I've come across a [very curios macro](#map-macro-implementation), let's call it `MAP`:
 ```cpp
 #define MAP(f, ...) /* <some preprocessor magic> */

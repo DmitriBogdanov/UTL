@@ -26,7 +26,8 @@
 function count_occurrences(str, substr) {
     return str.split(substr).length - 1
 }
-    
+
+// Link replacement that works without 'navigation.instant' (which means relative links are preserved)
 {
     const repo_link   = 'https://github.com/DmitriBogdanov/UTL/blob/master/';
     
@@ -46,11 +47,3 @@ function count_occurrences(str, substr) {
             }
         });
 }
-// [...document.querySelectorAll("a[href^='..'")] // ^= => "begins with" selector
-//     .forEach(el => {
-//         const repo_link     = 'https://github.com/DmitriBogdanov/UTL/blob/master'
-//         const relative_link = el.getAttribute('href').substring(2)
-//         el.setAttribute('href', repo_link + relative_link)
-        
-//         console.log('Replaced link', '..' + relative_link, 'with', repo_link + relative_link)
-//     });
