@@ -31,6 +31,9 @@ Key features:
 - Supports indentation
 - Stringifies arbitrary types based on their type traits
 
+> [!Warning]
+> This module is currently **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation coverage.
+
 ## Definitions
 
 ```cpp
@@ -537,3 +540,12 @@ std::ostream& operator<<(std::ostream os, const CustomType& value) {
 ```
 
 A more "proper" and performant way however, would be to create a custom stringifier that has an overload for `CustomType` like it was done in previous example.
+
+## Roadmap for v1.0.0 release
+
+- Rewrite the formatting engine to support colors and non-allocating alignment
+- Rewrite the logging API to use be macro-free and non-global
+- Improve logger & sink configurability, move configuration to compile-time
+- Rework formatting engine to allow extension though partial specialization
+- Improve buffering logic
+- Add formatter support for: `T*`, `std::chrono::duration<>`

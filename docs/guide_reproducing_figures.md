@@ -6,16 +6,16 @@ All plots showcased in this repo are made to be easily reproducible.
 
 To achieve this we use a combination of C++ targets and [Python](https://www.python.org/) scripts residing in the [`auxiliary/`](../auxiliary/) directory.
 
-Auxiliary targets are built together with tests, examples & benchmarks in a similar fashion. These targets can be invoked to generate numeric data, which is then visualized with [matplotlib](https://matplotlib.org/).
+Auxiliary targets are built together with tests, examples & benchmarks in a similar fashion. These targets can be invoked to generate numerical data, which is then visualized with [matplotlib](https://matplotlib.org/).
 
 ## Generating a figure
 
 Build the project according to the [guide](guide_building_project.md).
 
-To generate figures for `<target_name>` run corresponding executable:
+To generate figures for `<target_name>` run the corresponding executable:
 
 ```sh
-./build/auxiliary/auxiliary-<target_name>
+./build/auxiliary/auxiliary-<target_name>-generate
 ```
 
 and then plot the result:

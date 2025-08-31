@@ -10,7 +10,7 @@
 
 # UTL
 
-**UTL** is a collection of small self-contained libraries aimed at prototyping with minimal boilerplate. Most of the modules were created during my work in gamedev and math research projects.
+**UTL** is a collection of small self-contained libraries with a major aim towards usage simplicity. It was mostly created during my work in gamedev and mathematical research for the purpose of fast prototyping.
 
 For the ease of integration, all libraries are distributed as **individual headers**, which can be found [**here**](include/UTL).
 
@@ -84,7 +84,7 @@ While the library itself consists of isolated headers with no embedded dependenc
 | [GCC](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)                                 | **v.11.4.0** | [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) test instrumentation |
 | [cppcheck](https://github.com/danmar/cppcheck)                                                         | **v.2.7**    | Static analysis                                                                                                                                                  |
 | [GitHub Actions](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions) | **latest**   | Multi-platform [CI testing](https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions)                            |
-| [MkDocs Material](https://squidfunk.github.io/mkdocs-material/)                                        | **latest**   | Building the website                                                                                                                                             |
+| [MkDocs](https://www.mkdocs.org/)                                                                      | **latest**   | Building the website                                                                                                                                             |
 | [Matplotlib](https://matplotlib.org/)                                                                  | **latest**   | Data visualization                                                                                                                                               |
 
 | Library                                                       | Version            | License                                                                        | Used for                   | Embedded in repo |

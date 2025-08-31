@@ -1,3 +1,9 @@
+// __________________________________ CONTENTS ___________________________________
+// 
+//    This is a standard JS include for the MathJax LaTeX support provided by the
+//    MkDocs Material: https://squidfunk.github.io/mkdocs-material/reference/math/
+// _______________________________________________________________________________
+
 window.MathJax = {
     tex: {
         inlineMath: [["\\(", "\\)"]],
