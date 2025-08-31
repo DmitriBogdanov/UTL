@@ -56,7 +56,7 @@ From the idealistic perspective, we always want to pre-compute as much as possib
 In C++ member variables are guaranteed to be stored in the order of their declaration. This can often waste space due to alignment requirements, especially when working with large classes where "performance-optimal" order and "readability-optimal" order might differ:
 
 ```cpp
-struct Big {
+struct Large {
     std::uint32_t a;
     std::uint64_t b;
     std::uint32_t c;
@@ -68,7 +68,7 @@ struct Small {
     std::uint32_t c;
 };
 
-static_assert(sizeof(Big  ) == 24);
+static_assert(sizeof(Large) == 24);
 static_assert(sizeof(Small) == 16);
 ```
 
@@ -86,35 +86,45 @@ Unfortunately this is a very complex issue with no easy solution for the problem
 
 **Cause:** API design
 
-Almost every method of [`std::unordered_map`](https://en.cppreference.com/w/cpp/container/unordered_map.html) is significantly slower than it could be due to the pointer stability requirement, which dictates node-based implementation. Whether pointer stability is worth the performance cost is frequently debated. An excellent overview of existing map implementation and their performance trade-offs can be found on [martin.ankerl](https://martin.ankerl.com/2022/08/27/hashmap-bench-01/).
+Almost every method of [`std::unordered_map`](https://en.cppreference.com/w/cpp/container/unordered_map.html) is significantly slower than it could be due to the requirement of [pointer stability](https://en.cppreference.com/w/cpp/container/unordered_map.html#Notes), which dictates a node-based implementation that does not reallocate any elements.
+
+Whether pointer stability is worth the performance cost is frequently debated. An excellent overview of existing map implementations and their performance trade-offs can be found on [Martin Ankerl's website](https://martin.ankerl.com/2022/08/27/hashmap-bench-01/).
+
+As of 2025 it seems that densely stored designs with open addressing & linear probing (such as [`boost::unordered_flat_map`](https://www.boost.org/doc/libs/1_83_0/libs/unordered/doc/html/unordered.html) and [`ankerl::unordered_dense::map`](https://github.com/martinus/unordered_dense)) are a good general go-to.
 
 ### `<cmath>` error handling
 
 **Cause:** C legacy
 
-[`<cmath>`](https://en.cppreference.com/w/cpp/header/cmath.html) uses a rather questionable error handling which relies on modifying a global [`errno`](https://en.cppreference.com/w/cpp/error/errno.html) object. In many cases this global access prevents compiler from being more aggressive with optimizations. For this reason many compilers have an option to disable `errno` reporting (such as `-fno-math-errno` on GCC & clang).
+[`<cmath>`](https://en.cppreference.com/w/cpp/header/cmath.html) uses a rather questionable error handling strategy which relies on modifying a global [`errno`](https://en.cppreference.com/w/cpp/error/errno.html) object. In many cases this global access prevents compiler from being more aggressive with optimizations, with prevented vectorization being the biggest issue in terms of impact. For this reason many compilers have an option to disable `errno` reporting (such as `-fno-math-errno` on GCC & clang).
+
+In addition to that, modifying a global variable prevented `<cmath>` functions from being `constexpr` up until C++26, which affects a lot of generic code that could also be compile-time evaluated otherwise.
 
 ### `<random>` algorithms
 
 **Cause:** Outdated algorithms
 
-While the core design of [`<random>`](https://en.cppreference.com/w/cpp/header/random.html) is incredibly flexible, its performance suffers from outdated [PRNGs](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) and strict algorithmic requirements for distributions. A rather comprehensive overview of this topic can be found in [utl::random](../module_random.md) footnotes.
+While the core design of [`<random>`](https://en.cppreference.com/w/cpp/header/random.html) is incredibly flexible, its performance suffers from outdated [PRNGs](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) and strict algorithmic requirements for distributions. Switching to a more modern set of algorithms can frequently lead to a **2x-6x** speedup with no loss of statistical quality.
+
+A rather comprehensive overview of this topic can be found in the docs of [utl::random](../module_random.md). 
 
 ### `<regex>` performance
 
 **Cause:** ABI stability
 
-Standard library [`<regex>`](https://en.cppreference.com/w/cpp/header/regex.html) is known for its downright horrific performance caused by a suboptimal implementation back in the day. Unfortunately, these slower than necessary implementations were set in stone by the ABI stability, as fixing them would require an ABI break.
+Standard library [`<regex>`](https://en.cppreference.com/w/cpp/header/regex.html) is known for its downright horrific performance caused by a suboptimal implementation back in the day. At the moment standard library regex tends to be [**dozens**](https://github.com/mariomka/regex-benchmark) or even [**hundreds**](https://github.com/HFTrader/regex-performance) of times slower than modern regex engines of other languages.
+
+At the API level there is nothing preventing `<regex>` from achieving reasonable performance, however it fell victim to the requirement of ABI stability which set in stone its initial implementation, thus preventing any meaningful improvements in the future.
 
 ### No standard 128-bit types
 
 **Cause:** Library support
 
-A lot of bleeding-edge algorithms for hashing, RNG, serialization and etc. rely on wider type arithmetics which are often natively supported by the architecture (most use cases only need $64 \times 64 \rightarrow 128$ bit arithmetic instructions which are common on modern hardware).
+A lot of bleeding-edge algorithms for [hashing](https://github.com/martinus/unordered_dense/blob/main/include/ankerl/unordered_dense.h#L159-L193), [RNG](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/random.hpp#L119-L179), [serialization](https://github.com/fastfloat/fast_float/blob/main/include/fast_float/bigint.h#L233-L257) and etc. rely on wider type arithmetics which are often natively supported by the architecture (most use cases only need $64 \times 64 \rightarrow 128$ bit arithmetic instructions which are common on modern hardware).
 
-Since every major compiler supports them through extensions (GCC & clang `__uint128`, MSVC `_umul128()` and etc.), this is usually worked around with a bunch of compiler-specific `#ifdef` blocks with an emulated fallback.
+Since every major compiler supports them through extensions (GCC & clang [`__uint128`](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html), MSVC [`_umul128()`](https://learn.microsoft.com/en-us/cpp/intrinsics/umul128?view=msvc-170) and etc.), this is usually worked around with a bunch of compiler-specific `#ifdef` blocks with an emulated fallback.
 
-Such algorithms would be significantly easier and less error-prone to implement if `uint128_t` & `int128_t` were standardized across compilers.
+Such algorithms would be significantly easier and less error-prone to implement if `uint128_t` & `int128_t` were standardized across compilers. Doing so through [`<cstdint>`](https://en.cppreference.com/w/cpp/header/cstdint.html) however might prove challenging due to the concerns of old code compatibility.
 
 ### No bit operations
 
@@ -130,7 +140,7 @@ Many performant algorithms tend to be written in terms of bit operations present
 
 **[!] Fixed with:** C++17
 
-Quickly & correctly parsing / serializing floating point numbers is a task of significant complexity, which saw major improvements with the advancement of [Ryu](https://dl.acm.org/ft_gateway.cfm?id=3192369&type=pdf) / [Grisu](https://www.cs.tufts.edu/%7Enr/cs257/archive/florian-loitsch/printf.pdf) / [Schubfach](https://drive.google.com/file/d/1luHhyQF9zKlM8yJ1nebU0OgVYhfC6CBN/view) / [Dragonbox](https://github.com/jk-jeon/dragonbox/blob/master/other_files/Dragonbox.pdf) family of algorithms (speedup of **several times** with better round-trip guarantees).
+Quickly & correctly parsing / serializing floating point numbers is a task of significant complexity, which saw major improvements with the advancement of [Ryu](https://dl.acm.org/ft_gateway.cfm?id=3192369&type=pdf) / [Grisu](https://www.cs.tufts.edu/%7Enr/cs257/archive/florian-loitsch/printf.pdf) / [Schubfach](https://drive.google.com/file/d/1luHhyQF9zKlM8yJ1nebU0OgVYhfC6CBN/view) / [Dragonbox](https://github.com/jk-jeon/dragonbox/blob/master/other_files/Dragonbox.pdf) family of algorithms (speedup of [**several times**](https://github.com/fastfloat/fast_float#how-fast-is-it) with better round-trip guarantees).
 
 Old serialization methods (such as [streams](https://en.cppreference.com/w/cpp/header/ostream.html) and [`std::snprintf()`](https://en.cppreference.com/w/cpp/io/c/snprintf)) are unable to benefit from such advancements due to their legacy requirements. In C++17 [`<charconv>`](https://en.cppreference.com/w/cpp/header/charconv.html) was standardized as a performant low-level way of float serialization which should be more flexible in case of future algorithmic improvements.
 
@@ -141,7 +151,9 @@ Old serialization methods (such as [streams](https://en.cppreference.com/w/cpp/h
 **[!] Fixed with:** C++20, C++23 (partially due to incomplete adoption)
 
 The "classic" way to parse / serialize / format values is based around rather heavyweight polymorphic stream objects that 
-conflate formatting, I/O and locale manipulation. This approach is **significantly** outperformed by the design of [`fmtlib`](https://github.com/fmtlib/fmt) which was partially standardized in C++20 and C++23.
+conflate formatting, I/O and locale manipulation (which in many cases is largely detrimental).
+
+This approach is **significantly** outperformed by the design of [`fmtlib`](https://github.com/fmtlib/fmt) which was partially standardized in C++20 and C++23.
 
 ### No zero-size member optimization
 
@@ -149,7 +161,7 @@ conflate formatting, I/O and locale manipulation. This approach is **significant
 
 **[!] Fixed with:** C++20 (partially due to ABI stability concerns)
 
-In C++ all member variables are required to have a valid non-overlapping address. This can pointlessly bloat object size when working with potentially stateless members (such as allocators, comparators and etc.) whose address is never taken:
+In C++ all member variables are required to have a valid non-overlapping address. This can pointlessly bloat the object size when working with potentially stateless members (such as allocators, comparators and etc.) whose address is never taken:
 
 ```cpp
 template <class T, class Allocator = std::allocator<T>, class Comparator = std::less<>>
@@ -175,16 +187,35 @@ While C++17 added [parallel execution modes](https://en.cppreference.com/w/cpp/h
 
 Contiguous arrays such as `std::vector<>` (and other similar classes) should logically be able to grow in-place should the memory allow it, however due to a combination of C `realloc()` design flaws, `std::allocator<>` lack of reallocation mechanism and RAII requirements such ability never made it into the standard (or most of the existing libraries for that matter).
 
-In fact, even further gains could be made if containers had an ability to intrusively ingrate with specific allocators to account for various details, such as, for example [`folly::fbvector`](https://github.com/facebook/folly/blob/main/folly/docs/FBVector.md) which accounts for the [jemalloc](https://github.com/jemalloc/jemalloc) fixed-size quanta, however providing such mechanisms in a general case proves to be a task of incredible complexity.
+In fact, even further gains could be made if containers had an ability to intrusively ingrate with specific allocators to account for various implementation details, such as, for example [`folly::fbvector`](https://github.com/facebook/folly/blob/main/folly/docs/FBVector.md) which accounts for the [jemalloc](https://github.com/jemalloc/jemalloc) fixed-size quanta. Providing such mechanisms in a general case however proved to be a task of significant complexity.
 
 ### Pointer aliasing
 
 **Cause:** Language design
 
-In many scenarios potential [pointer aliasing](https://en.wikipedia.org/wiki/Aliasing_(computing)#Aliased_pointers) can prevent compiler from being more aggressive with optimization, in C we can use [`restrict`](https://en.cppreference.com/w/c/language/restrict.html) to signal a lack of aliasing, in C++ however there is no general solution for the problem. Many compilers provide extensions such as GCC [`__restrict__`](https://gcc.gnu.org/onlinedocs/gcc/Restricted-Pointers.html), however those qualifiers are only applicable to raw pointers and cannot, for example, specify that two instances of [`std::span<>`](https://en.cppreference.com/w/cpp/container/span.html) are non-aliasing. 
+In many scenarios potential [pointer aliasing](https://en.wikipedia.org/wiki/Aliasing_(computing)#Aliased_pointers) can prevent compiler from being more aggressive with optimization, in C we can use [`restrict`](https://en.cppreference.com/w/c/language/restrict.html) to signal a lack of aliasing, in C++ however there is no general solution for the problem.
+
+Many compilers provide extensions such as GCC [`__restrict__`](https://gcc.gnu.org/onlinedocs/gcc/Restricted-Pointers.html), however those qualifiers are only applicable to raw pointers and cannot, for example, specify that two instances of [`std::span<>`](https://en.cppreference.com/w/cpp/container/span.html) are non-aliasing:
+
+```cpp
+void vector_sum(std::span<double> res, std::span<double> lhs, std::span<double> rhs) {
+    assert(res.size() == lhs.size());
+    assert(res.size() == rhs.size());
+    
+    for (std::size_t i = 0; i < res.size(); ++i) res[i] = lhs[i] + rhs[i];
+    // vectorization would be incorrect in a general case due to the potential aliasing
+    // when 'res' / lhs' / 'rhs' point to the intersecting chunks of the same array
+}
+```
+
+For a simple loop like this one many compilers will be able to figure out a special case and use vectorized version when all pointers are proven to be non-aliasing (with a non-vectorized fallback for a general case). In real applications however dependency chains are frequently too complex to be resolved by a compiler, which leads to a significant performance loss relatively to a manually annotated version.
 
 ---
 
 ## Final notes
 
 The list above was initially made as a personal note to summarize a bunch of curios quirks and as such it does not intend to be a critique of language designers & implementers. Every passing standard makes significant strides in resolving & improving a lot of these points and with C++26 bringing [`std::simd`](https://en.cppreference.com/w/cpp/numeric/simd.html) and reflection we are likely to see some excellent changes in the ecosystem.
+
+**Publication date:** 2025.08.30
+
+**Last revision:** 2025.08.31
