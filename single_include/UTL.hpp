@@ -3658,7 +3658,7 @@ using impl::add_file_sink;
 #define UTLHEADERGUARD_MATH
 
 #define UTL_MATH_VERSION_MAJOR 1
-#define UTL_MATH_VERSION_MINOR 1
+#define UTL_MATH_VERSION_MINOR 2
 #define UTL_MATH_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -3708,11 +3708,17 @@ using require_invocable = require<std::is_invocable_v<T, Args...>>;
 namespace constants {
 
 constexpr double pi      = 3.14159265358979323846;
-constexpr double two_pi  = 2.0 * pi;
-constexpr double half_pi = 0.5 * pi;
-constexpr double inv_pi  = 1.0 / pi;
-constexpr double e       = 2.71828182845904523536;
+constexpr double two_pi  = 6.28318530717958647693;
+constexpr double half_pi = 1.57079632679489661923;
+constexpr double inv_pi  = 0.31830988618379067153;
+constexpr double sqrtpi  = 1.77245385090551602729;
+constexpr double e       = 2.71828182845904523536; // Euler's number
+constexpr double egamma  = 0.57721566490153286060; // Euler-Mascheroni constant
 constexpr double phi     = 1.61803398874989484820; // golden ratio
+constexpr double ln2     = 0.69314718055994530942;
+constexpr double ln10    = 2.30258509299404568402;
+constexpr double sqrt2   = 1.41421356237309504880;
+constexpr double sqrt3   = 1.73205080756887729352;
 
 } // namespace constants
 

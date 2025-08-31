@@ -80,15 +80,36 @@ template <class Idx, class Func> constexpr auto prod(Idx low, Idx high, Func&& f
 > ```cpp
 > namespace constants {
 >     constexpr double pi      = 3.14159265358979323846;
->     constexpr double two_pi  = 2.0 * pi;
->     constexpr double half_pi = 0.5 * pi;
->     constexpr double inv_pi  = 1.0 / pi;
+>     constexpr double two_pi  = 6.28318530717958647693;
+>     constexpr double half_pi = 1.57079632679489661923;
+>     constexpr double inv_pi  = 0.31830988618379067153;
+>     constexpr double sqrtpi  = 1.77245385090551602729;
 >     constexpr double e       = 2.71828182845904523536;
+>     constexpr double egamma  = 0.57721566490153286060;
 >     constexpr double phi     = 1.61803398874989484820;
+>     constexpr double ln2     = 0.69314718055994530942;
+>     constexpr double ln10    = 2.30258509299404568402;
+>     constexpr double sqrt2   = 1.41421356237309504880;
+>     constexpr double sqrt3   = 1.73205080756887729352;
 > }
 > ```
 
 Basic mathematical constants. In **C++20** most of these get standardized as a part of [`<numbers>`](https://en.cppreference.com/w/cpp/numeric/constants) header.
+
+| Identifier | Mathematical notation | Reference                                                    |
+| ---------- | --------------------- | ------------------------------------------------------------ |
+| `pi`       | $\pi$                 | [Mathematical constant π](https://en.wikipedia.org/wiki/Pi)  |
+| `two_pi`   | $2 \pi$               | -                                                            |
+| `half_pi`  | $\pi / 2$             | -                                                            |
+| `inv_pi`   | $1 / \pi$             | -                                                            |
+| `sqrtpi`   | $\sqrt{\pi}$          | -                                                            |
+| `e`        | $e$                   | [Euler's number](https://en.wikipedia.org/wiki/Euler%27s_constant) |
+| `egamma`   | $\gamma$              | [Euler–Mascheroni constant](https://en.wikipedia.org/wiki/Euler%27s_constant) |
+| `phi`      | $\varphi$             | [Golden ratio](https://en.wikipedia.org/wiki/Golden_ratio)   |
+| `ln2`      | $\ln{2}$              | -                                                            |
+| `ln10`     | $\ln{10}$             | -                                                            |
+| `sqrt2`    | $\sqrt{2}$            | -                                                            |
+| `sqrt3`    | $\sqrt{3}$            | -                                                            |
 
 ### Basic functions
 
