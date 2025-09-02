@@ -7860,7 +7860,7 @@ using impl::compilation_summary;
 
 #define UTL_PROFILER_VERSION_MAJOR 1
 #define UTL_PROFILER_VERSION_MINOR 0
-#define UTL_PROFILER_VERSION_PATCH 0
+#define UTL_PROFILER_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -8008,8 +8008,8 @@ using id_type = std::uint16_t;
 using id_type = std::uint32_t;
 #endif
 
-enum class CallsiteId : id_type { empty = to_int(CallsiteId(-1)) };
-enum class NodeId : id_type { root = 0, empty = to_int(NodeId(-1)) };
+enum class CallsiteId : id_type { empty = id_type(-1) };
+enum class NodeId : id_type { root = 0, empty = id_type(-1) };
 
 struct CallsiteInfo {
     const char* file;
