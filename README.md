@@ -16,6 +16,8 @@ For the ease of integration, all libraries are distributed as **individual heade
 
 The entire collection can also be downloaded as an [**amalgamated single-header**](single_include/UTL.hpp).
 
+CMake [`FetchContent()`](https://cmake.org/cmake/help/latest/module/FetchContent.html) support is also [provided](docs/guide_fetching_library.md).
+
 ## Design goals
 
 Implementation of this library sets following design goals:

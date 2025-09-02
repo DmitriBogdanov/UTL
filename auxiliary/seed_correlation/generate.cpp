@@ -11,6 +11,8 @@ void generate_binary_matrix(const std::filesystem::path& output_path) {
 
     constexpr std::size_t   w    = 200;
     constexpr std::size_t   h    = 160;
+    
+    using result_type = typename Gen::result_type;
 
     Gen gen;
 
@@ -19,7 +21,7 @@ void generate_binary_matrix(const std::filesystem::path& output_path) {
     std::ofstream out(output_path);
 
     for (std::size_t i = 0; i < h; ++i) {
-        gen.seed(i);
+        gen.seed(static_cast<result_type>(i));
         for (std::size_t j = 0; j < w; ++j) out << dist(gen) << (j + 1 == w ? '\n' : ',');
     }
 }
