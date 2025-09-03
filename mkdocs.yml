@@ -54,6 +54,7 @@ extra_javascript:
 plugins:
   - offline     # enables HTML with relative paths
   - search      # enables search function
+  - social      # enables thumbnail generation for externally shared links
   - awesome-nav # enables navigation hierarchy specified by '.nav.yml' rather than directory structure
 
 theme:
