@@ -8,6 +8,8 @@ The "issues" are listed in no particular order and were initially compiled as a 
 
 Every "issue" comes with an attached cause and a short explanation.
 
+This does not indent to be a language critique or necessarily make an argument for the sensibility integrating of all listed points, many of the points here are largely presented as "what if".
+
 ---
 
 ## Performance issues
