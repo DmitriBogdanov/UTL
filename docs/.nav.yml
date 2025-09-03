@@ -39,5 +39,5 @@ nav:
     - "Reproducing figures"  : guide_reproducing_figures.md
   - "Blog":
     - "What separates C++ from being a \"perfect\" performance-oriented language" : blog/cpp_performance_issues.md
-    - "Release: utl::random v2.0.0"                                               : blog/release_utl_random_v2.md
     - "Map-macro: Emulating reflection"                                           : blog/map_macro_reflection.md
+  - "License": license.md

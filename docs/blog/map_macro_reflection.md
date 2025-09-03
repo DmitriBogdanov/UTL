@@ -1,17 +1,3 @@
-- [`enum` reflection](#enum-reflection)
-- [`struct` reflection](#struct-reflection)
-- [Some examples](#some-examples)
-  * [Debug printing](#debug-printing)
-  * [Binary operators](#binary-operators)
-  * [Generic functions that operate on struct members](#generic-functions-that-operate-on-struct-members)
-  * [Advanced examples](#advanced-examples)
-- [Why use this over `Boost.PFR` or `Boost.Describe`](#why-use-this-over-boostpfr-or-boostdescribe)
-- [Why use `Boost.PFR` or `Boost.Describe` over this](#why-use-boostpfr-or-boostdescribe-over-this)
-- [Map-macro implementation](#map-macro-implementation)
-- [Alternative approaches for `enum` reflection](#alternative-approaches-for-enum-reflection)
-- [Alternative approaches for `struct` reflection](#alternative-approaches-for-struct-reflection)
-- [Related libraries](#related-libraries)
-
 # Map-macro: emulating reflection
 
 Recently I've come across a [very curios macro](#map-macro-implementation), let's call it `MAP`:
@@ -394,4 +380,8 @@ Some other libraries implement reflection using template metadata fields, inheri
 | Library                                              | Description                                                                        |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | [map-macro](https://github.com/swansontec/map-macro) | A clean implementation of the map-macro that inspired this post in the first place |
+
+**Publication date:** 2025.02.23
+
+**Last revision:** 2025.09.03
 

@@ -82,7 +82,7 @@ theme:
         name: Switch to dark mode
       primary: deep purple
       accent: purple
-      
+  
   features:
     - toc.follow                  # makes the sidebar automatically scroll to keep current TOC heading visible
     - content.code.copy           # adds copy button to code blocks
@@ -99,8 +99,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/DmitriBogdanov
-      
-copyright: Copyright &copy; 2023 Dmitri Bogdanov
+
+copyright: "Copyright &copy; 2023–2025 Dmitri Bogdanov"
 
 # Fix for 'markdown-callouts' plugin missing the style for '[!Important]'
 extra_css:
