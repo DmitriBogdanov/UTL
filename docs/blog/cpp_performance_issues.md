@@ -16,7 +16,7 @@ Every "issue" comes with an attached cause and a short explanation.
 
 **Cause:** Language design.
 
-In C++ any moved-from object is required to stay in some kind of a "valid" state. This often requires additional logic in the move-constructor and in certain cases can prevent move from being `noexcept` (which can affect performance of standard containers, mainly `std::vector<>`).
+In C++ any moved-from object is required to stay in some kind of a "valid" moved-from state. This often requires additional logic in the move-constructor and in certain cases can prevent move from being `noexcept` (which can affect performance of standard containers, mainly `std::vector<>`). A good overview of the topic can be found in this [blogpost](https://www.foonathan.net/2017/09/destructive-move/) by Jonathan Müller.
 
 ### Implicit copy
 
@@ -218,4 +218,4 @@ The list above was initially made as a personal note to summarize a bunch of cur
 
 **Publication date:** 2025.08.30
 
-**Last revision:** 2025.08.31
+**Last revision:** 2025.09.03
