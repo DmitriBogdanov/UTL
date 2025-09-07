@@ -54,6 +54,7 @@ jobs:
           pip install mkdocs-material
           pip install markdown-callouts
           pip install mkdocs-awesome-nav
+          pip install mkdocs-material[imaging]
         
       - name: "Deploy to the Github Pages"
         run: mkdocs gh-deploy --force
