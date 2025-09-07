@@ -69,7 +69,7 @@ cmake --preset gcc -D CMAKE_CXX_COMPILER="g++13"
 
 All developer targets are compiled with `-Wall -Wextra -Wpedantic -Werror` (or their MSVC equivalents). Tests also use sanitizers provided by the GCC / LLVM toolchain.
 
-CI pipeline is set up to test all 3 major compilers (`GCC`, `clang`, `MSVC`) with various standard libs (`libstdc++`, `libc++`, `STL`) on different operating systems (`Ubuntu`, `MacOS`, `Windows`). All documented examples also double as tests to ensure their validity.
+CI pipeline is set up to test all 3 major compilers (`MSVC`, `GCC`, `clang`) with various standard libs (`STL`, `libstdc++`, `libc++`) on different operating systems (`Windows`, `Ubuntu`, `MacOS`, `FreeBSD`). All documented examples also double as tests to ensure their validity.
 
 For testing we use [doctest](https://github.com/doctest/doctest) framework wrapped in [`tests/common.hpp`](../tests/common.hpp).
 

@@ -9,9 +9,6 @@
 # ============
 
 site_name: "UTL"
-# larger spacing gives a nicer look to the title, since HTML collapses repeated
-# whitespace by default, we use a non-breaking-space character instead, this could
-# probably achieved in a more flexible way using overrides
 
 site_url: https://dmitribogdanov.github.io/UTL/
 
@@ -102,7 +99,7 @@ extra:
 
 copyright: "Copyright &copy; 2023–2025 Dmitri Bogdanov"
 
-# Fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+
 extra_css:
-  - mkdocs/callouts.css
-  - mkdocs/width.css
+  - mkdocs/callouts.css # fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+  - mkdocs/width.css    # makes page content wide on large screens

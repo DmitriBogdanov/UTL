@@ -905,7 +905,7 @@ Flat maps maps seem like the way to go, slotting in a custom flat map implementa
 ```
 // Using associative wrapper for std::vector of pairs instead of std::map we can bridge the performance gap.
 // General-case usage however suffers, which is why this decision was ruled against.
-// Measurement below was done a database very similar to 'twitter.json' but with even more objects & nesting.
+// Measurement below was done on a database very similar to 'twitter.json' but with even more objects & nesting.
 
 ====== BENCHMARKING ON DATA: `database.json` ======
 

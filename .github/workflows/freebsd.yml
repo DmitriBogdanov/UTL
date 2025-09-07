@@ -4,8 +4,8 @@
 #    The workflow is triggered automatically on every push or pull request.
 #    Run results are then archived as GitHub artifacts.
 #
-#    Since FreeBSD is does not have any native runners, we have to use a VM.
-#    Dy default, VM provides x86-64 'clang++' which links 'libstdc++' stdlib.
+#    Since GitHub doesn't provide native FreeBSD runners, we have to use a VM.
+#    Dy default, VM uses x86-64 with 'clang++' which links 'libstdc++' stdlib.
 #    Using VM's custom shell allows us to split up 'run' into multiple steps.
 # _______________________________________________________________________________
 

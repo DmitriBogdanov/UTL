@@ -128,7 +128,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 
 ### Working with temporary files
 
-[ [Run this code](https://godbolt.org/z/ovKooPsEd) ]
+[ [Run this code](https://godbolt.org/z/4e6voz4q7) ]
 
 ```cpp
 const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
@@ -143,7 +143,7 @@ handle.ifstream() >> text;
 assert(text == "TEXT");
 
 // Append some more text
-handle.ofstream(std::ios_base::app) << "MORE TEXT";
+handle.ofstream(std::ios::app) << "MORE TEXT";
 
 // Temp. file is deleted once handle is destroyed
 ```

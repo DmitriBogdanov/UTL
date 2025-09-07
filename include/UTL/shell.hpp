@@ -14,7 +14,7 @@
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 1
+#define UTL_SHELL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -82,7 +82,7 @@ inline char random_char() {
 // In the end we have a pretty fast general-purpose random string function
 inline std::string random_ascii_string(std::size_t length = 20) {
     std::string result(length, '0');
-    for (std::size_t i = 0; i < result.size(); ++i) result[i] = random_char();
+    for (auto& e : result) e = random_char();
     return result;
 }
 
@@ -204,7 +204,6 @@ struct CommandResult {
 
 // A function to run shell command & capture it's status, stdout and stderr.
 //
-
 // Note 1:
 // Creating temporary files doesn't seem to be ideal, but I'd yet to find
 // a way to pipe BOTH stdout and stderr directly into the program without
@@ -218,7 +217,7 @@ struct CommandResult {
 inline CommandResult run_command(std::string_view command) {
     const auto stdout_handle = TemporaryHandle::create();
     const auto stderr_handle = TemporaryHandle::create();
-    
+
     constexpr std::string_view stdout_pipe_prefix = " >";
     constexpr std::string_view stderr_pipe_prefix = " 2>";
 
@@ -237,17 +236,17 @@ inline CommandResult run_command(std::string_view command) {
     pipe_command += '"';
 
     const int status = std::system(pipe_command.c_str());
-    
+
     // Extract out/err from files
     std::string out = read_file_to_string(stdout_handle.str());
     std::string err = read_file_to_string(stderr_handle.str());
-    
+
     // Remove possible LF/CRLF added by file piping at the end
     if (!out.empty() && out.back() == '\n') out.resize(out.size() - 1); // LF
     if (!out.empty() && out.back() == '\r') out.resize(out.size() - 1); // CR
     if (!err.empty() && err.back() == '\n') err.resize(err.size() - 1); // LF
     if (!err.empty() && err.back() == '\r') err.resize(err.size() - 1); // CR
-    
+
     return {status, std::move(out), std::move(err)};
 }
 

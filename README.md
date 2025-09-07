@@ -68,6 +68,7 @@ Quality goals include:
 * [Fetching the library with CMake `FetchContent()`](docs/guide_fetching_library.md)
 * [Names reserved for implementation](docs/guide_reserved_names.md)
 * [Building tests & benchmarks](docs/guide_building_project.md)
+* [Building documentation](docs/guide_building_docs.md)
 * [Semantic versioning](docs/guide_versioning.md)
 * [Reproducing figures](docs/guide_reproducing_figures.md)
 
