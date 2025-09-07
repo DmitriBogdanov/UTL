@@ -14,7 +14,7 @@
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 0 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 1 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 
@@ -398,18 +398,14 @@ template <class T>
     return std::unique_ptr<T[]>(new T[size]);
 }
 
-// Marker for unreachable code
-[[noreturn]] inline void _unreachable() {
-// (Implementation from https://en.cppreference.com/w/cpp/utility/unreachable)
-// Use compiler specific extensions if possible.
-// Even if no extension is used, undefined behavior is still raised by
-// an empty function body and the noreturn attribute.
+// Macro version of 'std::unreachable()' implementation from https://en.cppreference.com/w/cpp/utility/unreachable
+// we use macro instead of a function to work around false-positive MSVC /W4 warnings about "unreachable code"
+// in a function that exists to mark unreachable code
 #if defined(_MSC_VER) && !defined(__clang__) // MSVC
-    __assume(false);
+#define utl_mvl_unreachable static_assert(true)
 #else // GCC, Clang
-    __builtin_unreachable();
+#define utl_mvl_unreachable __builtin_unreachable()
 #endif
-}
 
 // =======================
 // --- Utility Classes ---
@@ -908,14 +904,14 @@ public:
     [[nodiscard]] constexpr size_type row_stride() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return 0;
         if constexpr (self::params::layout == Layout::CR) return 1;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::DENSE)
     [[nodiscard]] constexpr size_type col_stride() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return 1;
         if constexpr (self::params::layout == Layout::CR) return 0;
-        _unreachable();
+        utl_mvl_unreachable;
     }
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::STRIDED)
     [[nodiscard]] size_type row_stride() const noexcept { return this->_row_stride; }
@@ -982,7 +978,7 @@ public:
         }
         // Different sparsity comparison
         // TODO: Impl here and use .all_of() OR .any_of()
-        return true;
+        else return true;
     }
 
     // --- Indexation ---
@@ -999,7 +995,7 @@ private:
     [[nodiscard]] size_type _get_memory_offset_strided_impl(size_type idx, size_type i, size_type j) const {
         if constexpr (self::params::layout == Layout::RC) return idx * this->col_stride() + this->row_stride() * i;
         if constexpr (self::params::layout == Layout::CR) return idx * this->row_stride() + this->col_stride() * j;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
 public:
@@ -1097,14 +1093,14 @@ private:
     [[nodiscard]] size_type _unchecked_get_idx_of_ij(size_type i, size_type j) const {
         if constexpr (self::params::layout == Layout::RC) return i * this->cols() + j;
         if constexpr (self::params::layout == Layout::CR) return j * this->rows() + i;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && (type == Type::DENSE || type == Type::STRIDED))
     [[nodiscard]] Index2D _unchecked_get_ij_of_idx(size_type idx) const {
         if constexpr (self::params::layout == Layout::RC) return {idx / this->cols(), idx % this->cols()};
         if constexpr (self::params::layout == Layout::CR) return {idx % this->rows(), idx / this->rows()};
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::STRIDED && ownership == Ownership::CONTAINER)
@@ -1122,7 +1118,7 @@ private:
             return (this->rows() - 1) * this->row_stride() + this->rows() * this->cols() * this->col_stride();
         if constexpr (self::params::layout == Layout::CR)
             return (this->cols() - 1) * this->col_stride() + this->rows() * this->cols() * this->row_stride();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
 public:
@@ -1142,14 +1138,14 @@ public:
     [[nodiscard]] size_type extent_major() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return this->rows();
         if constexpr (self::params::layout == Layout::CR) return this->cols();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && (type == Type::DENSE || type == Type::STRIDED))
     [[nodiscard]] size_type extent_minor() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return this->cols();
         if constexpr (self::params::layout == Layout::CR) return this->rows();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     // - Sparse implementations -
@@ -1549,7 +1545,7 @@ public:
             return block_const_view_type(block_rows, block_cols, row_stride, col_stride,
                                          &this->operator()(block_i, block_j));
         }
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX)
@@ -1597,7 +1593,7 @@ public:
             const size_type col_stride = this->col_stride() + this->row_stride() * (this->rows() - block_rows);
             return block_view_type(block_rows, block_cols, row_stride, col_stride, &this->operator()(block_i, block_j));
         }
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && ownership != Ownership::CONST_VIEW)

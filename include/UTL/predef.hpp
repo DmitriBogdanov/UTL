@@ -14,7 +14,7 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 2
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 1
+#define UTL_PREDEF_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -264,7 +264,7 @@ constexpr bool debug =
 
 // Force inline
 #if defined(_MSC_VER)
-#define UTL_PREDEF_FORCE_INLINE __forceinline inline
+#define UTL_PREDEF_FORCE_INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
 #define UTL_PREDEF_FORCE_INLINE __attribute__((always_inline)) inline
 #else

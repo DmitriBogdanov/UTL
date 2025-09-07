@@ -14,7 +14,7 @@
 
 #define UTL_BIT_VERSION_MAJOR 1
 #define UTL_BIT_VERSION_MINOR 0
-#define UTL_BIT_VERSION_PATCH 0
+#define UTL_BIT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -144,13 +144,13 @@ template <class T, require_integral<T> = true>
 
 template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr std::size_t popcount(T value) noexcept {
-    constexpr auto bitmask_1 = T(0x5555555555555555UL);
-    constexpr auto bitmask_2 = T(0x3333333333333333UL);
-    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+    constexpr auto bitmask_1 = static_cast<T>(0x5555555555555555UL);
+    constexpr auto bitmask_2 = static_cast<T>(0x3333333333333333UL);
+    constexpr auto bitmask_3 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
 
-    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
-    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
-    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+    constexpr auto bitmask_16 = static_cast<T>(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = static_cast<T>(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = static_cast<T>(0x00000000FFFFFFFFUL);
 
     value = (value & bitmask_1) + (rshift(value, 1) & bitmask_1);
     value = (value & bitmask_2) + (rshift(value, 2) & bitmask_2);

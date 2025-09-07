@@ -14,7 +14,7 @@
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 1
+#define UTL_PARALLEL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -357,7 +357,7 @@ public:
         }
         // Regular task
         else {
-            const std::scoped_lock global_queue_mutex(this->global_queue_mutex);
+            const std::scoped_lock global_queue_lock(this->global_queue_mutex);
             this->global_queue.emplace(std::move(closure));
         }
 

@@ -14,7 +14,7 @@
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 2
+#define UTL_RANDOM_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -1299,13 +1299,13 @@ public:
 
 template <class T, require_uint<T> = true>
 [[nodiscard]] constexpr int popcount(T x) noexcept {
-    constexpr auto bitmask_1 = T(0x5555555555555555UL);
-    constexpr auto bitmask_2 = T(0x3333333333333333UL);
-    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+    constexpr auto bitmask_1 = static_cast<T>(0x5555555555555555UL);
+    constexpr auto bitmask_2 = static_cast<T>(0x3333333333333333UL);
+    constexpr auto bitmask_3 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
 
-    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
-    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
-    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+    constexpr auto bitmask_16 = static_cast<T>(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = static_cast<T>(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = static_cast<T>(0x00000000FFFFFFFFUL);
 
     x = (x & bitmask_1) + ((x >> 1) & bitmask_1);
     x = (x & bitmask_2) + ((x >> 2) & bitmask_2);

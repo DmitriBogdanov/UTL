@@ -58,9 +58,10 @@
             "description": "MSVC configuration variables.",
             "inherits": [ "base" ],
             "cacheVariables": {
-                "UTL_TEST_FLAGS": "/W3;/sdl;/Zc:preprocessor",
+                "CMAKE_CXX_FLAGS_DEBUG": "",
+                "UTL_TEST_FLAGS": "/W4;/sdl;/DEBUG;/RTC1;/Zc:preprocessor",
                 "UTL_TEST_LINKER_FLAGS": "",
-                "UTL_BENCHMARK_FLAGS": "/W3;/sdl;/Zc:preprocessor"
+                "UTL_BENCHMARK_FLAGS": "/O2;/W4;/Zc:preprocessor"
             }
         }
     ],

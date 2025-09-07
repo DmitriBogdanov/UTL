@@ -38,6 +38,7 @@
 .cache/
 .cache-cppcheck/
 .vscode/
+.vs/
 build/
 temp/
 snippets/

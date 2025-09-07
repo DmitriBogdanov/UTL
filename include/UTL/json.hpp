@@ -14,7 +14,7 @@
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 2
+#define UTL_JSON_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -1433,8 +1433,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         if (!skip_first_indent) chars.append(indent_size, ' ');
 
     // JSON Object
-    if (auto* ptr = node.get_if<Object>()) {
-        const auto& object_value = *ptr;
+    if (node.is_object()) {
+        const auto& object_value = node.get_object();
 
         // Skip all logic for empty objects
         if (object_value.empty()) {
@@ -1468,8 +1468,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '}';
     }
     // JSON Array
-    else if (auto* ptr = node.get_if<Array>()) {
-        const auto& array_value = *ptr;
+    else if (node.is_array()) {
+        const auto& array_value = node.get_array();
 
         // Skip all logic for empty arrays
         if (array_value.empty()) {
@@ -1496,8 +1496,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += ']';
     }
     // String
-    else if (auto* ptr = node.get_if<String>()) {
-        const auto& string_value = *ptr;
+    else if (node.is_string()) {
+        const auto& string_value = node.get_string();
 
         chars += '"';
 
@@ -1522,8 +1522,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '"';
     }
     // Number
-    else if (auto* ptr = node.get_if<Number>()) {
-        const auto& number_value = *ptr;
+    else if (node.is_number()) {
+        const auto& number_value = node.get_number();
 
         constexpr int max_exponent = std::numeric_limits<Number>::max_exponent10;
         constexpr int max_digits =
@@ -1554,12 +1554,12 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         }
     }
     // Bool
-    else if (auto* ptr = node.get_if<Bool>()) {
-        const auto& bool_value = *ptr;
+    else if (node.is_bool()) {
+        const auto& bool_value = node.get_bool();
         chars += (bool_value ? "true" : "false");
     }
     // Null
-    else if (node.is<Null>()) {
+    else if (node.is_null()) {
         chars += "null";
     }
 }

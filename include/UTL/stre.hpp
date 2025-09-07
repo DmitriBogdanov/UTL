@@ -13,13 +13,12 @@
 #define UTLHEADERGUARD_STRE
 
 #define UTL_STRE_VERSION_MAJOR 1
-#define UTL_STRE_VERSION_MINOR 0
-#define UTL_STRE_VERSION_PATCH 2
+#define UTL_STRE_VERSION_MINOR 1
+#define UTL_STRE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // transform()
-#include <cctype>      // tolower(), toupper()
 #include <stdexcept>   // invalid_argument
 #include <string>      // string, size_t
 #include <string_view> // string_view
@@ -112,15 +111,25 @@ namespace utl::stre::impl {
 // --- Case conversions ---
 // ========================
 
+[[nodiscard]] inline char to_lower(char ch) noexcept {
+    constexpr char offset = 'z' - 'Z';
+    return ('A' <= ch && ch <= 'Z') ? ch + offset : ch;
+}
+// saves <cctype> include and doesn't have the same 'unsigned char' and locale issues as 'std::tolower()',
+// similarly to 'std::tolower()' the algorithm is ASCII-only, general UTF-8 requires a unicode library
+
+[[nodiscard]] inline char to_upper(char ch) noexcept {
+    constexpr char offset = 'Z' - 'z';
+    return ('a' <= ch && ch <= 'z') ? ch + offset : ch;
+}
+
 [[nodiscard]] inline std::string to_lower(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](char ch) { return to_lower(ch); });
     return str;
-    // note that 'std::tolower()', 'std::toupper()' can only apply to unsigned chars, calling it on signed char
-    // is UB. Implementation above was directly taken from https://en.cppreference.com/w/cpp/string/byte/tolower
 }
 
 [[nodiscard]] inline std::string to_upper(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](char ch) { return to_upper(ch); });
     return str;
 }
 

@@ -34,7 +34,9 @@ std::string pad      (std::string_view str, std::size_t length, char padding_cha
 std::string pad_with_leading_zeroes(unsigned int number, std::size_t length = 10);
 
 // Case conversions
+std::string to_lower(       char ch );
 std::string to_lower(std::string str);
+std::string to_upper(       char ch );
 std::string to_upper(std::string str);
 
 // Substring checks
@@ -94,16 +96,18 @@ Pads a `number` with leading zeroes until it reaches given `length`. Useful for 
 ### Case conversions
 
 ```cpp
+std::string to_lower(       char ch );
 std::string to_lower(std::string str);
 ```
 
-Replaces all uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ` in the string `str` with corresponding lowercase letters `abcdefghijklmnopqrstuvwxyz`.
+Replaces all uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ` in the string `str` (or character `ch`) with corresponding lowercase letters `abcdefghijklmnopqrstuvwxyz`.
 
 ```cpp
+std::string to_upper(       char ch );
 std::string to_upper(std::string str);
 ```
 
-Replaces all lowercase letters `abcdefghijklmnopqrstuvwxyz` in the string `str` with corresponding uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
+Replaces all lowercase letters `abcdefghijklmnopqrstuvwxyz` in the string `str` (or character `ch`) with corresponding uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
 
 ### Substring checks
 

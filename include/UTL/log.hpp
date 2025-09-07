@@ -14,7 +14,7 @@
 
 #define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
 #define UTL_LOG_VERSION_MINOR 1
-#define UTL_LOG_VERSION_PATCH 0
+#define UTL_LOG_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -677,20 +677,20 @@ public:
         : os_variant(os), verbosity(verbosity), colors(colors), flush_interval(flush_interval), columns(columns) {}
 
     // We want a way of changing sink options using its handle / reference returned by the logger
-    Sink& set_verbosity(Verbosity verbosity) {
-        this->verbosity = verbosity;
+    Sink& set_verbosity(Verbosity new_verbosity) {
+        this->verbosity = new_verbosity;
         return *this;
     }
-    Sink& set_colors(Colors colors) {
-        this->colors = colors;
+    Sink& set_colors(Colors new_colors) {
+        this->colors = new_colors;
         return *this;
     }
-    Sink& set_flush_interval(clock::duration flush_interval) {
-        this->flush_interval = flush_interval;
+    Sink& set_flush_interval(clock::duration new_flush_interval) {
+        this->flush_interval = new_flush_interval;
         return *this;
     }
-    Sink& set_columns(const Columns& columns) {
-        this->columns = columns;
+    Sink& set_columns(const Columns& new_columns) {
+        this->columns = new_columns;
         return *this;
     }
     Sink& skip_header(bool skip = true) {
