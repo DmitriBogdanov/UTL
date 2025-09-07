@@ -40,4 +40,4 @@ nav:
   - "Blog":
     - "What separates C++ from being a \"perfect\" performance-oriented language" : blog/cpp_performance_issues.md
     - "Map-macro: Emulating reflection"                                           : blog/map_macro_reflection.md
-  - "License": license.md
+  - "License": LICENSE.md

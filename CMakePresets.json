@@ -56,7 +56,7 @@
             "description": "Clang configuration variables (BSD OS variant).",
             "inherits": [ "clang" ],
             "cacheVariables": {
-                "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;-pthread",
+                "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage;-pthread",
                 "UTL_BENCHMARK_LINKER_FLAGS": "-pthread"
             }
         },
