@@ -14,6 +14,10 @@
  * @brief `BS::thread_pool`: a fast, lightweight, modern, and easy-to-use C++17/C++20/C++23 thread pool library. This header file contains the entire library, and is the only file needed to use the library.
  */
 
+// [! NOTICE !]:
+// This is a slightly altered version of https://github.com/bshoshany/thread-pool distributed under MIT license,
+// FreeBSD compatibility was added at lines 103:104 to enable CI builds
+
 #ifndef BS_THREAD_POOL_HPP
 #define BS_THREAD_POOL_HPP
 
@@ -96,7 +100,9 @@ import std;
     #endif
 #endif
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
+    //                ^^^^^^^^^^^^^^^^^^^^^^^^ [DmitriBogdanov/UTL] FreeBSD compatibility
+    
     // On Linux, <sys/sysmacros.h> defines macros called `major` and `minor`. We undefine them here so the `version` struct can work.
     #ifdef major
         #undef major
