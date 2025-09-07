@@ -27,7 +27,7 @@ jobs:
       - name: "Set up FreeBSD VM"
         uses: vmactions/freebsd-vm@v1
         with:
-          release: '14.2' # optional
+          release: '14.2' # release from 2024.12.03
           usesh: true     # otherwise FreeBSD uses 'tcsh' shell
           prepare: pkg install -y cmake
       
@@ -35,19 +35,19 @@ jobs:
         shell: freebsd {0}
         run: |
           cd $GITHUB_WORKSPACE
-          cmake --preset clang
+          cmake --preset clang-bsd
         
       - name: "Build project"
         shell: freebsd {0}
         run: |
           cd $GITHUB_WORKSPACE
-          cmake --build --preset clang
+          cmake --build --preset clang-bsd
         
       - name: "Run tests"
         shell: freebsd {0}
         run: |
           cd $GITHUB_WORKSPACE
-          ctest --preset clang
+          ctest --preset clang-bsd
        
       - name: "Upload test artifacts"
         uses: actions/upload-artifact@v4

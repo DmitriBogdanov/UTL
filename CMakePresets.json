@@ -31,13 +31,11 @@
         },
         {
             "name": "gcc-tsan",
-            "description": "GCC configuration variables.",
-            "inherits": [ "base" ],
+            "description": "GCC configuration variables (Thread Sanitizer variant).",
+            "inherits": [ "gcc" ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "g++",
                 "UTL_TEST_FLAGS": "-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=thread;-fno-sanitize-recover=all",
                 "UTL_TEST_LINKER_FLAGS": "-fsanitize=thread",
-                "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror",
                 "UTL_BENCHMARK_LINKER_FLAGS": ""
             }
         },
@@ -51,6 +49,15 @@
                 "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;--coverage",
                 "UTL_BENCHMARK_FLAGS": "-O2;-Wall;-Wextra;-Wpedantic;-Werror",
                 "UTL_BENCHMARK_LINKER_FLAGS": ""
+            }
+        },
+        {
+            "name": "clang-bsd",
+            "description": "Clang configuration variables (BSD OS variant).",
+            "inherits": [ "clang" ],
+            "cacheVariables": {
+                "UTL_TEST_LINKER_FLAGS": "-fsanitize=address,undefined;-pthread",
+                "UTL_BENCHMARK_LINKER_FLAGS": "-pthread"
             }
         },
         {
@@ -73,10 +80,11 @@
             "hidden": true,
             "jobs": 4
         },
-        { "name": "gcc"     , "configurePreset": "gcc"     , "inherits": [ "base" ] },
-        { "name": "gcc-tsan", "configurePreset": "gcc-tsan", "inherits": [ "base" ] },
-        { "name": "clang"   , "configurePreset": "clang"   , "inherits": [ "base" ] },
-        { "name": "msvc"    , "configurePreset": "msvc"    , "inherits": [ "base" ] }
+        { "name": "gcc"      , "configurePreset": "gcc"      , "inherits": [ "base" ] },
+        { "name": "gcc-tsan" , "configurePreset": "gcc-tsan" , "inherits": [ "base" ] },
+        { "name": "clang"    , "configurePreset": "clang"    , "inherits": [ "base" ] },
+        { "name": "clang-bsd", "configurePreset": "clang-bsd", "inherits": [ "base" ] },
+        { "name": "msvc"     , "configurePreset": "msvc"     , "inherits": [ "base" ] }
     ],
     
     "testPresets": [
@@ -91,9 +99,10 @@
                 "timeout": 60
             }
         },
-        { "name": "gcc"     , "configurePreset": "gcc"     , "inherits": [ "base" ] },
-        { "name": "gcc-tsan", "configurePreset": "gcc-tsan", "inherits": [ "base" ] },
-        { "name": "clang"   , "configurePreset": "clang"   , "inherits": [ "base" ] },
-        { "name": "msvc"    , "configurePreset": "msvc"    , "inherits": [ "base" ] }
+        { "name": "gcc"      , "configurePreset": "gcc"      , "inherits": [ "base" ] },
+        { "name": "gcc-tsan" , "configurePreset": "gcc-tsan" , "inherits": [ "base" ] },
+        { "name": "clang"    , "configurePreset": "clang"    , "inherits": [ "base" ] },
+        { "name": "clang-bsd", "configurePreset": "clang-bsd", "inherits": [ "base" ] },
+        { "name": "msvc"     , "configurePreset": "msvc"     , "inherits": [ "base" ] }
     ]
 }
