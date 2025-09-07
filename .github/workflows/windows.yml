@@ -1,10 +1,10 @@
 # __________________________________ CONTENTS ___________________________________
 #
-#    This is a workflow file for GitHub Actions that runs a matrix of tests
-#    in a Windows environment. The actions is triggered automatically on every
-#    push or pull request. Run results are then archived as GitHub artifacts.
+#    This is a workflow file for GitHub Actions that runs tests on Windows.
+#    The workflow is triggered automatically on every push or pull request.
+#    Run results are then archived as GitHub artifacts.
 #
-#    By default, Windows links to 'STL' stdlib.
+#    By default, Windows provides MSVC which links 'STL' stdlib.
 # _______________________________________________________________________________
 
 name: "Run tests: Windows"
@@ -14,14 +14,11 @@ run-name: "Build & runs tests on Windows"
 on: [ push, pull_request ]
 
 jobs:
-  msvc-matrix:
-    strategy:
-      matrix:
-        os: [ windows-latest ]
-        # 'windows-latest' uses corresponding year's MSVC as a default toolchain,
-        # see https://github.com/actions/virtual-environments
+  build-and-test:
     
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
+    # 'windows-latest' uses corresponding year's MSVC as a default toolchain,
+    # see https://github.com/actions/virtual-environments
     
     steps:
       - name: "Checkout repository"
@@ -44,6 +41,7 @@ jobs:
           name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
           path: |
             build/
+            !build/auxiliary/
             !build/benchmarks/
             !build/examples/
             !build/tests/

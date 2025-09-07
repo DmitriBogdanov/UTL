@@ -1,10 +1,10 @@
 # __________________________________ CONTENTS ___________________________________
 #
-#    This is a workflow file for GitHub Actions that runs a matrix of tests
-#    in a Linux environment. The actions is triggered automatically on every
-#    push or pull request. Run results are then archived as GitHub artifacts.
+#    This is a workflow file for GitHub Actions that runs tests on Ubuntu.
+#    The workflow is triggered automatically on every push or pull request.
+#    Run results are then archived as GitHub artifacts.
 #
-#    By default, Ubuntu links to 'libstdc++' stdlib.
+#    By default, Ubuntu provides 'g++' which links 'libstdc++' stdlib.
 # _______________________________________________________________________________
 
 name: "Run tests: Ubuntu"
@@ -14,13 +14,9 @@ run-name: "Build & runs tests on Ubuntu"
 on: [ push, pull_request ]
 
 jobs:
-  gcc-matrix:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        cxx: [ g++-11, g++-14 ]
+  build-and-test:
     
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     steps:
       - name: "Checkout repository"
@@ -42,6 +38,7 @@ jobs:
           name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
           path: |
             build/
+            !build/auxiliary/
             !build/benchmarks/
             !build/examples/
             !build/tests/

@@ -99,7 +99,6 @@ While the library itself consists of isolated headers with no embedded dependenc
 
 ## Roadmap
 
-* Reach zero warnings at MSVC `/W4`
 * Create packages for `Conan` and `vcpkg`
 * Possibly provide PCH targets for internal and external use
 * Set up better test coverage statistics
