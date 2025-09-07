@@ -54,6 +54,7 @@ extra_javascript:
 plugins:
   - offline     # enables HTML with relative paths
   - search      # enables search function
+  - social      # enables thumbnail generation for externally shared links
   - awesome-nav # enables navigation hierarchy specified by '.nav.yml' rather than directory structure
 
 theme:
@@ -81,7 +82,7 @@ theme:
         name: Switch to dark mode
       primary: deep purple
       accent: purple
-      
+  
   features:
     - toc.follow                  # makes the sidebar automatically scroll to keep current TOC heading visible
     - content.code.copy           # adds copy button to code blocks
@@ -98,8 +99,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/DmitriBogdanov
-      
-copyright: Copyright &copy; 2023 Dmitri Bogdanov
+
+copyright: "Copyright &copy; 2023–2025 Dmitri Bogdanov"
 
 # Fix for 'markdown-callouts' plugin missing the style for '[!Important]'
 extra_css:
