@@ -55,6 +55,7 @@ Quality goals include:
 | [**utl::shell**](docs/module_shell.md)                   | Shell commands and temporary files                                   |
 | [**utl::sleep**](docs/module_sleep.md)                   | Precise sleep implementations                                        |
 | [**utl::stre**](docs/module_stre.md)                     | Efficient implementations of common string utils                     |
+| [**utl::strong_type**](docs/module_strong_type.md)       | Strong typedefs & RAII wrappers                                      |
 | [**utl::struct_reflect**](docs/module_struct_reflect.md) | Struct reflection                                                    |
 | [**utl::table**](docs/module_table.md)                   | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables            |
 | [**utl::time**](docs/module_time.md)                     | Floating-point time, timers, stopwatches, datetime                   |

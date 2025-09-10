@@ -27,6 +27,7 @@ nav:
     - "utl::shell"          : module_shell.md
     - "utl::sleep"          : module_sleep.md
     - "utl::stre"           : module_stre.md
+    - "utl::strong_type"    : module_strong_type.md
     - "utl::struct_reflect" : module_struct_reflect.md
     - "utl::table"          : module_table.md
     - "utl::time"           : module_time.md
