@@ -38,7 +38,7 @@ static_assert(!std::is_same_v<Offset, Size>); // types are different
 
 This is useful for improving type safety. Arithmetic strong types act like thin wrappers around the underlying value and support all of the usual operations, but preserve type and disallow unwanted implicit conversions at no runtime cost.
 
-Strong types are often used in physical modeling together with [`<chrono>`]()-like ratio conversions to ensure dimensional correctness of the expressions. In a more general case they can protect against mixing up conceptually different values (such as IDs, offsets, sizes and etc.) which would otherwise be implicitly convertible to each other.
+Strong types are often used in physical modeling together with [`<chrono>`](https://en.cppreference.com/w/cpp/chrono.html)-like ratio conversions to ensure dimensional correctness of the expressions. In a more general case they can protect against mixing up conceptually different values (such as IDs, offsets, sizes and etc.) which would otherwise be implicitly convertible to each other.
 
 In addition, strong types are exceedingly useful for wrapping `C` APIs which tend to use regular integers and type-erased pointers for distinctly different values (whereas `C++` would usually use classes and strongly typed `enum class`). This is particularly common for various system handles, which is why this header also provides `strong_type::Unique<>` that can wrap arbitrary handles into RAII semantics with a custom deleter (see [OpenGL example](#wrapping-opengl-shader-handle)).
 
@@ -98,7 +98,7 @@ struct Arithmetic {
 ```
 
 > [!Note]
-> Strictly speaking, some `noexcept` modifiers are inferred from `std::is_nothrow_move_constructible_v<T>` and other traits. In practice types that can throw during a move are extremely rare for our use case, so it always holds.
+> Strictly speaking, some of the `noexcept` modifiers listed here are inferred from `std::is_nothrow_move_constructible_v<T>` and other traits. In practice types that can throw during a move are extremely rare for our use case, so it usually holds true.
 
 ## Methods
 
@@ -179,7 +179,7 @@ Returns a **constant** or **mutable** reference to the managed object.
 
 Member types reflecting the template parameters.
 
-`T` can of an instance of any [arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic.html) type (aka integer or float).
+`T` can be an instance of any [arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic.html) type (aka integer or float).
 
 `Tag` is an arbitrary class used to discriminate this type from the others.
 
@@ -190,7 +190,7 @@ Member types reflecting the template parameters.
 > constexpr Arithmetic& operator=(T value) noexcept;
 > ```
 
-Constructor / assignment that assign the underlying `value`.
+Constructor / assignment that assigns the underlying `value`.
 
 #### Accessing the underlying value
 
@@ -215,7 +215,7 @@ Implicit casts are intentionally prohibited.
 
 `Arithmetic<T>` supports the same set of binary / unary operators as its underlying `value_type`.
 
-The only exception to this rule is `operator!()` which is intentionally prohibited together with implicit casts.
+The only exception to this rule is `operator!()` which is intentionally prohibited similarly to implicit casts.
 
 [`std::swap()`](https://en.cppreference.com/w/cpp/algorithm/swap.html) support is also provided.
 
@@ -223,7 +223,7 @@ The only exception to this rule is `operator!()` which is intentionally prohibit
 
 ### Wrapping `<cstdio>` file handle
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/YGrdsxzjE) ]
 
 ```cpp
 using namespace utl;
@@ -241,9 +241,9 @@ FileHandle file = std::fopen("temp.txt", "w");
 ### Wrapping OpenGL shader handle
 
 > [!Note]
-> [OpenGL](https://en.wikipedia.org/wiki/OpenGL) is a graphics API written in `C`. It uses `unsigned int` IDs as handles to the objects living in a GPU memory (buffers, shaders, pipelines and etc.). This is a perfect example of an API that can benefit from a stronger type safety and automatic cleanup of `strong_type::Unique<>`.
+> [OpenGL](https://en.wikipedia.org/wiki/OpenGL) is a graphics API written in `C`. It uses `unsigned int` IDs as handles to the objects living in a GPU memory (buffers, shaders, pipelines and etc.). This is a perfect example of an API which greatly benefits from the stronger type safety and automatic cleanup of `strong_type::Unique<>`.
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/bfzzE9jzM) ]
 
 ```cpp
 // Mock of an OpenGL API
@@ -274,7 +274,7 @@ glCompileShader(shader.get());
 
 ### Strongly typed integer unit
 
-[ [Run this code]() ]
+[ [Run this code](https://godbolt.org/z/94sPcxbGK) ]
 
 ```cpp
 using ByteOffset = utl::strong_type::Arithmetic<int, struct OffsetTag>;
