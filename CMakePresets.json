@@ -66,9 +66,9 @@
             "inherits": [ "base" ],
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS_DEBUG": "",
-                "UTL_TEST_FLAGS": "/W4;/sdl;/DEBUG;/RTC1;/Zc:preprocessor",
+                "UTL_TEST_FLAGS": "/W4;/sdl;/WX;/DEBUG;/RTC1;/permissive-;/Zc:preprocessor",
                 "UTL_TEST_LINKER_FLAGS": "",
-                "UTL_BENCHMARK_FLAGS": "/O2;/W4;/Zc:preprocessor"
+                "UTL_BENCHMARK_FLAGS": "/O2;/W4;/WX;/permissive-;/Zc:preprocessor"
             }
         }
     ],

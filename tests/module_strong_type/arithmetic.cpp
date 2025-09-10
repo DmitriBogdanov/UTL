@@ -9,6 +9,7 @@
 // ____________________ IMPLEMENTATION ____________________
 
 
+
 TEST_CASE_TEMPLATE("Arithmetic / Integral", T, //
                    std::int8_t,                //
                    std::int16_t,               //
@@ -42,7 +43,7 @@ TEST_CASE_TEMPLATE("Arithmetic / Integral", T, //
 
     // Unary operators
     static_assert(+Int{l} == Int{static_cast<T>(+l)});
-    static_assert(-Int{l} == Int{static_cast<T>(-l)});
+    static_assert(-Int{l} == Int{static_cast<T>(strong_type::impl::minus(l))});
     static_assert(~Int{l} == Int{static_cast<T>(~l)});
 
     // Additive & bitwise operators

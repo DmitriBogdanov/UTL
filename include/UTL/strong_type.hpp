@@ -14,7 +14,7 @@
 
 #define UTL_STRONG_TYPE_VERSION_MAJOR 1
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 0
+#define UTL_STRONG_TYPE_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -82,7 +82,7 @@ class Unique {
     static_assert(std::is_move_assignable_v<T>, "Type must be move-assignable.");
     static_assert(std::is_class_v<Deleter>, "Deleter must be a class.");
     static_assert(std::is_empty_v<Deleter>, "Deleter must be stateless.");
-    static_assert(std::is_invocable_v<Deleter, T&&> || std::is_invocable_v<Deleter, T&>,
+    static_assert(std::is_invocable_v<Deleter, T> || std::is_invocable_v<Deleter, T&>,
                   "Deleter must be invocable for the type.");
 
     static constexpr bool nothrow_movable =
@@ -120,14 +120,20 @@ public:
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
-    constexpr T&       unsafe_get() noexcept { return this->value; }
+    constexpr T&       get() noexcept { return this->value; }
 
     ~Unique() {
         if (this->active) {
-            if constexpr (std::is_invocable_v<Deleter, T&&>)
-                deleter_type{}(std::move(this->value));
-            else
-                deleter_type{}(this->value); // some APIs take arguments only as an l-value
+            // In MSVC without '/permissive-' or '/Zc:referenceBinding' (which is a subset of '/permissive-')
+            // 'std::is_invocable_v<Deleter, T&&>' might be evaluated as 'true' even for deleters that should
+            // only accept l-values. This is a warning at C4239 '/W4', but it doesn't affect the behavior and
+            // there is literally nothing we can do to work around MSVC blatantly lying about type trait always
+            // being 'true' since even instantiating the type trait produces this warning.
+#ifdef _MSC_VER
+#pragma warning(suppress : 4239, justification : "Non-conformant behavior of MSVC, false positive at '/W4'.")
+#endif
+            if constexpr (std::is_invocable_v<Deleter, T&&>) deleter_type{}(std::move(this->value));
+            else deleter_type{}(this->value); // some APIs take arguments only as an l-value
         }
     }
 };
@@ -230,6 +236,22 @@ template <class T, require_integral<T> = true>
     return static_cast<T>(static_cast<std::make_unsigned_t<T>>(value) >> shift);
 }
 
+// =============================
+// --- Unsigned unary minus ----
+// =============================
+
+template <class T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+[[nodiscard]] constexpr T minus(T value) noexcept {
+    if constexpr (std::is_signed_v<T>) return -value;
+    else return ~value + T(1);
+    // We need unsigned unary minus for a general case, but MSVC with '/W2' warning level produces a warning when using
+    // unary minus with an unsigned value, this warning gets elevated to a compilation error by '/sdl' flag, see
+    // https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4146
+    //
+    // This is a case of MSVC not being standard-compliant, as unsigned '-x' is a perfectly defined operation which
+    // evaluates to the same thing as '~x + 1u'. To work around such warning we define this function.
+}
+
 // ==================================
 // --- Strongly typed arithmetic  ---
 // ==================================
@@ -283,9 +305,9 @@ public:
     constexpr Arithmetic  operator--(int) noexcept { const auto temp = *this; --this->value; return  temp; }
     
     // Unary operators
-    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return +this->value; }
-    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return -this->value; }
-    [[nodiscard]] constexpr Arithmetic operator~() const noexcept { return ~this->value; }
+    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return      +this->value ; }
+    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return minus(this->value); }
+    [[nodiscard]] constexpr Arithmetic operator~() const noexcept { return      ~this->value ; }
     
     // Additive & bitwise operators
     [[nodiscard]] constexpr Arithmetic operator+(Arithmetic other) const noexcept { return this->value + other.value; }

@@ -1,5 +1,11 @@
 #include "include/UTL/strong_type.hpp"
 
+// Disable MSVC warning about using 'fopen' instead of a windows-specific 'fopen_s()',
+// this warning is both dubious and not particularly relevant for this example
+#ifdef  _MSC_VER
+#pragma warning (disable: 4996, justification: "Non-conformant behavior of MSVC.")
+#endif
+
 #include <cstdio>
 
 int main() {
