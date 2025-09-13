@@ -208,7 +208,7 @@ Comparison operators, effectively same as comparing the underlying value.
 
 ### Working with individual bits
 
-[ [Run this code](https://godbolt.org/z/xorGove9Y) ]
+[ [Run this code](https://godbolt.org/z/xorGove9Y) ] [ [Open source file](../examples/module_bit/working_with_individual_bits.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -234,7 +234,7 @@ static_assert(bit::flip( x, 1) == 17); // 17 ~ 00010001
 
 ### General usage
 
-[ [Run this code](https://godbolt.org/z/3ac5YK11s) ]
+[ [Run this code](https://godbolt.org/z/3ac5YK11s) ] [ [Open source file](../examples/module_bit/general_usage.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -257,7 +257,7 @@ static_assert(bit::size_of<std::uint64_t> == 64);
 
 ### Using enum bitflags
 
-[ [Run this code](https://godbolt.org/z/7GqojMWjW) ]
+[ [Run this code](https://godbolt.org/z/7GqojMWjW) ] [ [Open source file](../examples/module_bit/using_enum_bitflags.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -292,7 +292,7 @@ Opening file with OUT | APP:
 
 ### Additional bitflag examples
 
-[ [Run this code](https://godbolt.org/z/8zbqPo4va) ]
+[ [Run this code](https://godbolt.org/z/8zbqPo4va) ] [ [Open source file](../examples/module_bit/additional_bitflag_examples.cpp) ]
 
 ```cpp
 using namespace utl;

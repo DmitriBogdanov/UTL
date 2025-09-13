@@ -223,7 +223,7 @@ The only exception to this rule is `operator!()` which is intentionally prohibit
 
 ### Wrapping `<cstdio>` file handle
 
-[ [Run this code](https://godbolt.org/z/YGrdsxzjE) ]
+[ [Run this code](https://godbolt.org/z/YGrdsxzjE) ] [ [Open source file](../examples/module_strong_type/wrapping_cstdio_file_handle.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -243,7 +243,7 @@ FileHandle file = std::fopen("temp.txt", "w");
 > [!Note]
 > [OpenGL](https://en.wikipedia.org/wiki/OpenGL) is a graphics API written in `C`. It uses `unsigned int` IDs as handles to the objects living in a GPU memory (buffers, shaders, pipelines and etc.). This is a perfect example of an API which greatly benefits from the stronger type safety and automatic cleanup of `strong_type::Unique<>`.
 
-[ [Run this code](https://godbolt.org/z/bfzzE9jzM) ]
+[ [Run this code](https://godbolt.org/z/bfzzE9jzM) ] [ [Open source file](../examples/module_strong_type/wrapping_opengl_shader_handle.cpp) ]
 
 ```cpp
 // Mock of an OpenGL API
@@ -274,7 +274,7 @@ glCompileShader(shader.get());
 
 ### Strongly typed integer unit
 
-[ [Run this code](https://godbolt.org/z/94sPcxbGK) ]
+[ [Run this code](https://godbolt.org/z/94sPcxbGK) ] [ [Open source file](../examples/module_strong_type/strongly_typed_integer_unit.cpp) ]
 
 ```cpp
 using ByteOffset = utl::strong_type::Arithmetic<int, struct OffsetTag>;

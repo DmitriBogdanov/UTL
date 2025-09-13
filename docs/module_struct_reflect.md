@@ -182,7 +182,7 @@ Applies binary function `func` to all elements of the tuple pair `tuple_1`, `tup
 
 ### Basic reflection
 
-[ [Run this code](https://godbolt.org/z/e5qq7eb11) ]
+[ [Run this code](https://godbolt.org/z/e5qq7eb11) ] [ [Open source file](../examples/module_struct_reflect/basic_reflection.cpp) ]
 
 ```cpp
 // Define struct & reflection
@@ -212,7 +212,7 @@ static_assert( struct_reflect::get<3>(q) == 8. );
 
 ### Field & entry views
 
-[ [Run this code](https://godbolt.org/z/oz1zPY95f) ]
+[ [Run this code](https://godbolt.org/z/oz1zPY95f) ] [ [Open source file](../examples/module_struct_reflect/field_and_entry_views.cpp) ]
 
 ```cpp
 // Define struct & reflection
@@ -239,7 +239,7 @@ static_assert( std::get<3>(struct_reflect::entry_view(q)).second == 8.  );
 
 ### Using reflection to define binary operations
 
-[ [Run this code](https://godbolt.org/z/aWMeKx1sx) ]
+[ [Run this code](https://godbolt.org/z/aWMeKx1sx) ] [ [Open source file](../examples/module_struct_reflect/using_reflection_to_define_binary_operations.cpp) ]
 
 ```cpp
 // Define struct & reflection
@@ -265,7 +265,7 @@ static_assert( Quaternion{1, 2, 3, 4} + Quaternion{5, 6, 7, 8} == Quaternion{6, 
 
 ### Iterating over a generic tuple
 
-[ [Run this code](https://godbolt.org/z/o8noxx6P6) ]
+[ [Run this code](https://godbolt.org/z/o8noxx6P6) ] [ [Open source file](../examples/module_struct_reflect/iterating_over_a_generic_tuple.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -294,7 +294,7 @@ loremipsum
 
 ### Debug printing with `utl::log`
 
-[ [Run this code](https://godbolt.org/z/h3h8f3KWW) ]
+[ [Run this code](https://godbolt.org/z/h3h8f3KWW) ] [ [Open source file](../examples/module_struct_reflect/debug_printing_with_utl_log.cpp) ]
 
 ```cpp
 // Define struct & reflection

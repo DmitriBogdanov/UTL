@@ -50,7 +50,7 @@ template <class Rep, class Period> void hybrid  (std::chrono::duration<Rep, Peri
 
 ### Comparing sleep precision
 
-[ [Run this code](https://godbolt.org/z/vTfq318oc) ]
+[ [Run this code](https://godbolt.org/z/vTfq318oc) ] [ [Open source file](../examples/module_sleep/comparing_sleep_precision.cpp) ]
 
 ```cpp
 using ms = std::chrono::duration<double, std::milli>;

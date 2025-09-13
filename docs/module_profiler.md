@@ -143,12 +143,12 @@ Global profiler object.
 
 ## Examples
 
-### Profiling code segment
+### Profiling a code segment
 
 > [!Note]
 > Online compiler explorer may be a little weird when it comes to sleep & time measurement precision.
 
-[ [Run this code](https://godbolt.org/z/n4e54vdo5) ]
+[ [Run this code](https://godbolt.org/z/n4e54vdo5) ] [ [Open source file](../examples/module_profiler/profiling_code_segment.cpp) ]
 
 ```cpp
 using namespace std::chrono_literals;
@@ -182,7 +182,7 @@ Output:
 
 ### Profiling recursion
 
-[ [Run this code](https://godbolt.org/z/vYqaz91jY) ]
+[ [Run this code](https://godbolt.org/z/vYqaz91jY) ] [ [Open source file](../examples/module_profiler/profiling_recursion.cpp) ]
 
 ```cpp
 void recursive(int depth = 0) {
@@ -209,7 +209,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](module_parallel.md) to represent a parallel section concisely.
 
-[ [Run this code](https://godbolt.org/z/3fexeW638) ]
+[ [Run this code](https://godbolt.org/z/3fexeW638) ] [ [Open source file](../examples/module_profiler/profiling_parallel_section.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -240,7 +240,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](module_parallel.md) to represent detached section concisely.
 
-[ [Run this code](https://godbolt.org/z/o6ojTv8oc) ]
+[ [Run this code](https://godbolt.org/z/o6ojTv8oc) ] [ [Open source file](../examples/module_profiler/profiling_detached_threads_and_uploading_results.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -283,7 +283,7 @@ Output:
 
 ### Custom style & exporting results to a file
 
-[ [Run this code](https://godbolt.org/z/f3483G995) ]
+[ [Run this code](https://godbolt.org/z/f3483G995) ] [ [Open source file](../examples/module_profiler/custom_style_and_exporting_results_to_a_file.cpp) ]
 
 ```cpp
 using namespace utl;

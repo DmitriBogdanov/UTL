@@ -10,7 +10,7 @@
 # _______________________________________________________________________________
 
 nav:
-  - "Home": index.md
+  - "Home": README.md
   - "Modules":
     - "utl::bit"            : module_bit.md
     - "utl::enum_reflect"   : module_enum_reflect.md

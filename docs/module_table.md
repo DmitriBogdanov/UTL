@@ -282,7 +282,7 @@ A thin wrapper around the floating-point `value` used to specify its format. See
 
 ### ASCII table
 
-[ [Run this code](https://godbolt.org/z/WG48hPnq4) ]
+[ [Run this code](https://godbolt.org/z/WG48hPnq4) ] [ [Open source file](../examples/module_table/ascii_table.cpp) ]
 
 ```cpp
 utl::table::ASCII tb(4);
@@ -310,7 +310,7 @@ Output:
 
 ### Markdown table
 
-[ [Run this code](https://godbolt.org/z/3TGb9b4c3) ]
+[ [Run this code](https://godbolt.org/z/3TGb9b4c3) ] [ [Open source file](../examples/module_table/markdown_table.cpp) ]
 
 ```cpp
 utl::table::Markdown tb({"Task", "Time", "Error", "Done"});
@@ -332,7 +332,7 @@ Output:
 
 ### LaTeX table
 
-[ [Run this code](https://godbolt.org/z/8cje1dKh1) ]
+[ [Run this code](https://godbolt.org/z/8cje1dKh1) ] [ [Open source file](../examples/module_table/latex_table.cpp) ]
 
 ```cpp
 utl::table::LaTeX tb(4);
@@ -362,7 +362,7 @@ Output:
 
 ### Mathematica table
 
-[ [Run this code](https://godbolt.org/z/3dKsK1G9G) ]
+[ [Run this code](https://godbolt.org/z/3dKsK1G9G) ] [ [Open source file](../examples/module_table/mathematica_table.cpp) ]
 
 ```cpp
 utl::table::Mathematica tb(4);
@@ -389,7 +389,7 @@ Grid[{
 
 ### CSV table
 
-[ [Run this code](https://godbolt.org/z/rEhxozzMY) ]
+[ [Run this code](https://godbolt.org/z/rEhxozzMY) ] [ [Open source file](../examples/module_table/csv_table.cpp) ]
 
 ```cpp
 utl::table::CSV tb(4);
@@ -411,7 +411,7 @@ Output:
 
 ### Floating-point formatting
 
-[ [Run this code](https://godbolt.org/z/TMxqM7ez4) ]
+[ [Run this code](https://godbolt.org/z/TMxqM7ez4) ] [ [Open source file](../examples/module_table/floating_point_formatting.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -437,7 +437,7 @@ Output:
 
 ### Building tables cell-by-cell
 
-[ [Run this code](https://godbolt.org/z/hP617d11W) ]
+[ [Run this code](https://godbolt.org/z/hP617d11W) ] [ [Open source file](../examples/module_table/building_tables_cell_by_cell.cpp) ] 
 
 ```cpp
 utl::table::Markdown tb({"Method", "Error", "Converged"});

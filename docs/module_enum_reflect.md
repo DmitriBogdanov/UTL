@@ -118,7 +118,7 @@ Throws [`std::out_of_range`](https://en.cppreference.com/w/cpp/error/out_of_rang
 
 ### Reflecting an enum
 
-[ [Run this code](https://godbolt.org/z/bq9bv8jr5) ]
+[ [Run this code](https://godbolt.org/z/bq9bv8jr5) ] [ [Open source file](../examples/module_enum_reflect/reflecting_an_enum.cpp) ]
 
 ```cpp
 // Register enum & reflection

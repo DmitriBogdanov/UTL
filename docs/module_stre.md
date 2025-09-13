@@ -168,7 +168,7 @@ Throws `std::logical_error` if `str_1.size() != str_2.size()`.
 
 ### Trimming strings
 
-[ [Run this code](https://godbolt.org/z/hjf1anMcb) ]
+[ [Run this code](https://godbolt.org/z/hjf1anMcb) ] [ [Open source file](../examples/module_stre/trimming_strings.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -182,7 +182,7 @@ assert(stre::trim("__ASSERT_MACRO__", '_') == "ASSERT_MACRO");
 
 ### Padding strings
 
-[ [Run this code](https://godbolt.org/z/nG7zdqP11) ]
+[ [Run this code](https://godbolt.org/z/nG7zdqP11) ] [ [Open source file](../examples/module_stre/padding_strings.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -198,7 +198,7 @@ assert(stre::pad_with_leading_zeroes(17, 5) == "00017");
 
 ### Converting string case
 
-[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ]
+[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ] [ [Open source file](../examples/module_stre/converting_string_case.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -209,7 +209,7 @@ assert(stre::to_upper("lorem ipsum") == "LOREM IPSUM");
 
 ### Substring checks
 
-[ [Run this code](https://godbolt.org/z/v8Enfn9a6) ]
+[ [Run this code](https://godbolt.org/z/v8Enfn9a6) ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -221,7 +221,7 @@ assert(stre::contains   ("lorem ipsum", "em ip"));
 
 ### Token manipulation
 
-[ [Run this code](https://godbolt.org/z/osMK6x1be) ]
+[ [Run this code](https://godbolt.org/z/osMK6x1be) ] [ [Open source file](../examples/module_stre/token_manipulation.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -246,7 +246,7 @@ assert(tokens[2] == "ipsum");
 
 ### Other utilities
 
-[ [Run this code](https://godbolt.org/z/xKG6qM79n) ]
+[ [Run this code](https://godbolt.org/z/xKG6qM79n) ] [ [Open source file](../examples/module_stre/other_utilities.cpp) ]
 
 ```cpp
 using namespace utl;

@@ -261,7 +261,7 @@ Returns a string containing a detailed summary of compilation details based on t
 
 ### Conditional compilation
 
-[ [Run this code](https://godbolt.org/z/1TvKEqaYY) ]
+[ [Run this code](https://godbolt.org/z/1TvKEqaYY) ] [ [Open source file](../examples/module_predef/conditional_compilation.cpp) ]
 
 ```cpp
 #if defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
@@ -280,7 +280,7 @@ Running Clang or GCC
 
 ### Optimization macros
 
-[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ]
+[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ] [ [Open source file](../examples/module_predef/optimization_macros.cpp) ]
 
 ```cpp
 enum class State { YES, NO };
@@ -300,7 +300,7 @@ assert( to_string(State::YES) == "YES" );
 
 ### Compilation summary
 
-[ [Run this code](https://godbolt.org/z/PGYreYKor) ]
+[ [Run this code](https://godbolt.org/z/PGYreYKor) ] [ [Open source file](../examples/module_predef/compilation_summary.cpp) ]
 
 ```cpp
 std::cout << utl::predef::compilation_summary();

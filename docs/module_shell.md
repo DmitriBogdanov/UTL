@@ -128,7 +128,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 
 ### Working with temporary files
 
-[ [Run this code](https://godbolt.org/z/4e6voz4q7) ]
+[ [Run this code](https://godbolt.org/z/4e6voz4q7) ] [ [Open source file](../examples/module_shell/working_with_temporary_files.cpp) ]
 
 ```cpp
 const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
@@ -153,7 +153,7 @@ handle.ofstream(std::ios::app) << "MORE TEXT";
 > [!Warning]
 > Online compiler explorer does not support `std::system`, failing the `[ Run this code ]` is expected.
 
-[ [Run this code](https://godbolt.org/z/csnMvEc67) ]
+[ [Run this code](https://godbolt.org/z/csnMvEc67) ] [ [Open source file](../examples/module_shell/running_shell_commands.cpp) ]
 
 ```cpp
 #ifdef __linux__

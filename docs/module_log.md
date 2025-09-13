@@ -546,7 +546,7 @@ A more "proper" and performant way however, would be to create a custom stringif
 ## Roadmap for v1.0.0 release
 
 - Rewrite the formatting engine to support colors and non-allocating alignment
-- Rewrite the logging API to use be macro-free and non-global
+- Rewrite the logging API to be macro-free and non-global
 - Improve logger & sink configurability, move configuration to compile-time
 - Rework formatting engine to allow extension though partial specialization
 - Improve buffering logic

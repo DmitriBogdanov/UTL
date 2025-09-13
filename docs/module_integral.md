@@ -197,7 +197,7 @@ Literal suffixes for several integer types not included in `std`.
 
 ### Integer division
 
-[ [Run this code](https://godbolt.org/z/8rfGE1dKh) ]
+[ [Run this code](https://godbolt.org/z/8rfGE1dKh) ] [ [Open source file](../examples/module_integral/integer_division.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -215,7 +215,7 @@ static_assert( integral::div_up   (-7, 5) == -2 ); // round away from 0
 
 ### Saturated math
 
-[ [Run this code](https://godbolt.org/z/6YerhvTGe) ]
+[ [Run this code](https://godbolt.org/z/6YerhvTGe) ] [ [Open source file](../examples/module_integral/saturated_math.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -243,7 +243,7 @@ static_assert( integral::saturate_cast<std::uint8_t>(-143) ==   0 ); // value cl
 
 ### Heterogeneous comparison
 
-[ [Run this code](https://godbolt.org/z/5W6EGW3dz) ]
+[ [Run this code](https://godbolt.org/z/5W6EGW3dz) ] [ [Open source file](../examples/module_integral/heterogeneous_comparison.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -258,7 +258,7 @@ static_assert( integral::cmp_less(std::size_t(15), int(-7)) == false );
 
 ### Narrow cast
 
-[ [Run this code](https://godbolt.org/z/sch65GG7e) ]
+[ [Run this code](https://godbolt.org/z/sch65GG7e) ] [ [Open source file](../examples/module_integral/narrow_cast.cpp) ]
 
 ```cpp
 try {
@@ -285,7 +285,7 @@ narrow_cast() overflows the result.
 
 ### Sign conversion
 
-[ [Run this code](https://godbolt.org/z/YhbYoMWhj) ]
+[ [Run this code](https://godbolt.org/z/YhbYoMWhj) ] [ [Open source file](../examples/module_integral/sign_conversion.cpp) ]
 
 ```cpp
 try {
@@ -315,7 +315,7 @@ narrow_cast() overflows the result.
 
 ### Integral literals
 
-[ [Run this code](https://godbolt.org/z/W687695c9) ]
+[ [Run this code](https://godbolt.org/z/W687695c9) ] [ [Open source file](../examples/module_integral/integral_literals.cpp) ]
 
 ```cpp
 using namespace utl::integral::literals;

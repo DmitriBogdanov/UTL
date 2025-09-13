@@ -381,7 +381,7 @@ Generic template requires `Container::at()` and `Container::size()` to exist.
 
 ### Getting random values
 
-[ [Run this code](https://godbolt.org/z/rfvhEre1P) ]
+[ [Run this code](https://godbolt.org/z/rfvhEre1P) ] [ [Open source file](../examples/module_random/getting_random_values.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -418,7 +418,7 @@ Exp(4) -> 0.384687
 
 ### Using custom PRNGs with &lt;random&gt;
 
-[ [Run this code](https://godbolt.org/z/bYesn8hfn) ]
+[ [Run this code](https://godbolt.org/z/bYesn8hfn) ] [ [Open source file](../examples/module_random/using_custom_prngs_with_random.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -436,7 +436,7 @@ Random value from distribution -> 4.80049
 
 ### Constexpr random
 
-[ [Run this code](https://godbolt.org/z/vTzWMd9dc) ]
+[ [Run this code](https://godbolt.org/z/vTzWMd9dc) ] [ [Open source file](../examples/module_random/constexpr_random.cpp) ]
 
 ```cpp
 using namespace utl;

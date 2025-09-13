@@ -28,7 +28,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(UTL)
 ```
 
-**Note:** While `GIT_TAG` argument can be omitted to download latest commit automatically, it is not recommended due to possible breaking changes in the newer versions of the library.
+**Note:** While `GIT_TAG` argument can be omitted to download the latest commit automatically, it is not recommended due to possible breaking changes in the newer versions of the library.
 
 ## `CPM` example
 

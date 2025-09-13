@@ -193,7 +193,7 @@ Redraws progress bar to update its style configuration immediately.
 
 ### Progress bar
 
-[ [Run this code](https://godbolt.org/z/1jWzzGncr) ]
+[ [Run this code](https://godbolt.org/z/1jWzzGncr) ] [ [Open source file](../examples/module_progressbar/progress_bar.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -217,7 +217,7 @@ Output (at some point in time):
 
 ### Progress bar with custom style
 
-[ [Run this code](https://godbolt.org/z/vWPz5d8KW) ]
+[ [Run this code](https://godbolt.org/z/vWPz5d8KW) ] [ [Open source file](../examples/module_progressbar/progress_bar_with_custom_style.cpp) ]
 
 ```cpp
 using namespace utl;

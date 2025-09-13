@@ -307,7 +307,7 @@ Thread-safe just like the previous function.
 
 ### Get elapsed time
 
-[ [Run this code](https://godbolt.org/z/o5nMvdMa9) ]
+[ [Run this code](https://godbolt.org/z/o5nMvdMa9) ] [ [Open source file](../examples/module_time/get_elapsed_time.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -333,7 +333,7 @@ Output:
 
 ### Accumulate time
 
-[ [Run this code](https://godbolt.org/z/48dsP9qsq) ]
+[ [Run this code](https://godbolt.org/z/48dsP9qsq) ] [ [Open source file](../examples/module_time/accumulate_time.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -360,7 +360,7 @@ Output:
 
 ### Set timers
 
-[ [Run this code](https://godbolt.org/z/7vf36rTh1) ]
+[ [Run this code](https://godbolt.org/z/7vf36rTh1) ] [ [Open source file](../examples/module_time/set_timers.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -380,7 +380,7 @@ Counted to 42286547 while looping for 1 sec 0 ms 0 us
 
 ### Get local date & time
 
-[ [Run this code](https://godbolt.org/z/1E455Gv7G) ]
+[ [Run this code](https://godbolt.org/z/1E455Gv7G) ] [ [Open source file](../examples/module_time/get_local_date_and_time.cpp) ]
 
 ```cpp
 using namespace utl;
