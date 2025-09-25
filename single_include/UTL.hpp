@@ -19,8 +19,6 @@
 // _______________________ INCLUDES _______________________
 
 #include <array>       // array<>
-#include <cstdlib>     // abort()
-#include <exception>   // exception
 #include <functional>  // function<>
 #include <iostream>    // cerr
 #include <mutex>       // mutex, scoped_lock
@@ -28,6 +26,12 @@
 #include <string>      // string
 #include <string_view> // string_view
 #include <utility>     // forward(), move()
+
+#ifdef UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
+#include <stdexcept> // runtime_error
+#else
+#include <cstdlib> // abort()
+#endif
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -57,8 +61,8 @@
 // when evaluated in a general macro.
 //
 // We can declare custom 'operator<()' that wraps 'info' + 'lhs' into an 'UnaryCapture', and custom set of comparisons
-// turning 'UnaryCapture' + 'rhs' into a 'BinaryCapture'. Due to operator precedence 'lhs' / 'rhs' will be evaluated
-// before the comparisons so we can capture them. This might produce some warnings, but we can silence them.
+// turning 'UnaryCapture' + 'rhs' into a 'BinaryCapture'. Due to the operator precedence 'lhs' / 'rhs' will be evaluated
+// before the comparisons so we can always capture them. This might produce some warnings, but we can silence them.
 //
 // After this the captured expression can be forwarded to a relatively standard assertion handler, which will use
 // this decomposition for pretty printing and more debug info. Performance-wise the cost should be minimal since
@@ -178,16 +182,21 @@ public:
 // =======================
 
 void standard_handler(const FailureInfo& info) {
+#ifdef UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
+    throw std::runtime_error(info.to_string());
+#else
     std::cerr << info.to_string(true) << std::endl;
     std::abort(); // <cassert> uses 'std::abort()', terminate allows more customization points
+#endif
 }
 
-struct GlobalHandler {
+class GlobalHandler {
     std::function<void(const FailureInfo&)> handler = standard_handler;
     std::mutex                              mutex;
     // regular 'assert()' doesn't need thread safety since it always aborts, in a general case
     // with custom handlers however thread safety on failure should be provided
 
+public:
     static GlobalHandler& instance() {
         static GlobalHandler handler;
         return handler;
@@ -256,7 +265,7 @@ struct BinaryCapture {
     }
 };
 
-// Macro to avoid 6x repetition
+// Macro to avoid 6x code repetition
 #define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
     template <class T, class U>                                                                                        \
     BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) {                                       \
@@ -299,8 +308,8 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 
 // Standard-compliant macro to achieve macro overloading. This could be achieved easier with a common
 // GCC/clang/MSVC extension that removes a trailing '__VA_ARGS__' comma, or with C++20 '__VA_OPT__'.
-// Here we have a pedantic implementation based on the notes of Jason Deng & Kuukunen, see:
-// https://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros
+// Here we have a pedantic implementation for up to 3 args based on the notes of Jason Deng & Kuukunen,
+// see: https://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros
 
 #define utl_assertion_func_chooser(_f0, _f1, _f2, _f3, ...) _f3
 #define utl_assertion_func_composer(enclosed_args_) utl_assertion_func_chooser enclosed_args_
@@ -317,7 +326,7 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 
 #define utl_assertion_impl_0() static_assert(false, "Cannot invoke an assertion with no arguments.")
 
-#define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no message provided>")
+#define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no context provided>")
 
 #define utl_assertion_impl_2(expr_, context_)                                                                          \
     utl::assertion::impl::handle_capture(                                                                              \
@@ -327,18 +336,9 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 
 // ______________________ PUBLIC API ______________________
 
-namespace utl::assertion {
-
-using impl::FailureInfo;
-
-using impl::standard_handler;
-using impl::set_handler;
-
-}
-
-// ====================
-// --- Public macro ---
-// ====================
+// =======================
+// --- Assertion macro ---
+// =======================
 
 // Disable false positive warning about operator precedence,
 // while error-prone for the regular use cases 'expr < lhs < rhs'
@@ -373,20 +373,17 @@ using impl::set_handler;
 #define ASSERT(...) UTL_ASSERTION(__VA_ARGS__)
 #endif
 
-// ===================================
-// --- Optional <cassert> override ---
-// ===================================
+// =====================
+// --- Non-macro API ---
+// =====================
 
-#ifdef UTL_ASSERTION_REPLACE_STD
+namespace utl::assertion {
 
-#ifdef assert
-#undef assert
-#endif
+using impl::FailureInfo;
 
-#define assert(...) UTL_ASSERTION(__VA_ARGS__)
-// overriding standard macros is technically UB, however in practice it shouldn't be an issue for any sane compiler
+using impl::set_handler;
 
-#endif
+} // namespace utl::assertion
 
 #endif
 #endif // module utl::XXXXXXXXXXXX

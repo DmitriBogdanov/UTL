@@ -12,6 +12,7 @@
 nav:
   - "Home": README.md
   - "Modules":
+    - "utl::assertion"      : module_assertion.md
     - "utl::bit"            : module_bit.md
     - "utl::enum_reflect"   : module_enum_reflect.md
     - "utl::integral"       : module_integral.md
