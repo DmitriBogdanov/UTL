@@ -86,6 +86,11 @@ void append_fold(std::string& str, const Args&... args) {
     ((str += args), ...);
 } // faster than 'std::ostringstream'
 
+[[nodiscard]] inline std::string_view trim_to_filename(std::string_view path) {
+    const std::size_t last_slash = path.find_last_of("/\\");
+    return path.substr(last_slash + 1);
+}
+
 namespace colors {
 
 constexpr std::string_view cyan         = "\033[36m";
@@ -159,9 +164,15 @@ public:
 
         std::string res;
 
+#ifdef UTL_ASSERTION_ENABLE_FULL_PATHS
+        const auto displayed_file = this->file;
+#else
+        const auto displayed_file = trim_to_filename(this->file);
+#endif
+
         // "Assertion failed at {file}:{line}: {func}"
         append_fold(res, color_assert, "Assertion failed at ", color_reset);
-        append_fold(res, color_file, this->file, ":", std::to_string(this->line), color_reset);
+        append_fold(res, color_file, displayed_file, ":", std::to_string(this->line), color_reset);
         append_fold(res, color_assert, ": ", color_reset, color_func, this->func, color_reset, '\n');
         // "Where condition: {expr}"
         append_fold(res, indent_single, color_text, "Where condition:", color_reset, color_reset, '\n');
@@ -173,6 +184,8 @@ public:
         append_fold(res, indent_single, color_text, "Context:", color_reset, '\n');
         append_fold(res, color_context, indent_double, this->context, color_reset, '\n');
 
+        // Note: Trimming path to
+
         return res;
     }
 };
@@ -182,12 +195,8 @@ public:
 // =======================
 
 void standard_handler(const FailureInfo& info) {
-#ifdef UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
-    throw std::runtime_error(info.to_string());
-#else
     std::cerr << info.to_string(true) << std::endl;
-    std::abort(); // <cassert> uses 'std::abort()', terminate allows more customization points
-#endif
+    std::abort();
 }
 
 class GlobalHandler {
@@ -230,8 +239,14 @@ struct UnaryCapture {
     T value;
 
     FailureInfo get_failure_info() const {
-        std::string evaluated = stringify(this->value) + " (converts to false)";
-        return {this->info, std::move(evaluated)};
+        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+            return {this->info, "false"}; // makes boolean case look nicer
+        } else if constexpr (std::is_pointer_v<std::decay_t<T>>) {
+            return {this->info, "nullptr (converts to false)"}; // makes pointer case look nicer
+        } else {
+            std::string evaluated = stringify(this->value) + " (converts to false)";
+            return {this->info, std::move(evaluated)};
+        }
     }
 };
 
@@ -324,13 +339,13 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 // --- Assert macro implementation ---
 // ===================================
 
-#define utl_assertion_impl_0() static_assert(false, "Cannot invoke an assertion with no arguments.")
-
-#define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no context provided>")
-
 #define utl_assertion_impl_2(expr_, context_)                                                                          \
     utl::assertion::impl::handle_capture(                                                                              \
         utl::assertion::impl::Info{__FILE__, __LINE__, utl_check_pretty_function, #expr_, context_} < expr_)
+
+#define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no context provided>")
+
+#define utl_assertion_impl_0() static_assert(false, "Cannot invoke an assertion with no arguments.")
 
 } // namespace utl::assertion::impl
 
@@ -352,7 +367,7 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 #pragma GCC diagnostic push
 #endif
 
-#if defined(_DEBUG) || defined(UTL_ASSERTION_ENABLE_IN_RELEASE)
+#if !defined(NDEBUG) || defined(UTL_ASSERTION_ENABLE_IN_RELEASE)
 #define UTL_ASSERTION(...) utl_assertion_overloaded_macro(utl_assertion_impl, __VA_ARGS__)
 #else
 #define UTL_ASSERTION(...) static_assert(true)

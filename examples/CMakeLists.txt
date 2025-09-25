@@ -21,6 +21,10 @@ endfunction()
 #       to read any pre-existing data, but might create temporary files themselves
 
 # Examples
+utl_add_example("module_assertion/binary_assertion")
+utl_add_example("module_assertion/default_message")
+utl_add_example("module_assertion/logging_on_failure")
+utl_add_example("module_assertion/unary_assertion")
 utl_add_example("module_bit/additional_bitflag_examples")
 utl_add_example("module_bit/general_usage")
 utl_add_example("module_bit/using_enum_bitflags")

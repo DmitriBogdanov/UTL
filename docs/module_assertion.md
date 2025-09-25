@@ -21,12 +21,13 @@
 **Quick showcase:**
 
 ```cpp
-const int rows = -1;
+const int rows = 10;
+const int cols = 12;
 
-ASSERT(rows >= 0, "Matrix dimensions should be non-negative.");
+TRY( ASSERT(rows == cols, "Linear system requires a square matrix."); )
 ```
 
-<img src ="images/assertion_quick_showcase.png">
+<img src ="images/assertion_binary_assertion.png">
 
 **Main features:**
 
@@ -47,6 +48,7 @@ ASSERT(rows >= 0, "Matrix dimensions should be non-negative.");
 #define UTL_ASSERTION_ENABLE_SHORTCUT
 #define UTL_ASSERTION_ENABLE_IN_RELEASE
 #define UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
+#define UTL_ASSERTION_ENABLE_FULL_PATHS
 
 // Handler customization
 struct FailureInfo {
@@ -85,6 +87,11 @@ In `Release` mode (which means `NDEBUG` is not defined) compiles to nothing.
 - This macro also performs expression decomposition to print more diagnostic info
 - Assert handler invoked by the failure is customizable (which is usually used to log failures, print stack traces and change failure behavior)
 
+**Limitations:**
+
+- Only simple expressions without parenthesis can be decomposed (such as `a - b`, `a + b < c` and etc.)
+- Decomposed values should be printable using [`std::ostream`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)
+
 ### Options
 
 > ```cpp
@@ -106,6 +113,14 @@ When defined before including the header, this macro enables assertion checking 
 When defined before including the header, this macro changes default assertion handler to throw [`std::runtime_error`](https://www.cppreference.com/w/cpp/error/runtime_error.html) instead of calling [`std::abort`](https://en.cppreference.com/w/cpp/utility/program/abort.html).
 
 **Note:** Similar effect can be achieved using a custom handler, this is mostly a convenience option.
+
+> ```cpp
+> #define UTL_ASSERTION_ENABLE_FULL_PATHS // declared by the user
+> ```
+
+When defined before including the header, this macro enables full filepath display in failed assertions. By default only filename is displayed.
+
+**Note:** Full filepath can be rather verbose when using build systems such as **CMake** due to their tendency to pass absolute paths to the compiler.
 
 ### Handler customization
 
@@ -150,44 +165,54 @@ Can be stringified with `to_string()` method, which uses ANSI color codes to imp
 >
 > ```cpp
 > #define UTL_ASSERTION_ENABLE_SHORTCUT
-> #define UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
 > ```
 > and define
-> ```
-> #define TRY(expr) try { expr } catch (std::exception& e) { std::cout << e.what(); }
+> ```cpp
+> const auto before_main = [](){
+>     return std::signal(SIGABRT, [](int){
+>         std::cerr << "\nReceived SIGABRT\n";
+>         std::exit(EXIT_SUCCESS);
+>     });
+> }();
 > ```
 > to reduce verbosity and allow running examples as tests.
 
 ### Unary assertion
 
-[ [Run this code]() ] [ [Open source file]() ]
+[ [Run this code]() ] [ [Open source file](../examples/module_assertion/unary_assertion.cpp) ]
 
 ```cpp
-const auto vec = std::vector{ 1, 2, 3 };
+std::unique_ptr<int> component;
 
-TRY( ASSERT(vec.empty(), "Vector should be empty at the end of the algorithm."); )
+ASSERT(component.get(), "Cannot invoke handling for an empty component.");
 ```
 
 Output:
+
+<img src ="images/assertion_unary_assertion.png">
 
 ### Binary assertion
 
-[ [Run this code]() ] [ [Open source file]() ]
+[ [Run this code]() ] [ [Open source file](../examples/module_assertion/binary_assertion.cpp) ]
 
 ```cpp
-const int rows = -1;
+const int rows = 10;
+const int cols = 12;
 
-TRY( ASSERT(rows >= 0, "Matrix dimensions should be non-negative."); )
+ASSERT(rows == cols, "Linear system requires a square matrix.");
 ```
 
 Output:
+
+<img src ="images/assertion_binary_assertion.png">
 
 ### Default message
 
 [ [Run this code]() ] [ [Open source file]() ]
 
 ```cpp
-TRY( ASSERT(2 + 4 == 17) )
+// Second argument is optional, this can be used like a regular assert
+ASSERT(2 + 4 == 17);
 ```
 
 Output:
@@ -197,7 +222,7 @@ Output:
 [ [Run this code]() ] [ [Open source file]() ]
 
 ```cpp
-utl::assertion::set_handler([](const FailureInfo& info) {
+utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
     // Forward assertion message to some logging facility with colors disabled
     std::ofstream("failure.txt") << info.to_string();
     
@@ -206,35 +231,12 @@ utl::assertion::set_handler([](const FailureInfo& info) {
     std::abort();
 });
 
-TRY( ASSERT((2 + 3 == 5) && (2 + 3 == 6)); )
+ASSERT(3 + 4 < 6);
 ```
 
 Output:
-
-
 
 `failure.txt`:
 
 ```
 ```
-
-### Throwing custom exception on failure
-
-[ [Run this code]() ] [ [Open source file]() ]
-
-```cpp
-// Custom exception
-struct AssertionFailure : std::runtime_error {
-    using std::runtime_error::runtime_error; // inherit constructors
-};
-
-// Throw that custom exception on assert failure
-utl::assertion::set_handler([](const FailureInfo& info) {
-    throw AssertionFailure(info.to_string());
-});
-
-TRY( ASSERT((2 + 3 == 5) && (2 + 3 == 6)); )
-```
-
-Output:
-
