@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::predef
 
@@ -259,7 +261,7 @@ Returns a string containing a detailed summary of compilation details based on t
 
 ### Conditional compilation
 
-[ [Run this code](https://godbolt.org/z/1TvKEqaYY) ]
+[ [Run this code](https://godbolt.org/z/1TvKEqaYY) ] [ [Open source file](../examples/module_predef/conditional_compilation.cpp) ]
 
 ```cpp
 #if defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
@@ -278,7 +280,7 @@ Running Clang or GCC
 
 ### Optimization macros
 
-[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ]
+[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ] [ [Open source file](../examples/module_predef/optimization_macros.cpp) ]
 
 ```cpp
 enum class State { YES, NO };
@@ -298,7 +300,7 @@ assert( to_string(State::YES) == "YES" );
 
 ### Compilation summary
 
-[ [Run this code](https://godbolt.org/z/PGYreYKor) ]
+[ [Run this code](https://godbolt.org/z/PGYreYKor) ] [ [Open source file](../examples/module_predef/compilation_summary.cpp) ]
 
 ```cpp
 std::cout << utl::predef::compilation_summary();

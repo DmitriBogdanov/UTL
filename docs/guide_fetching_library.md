@@ -22,13 +22,13 @@ include(FetchContent)
 FetchContent_Declare(
     UTL
     GIT_REPOSITORY https://github.com/DmitriBogdanov/UTL.git
-    GIT_TAG        v6.0.0
+    GIT_TAG        v6.2.1
 )
 
 FetchContent_MakeAvailable(UTL)
 ```
 
-**Note:** While `GIT_TAG` argument can be omitted to download latest commit automatically, it is not recommended due to possible breaking changes in the newer versions of the library.
+**Note:** While `GIT_TAG` argument can be omitted to download the latest commit automatically, it is not recommended due to possible breaking changes in the newer versions of the library.
 
 ## `CPM` example
 
@@ -38,7 +38,7 @@ The same thing can be done using [CPM](https://github.com/cpm-cmake/CPM.cmake) f
 # Fetch library from GitHub
 include(cmake/CPM.cmake)
 
-CPMAddPackage("gh:DmitriBogdanov/UTL#v6.0.0")
+CPMAddPackage("gh:DmitriBogdanov/UTL#v6.2.1")
 ```
 
 **Note:** Use [commit SHA](https://github.com/DmitriBogdanov/UTL/commits/master/) instead of the tag to download specific commits.

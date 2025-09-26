@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::parallel
 
@@ -369,7 +371,7 @@ Same thing as [`std::thread::hardware_concurrency()`](https://en.cppreference.co
 
 ### Detached tasks
 
-[ [Run this code](https://godbolt.org/z/ahaEvnaq7) ]
+[ [Run this code](https://godbolt.org/z/ahaEvnaq7) ] [ [Open source file](../examples/module_parallel/detached_tasks.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -386,7 +388,7 @@ parallel::wait(); // wait for tasks to complete
 
 ### Awaitable tasks
 
-[ [Run this code](https://godbolt.org/z/73doqc894) ]
+[ [Run this code](https://godbolt.org/z/73doqc894) ] [ [Open source file](../examples/module_parallel/awaitable_tasks.cpp) ]
 
 ```cpp
 double some_heavy_computation(double x) {
@@ -411,7 +413,7 @@ assert( result == 42 );
 
 ### Parallel for loop
 
-[ [Run this code](https://godbolt.org/z/4K8njMGjK) ]
+[ [Run this code](https://godbolt.org/z/4K8njMGjK) ] [ [Open source file](../examples/module_parallel/parallel_for_loop.cpp) ]
 
 ```cpp
 double f(double x) { return std::exp(std::sin(x)); }
@@ -439,7 +441,7 @@ parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int low, int high) {
 
 ### Reducing over a binary operation
 
-[ [Run this code](https://godbolt.org/z/6KWo6bvPs) ]
+[ [Run this code](https://godbolt.org/z/6KWo6bvPs) ] [ [Open source file](../examples/module_parallel/reducing_over_a_binary_operation.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -459,7 +461,7 @@ assert( subrange_sum == (200'000 - 100) * 2 );
 
 ### Using a local thread pool
 
-[ [Run this code](https://godbolt.org/z/zh3PobGes) ]
+[ [Run this code](https://godbolt.org/z/zh3PobGes) ] [ [Open source file](../examples/module_parallel/using_a_local_thread_pool.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -479,7 +481,7 @@ Hello from the task
 
 ### Recursive tasks
 
-[ [Run this code](https://godbolt.org/z/5P43f5fPh) ]
+[ [Run this code](https://godbolt.org/z/5P43f5fPh) ] [ [Open source file](../examples/module_parallel/recursive_tasks.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -499,7 +501,7 @@ assert( fibonacci(8) == 21 );
 
 ### Awaitable parallel loop with specific grain size
 
-[ [Run this code](https://godbolt.org/z/7Msqjn6s9) ]
+[ [Run this code](https://godbolt.org/z/7Msqjn6s9) ] [ [Open source file](../examples/module_parallel/awaitable_parallel_loop_with_specific_grain_size.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -526,7 +528,7 @@ for (std::size_t i = 0; i < 200'000; ++i) assert( c[i] == a[i] + b[i] );
 
 ### Thread introspection
 
-[ [Run this code](https://godbolt.org/z/3TEE5q1KG) ]
+[ [Run this code](https://godbolt.org/z/3TEE5q1KG) ] [ [Open source file](../examples/module_parallel/thread_introspection.cpp) ]
 
 ```cpp
 using namespace utl;

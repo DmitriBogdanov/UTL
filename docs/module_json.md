@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::json
 
@@ -385,7 +387,7 @@ Evaluates to `true` if `T` was reflected with `UTL_JSON_REFLECT()`, `false` othe
 
 ### Parse/serialize JSON
 
-[ [Run this code](https://godbolt.org/z/aEja9Gf1E) ]
+[ [Run this code](https://godbolt.org/z/aEja9Gf1E) ] [ [Open source file](../examples/module_json/parse_serialize_json.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -429,7 +431,7 @@ Output:
 
 ### Setters & type conversions
 
-[ [Run this code](https://godbolt.org/z/6qM5cMTG8) ]
+[ [Run this code](https://godbolt.org/z/6qM5cMTG8) ] [ [Open source file](../examples/module_json/setters_and_type_conversions.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -466,7 +468,7 @@ json["string"] = std::string_view("lorem ipsum");
 
 ### Getters
 
-[ [Run this code](https://godbolt.org/z/oohca1aaP) ]
+[ [Run this code](https://godbolt.org/z/oohca1aaP) ] [ [Open source file](../examples/module_json/getters.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -504,7 +506,7 @@ for (const auto &element : json.at("array").get_array())
 
 ### Formatting
 
-[ [Run this code](https://godbolt.org/z/b1MnbcaE6) ]
+[ [Run this code](https://godbolt.org/z/b1MnbcaE6) ] [ [Open source file](../examples/module_json/formatting.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -551,7 +553,7 @@ Output:
 
 ### Error handling
 
-[ [Run this code](https://godbolt.org/z/Ysfj3fYxb) ]
+[ [Run this code](https://godbolt.org/z/Ysfj3fYxb) ] [ [Open source file](../examples/module_json/error_handling.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -586,7 +588,7 @@ Line 4:         "key_2":  value_2",
 > [!Important]
 > When compiling with [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B) use [`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor) to enable standard-compliant preprocessor. Default MSVC preprocessor is notoriously non-compliant due to legacy reasons and might not handle macro expansion properly.
 
-[ [Run this code](https://godbolt.org/z/arv1sb46r) ]
+[ [Run this code](https://godbolt.org/z/arv1sb46r) ] [ [Open source file](../examples/module_json/structure_reflection.cpp) ]
 
 ```cpp
 struct Config {
@@ -651,7 +653,7 @@ Output:
 > [!Note]
 > There are no particular limitations on what kinds of nested structures can be reflected, as long as there is a logically sound path to converting one thing to another `utl::json` will figure out a way.
 
-[ [Run this code](https://godbolt.org/z/89KoPb3cf) ]
+[ [Run this code](https://godbolt.org/z/89KoPb3cf) ] [ [Open source file](../examples/module_json/complex_structure_reflection.cpp) ]
 
 ```cpp
 // Set up some complex nested structs
@@ -896,14 +898,14 @@ Parsing and serialization also satisfies [C++ `<charconv>`](https://en.cpprefere
 
 The main weak-point of `utl::json` from the performance point of view is parsing  of object-heavy JSONs.
 
-Unfortunately, the issue is mostly caused by `std::map` insertion & iteration, which dominates the runtime. A truly suitable for the purpose container doesn't really exist in the standard library, and would need a custom implementation like in `RapidJSON`, which would reduce the standard library interoperability thus going against the main purpose of this library which is simplicity of use.
+Unfortunately, the issue is mostly caused by `std::map` insertion & iteration, which dominates the runtime. A truly suitable for the purpose container doesn't really exist in the standard library, and would need a custom implementation like in `RapidJSON`, which would reduce the standard library interoperability thus going against the main goal of this library which is its simplicity of use.
 
 Flat maps maps seem like the way to go, slotting in a custom flat map implementation into `impl::object_type_impl` allowed `utl::json` to beat `RapidJSON` on all serializing tasks and significantly closed the gap of `database.json` parsing:
 
 ```
 // Using associative wrapper for std::vector of pairs instead of std::map we can bridge the performance gap.
 // General-case usage however suffers, which is why this decision was ruled against.
-// Measurement below was done a database very similar to 'twitter.json' but with even more objects & nesting.
+// Measurement below was done on a database very similar to 'twitter.json' but with even more objects & nesting.
 
 ====== BENCHMARKING ON DATA: `database.json` ======
 

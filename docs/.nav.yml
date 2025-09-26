@@ -10,8 +10,9 @@
 # _______________________________________________________________________________
 
 nav:
-  - "Home": index.md
+  - "Home": README.md
   - "Modules":
+    - "utl::assertion"      : module_assertion.md
     - "utl::bit"            : module_bit.md
     - "utl::enum_reflect"   : module_enum_reflect.md
     - "utl::integral"       : module_integral.md
@@ -27,17 +28,19 @@ nav:
     - "utl::shell"          : module_shell.md
     - "utl::sleep"          : module_sleep.md
     - "utl::stre"           : module_stre.md
+    - "utl::strong_type"    : module_strong_type.md
     - "utl::struct_reflect" : module_struct_reflect.md
     - "utl::table"          : module_table.md
     - "utl::time"           : module_time.md
   - "Guides":
-    - "Selecting modules"    : guide_selecting_modules.md
-    - "Fetching the library" : guide_fetching_library.md
-    - "Reserved names"       : guide_reserved_names.md
-    - "Building the repo"    : guide_building_project.md
-    - "Semantic versioning"  : guide_versioning.md
-    - "Reproducing figures"  : guide_reproducing_figures.md
+    - "Selecting modules"      : guide_selecting_modules.md
+    - "Fetching the library"   : guide_fetching_library.md
+    - "Reserved names"         : guide_reserved_names.md
+    - "Building the repo"      : guide_building_project.md
+    - "Building documentation" : guide_building_docs.md
+    - "Semantic versioning"    : guide_versioning.md
+    - "Reproducing figures"    : guide_reproducing_figures.md
   - "Blog":
     - "What separates C++ from being a \"perfect\" performance-oriented language" : blog/cpp_performance_issues.md
     - "Map-macro: Emulating reflection"                                           : blog/map_macro_reflection.md
-  - "License": license.md
+  - "License": LICENSE.md

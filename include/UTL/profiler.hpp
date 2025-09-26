@@ -47,10 +47,10 @@
 // already applied the idea of using static variables to mark callsites efficiently and later underwent
 // a full rewrite to add proper threading & call graph support.
 //
-// A lot of though went into making it fast, the key idea is to use 'thread_local' callsite
-// markers to associate callsites with numeric thread-specific IDs and to reduce all call graph
-// traversal to simple integer array lookups. Store everything we can densely, minimize locks,
-// delay formatting and result evaluation as much as possible.
+// A lot of thought went into making it fast. The key idea is to use 'thread_local' callsite
+// markers to associate callsites with linearly growing thread-specific IDs and reduce all call
+// graph traversal logic to traversing a matrix of integers. Store everything we can densely,
+// minimize locks, delay formatting and result evaluation as much as possible.
 //
 // Docs & comments scattered through code should explain the details decently well.
 
@@ -138,7 +138,7 @@ struct clock {
     static time_point now() noexcept { return time_point(duration(utl_profiler_cpu_counter)); }
 };
 #else
-using clock   = std::chrono::steady_clock;
+using clock = std::chrono::steady_clock;
 #endif
 
 using duration   = clock::duration;

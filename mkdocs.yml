@@ -9,9 +9,6 @@
 # ============
 
 site_name: "UTL"
-# larger spacing gives a nicer look to the title, since HTML collapses repeated
-# whitespace by default, we use a non-breaking-space character instead, this could
-# probably achieved in a more flexible way using overrides
 
 site_url: https://dmitribogdanov.github.io/UTL/
 
@@ -38,6 +35,8 @@ markdown_extensions:
   - pymdownx.arithmatex: # enables KaTeX parser
       generic: true      #
   - pymdownx.superfences # enables nesting of code and content blocks
+  - toc:                 # enables permalink buttons next to the section headings
+      permalink: true    #
 
 extra_javascript:
   - mkdocs/mathjax.js                                # standard Mathjax includes
@@ -84,9 +83,10 @@ theme:
       accent: purple
   
   features:
-    - toc.follow                  # makes the sidebar automatically scroll to keep current TOC heading visible
-    - content.code.copy           # adds copy button to code blocks
-    - search.suggest              # adds greyed-out suggestion to the search
+    - toc.follow        # makes the sidebar automatically scroll to keep current TOC heading visible
+    - content.code.copy # adds copy button to code blocks
+    - search.suggest    # adds greyed-out suggestion to the search
+    - content.tooltips  # improves the style of hover tooltips (library name, permalink button, mode switch, repo link)
     # - navigation.instant          # dispatches internal links without refresh (makes loading feel smoother)
     # - navigation.instant.progress # shows loading bar if page load takes over 400ms
 
@@ -102,7 +102,7 @@ extra:
 
 copyright: "Copyright &copy; 2023–2025 Dmitri Bogdanov"
 
-# Fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+
 extra_css:
-  - mkdocs/callouts.css
-  - mkdocs/width.css
+  - mkdocs/callouts.css # fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+  - mkdocs/width.css    # makes page content wide on large screens

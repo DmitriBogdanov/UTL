@@ -12,7 +12,7 @@
 
 // ____________________ STD INCLUDES  _____________________
 
-#include <filesystem>  //  filesystem::
+#include <filesystem>  // filesystem::
 #include <limits>      // numeric_limits<>::
 #include <string>      // string_literals::
 #include <string_view> // string_view_literals::
@@ -60,7 +60,7 @@ constexpr auto nlmax = nl<T>::max();
 // --- Approx. float comparison ---
 // --------------------------------
 
-// 'constexpr' approximate float comparison (doctest::Approx only works in runtime)
+// 'constexpr' approximate float comparison ('doctest::Approx' only works at runtime)
 
 template <bool Cond>
 using require = std::enable_if_t<Cond, bool>; // makes SFINAE a bit less cumbersome

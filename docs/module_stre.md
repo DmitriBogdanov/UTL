@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::stre
 
@@ -166,7 +168,7 @@ Throws `std::logical_error` if `str_1.size() != str_2.size()`.
 
 ### Trimming strings
 
-[ [Run this code](https://godbolt.org/z/hjf1anMcb) ]
+[ [Run this code](https://godbolt.org/z/hjf1anMcb) ] [ [Open source file](../examples/module_stre/trimming_strings.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -180,7 +182,7 @@ assert(stre::trim("__ASSERT_MACRO__", '_') == "ASSERT_MACRO");
 
 ### Padding strings
 
-[ [Run this code](https://godbolt.org/z/nG7zdqP11) ]
+[ [Run this code](https://godbolt.org/z/nG7zdqP11) ] [ [Open source file](../examples/module_stre/padding_strings.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -196,7 +198,7 @@ assert(stre::pad_with_leading_zeroes(17, 5) == "00017");
 
 ### Converting string case
 
-[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ]
+[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ] [ [Open source file](../examples/module_stre/converting_string_case.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -207,7 +209,7 @@ assert(stre::to_upper("lorem ipsum") == "LOREM IPSUM");
 
 ### Substring checks
 
-[ [Run this code](https://godbolt.org/z/v8Enfn9a6) ]
+[ [Run this code](https://godbolt.org/z/v8Enfn9a6) ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -219,7 +221,7 @@ assert(stre::contains   ("lorem ipsum", "em ip"));
 
 ### Token manipulation
 
-[ [Run this code](https://godbolt.org/z/osMK6x1be) ]
+[ [Run this code](https://godbolt.org/z/osMK6x1be) ] [ [Open source file](../examples/module_stre/token_manipulation.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -244,7 +246,7 @@ assert(tokens[2] == "ipsum");
 
 ### Other utilities
 
-[ [Run this code](https://godbolt.org/z/xKG6qM79n) ]
+[ [Run this code](https://godbolt.org/z/xKG6qM79n) ] [ [Open source file](../examples/module_stre/other_utilities.cpp) ]
 
 ```cpp
 using namespace utl;

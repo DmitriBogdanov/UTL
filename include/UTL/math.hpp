@@ -118,8 +118,7 @@ template <class T, require_arithmetic<T> = true>
     return static_cast<T>(x > T(0));
 }
 
-// Floating point midpoint base on 'libstdc++' implementation,
-// takes care of extreme values
+// Floating point midpoint based on 'libstdc++' implementation, takes care of extreme values
 template <class T, require_float<T> = true>
 [[nodiscard]] constexpr T midpoint(T a, T b) noexcept {
     constexpr T low  = std::numeric_limits<T>::min() * 2;
@@ -134,7 +133,7 @@ template <class T, require_float<T> = true>
     return a / 2 + b / 2;                                   // correctly rounded for remaining cases
 }
 
-// Non-overflowing integer midpoint is less trivial that it might initially seem, see
+// Non-overflowing integer midpoint is less trivial than it might initially seem, see
 // https://lemire.me/blog/2022/12/06/fast-midpoint-between-two-integers-without-overflow/
 // https://biowpn.github.io/bioweapon/2025/03/23/generalizing-std-midpoint.html
 template <class T, require_int<T> = true>

@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::shell
 
@@ -126,7 +128,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 
 ### Working with temporary files
 
-[ [Run this code](https://godbolt.org/z/ovKooPsEd) ]
+[ [Run this code](https://godbolt.org/z/4e6voz4q7) ] [ [Open source file](../examples/module_shell/working_with_temporary_files.cpp) ]
 
 ```cpp
 const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
@@ -141,7 +143,7 @@ handle.ifstream() >> text;
 assert(text == "TEXT");
 
 // Append some more text
-handle.ofstream(std::ios_base::app) << "MORE TEXT";
+handle.ofstream(std::ios::app) << "MORE TEXT";
 
 // Temp. file is deleted once handle is destroyed
 ```
@@ -151,7 +153,7 @@ handle.ofstream(std::ios_base::app) << "MORE TEXT";
 > [!Warning]
 > Online compiler explorer does not support `std::system`, failing the `[ Run this code ]` is expected.
 
-[ [Run this code](https://godbolt.org/z/csnMvEc67) ]
+[ [Run this code](https://godbolt.org/z/csnMvEc67) ] [ [Open source file](../examples/module_shell/running_shell_commands.cpp) ]
 
 ```cpp
 #ifdef __linux__

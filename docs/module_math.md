@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::math
 
@@ -211,7 +213,7 @@ Computes $\sum_{i = low}^{high} f(i)$ or $\prod_{i = low}^{high} f(i)$.
 
 ### Template math functions
 
-[ [Run this code](https://godbolt.org/z/P9xbPPsnq) ]
+[ [Run this code](https://godbolt.org/z/P9xbPPsnq) ] [ [Open source file](../examples/module_math/template_math_functions.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -233,7 +235,7 @@ static_assert( math::signpow(  -5) == -1   );
 
 ### Index functions
 
-[ [Run this code](https://godbolt.org/z/aqEMqhrdd) ]
+[ [Run this code](https://godbolt.org/z/aqEMqhrdd) ] [ [Open source file](../examples/module_math/index_functions.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -248,7 +250,7 @@ static_assert( math::levi_civita(5, 4, 3) == -1 );
 
 ### Conversions
 
-[ [Run this code](https://godbolt.org/z/zd59Pox6K) ]
+[ [Run this code](https://godbolt.org/z/zd59Pox6K) ] [ [Open source file](../examples/module_math/conversions.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -260,7 +262,7 @@ static_assert( math::absdiff(math::rad_to_deg(math::constants::pi), 180.) < 1e-1
 
 ### Summation & product
 
-[ [Run this code](https://godbolt.org/z/Ejaj6z4vs) ]
+[ [Run this code](https://godbolt.org/z/Ejaj6z4vs) ] [ [Open source file](../examples/module_math/summation_and_product.cpp) ]
 
 ```cpp
 using namespace utl;

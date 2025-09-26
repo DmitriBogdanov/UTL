@@ -1,10 +1,10 @@
 # __________________________________ CONTENTS ___________________________________
 #
-#    This is a workflow file for GitHub Actions that runs a matrix of tests
-#    in a MacOS environment. The actions is triggered automatically on every
-#    push or pull request. Run results are then archived as GitHub artifacts.
+#    This is a workflow file for GitHub Actions that runs tests on MacOS.
+#    The workflow is triggered automatically on every push or pull request.
+#    Run results are then archived as GitHub artifacts.
 #
-#    By default, MacOS links to 'libc++' stdlib.
+#    By default, Ubuntu provides 'clang++' which links 'libc++' stdlib.
 # _______________________________________________________________________________
 
 name: "Run tests: MacOS"
@@ -14,13 +14,9 @@ run-name: "Build & runs tests on MacOS"
 on: [ push, pull_request ]
 
 jobs:
-  clang-matrix:
-    strategy:
-      matrix:
-        os: [ macos-latest ]
-        cxx: [ clang++-14, clang++-20 ]
+  build-and-test:
     
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     
     steps:
       - name: "Checkout repository"
@@ -42,6 +38,7 @@ jobs:
           name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
           path: |
             build/
+            !build/auxiliary/
             !build/benchmarks/
             !build/examples/
             !build/tests/

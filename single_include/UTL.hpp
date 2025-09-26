@@ -1,5 +1,415 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DmitriBogdanov/UTL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
+// Module:        utl::assertion
+// Documentation: https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_assertion.md
+// Source repo:   https://github.com/DmitriBogdanov/UTL
+//
+// This project is licensed under the MIT License
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_ASSERTION)
+#ifndef UTLHEADERGUARD_ASSERTION
+#define UTLHEADERGUARD_ASSERTION
+
+#define UTL_ASSERTION_VERSION_MAJOR 0
+#define UTL_ASSERTION_VERSION_MINOR 1
+#define UTL_ASSERTION_VERSION_PATCH 0
+
+// _______________________ INCLUDES _______________________
+
+#include <array>       // array<>
+#include <functional>  // function<>
+#include <iostream>    // cerr
+#include <mutex>       // mutex, scoped_lock
+#include <sstream>     // ostringstream
+#include <string>      // string
+#include <string_view> // string_view
+#include <utility>     // forward(), move()
+
+#ifdef UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
+#include <stdexcept> // runtime_error
+#else
+#include <cstdlib> // abort()
+#endif
+
+// ____________________ DEVELOPER DOCS ____________________
+
+// The key to nice assertion messages is expression decomposition, we want to print something like:
+//    | Error: assertion {x + y < z} evaluated to {4 < 3}
+// instead of a regular message with no diagnostics.
+//
+// Lets consider some expression, for example 'x + y > z * 4'. Ideally, we want to non-intrusively decompose this
+// expression into its individual parts so we can print the values of all variables ('x', 'y' and 'z').
+//
+// In a general case this is not possible in C++, however if we restrict expressions to the form:
+//    | {lhs} {comparison} {rhs}
+// where 'lhs' and 'rhs' are some values evaluated before the 'comparison', then we can use a certain trick
+// based on operator precedence to extract and print 'lhs' / 'rhs' / 'comparison'. For the example above we have:
+//    | x + y <= z * 4
+//    | ^^^^^    ^^^^^
+//    | {lhs}    {rhs}
+//
+// Now let's declare:
+//    - 'Info'          object which carries assertion info (callsite, message, etc.)
+//    - 'UnaryCapture'  object which carries 'info' + 'lhs'
+//    - 'BinaryCapture' object which carries 'info' + 'lhs' + 'rhs'
+// and write:
+//    | info < x + y <= z * 4
+// which is a non-intrusive expression which will look like
+//    | info < {expr}
+// when evaluated in a general macro.
+//
+// We can declare custom 'operator<()' that wraps 'info' + 'lhs' into an 'UnaryCapture', and custom set of comparisons
+// turning 'UnaryCapture' + 'rhs' into a 'BinaryCapture'. Due to the operator precedence 'lhs' / 'rhs' will be evaluated
+// before the comparisons so we can always capture them. This might produce some warnings, but we can silence them.
+//
+// After this the captured expression can be forwarded to a relatively standard assertion handler, which will use
+// this decomposition for pretty printing and more debug info. Performance-wise the cost should be minimal since
+// this is effectively the same thing as expression templates, but simpler.
+
+// ____________________ IMPLEMENTATION ____________________
+
+namespace utl::assertion::impl {
+
+// ===============
+// --- Utility ---
+// ===============
+
+template <class T>
+[[nodiscard]] std::string stringify(const T& value) {
+    return (std::ostringstream{} << value).str();
+}
+
+template <class... Args>
+void append_fold(std::string& str, const Args&... args) {
+    ((str += args), ...);
+} // faster than 'std::ostringstream'
+
+[[nodiscard]] inline std::string_view trim_to_filename(std::string_view path) {
+    const std::size_t last_slash = path.find_last_of("/\\");
+    return path.substr(last_slash + 1);
+}
+
+namespace colors {
+
+constexpr std::string_view cyan         = "\033[36m";
+constexpr std::string_view bold_red     = "\033[31;1m";
+constexpr std::string_view bold_blue    = "\033[34;1m";
+constexpr std::string_view bold_magenta = "\033[35;1m";
+constexpr std::string_view reset        = "\033[0m";
+
+} // namespace colors
+
+// =============================
+// --- Decomposed operations ---
+// =============================
+
+enum class Operation : std::size_t {
+    EQ  = 0, // ==
+    NEQ = 1, // !=
+    LEQ = 2, // <=
+    GEQ = 3, // >=
+    L   = 4, // <
+    G   = 5  // >
+};
+
+constexpr std::array<const char*, 6> op_names = {" == ", " != ", " <= ", " >= ", " < ", " > "};
+
+// ======================
+// --- Assertion info ---
+// ======================
+
+// Lightweight struct that captures the assertion context internally
+struct Info {
+    const char* file;
+    int         line;
+    const char* func;
+
+    const char* expression;
+    const char* context;
+};
+
+// Once we hit a slow failure path we can convert internal info to a nicer format for public API
+class FailureInfo {
+    std::string evaluated_string;
+    // since evaluated string is constructed at runtime we have to store it here,
+    // while exposing string_view in a public API for the sake of uniformity
+
+public:
+    FailureInfo(const Info& info, std::string evaluated_string)
+        : evaluated_string(std::move(evaluated_string)), file(info.file), line(static_cast<std::size_t>(info.line)),
+          func(info.func), expression(info.expression), evaluated(this->evaluated_string), context(info.context) {}
+
+    std::string_view file;
+    std::size_t      line;
+    std::string_view func;
+
+    std::string_view expression;
+    std::string_view evaluated;
+    std::string_view context;
+
+    [[nodiscard]] std::string to_string(bool color = false) const {
+        constexpr auto indent_single = "    ";
+        constexpr auto indent_double = "        ";
+
+        const auto color_assert    = color ? colors::bold_red : "";
+        const auto color_file      = color ? colors::bold_blue : "";
+        const auto color_func      = color ? colors::bold_magenta : "";
+        const auto color_text      = color ? colors::bold_red : "";
+        const auto color_expr      = color ? colors::cyan : "";
+        const auto color_evaluated = color ? colors::cyan : "";
+        const auto color_context   = color ? colors::cyan : "";
+        const auto color_reset     = color ? colors::reset : "";
+
+        std::string res;
+
+#ifdef UTL_ASSERTION_ENABLE_FULL_PATHS
+        const auto displayed_file = this->file;
+#else
+        const auto displayed_file = trim_to_filename(this->file);
+#endif
+
+        // "Assertion failed at {file}:{line}: {func}"
+        append_fold(res, color_assert, "Assertion failed at ", color_reset);
+        append_fold(res, color_file, displayed_file, ":", std::to_string(this->line), color_reset);
+        append_fold(res, color_assert, ": ", color_reset, color_func, this->func, color_reset, '\n');
+        // "Where condition: {expr}"
+        append_fold(res, indent_single, color_text, "Where condition:", color_reset, color_reset, '\n');
+        append_fold(res, indent_double, color_expr, this->expression, color_reset, '\n');
+        // "Evaluated to: {eval}"
+        append_fold(res, indent_single, color_text, "Evaluated to:", color_reset, '\n');
+        append_fold(res, indent_double, color_evaluated, this->evaluated, color_reset, '\n');
+        // "Context: {message}"
+        append_fold(res, indent_single, color_text, "Context:", color_reset, '\n');
+        append_fold(res, color_context, indent_double, this->context, color_reset, '\n');
+
+        // Note: Trimming path to
+
+        return res;
+    }
+};
+
+// =======================
+// --- Failure handler ---
+// =======================
+
+void standard_handler(const FailureInfo& info) {
+    std::cerr << info.to_string(true) << std::endl;
+    std::abort();
+}
+
+class GlobalHandler {
+    std::function<void(const FailureInfo&)> handler = standard_handler;
+    std::mutex                              mutex;
+    // regular 'assert()' doesn't need thread safety since it always aborts, in a general case
+    // with custom handlers however thread safety on failure should be provided
+
+public:
+    static GlobalHandler& instance() {
+        static GlobalHandler handler;
+        return handler;
+    }
+
+    void set(std::function<void(const FailureInfo&)> new_handler) {
+        const std::scoped_lock lock(this->mutex);
+
+        this->handler = std::move(new_handler);
+    }
+
+    void invoke(const FailureInfo& info) {
+        const std::scoped_lock lock(this->mutex);
+
+        this->handler(info);
+    }
+};
+
+void set_handler(std::function<void(const FailureInfo&)> new_handler) {
+    GlobalHandler::instance().set(std::move(new_handler));
+}
+
+// =====================
+// --- Unary capture ---
+// =====================
+
+template <class T>
+struct UnaryCapture {
+    const Info& info;
+
+    T value;
+
+    FailureInfo get_failure_info() const {
+        if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+            return {this->info, "false"}; // makes boolean case look nicer
+        } else if constexpr (std::is_pointer_v<std::decay_t<T>>) {
+            return {this->info, "nullptr (converts to false)"}; // makes pointer case look nicer
+        } else {
+            std::string evaluated = stringify(this->value) + " (converts to false)";
+            return {this->info, std::move(evaluated)};
+        }
+    }
+};
+
+template <class T>
+UnaryCapture<T> operator<(const Info& info, T&& value) {
+    return {info, std::forward<T>(value)};
+}
+
+template <class T>
+void handle_capture(UnaryCapture<T>&& capture) {
+    if (capture.value) return;
+    GlobalHandler::instance().invoke(capture.get_failure_info());
+}
+
+// ======================
+// --- Binary capture ---
+// ======================
+
+template <class T, class U, Operation Op>
+struct BinaryCapture {
+    const Info& info;
+
+    T lhs;
+    U rhs;
+
+    FailureInfo get_failure_info() const {
+        constexpr std::size_t op_index = static_cast<std::size_t>(Op);
+
+        std::string evaluated = stringify(this->lhs) + op_names[op_index] + stringify(this->rhs);
+        return {this->info, std::move(evaluated)};
+    }
+};
+
+// Macro to avoid 6x code repetition
+#define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
+    template <class T, class U>                                                                                        \
+    BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) {                                       \
+        return {lhs.info, std::move(lhs).value, std::forward<U>(rhs)};                                                 \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <class T, class U>                                                                                        \
+    void handle_capture(BinaryCapture<T, U, op_enum_>&& capture) {                                                     \
+        if (capture.lhs op_ capture.rhs) return;                                                                       \
+        GlobalHandler::instance().invoke(capture.get_failure_info());                                                  \
+    }                                                                                                                  \
+                                                                                                                       \
+    static_assert(true)
+
+utl_assertion_define_binary_capture_op(Operation::EQ, ==);
+utl_assertion_define_binary_capture_op(Operation::NEQ, !=);
+utl_assertion_define_binary_capture_op(Operation::LEQ, <=);
+utl_assertion_define_binary_capture_op(Operation::GEQ, >=);
+utl_assertion_define_binary_capture_op(Operation::L, <);
+utl_assertion_define_binary_capture_op(Operation::G, >);
+
+#undef utl_assertion_define_binary_capture_op
+
+// =======================
+// --- Pretty function ---
+// =======================
+
+// Makes assertion diagnostics a bit nicer
+#if defined(__clang__) || defined(__GNUC__)
+#define utl_check_pretty_function __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+#define utl_check_pretty_function __FUNCSIG__
+#else
+#define utl_check_pretty_function __func__
+#endif
+
+// ======================================
+// --- Macros with optional arguments ---
+// ======================================
+
+// Standard-compliant macro to achieve macro overloading. This could be achieved easier with a common
+// GCC/clang/MSVC extension that removes a trailing '__VA_ARGS__' comma, or with C++20 '__VA_OPT__'.
+// Here we have a pedantic implementation for up to 3 args based on the notes of Jason Deng & Kuukunen,
+// see: https://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros
+
+#define utl_assertion_func_chooser(_f0, _f1, _f2, _f3, ...) _f3
+#define utl_assertion_func_composer(enclosed_args_) utl_assertion_func_chooser enclosed_args_
+#define utl_assertion_choose_from_arg_count(F, ...) utl_assertion_func_composer((__VA_ARGS__, F##_3, F##_2, F##_1, ))
+#define utl_assertion_narg_expander(f_) , , , f_##_0
+#define utl_assertion_macro_chooser(f_, ...)                                                                           \
+    utl_assertion_choose_from_arg_count(f_, utl_assertion_narg_expander __VA_ARGS__(f_))
+
+#define utl_assertion_overloaded_macro(f_, ...) utl_assertion_macro_chooser(f_, __VA_ARGS__)(__VA_ARGS__)
+
+// ===================================
+// --- Assert macro implementation ---
+// ===================================
+
+#define utl_assertion_impl_2(expr_, context_)                                                                          \
+    utl::assertion::impl::handle_capture(                                                                              \
+        utl::assertion::impl::Info{__FILE__, __LINE__, utl_check_pretty_function, #expr_, context_} < expr_)
+
+#define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no context provided>")
+
+#define utl_assertion_impl_0() static_assert(false, "Cannot invoke an assertion with no arguments.")
+
+} // namespace utl::assertion::impl
+
+// ______________________ PUBLIC API ______________________
+
+// =======================
+// --- Assertion macro ---
+// =======================
+
+// Disable false positive warning about operator precedence,
+// while error-prone for the regular use cases 'expr < lhs < rhs'
+// in this context is exactly what we want since this is the only way
+// of implementing the desired expression decomposition.
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wparentheses"
+#pragma clang diagnostic push
+#elif __GNUC__
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic push
+#endif
+
+#if !defined(NDEBUG) || defined(UTL_ASSERTION_ENABLE_IN_RELEASE)
+#define UTL_ASSERTION(...) utl_assertion_overloaded_macro(utl_assertion_impl, __VA_ARGS__)
+#else
+#define UTL_ASSERTION(...) static_assert(true)
+#endif
+
+// Turn the warnings back on
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
+// =========================
+// --- Optional shortcut ---
+// =========================
+
+#ifdef UTL_ASSERTION_ENABLE_SHORTCUT
+#define ASSERT(...) UTL_ASSERTION(__VA_ARGS__)
+#endif
+
+// =====================
+// --- Non-macro API ---
+// =====================
+
+namespace utl::assertion {
+
+using impl::FailureInfo;
+
+using impl::set_handler;
+
+} // namespace utl::assertion
+
+#endif
+#endif // module utl::XXXXXXXXXXXX
+
+
+
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DmitriBogdanov/UTL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 // Module:        utl::bit
 // Documentation: https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_bit.md
 // Source repo:   https://github.com/DmitriBogdanov/UTL
@@ -14,7 +424,7 @@
 
 #define UTL_BIT_VERSION_MAJOR 1
 #define UTL_BIT_VERSION_MINOR 0
-#define UTL_BIT_VERSION_PATCH 0
+#define UTL_BIT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -144,13 +554,13 @@ template <class T, require_integral<T> = true>
 
 template <class T, require_integral<T> = true>
 [[nodiscard]] constexpr std::size_t popcount(T value) noexcept {
-    constexpr auto bitmask_1 = T(0x5555555555555555UL);
-    constexpr auto bitmask_2 = T(0x3333333333333333UL);
-    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+    constexpr auto bitmask_1 = static_cast<T>(0x5555555555555555UL);
+    constexpr auto bitmask_2 = static_cast<T>(0x3333333333333333UL);
+    constexpr auto bitmask_3 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
 
-    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
-    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
-    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+    constexpr auto bitmask_16 = static_cast<T>(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = static_cast<T>(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = static_cast<T>(0x00000000FFFFFFFFUL);
 
     value = (value & bitmask_1) + (rshift(value, 1) & bitmask_1);
     value = (value & bitmask_2) + (rshift(value, 2) & bitmask_2);
@@ -885,7 +1295,7 @@ namespace literals = impl::literals;
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 2
+#define UTL_JSON_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -2304,8 +2714,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         if (!skip_first_indent) chars.append(indent_size, ' ');
 
     // JSON Object
-    if (auto* ptr = node.get_if<Object>()) {
-        const auto& object_value = *ptr;
+    if (node.is_object()) {
+        const auto& object_value = node.get_object();
 
         // Skip all logic for empty objects
         if (object_value.empty()) {
@@ -2339,8 +2749,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '}';
     }
     // JSON Array
-    else if (auto* ptr = node.get_if<Array>()) {
-        const auto& array_value = *ptr;
+    else if (node.is_array()) {
+        const auto& array_value = node.get_array();
 
         // Skip all logic for empty arrays
         if (array_value.empty()) {
@@ -2367,8 +2777,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += ']';
     }
     // String
-    else if (auto* ptr = node.get_if<String>()) {
-        const auto& string_value = *ptr;
+    else if (node.is_string()) {
+        const auto& string_value = node.get_string();
 
         chars += '"';
 
@@ -2393,8 +2803,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '"';
     }
     // Number
-    else if (auto* ptr = node.get_if<Number>()) {
-        const auto& number_value = *ptr;
+    else if (node.is_number()) {
+        const auto& number_value = node.get_number();
 
         constexpr int max_exponent = std::numeric_limits<Number>::max_exponent10;
         constexpr int max_digits =
@@ -2425,12 +2835,12 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         }
     }
     // Bool
-    else if (auto* ptr = node.get_if<Bool>()) {
-        const auto& bool_value = *ptr;
+    else if (node.is_bool()) {
+        const auto& bool_value = node.get_bool();
         chars += (bool_value ? "true" : "false");
     }
     // Null
-    else if (node.is<Null>()) {
+    else if (node.is_null()) {
         chars += "null";
     }
 }
@@ -2649,7 +3059,7 @@ using impl::is_reflected_struct;
 
 #define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
 #define UTL_LOG_VERSION_MINOR 1
-#define UTL_LOG_VERSION_PATCH 0
+#define UTL_LOG_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -3312,20 +3722,20 @@ public:
         : os_variant(os), verbosity(verbosity), colors(colors), flush_interval(flush_interval), columns(columns) {}
 
     // We want a way of changing sink options using its handle / reference returned by the logger
-    Sink& set_verbosity(Verbosity verbosity) {
-        this->verbosity = verbosity;
+    Sink& set_verbosity(Verbosity new_verbosity) {
+        this->verbosity = new_verbosity;
         return *this;
     }
-    Sink& set_colors(Colors colors) {
-        this->colors = colors;
+    Sink& set_colors(Colors new_colors) {
+        this->colors = new_colors;
         return *this;
     }
-    Sink& set_flush_interval(clock::duration flush_interval) {
-        this->flush_interval = flush_interval;
+    Sink& set_flush_interval(clock::duration new_flush_interval) {
+        this->flush_interval = new_flush_interval;
         return *this;
     }
-    Sink& set_columns(const Columns& columns) {
-        this->columns = columns;
+    Sink& set_columns(const Columns& new_columns) {
+        this->columns = new_columns;
         return *this;
     }
     Sink& skip_header(bool skip = true) {
@@ -3763,8 +4173,7 @@ template <class T, require_arithmetic<T> = true>
     return static_cast<T>(x > T(0));
 }
 
-// Floating point midpoint base on 'libstdc++' implementation,
-// takes care of extreme values
+// Floating point midpoint based on 'libstdc++' implementation, takes care of extreme values
 template <class T, require_float<T> = true>
 [[nodiscard]] constexpr T midpoint(T a, T b) noexcept {
     constexpr T low  = std::numeric_limits<T>::min() * 2;
@@ -3779,7 +4188,7 @@ template <class T, require_float<T> = true>
     return a / 2 + b / 2;                                   // correctly rounded for remaining cases
 }
 
-// Non-overflowing integer midpoint is less trivial that it might initially seem, see
+// Non-overflowing integer midpoint is less trivial than it might initially seem, see
 // https://lemire.me/blog/2022/12/06/fast-midpoint-between-two-integers-without-overflow/
 // https://biowpn.github.io/bioweapon/2025/03/23/generalizing-std-midpoint.html
 template <class T, require_int<T> = true>
@@ -3928,7 +4337,7 @@ using impl::prod;
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 0 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 1 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 
@@ -4312,18 +4721,14 @@ template <class T>
     return std::unique_ptr<T[]>(new T[size]);
 }
 
-// Marker for unreachable code
-[[noreturn]] inline void _unreachable() {
-// (Implementation from https://en.cppreference.com/w/cpp/utility/unreachable)
-// Use compiler specific extensions if possible.
-// Even if no extension is used, undefined behavior is still raised by
-// an empty function body and the noreturn attribute.
+// Macro version of 'std::unreachable()' implementation from https://en.cppreference.com/w/cpp/utility/unreachable
+// we use macro instead of a function to work around false-positive MSVC /W4 warnings about "unreachable code"
+// in a function that exists to mark unreachable code
 #if defined(_MSC_VER) && !defined(__clang__) // MSVC
-    __assume(false);
+#define utl_mvl_unreachable static_assert(true)
 #else // GCC, Clang
-    __builtin_unreachable();
+#define utl_mvl_unreachable __builtin_unreachable()
 #endif
-}
 
 // =======================
 // --- Utility Classes ---
@@ -4822,14 +5227,14 @@ public:
     [[nodiscard]] constexpr size_type row_stride() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return 0;
         if constexpr (self::params::layout == Layout::CR) return 1;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::DENSE)
     [[nodiscard]] constexpr size_type col_stride() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return 1;
         if constexpr (self::params::layout == Layout::CR) return 0;
-        _unreachable();
+        utl_mvl_unreachable;
     }
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::STRIDED)
     [[nodiscard]] size_type row_stride() const noexcept { return this->_row_stride; }
@@ -4896,7 +5301,7 @@ public:
         }
         // Different sparsity comparison
         // TODO: Impl here and use .all_of() OR .any_of()
-        return true;
+        else return true;
     }
 
     // --- Indexation ---
@@ -4913,7 +5318,7 @@ private:
     [[nodiscard]] size_type _get_memory_offset_strided_impl(size_type idx, size_type i, size_type j) const {
         if constexpr (self::params::layout == Layout::RC) return idx * this->col_stride() + this->row_stride() * i;
         if constexpr (self::params::layout == Layout::CR) return idx * this->row_stride() + this->col_stride() * j;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
 public:
@@ -5011,14 +5416,14 @@ private:
     [[nodiscard]] size_type _unchecked_get_idx_of_ij(size_type i, size_type j) const {
         if constexpr (self::params::layout == Layout::RC) return i * this->cols() + j;
         if constexpr (self::params::layout == Layout::CR) return j * this->rows() + i;
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && (type == Type::DENSE || type == Type::STRIDED))
     [[nodiscard]] Index2D _unchecked_get_ij_of_idx(size_type idx) const {
         if constexpr (self::params::layout == Layout::RC) return {idx / this->cols(), idx % this->cols()};
         if constexpr (self::params::layout == Layout::CR) return {idx % this->rows(), idx / this->rows()};
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && type == Type::STRIDED && ownership == Ownership::CONTAINER)
@@ -5036,7 +5441,7 @@ private:
             return (this->rows() - 1) * this->row_stride() + this->rows() * this->cols() * this->col_stride();
         if constexpr (self::params::layout == Layout::CR)
             return (this->cols() - 1) * this->col_stride() + this->rows() * this->cols() * this->row_stride();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
 public:
@@ -5056,14 +5461,14 @@ public:
     [[nodiscard]] size_type extent_major() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return this->rows();
         if constexpr (self::params::layout == Layout::CR) return this->cols();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && (type == Type::DENSE || type == Type::STRIDED))
     [[nodiscard]] size_type extent_minor() const noexcept {
         if constexpr (self::params::layout == Layout::RC) return this->cols();
         if constexpr (self::params::layout == Layout::CR) return this->rows();
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     // - Sparse implementations -
@@ -5463,7 +5868,7 @@ public:
             return block_const_view_type(block_rows, block_cols, row_stride, col_stride,
                                          &this->operator()(block_i, block_j));
         }
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX)
@@ -5511,7 +5916,7 @@ public:
             const size_type col_stride = this->col_stride() + this->row_stride() * (this->rows() - block_rows);
             return block_view_type(block_rows, block_cols, row_stride, col_stride, &this->operator()(block_i, block_j));
         }
-        _unreachable();
+        utl_mvl_unreachable;
     }
 
     utl_mvl_reqs(dimension == Dimension::MATRIX && ownership != Ownership::CONST_VIEW)
@@ -6526,7 +6931,7 @@ return_type operator*(const L& left, const R& right) {
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 1
+#define UTL_PARALLEL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -6869,7 +7274,7 @@ public:
         }
         // Regular task
         else {
-            const std::scoped_lock global_queue_mutex(this->global_queue_mutex);
+            const std::scoped_lock global_queue_lock(this->global_queue_mutex);
             this->global_queue.emplace(std::move(closure));
         }
 
@@ -7463,7 +7868,7 @@ using impl::hardware_concurrency;
 
 #define UTL_PREDEF_VERSION_MAJOR 2
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 1
+#define UTL_PREDEF_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -7713,7 +8118,7 @@ constexpr bool debug =
 
 // Force inline
 #if defined(_MSC_VER)
-#define UTL_PREDEF_FORCE_INLINE __forceinline inline
+#define UTL_PREDEF_FORCE_INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
 #define UTL_PREDEF_FORCE_INLINE __attribute__((always_inline)) inline
 #else
@@ -7893,10 +8298,10 @@ using impl::compilation_summary;
 // already applied the idea of using static variables to mark callsites efficiently and later underwent
 // a full rewrite to add proper threading & call graph support.
 //
-// A lot of though went into making it fast, the key idea is to use 'thread_local' callsite
-// markers to associate callsites with numeric thread-specific IDs and to reduce all call graph
-// traversal to simple integer array lookups. Store everything we can densely, minimize locks,
-// delay formatting and result evaluation as much as possible.
+// A lot of thought went into making it fast. The key idea is to use 'thread_local' callsite
+// markers to associate callsites with linearly growing thread-specific IDs and reduce all call
+// graph traversal logic to traversing a matrix of integers. Store everything we can densely,
+// minimize locks, delay formatting and result evaluation as much as possible.
 //
 // Docs & comments scattered through code should explain the details decently well.
 
@@ -7984,7 +8389,7 @@ struct clock {
     static time_point now() noexcept { return time_point(duration(utl_profiler_cpu_counter)); }
 };
 #else
-using clock   = std::chrono::steady_clock;
+using clock = std::chrono::steady_clock;
 #endif
 
 using duration   = clock::duration;
@@ -8984,7 +9389,7 @@ using impl::Ruler;
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 2
+#define UTL_RANDOM_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -9043,27 +9448,22 @@ namespace utl::random::impl {
 // --- SFINAE & type traits ---
 // ============================
 
-#define utl_random_define_trait(trait_name_, ...)                                                                      \
-    template <class T, class = void>                                                                                   \
-    struct trait_name_ : std::false_type {};                                                                           \
-                                                                                                                       \
-    template <class T>                                                                                                 \
-    struct trait_name_<T, std::void_t<decltype(__VA_ARGS__)>> : std::true_type {};                                     \
-                                                                                                                       \
-    template <class T>                                                                                                 \
-    constexpr bool trait_name_##_v = trait_name_<T>::value;                                                            \
-                                                                                                                       \
-    template <class T>                                                                                                 \
-    using require_##trait_name_ = std::enable_if_t<trait_name_<T>::value, bool>
+template <class T, class = void>
+struct is_seed_seq : std::false_type {};
 
+template <class T>
+struct is_seed_seq<T, std::void_t<decltype(std::declval<T>().generate(
+                          std::declval<std::uint32_t*>(), std::declval<std::uint32_t*>()))>> : std::true_type {};
 
-utl_random_define_trait(is_seed_seq,
-                        std::declval<T>().generate(std::declval<std::uint32_t*>(), std::declval<std::uint32_t*>()));
+template <class T>
+constexpr bool is_seed_seq_v = is_seed_seq<T>::value;
+
+template <class T>
+using require_is_seed_seq = std::enable_if_t<is_seed_seq<T>::value, bool>;
+
 // this type trait is necessary to restrict template constructors & seed functions that take 'SeedSeq&& seq',
 // otherwise they will get picked instead of regular seeding methods even for integer arguments.
 // This is how standard library seems to do it (based on GCC implementation) so we follow their API.
-
-#undef utl_random_define_trait
 
 template <class>
 constexpr bool always_false_v = false;
@@ -9206,8 +9606,7 @@ std::uint64_t seed_seq_to_uint64(SeedSeq&& seq) {
     return merge_uint32_into_uint64(temp[0], temp[1]);
 }
 
-// 'std::rotl()' from C++20, used by many PRNGs,
-// have to use long name because platform-specific includes declare '_rotl' as a macro
+// 'std::rotl()' from C++20, used by many PRNGs
 template <class T, require_uint<T> = true>
 [[nodiscard]] constexpr T rotl(T x, int k) noexcept {
     return (x << k) | (x >> (std::numeric_limits<T>::digits - k));
@@ -9215,8 +9614,8 @@ template <class T, require_uint<T> = true>
 
 // Some generators shouldn't be zero initialized, in a perfect world the user would never
 // do that, but in case they happened to do so regardless we can remap 0 to some "weird"
-// value that isn't like to intersect with any other seeds generated by the user. Rejecting
-// zero seeds completely wouldn't be appropriate for compatibility reasons.
+// value that isn't likely to intersect with any other seeds generated by the user.
+// Rejecting zero seeds completely wouldn't be appropriate for compatibility reasons.
 template <class T, std::size_t N, require_uint<T> = true>
 [[nodiscard]] constexpr bool is_zero_state(const std::array<T, N>& state) {
     for (const auto& e : state)
@@ -9787,7 +10186,6 @@ using ChaCha8  = ChaCha<8>;
 using ChaCha12 = ChaCha<12>;
 using ChaCha20 = ChaCha<20>;
 
-
 } // namespace generators
 
 // ===============
@@ -9871,16 +10269,16 @@ constexpr T uniform_uint_lemire(Gen& gen, T range) noexcept(noexcept(gen())) {
     return product >> std::numeric_limits<T>::digits;
 }
 
-// Reimplementation of libc++ 'std::uniform_int_distribution<>' except
+// Reimplementation of libstdc++ 'std::uniform_int_distribution<>' except
 // - constexpr
 // - const-qualified (relative to distribution parameters)
 // - noexcept as long as 'Gen::operator()' is noexcept, which is true for all generators in this module
 // - supports 'std::uint8_t', 'std::int8_t', 'char'
 // - produces the same sequence on each platform
-// Performance is exactly the same a libc++ version of 'std::uniform_int_distribution<>',
+// Performance is exactly the same a libstdc++ version of 'std::uniform_int_distribution<>',
 // in fact, it is likely to return the exact same sequence for most types
 template <class T, class Gen, require_integral<T> = true>
-constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
+constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept(noexcept(gen())) {
     using result_type    = T;
     using unsigned_type  = std::make_unsigned_t<result_type>;
     using generated_type = typename Gen::result_type;
@@ -9942,22 +10340,15 @@ constexpr T generate_uniform_int(Gen& gen, T min, T max) noexcept {
     // This would be a bit nicer semantically with C++20 `std::bit_cast<>`, but not ultimately any different.
 
     // Note 2:
-    // 'ext_prng_range' has a ternary purely to silence a false compiler warning from about division by zero due to
+    // 'ext_prng_range' has a ternary purely to silence a false compiler warning about division by zero due to
     // 'prng_range + 1' overflowing into '0' when 'prng_range' is equal to 'type_range'. Falling into this runtime
     // branch requires 'prng_range < range <= type_range' making such situation impossible, here we simply clamp the
     // value to 'type_range' so it doesn't overflow and trip the compiler when analyzing constexpr for potential UB.
-    
+
     // Note 3:
     // 'static_cast<T>()' in return is functionally useless, but prevents some false positive warnings on MSVC
 }
 
-// 'static_cast<>()' preserves bit pattern of signed/unsigned integers of the same size as long as
-// those integers are two-complement (see https://en.wikipedia.org/wiki/Two's_complement), this is
-// true for most platforms and is in fact guaranteed for standard fixed-width types like 'uint32_t'
-// on any platform (see https://en.cppreference.com/w/cpp/types/integer)
-//
-// This means signed integer distribution can simply use unsigned algorithm and reinterpret the result internally.
-// This would be a bit nicer semantically with C++20 `std::bit_cast<>`, but not ultimately any different.
 template <class T = int, require_integral<T> = true>
 struct UniformIntDistribution {
     using result_type = T;
@@ -10040,14 +10431,14 @@ constexpr T generate_canonical_generic(Gen& gen) noexcept(noexcept(gen())) {
         return count;
     }();
     // GCC and MSVC use runtime conversion to floating point and std::ceil() & std::log() to obtain
-    // this value, in MSVC for example we have something like this:
+    // this value, in MSVC (before LWG 2524 implementation) for example we had something like this:
     //    > invocations_needed = std::ceil( float_type(float_bits) / std::log2( float_type(prng_range) + 1 ) )
     // which is not constexpr due to math functions, we can do a similar thing much easier by just counting bits
     // generated per each invocation. This returns the same thing for any sane PRNG, except since it only counts
     // "full bits" esoteric ranges such as [1, 3] which technically have 1.5 bits of randomness will be counted
     // as 1 bit of randomness, thus overestimating the invocations a little. In practice this makes 0 difference
     // since its only matters for exceedingly small 'prng_range' and such PRNGs simply don't exist in nature, and
-    // even if they are theoretically used they will simply use a few more invocation to produce a proper result
+    // even if they are theoretically used they will simply use a few more invocations to produce a proper result
 
     constexpr float_type prng_float_max   = static_cast<float_type>(prng_max);
     constexpr float_type prng_float_min   = static_cast<float_type>(prng_min);
@@ -10065,12 +10456,12 @@ constexpr T generate_canonical_generic(Gen& gen) noexcept(noexcept(gen())) {
     // before the P0952R2 overhaul (see https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0952r2.html)
 
     if (res >= float_type(1)) res = float_type(1) - std::numeric_limits<float_type>::epsilon() / float_type(2);
-    // GCC patch the fixes occasional generation of '1's, has non-zero effect on performance
+    // GCC patch that fixes occasional generation of '1's, has non-zero effect on performance
 
     return res;
 }
 
-// Wrapper that adds special case optimizations for `_generate_canonical_generic<>()'
+// Wrapper that adds special case optimizations for `generate_canonical_generic<>()'
 template <class T, class Gen>
 constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen())) {
     using float_type     = T;
@@ -10100,12 +10491,12 @@ constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen())) {
 
     // Bit-uniform PRNGs can be simply bitmasked & shifted to obtain mantissa
     // 64-bit float, 64-bit uniform PRNG
-    // => multiplication algorithm, see [https://prng.di.unimi.it/]
+    // => multiplication algorithm, see https://prng.di.unimi.it/
     if constexpr (prng_is_bit_uniform && sizeof(float_type) == 8 && sizeof(generated_type) == 8) {
         return (gen() >> exponent_bits_64) * mantissa_hex_64;
     }
     // 64-bit float, 32-bit uniform PRNG
-    // => "low-high" algorithm, see [https://www.doornik.com/research/randomdouble.pdf]
+    // => "low-high" algorithm, see https://www.doornik.com/research/randomdouble.pdf
     else if constexpr (prng_is_bit_uniform && sizeof(T) == 8 && sizeof(generated_type) == 4) {
         return (gen() * pow2_minus_64) + (gen() * pow2_minus_32);
     }
@@ -10198,8 +10589,8 @@ private:
     // 'generate_canonical()'. Ziggurat is usually ~50% faster, but involver several KB of lookup tables
     // and a MUCH more cumbersome and difficult to generalize implementation. Most (in fact, all I've seen so far)
     // ziggurat implementations found online are absolutely atrocious. There is a very interesting and well-made
-    // paper by Christopher McFarland (2015, see https://pmc.ncbi.nlm.nih.gov/articles/PMC4812161/ for pdf) than
-    // proposes several significant improvements, but it has even more lookup tables (~12 KB in total) and an even
+    // paper by Christopher McFarland (2015, see https://pmc.ncbi.nlm.nih.gov/articles/PMC4812161/ for pdf) that
+    // proposes several significant improvements, but it has even more lookup tables (~12 KB in total) and even
     // harder implementation. For the sake of robustness we will stick to Polar method for now.
     //
     // Note 3:
@@ -10269,13 +10660,13 @@ public:
 
 template <class T, require_uint<T> = true>
 [[nodiscard]] constexpr int popcount(T x) noexcept {
-    constexpr auto bitmask_1 = T(0x5555555555555555UL);
-    constexpr auto bitmask_2 = T(0x3333333333333333UL);
-    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+    constexpr auto bitmask_1 = static_cast<T>(0x5555555555555555UL);
+    constexpr auto bitmask_2 = static_cast<T>(0x3333333333333333UL);
+    constexpr auto bitmask_3 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
 
-    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
-    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
-    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+    constexpr auto bitmask_16 = static_cast<T>(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = static_cast<T>(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = static_cast<T>(0x00000000FFFFFFFFUL);
 
     x = (x & bitmask_1) + ((x >> 1) & bitmask_1);
     x = (x & bitmask_2) + ((x >> 2) & bitmask_2);
@@ -10381,8 +10772,8 @@ struct ApproxNormalDistribution {
 // Note 1:
 // Despite the intuitive judgement, creating new distribution objects on each call doesn't introduce
 // any meaningful overhead. There is however a bit of additional overhead due to 'thread_local' branch
-// caused by the thread local PRNG. It is still much faster that 'rand()' or regular <random> usage, but
-// if user want to have the bleeding edge performance they should use distributions manually.
+// caused by the thread local PRNG. It is still much faster than 'rand()' or regular <random> usage, but
+// if user wants to have the bleeding edge performance they should use distributions manually.
 
 // Note 2:
 // No '[[nodiscard]]' since random functions inherently can't be pure due to advancing the generator state.
@@ -10483,19 +10874,6 @@ inline  float normal_float (                          ) { return  normal< float>
 inline double normal_double(                          ) { return  normal<double>(            ); }
 // clang-format on
 
-int    uniform_int(int min, int max);
-Uint   uniform_uint(Uint min, Uint max);
-bool   uniform_bool();
-float  uniform_float(float min, float max);
-double uniform_double(double min, double max);
-float  uniform_float();
-double uniform_double();
-
-float  normal_float(float mean, float stddev);
-double normal_double(double mean, double stddev);
-float  normal_float();
-double normal_double();
-
 } // namespace utl::random::impl
 
 // ______________________ PUBLIC API ______________________
@@ -10557,7 +10935,7 @@ using impl::choose;
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 1
+#define UTL_SHELL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -10625,7 +11003,7 @@ inline char random_char() {
 // In the end we have a pretty fast general-purpose random string function
 inline std::string random_ascii_string(std::size_t length = 20) {
     std::string result(length, '0');
-    for (std::size_t i = 0; i < result.size(); ++i) result[i] = random_char();
+    for (auto& e : result) e = random_char();
     return result;
 }
 
@@ -10747,7 +11125,6 @@ struct CommandResult {
 
 // A function to run shell command & capture it's status, stdout and stderr.
 //
-
 // Note 1:
 // Creating temporary files doesn't seem to be ideal, but I'd yet to find
 // a way to pipe BOTH stdout and stderr directly into the program without
@@ -10761,7 +11138,7 @@ struct CommandResult {
 inline CommandResult run_command(std::string_view command) {
     const auto stdout_handle = TemporaryHandle::create();
     const auto stderr_handle = TemporaryHandle::create();
-    
+
     constexpr std::string_view stdout_pipe_prefix = " >";
     constexpr std::string_view stderr_pipe_prefix = " 2>";
 
@@ -10780,17 +11157,17 @@ inline CommandResult run_command(std::string_view command) {
     pipe_command += '"';
 
     const int status = std::system(pipe_command.c_str());
-    
+
     // Extract out/err from files
     std::string out = read_file_to_string(stdout_handle.str());
     std::string err = read_file_to_string(stderr_handle.str());
-    
+
     // Remove possible LF/CRLF added by file piping at the end
     if (!out.empty() && out.back() == '\n') out.resize(out.size() - 1); // LF
     if (!out.empty() && out.back() == '\r') out.resize(out.size() - 1); // CR
     if (!err.empty() && err.back() == '\n') err.resize(err.size() - 1); // LF
     if (!err.empty() && err.back() == '\r') err.resize(err.size() - 1); // CR
-    
+
     return {status, std::move(out), std::move(err)};
 }
 
@@ -10971,13 +11348,12 @@ using impl::hybrid;
 #define UTLHEADERGUARD_STRE
 
 #define UTL_STRE_VERSION_MAJOR 1
-#define UTL_STRE_VERSION_MINOR 0
-#define UTL_STRE_VERSION_PATCH 2
+#define UTL_STRE_VERSION_MINOR 1
+#define UTL_STRE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // transform()
-#include <cctype>      // tolower(), toupper()
 #include <stdexcept>   // invalid_argument
 #include <string>      // string, size_t
 #include <string_view> // string_view
@@ -11070,15 +11446,25 @@ namespace utl::stre::impl {
 // --- Case conversions ---
 // ========================
 
+[[nodiscard]] inline char to_lower(char ch) noexcept {
+    constexpr char offset = 'z' - 'Z';
+    return ('A' <= ch && ch <= 'Z') ? ch + offset : ch;
+}
+// saves <cctype> include and doesn't have the same 'unsigned char' and locale issues as 'std::tolower()',
+// similarly to 'std::tolower()' the algorithm is ASCII-only, general UTF-8 requires a unicode library
+
+[[nodiscard]] inline char to_upper(char ch) noexcept {
+    constexpr char offset = 'Z' - 'z';
+    return ('a' <= ch && ch <= 'z') ? ch + offset : ch;
+}
+
 [[nodiscard]] inline std::string to_lower(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](char ch) { return to_lower(ch); });
     return str;
-    // note that 'std::tolower()', 'std::toupper()' can only apply to unsigned chars, calling it on signed char
-    // is UB. Implementation above was directly taken from https://en.cppreference.com/w/cpp/string/byte/tolower
 }
 
 [[nodiscard]] inline std::string to_upper(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](char ch) { return to_upper(ch); });
     return str;
 }
 
@@ -11237,6 +11623,471 @@ using impl::index_of_difference;
 
 #endif
 #endif // module utl::stre
+
+
+
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DmitriBogdanov/UTL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+// Module:        utl::strong_type
+// Documentation: https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_strong_type.md
+// Source repo:   https://github.com/DmitriBogdanov/UTL
+//
+// This project is licensed under the MIT License
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRONG_TYPE)
+#ifndef UTLHEADERGUARD_STRONG_TYPE
+#define UTLHEADERGUARD_STRONG_TYPE
+
+#define UTL_STRONG_TYPE_VERSION_MAJOR 1
+#define UTL_STRONG_TYPE_VERSION_MINOR 0
+#define UTL_STRONG_TYPE_VERSION_PATCH 1
+
+// _______________________ INCLUDES _______________________
+
+#include <cassert>     // assert()
+#include <type_traits> // enable_if_t<>, is_integral<>, is_floating_point<>, make_unsigned<>, ...
+#include <utility>     // size_t, move(), swap()
+
+// ____________________ DEVELOPER DOCS ____________________
+
+// A simple strong type library.
+//
+// It doesn't provide as many customization points as some other strong type libs do, but it allows
+// for a much simpler implementation with significantly less compile time impact since the classic
+// trait-per-enabled-operator dispatch requires a great deal of nested template instantiations.
+//
+// In most actual use cases we just want a simple strongly typed arithmetic value or some kind of immutable
+// ID / handle, which makes that complexity go to waste, which why the minimalistic design was chosen.
+//
+// It also focuses on making things as 'constexpr'-friendly as possible and takes some inspiration
+// from 'std::experimental::unique_resource' suggested by paper N4189 back in the day. This part of
+// the functionality can be somewhat emulated by exploiting that 'std::unique_ptr<>' works with any
+// 'named requirements: NullablePointer' type and can in fact manage a non-pointer data, but doing
+// things this way would add a heavy include a prevent a lot of potential 'constexpr'.
+
+// ____________________ IMPLEMENTATION ____________________
+
+namespace utl::strong_type::impl {
+
+// ===============
+// --- Utility ---
+// ===============
+
+// Binds specific function to a type, useful for wrapping 'C' API functions for a deleter
+//
+// Note: Explicit SFINAE restrictions on 'operator()' are necessary to make this class work with a 'false'
+//       case of 'std::is_invocable<>', without restrictions the trait deduces variadic to be invocable
+//       and falls into the ill-formed function body which is a compile error
+template <auto function>
+struct Bind {
+    template <class... Args, std::enable_if_t<std::is_invocable_v<decltype(function), Args...>, bool> = true>
+    constexpr auto operator()(Args&&... args) const noexcept(noexcept(function(std::forward<Args>(args)...))) {
+        return function(std::forward<Args>(args)...);
+    }
+};
+
+// =============================
+// --- Strongly typed unique ---
+// =============================
+
+// --- General case ---
+// --------------------
+
+// Strongly typed move-only wrapper around 'T' with a custom deleter.
+//
+// Useful for wrapping handles returned by 'C' APIs into a strongly typed RAII object.
+//
+// Examples: OpenGL buffer / shader / program handles.
+
+template <class T, class Tag, class Deleter = void>
+class Unique {
+    T    value; // potentially default constructible, but not necessarily
+    bool active = false;
+
+    static_assert(std::is_move_constructible_v<T>, "Type must be move-constructible.");
+    static_assert(std::is_move_assignable_v<T>, "Type must be move-assignable.");
+    static_assert(std::is_class_v<Deleter>, "Deleter must be a class.");
+    static_assert(std::is_empty_v<Deleter>, "Deleter must be stateless.");
+    static_assert(std::is_invocable_v<Deleter, T> || std::is_invocable_v<Deleter, T&>,
+                  "Deleter must be invocable for the type.");
+
+    static constexpr bool nothrow_movable =
+        std::is_nothrow_move_constructible_v<T> && std::is_nothrow_move_assignable_v<T>;
+
+public:
+    using value_type   = T;
+    using tag_type     = Tag;
+    using deleter_type = Deleter;
+
+    // Move-only semantics
+    Unique(const Unique&)            = delete;
+    Unique& operator=(const Unique&) = delete;
+
+    constexpr Unique(Unique&& other) noexcept(nothrow_movable) { *this = std::move(other); }
+
+    constexpr Unique& operator=(Unique&& other) noexcept(nothrow_movable) {
+        std::swap(this->value, other.value);
+        std::swap(this->active, other.active);
+
+        return *this;
+    }
+
+    // Conversion
+    constexpr Unique(T&& new_value) noexcept(nothrow_movable) { *this = std::move(new_value); }
+
+    constexpr Unique& operator=(T&& new_value) noexcept(nothrow_movable) {
+        this->~Unique(); // don't forget to cleanup existing value
+
+        this->value  = std::move(new_value);
+        this->active = true;
+
+        return *this;
+    }
+
+    // Accessing the underlying value
+    constexpr const T& get() const noexcept { return this->value; }
+    constexpr T&       get() noexcept { return this->value; }
+
+    ~Unique() {
+        if (this->active) {
+            // In MSVC without '/permissive-' or '/Zc:referenceBinding' (which is a subset of '/permissive-')
+            // 'std::is_invocable_v<Deleter, T&&>' might be evaluated as 'true' even for deleters that should
+            // only accept l-values. This is a warning at C4239 '/W4', but it doesn't affect the behavior and
+            // there is literally nothing we can do to work around MSVC blatantly lying about type trait always
+            // being 'true' since even instantiating the type trait produces this warning.
+#ifdef _MSC_VER
+#pragma warning(suppress : 4239, justification : "Non-conformant behavior of MSVC, false positive at '/W4'.")
+#endif
+            if constexpr (std::is_invocable_v<Deleter, T&&>) deleter_type{}(std::move(this->value));
+            else deleter_type{}(this->value); // some APIs take arguments only as an l-value
+        }
+    }
+};
+
+// --- Trivial deleter case ---
+// ----------------------------
+
+// Strongly typed move-only wrapper around 'T' with a trivial deleter.
+//
+// Useful for cases where we don't want (or need) to provide a
+// custom deleter, but still want strongly typed move-only semantics.
+//
+// Trivial deleter case requires a separate specialization with some code duplication because
+//    1) Before C++20 only trivial destructors can be 'constexpr'
+//    2) There is no way to conditionally compile a destructor
+// which means using a trivial 'DefaultDestructor<T>' won't work without sacrificing 'constexpr'.
+
+template <class T, class Tag>
+class Unique<T, Tag, void> {
+    T value;
+
+    static_assert(std::is_move_constructible_v<T>, "Type must be move-constructible.");
+    static_assert(std::is_move_assignable_v<T>, "Type must be move-assignable.");
+
+    static constexpr bool nothrow_movable = std::is_nothrow_move_assignable_v<T>;
+
+public:
+    using value_type   = T;
+    using tag_type     = Tag;
+    using deleter_type = void;
+
+    // Move-only semantics
+    Unique(const Unique&)            = delete;
+    Unique& operator=(const Unique&) = delete;
+
+    constexpr Unique(Unique&&)            = default;
+    constexpr Unique& operator=(Unique&&) = default;
+
+    // Conversion
+    constexpr Unique(T&& other) noexcept(nothrow_movable) { *this = std::move(other); }
+
+    constexpr Unique& operator=(T&& other) noexcept(nothrow_movable) {
+        this->value = std::move(other);
+
+        return *this;
+    }
+
+    // Accessing the underlying value
+    constexpr const T& get() const noexcept { return this->value; }
+    constexpr T&       get() noexcept { return this->value; }
+};
+
+// =============================
+// --- No UB signed bitshift ---
+// =============================
+
+// Ensure target is two's complement, this includes pretty much every platform ever
+// to the point that C++20 standardizes two's complement encoding as a requirement,
+// this check exists purely to be pedantic and document our assumptions strictly
+
+static_assert((-1 & 3) == 3);
+
+// before C++20 following options could technically be the case:
+//    1. (-1 & 3) == 1 => target is sign & magnitude encoded
+//    2. (-1 & 3) == 2 => target is one's complement
+//    3. (-1 & 3) == 3 => target is two's complement
+// other integer encodings are not possible in the standard
+//
+// Shifting negative numbers is technically considered UB, in practice every compiler implements
+// signed bitshift as '(signed)( (unsigned)x << shift )' however they still act as if calling shift
+// on a negative 'x < 0' is UB and therefore can never happen which can lead to weirdness with what
+// compiler considers to be dead code elimination. This is why we do the casting explicitly and
+// use custom 'lshift()' and 'rshift()' to avoid possible UB.
+// see https://stackoverflow.com/a/29710927/28607141
+//
+// Note: Other bitwise operators ('&', '|', '^', '~') do not suffer from the same issue, their invocation
+//       for signed types is implementation-defined rather than UB, which in practice means that they do
+//       a reasonable consistent thing since we already enforced two's complement representation.
+
+template <class T>
+using require_integral = std::enable_if_t<std::is_integral_v<T>, bool>;
+
+constexpr std::size_t byte_size = 8;
+
+// Left shift,
+// unlike regular '<<' works properly with negative values, see notes above
+// undefined behavior if 'shift >= bit_sizeof<T>'
+template <class T, require_integral<T> = true>
+[[nodiscard]] constexpr T lshift(T value, std::size_t shift) noexcept {
+    assert(shift < sizeof(T) * byte_size);
+    return static_cast<T>(static_cast<std::make_unsigned_t<T>>(value) << shift);
+}
+
+// Right shift,
+// unlike regular '>>' works properly with negative values, see notes above
+// undefined behavior if 'shift >= bit_sizeof<T>'
+template <class T, require_integral<T> = true>
+[[nodiscard]] constexpr T rshift(T value, std::size_t shift) noexcept {
+    assert(shift < sizeof(T) * byte_size);
+    return static_cast<T>(static_cast<std::make_unsigned_t<T>>(value) >> shift);
+}
+
+// =============================
+// --- Unsigned unary minus ----
+// =============================
+
+template <class T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+[[nodiscard]] constexpr T minus(T value) noexcept {
+    if constexpr (std::is_signed_v<T>) return -value;
+    else return ~value + T(1);
+    // We need unsigned unary minus for a general case, but MSVC with '/W2' warning level produces a warning when using
+    // unary minus with an unsigned value, this warning gets elevated to a compilation error by '/sdl' flag, see
+    // https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4146
+    //
+    // This is a case of MSVC not being standard-compliant, as unsigned '-x' is a perfectly defined operation which
+    // evaluates to the same thing as '~x + 1u'. To work around such warning we define this function.
+}
+
+// ==================================
+// --- Strongly typed arithmetic  ---
+// ==================================
+
+template <class>
+constexpr bool always_false_v = false;
+
+template <class T, class Tag, class = void>
+class Arithmetic {
+    static_assert(always_false_v<T>, "'T' must be an arithmetic type (integral or floating-point).");
+};
+
+// --- Integer specialization ---
+// ------------------------------
+
+// Strongly typed wrapper around an integer.
+//
+// Supports all of its usual operators with a unit-like behavior (aka 'unit + unit => unit', 'unit * scalar => unit').
+// Useful for wrapping conceptually different dimensions & offsets.
+//
+// Examples: Screen width, screen height, element count, size in bytes.
+
+template <class T, class Tag>
+class Arithmetic<T, Tag, std::enable_if_t<std::is_integral_v<T>>> {
+    T value = T{};
+
+public:
+    // clang-format off
+    
+    using value_type = T;
+    using   tag_type = Tag;
+    
+    // Copyable semantics
+    constexpr Arithmetic           (const Arithmetic& ) = default;
+    constexpr Arithmetic           (      Arithmetic&&) = default;
+    constexpr Arithmetic& operator=(const Arithmetic& ) = default;
+    constexpr Arithmetic& operator=(      Arithmetic&&) = default;
+    
+    // Conversion
+    constexpr Arithmetic           (T new_value) noexcept : value(new_value) {}
+    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; }
+
+    // Accessing the underlying value
+    constexpr const T& get() const noexcept { return this->value; }
+    constexpr       T& get()       noexcept { return this->value; }
+    
+    // Increment
+    constexpr Arithmetic& operator++(   ) noexcept {                          ++this->value; return *this; }
+    constexpr Arithmetic& operator--(   ) noexcept {                          --this->value; return *this; }
+    constexpr Arithmetic  operator++(int) noexcept { const auto temp = *this; ++this->value; return  temp; }
+    constexpr Arithmetic  operator--(int) noexcept { const auto temp = *this; --this->value; return  temp; }
+    
+    // Unary operators
+    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return      +this->value ; }
+    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return minus(this->value); }
+    [[nodiscard]] constexpr Arithmetic operator~() const noexcept { return      ~this->value ; }
+    
+    // Additive & bitwise operators
+    [[nodiscard]] constexpr Arithmetic operator+(Arithmetic other) const noexcept { return this->value + other.value; }
+    [[nodiscard]] constexpr Arithmetic operator-(Arithmetic other) const noexcept { return this->value - other.value; }
+    [[nodiscard]] constexpr Arithmetic operator&(Arithmetic other) const noexcept { return this->value & other.value; }
+    [[nodiscard]] constexpr Arithmetic operator|(Arithmetic other) const noexcept { return this->value | other.value; }
+    [[nodiscard]] constexpr Arithmetic operator^(Arithmetic other) const noexcept { return this->value ^ other.value; }
+    
+    // Multiplicative operators
+    [[nodiscard]] constexpr Arithmetic operator*(T other) const noexcept { return this->value * other; }
+    [[nodiscard]] constexpr Arithmetic operator/(T other) const noexcept { return this->value / other; }
+    [[nodiscard]] constexpr Arithmetic operator%(T other) const noexcept { return this->value % other; }
+    
+    // Arithmetic & bitwise augmented assignment
+    [[nodiscard]] constexpr Arithmetic& operator+=(Arithmetic other) noexcept { this->value += other.value; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator-=(Arithmetic other) noexcept { this->value -= other.value; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator^=(Arithmetic other) noexcept { this->value ^= other.value; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator|=(Arithmetic other) noexcept { this->value |= other.value; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator&=(Arithmetic other) noexcept { this->value &= other.value; return *this; }
+    
+    // Multiplicative augmented assignment
+    [[nodiscard]] constexpr Arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator%=(T other) noexcept { this->value %= other; return *this; }
+    
+    // Comparison
+    [[nodiscard]] constexpr bool operator< (Arithmetic other) const noexcept { return this->value <  other.value; }
+    [[nodiscard]] constexpr bool operator<=(Arithmetic other) const noexcept { return this->value <= other.value; }
+    [[nodiscard]] constexpr bool operator> (Arithmetic other) const noexcept { return this->value >  other.value; }
+    [[nodiscard]] constexpr bool operator>=(Arithmetic other) const noexcept { return this->value >= other.value; }
+    [[nodiscard]] constexpr bool operator==(Arithmetic other) const noexcept { return this->value == other.value; }
+    [[nodiscard]] constexpr bool operator!=(Arithmetic other) const noexcept { return this->value != other.value; }
+    
+    // Shift operators
+    [[nodiscard]] constexpr Arithmetic operator<<(std::size_t shift) const noexcept { return lshift(this->value, shift); }
+    [[nodiscard]] constexpr Arithmetic operator>>(std::size_t shift) const noexcept { return rshift(this->value, shift); }
+    
+    // Shift augmented assignment
+    [[nodiscard]] constexpr Arithmetic operator<<=(std::size_t shift) noexcept { *this = *this << shift; return *this; }
+    [[nodiscard]] constexpr Arithmetic operator>>=(std::size_t shift) noexcept { *this = *this >> shift; return *this; }
+    
+    // Explicit cast 
+    template <class To>
+    [[nodiscard]] constexpr explicit operator To() const noexcept { return static_cast<To>(this->value); }
+
+    // clang-format on
+};
+
+// --- Float specialization ---
+// ----------------------------
+
+// Strongly typed wrapper around a float.
+//
+// Supports all of its usual operators with a unit-like behavior (aka 'unit + unit => unit', 'unit * scalar => unit').
+// Useful for wrapping conceptually different dimensions & offsets.
+//
+// Examples: Physical width, physical height, velocity.
+
+template <class T, class Tag>
+class Arithmetic<T, Tag, std::enable_if_t<std::is_floating_point_v<T>>> {
+    T value = T{};
+
+public:
+    // clang-format off
+    
+    using value_type = T;
+    using   tag_type = Tag;
+    
+    // Copyable semantics
+    constexpr Arithmetic           (const Arithmetic& ) = default;
+    constexpr Arithmetic           (      Arithmetic&&) = default;
+    constexpr Arithmetic& operator=(const Arithmetic& ) = default;
+    constexpr Arithmetic& operator=(      Arithmetic&&) = default;
+    
+    // Conversion
+    constexpr Arithmetic           (T other) noexcept : value(other) {}
+    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; }
+
+    // Accessing the underlying value
+    constexpr const T& get() const noexcept { return this->value; }
+    constexpr       T& get()       noexcept { return this->value; }
+    
+    // Unary operators
+    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return +this->value; }
+    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return -this->value; }
+    
+    // Additive operators
+    [[nodiscard]] constexpr Arithmetic operator+(Arithmetic other) const noexcept { return this->value + other.value; }
+    [[nodiscard]] constexpr Arithmetic operator-(Arithmetic other) const noexcept { return this->value - other.value; }
+    
+    // Multiplicative operators
+    [[nodiscard]] constexpr Arithmetic operator*(T other) const noexcept { return this->value * other; }
+    [[nodiscard]] constexpr Arithmetic operator/(T other) const noexcept { return this->value / other; }
+    
+    // Arithmetic augmented assignment
+    [[nodiscard]] constexpr Arithmetic& operator+=(Arithmetic other) noexcept { this->value += other.value; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator-=(Arithmetic other) noexcept { this->value -= other.value; return *this; }
+    
+    // Multiplicative augmented assignment
+    [[nodiscard]] constexpr Arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
+    [[nodiscard]] constexpr Arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
+    
+    // Comparison
+    [[nodiscard]] constexpr bool operator< (Arithmetic other) const noexcept { return this->value <  other.value; }
+    [[nodiscard]] constexpr bool operator<=(Arithmetic other) const noexcept { return this->value <= other.value; }
+    [[nodiscard]] constexpr bool operator> (Arithmetic other) const noexcept { return this->value >  other.value; }
+    [[nodiscard]] constexpr bool operator>=(Arithmetic other) const noexcept { return this->value >= other.value; }
+    [[nodiscard]] constexpr bool operator==(Arithmetic other) const noexcept { return this->value == other.value; }
+    [[nodiscard]] constexpr bool operator!=(Arithmetic other) const noexcept { return this->value != other.value; }
+    
+    // Explicit cast 
+    template <class To>
+    [[nodiscard]] constexpr explicit operator To() const noexcept { return static_cast<To>(this->value); }
+
+    // clang-format on
+};
+
+// --- Generic operations ---
+// --------------------------
+
+// Inverted multiplication order
+template <class T, class Tag>
+[[nodiscard]] constexpr Arithmetic<T, Tag> operator*(T lhs, Arithmetic<T, Tag> rhs) noexcept {
+    return rhs * lhs;
+}
+
+// Makes type usable with 'std::swap' (see https://en.cppreference.com/w/cpp/named_req/Swappable.html)
+template <class T, class Tag>
+constexpr void swap(Arithmetic<T, Tag> lhs, Arithmetic<T, Tag> rhs) noexcept {
+    const auto tmp = lhs;
+
+    lhs = rhs;
+    rhs = tmp;
+}
+
+} // namespace utl::strong_type::impl
+
+// ______________________ PUBLIC API ______________________
+
+namespace utl::strong_type {
+
+using impl::Bind;
+using impl::Unique;
+using impl::Arithmetic;
+
+} // namespace utl::strong_type
+
+#endif
+#endif // module utl::strong_type
 
 
 

@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::profiler
 
@@ -141,12 +143,12 @@ Global profiler object.
 
 ## Examples
 
-### Profiling code segment
+### Profiling a code segment
 
 > [!Note]
 > Online compiler explorer may be a little weird when it comes to sleep & time measurement precision.
 
-[ [Run this code](https://godbolt.org/z/n4e54vdo5) ]
+[ [Run this code](https://godbolt.org/z/n4e54vdo5) ] [ [Open source file](../examples/module_profiler/profiling_code_segment.cpp) ]
 
 ```cpp
 using namespace std::chrono_literals;
@@ -180,7 +182,7 @@ Output:
 
 ### Profiling recursion
 
-[ [Run this code](https://godbolt.org/z/vYqaz91jY) ]
+[ [Run this code](https://godbolt.org/z/vYqaz91jY) ] [ [Open source file](../examples/module_profiler/profiling_recursion.cpp) ]
 
 ```cpp
 void recursive(int depth = 0) {
@@ -207,7 +209,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](module_parallel.md) to represent a parallel section concisely.
 
-[ [Run this code](https://godbolt.org/z/3fexeW638) ]
+[ [Run this code](https://godbolt.org/z/3fexeW638) ] [ [Open source file](../examples/module_profiler/profiling_parallel_section.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -238,7 +240,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](module_parallel.md) to represent detached section concisely.
 
-[ [Run this code](https://godbolt.org/z/o6ojTv8oc) ]
+[ [Run this code](https://godbolt.org/z/o6ojTv8oc) ] [ [Open source file](../examples/module_profiler/profiling_detached_threads_and_uploading_results.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -281,7 +283,7 @@ Output:
 
 ### Custom style & exporting results to a file
 
-[ [Run this code](https://godbolt.org/z/f3483G995) ]
+[ [Run this code](https://godbolt.org/z/f3483G995) ] [ [Open source file](../examples/module_profiler/custom_style_and_exporting_results_to_a_file.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -388,7 +390,7 @@ New call-site entry & new node creation are rare slow paths, they only happen du
 
 ### Memory usage
 
-Memory overhead of profiling is mostly defined by the aforementioned call graph matrix. For example, on thread that runs into `20` profiling macros and creates `100` nodes, memory overhead is going to be `8 kB`. A thread that runs into `100` profiling macros and creates `500` call graph nodes, memory overhead will be `0.2 MB`.
+Memory overhead of profiling is mostly defined by the aforementioned call graph matrix. For example, on a thread that runs into `20` profiling macros and creates `100` nodes, memory overhead is going to be `8 kB`. A thread that runs into `100` profiling macros and creates `500` call graph nodes, memory overhead will be `0.2 MB`.
 
 It is possible to further reduce memory overhead (down to `4 kB` and `0.1 MB`) by defining a `UTL_PROFILER_USE_SMALL_IDS` macro before the include:
 

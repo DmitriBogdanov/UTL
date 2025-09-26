@@ -1,12 +1,14 @@
-[<img src ="images/badge_cpp_std_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](../LICENSE.md)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
 [<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 [<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
 
-[<img src ="images/badge_windows_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_ubuntu_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_macos_passing.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
+[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
 # utl::integral
 
@@ -195,7 +197,7 @@ Literal suffixes for several integer types not included in `std`.
 
 ### Integer division
 
-[ [Run this code](https://godbolt.org/z/8rfGE1dKh) ]
+[ [Run this code](https://godbolt.org/z/8rfGE1dKh) ] [ [Open source file](../examples/module_integral/integer_division.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -213,7 +215,7 @@ static_assert( integral::div_up   (-7, 5) == -2 ); // round away from 0
 
 ### Saturated math
 
-[ [Run this code](https://godbolt.org/z/6YerhvTGe) ]
+[ [Run this code](https://godbolt.org/z/6YerhvTGe) ] [ [Open source file](../examples/module_integral/saturated_math.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -241,7 +243,7 @@ static_assert( integral::saturate_cast<std::uint8_t>(-143) ==   0 ); // value cl
 
 ### Heterogeneous comparison
 
-[ [Run this code](https://godbolt.org/z/5W6EGW3dz) ]
+[ [Run this code](https://godbolt.org/z/5W6EGW3dz) ] [ [Open source file](../examples/module_integral/heterogeneous_comparison.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -256,7 +258,7 @@ static_assert( integral::cmp_less(std::size_t(15), int(-7)) == false );
 
 ### Narrow cast
 
-[ [Run this code](https://godbolt.org/z/sch65GG7e) ]
+[ [Run this code](https://godbolt.org/z/sch65GG7e) ] [ [Open source file](../examples/module_integral/narrow_cast.cpp) ]
 
 ```cpp
 try {
@@ -283,7 +285,7 @@ narrow_cast() overflows the result.
 
 ### Sign conversion
 
-[ [Run this code](https://godbolt.org/z/YhbYoMWhj) ]
+[ [Run this code](https://godbolt.org/z/YhbYoMWhj) ] [ [Open source file](../examples/module_integral/sign_conversion.cpp) ]
 
 ```cpp
 try {
@@ -313,7 +315,7 @@ narrow_cast() overflows the result.
 
 ### Integral literals
 
-[ [Run this code](https://godbolt.org/z/W687695c9) ]
+[ [Run this code](https://godbolt.org/z/W687695c9) ] [ [Open source file](../examples/module_integral/integral_literals.cpp) ]
 
 ```cpp
 using namespace utl::integral::literals;

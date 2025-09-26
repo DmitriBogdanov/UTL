@@ -1,0 +1,62 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a workflow file for GitHub Actions that runs tests on FreeBSD.
+#    The workflow is triggered automatically on every push or pull request.
+#    Run results are then archived as GitHub artifacts.
+#
+#    Since GitHub doesn't provide native FreeBSD runners, we have to use a VM.
+#    Dy default, VM uses x86-64 with 'clang++' which links 'libstdc++' stdlib.
+#    Using VM's custom shell allows us to split up 'run' into multiple steps.
+# _______________________________________________________________________________
+
+name: "Run tests: FreeBSD"
+
+run-name: "Build & runs tests on FreeBSD"
+
+on: [ push, pull_request ]
+
+jobs:
+  build-and-test:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      
+      - name: "Set up FreeBSD VM"
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: '14.2' # release from 2024.12.03
+          usesh: true     # otherwise FreeBSD uses 'tcsh' shell
+          prepare: pkg install -y cmake
+      
+      - name: "Configure CMake"
+        shell: freebsd {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          cmake --preset clang-bsd
+        
+      - name: "Build project"
+        shell: freebsd {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          cmake --build --preset clang-bsd
+        
+      - name: "Run tests"
+        shell: freebsd {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          ctest --preset clang-bsd
+       
+      - name: "Upload test artifacts"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "artifact-${{matrix.os}}-${{matrix.cxx}}"
+          path: |
+            build/
+            !build/auxiliary/
+            !build/benchmarks/
+            !build/examples/
+            !build/tests/

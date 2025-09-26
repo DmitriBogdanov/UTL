@@ -17,11 +17,10 @@ on:
 
 permissions:
   contents: write
-  
-jobs:
 
-  deploy:
-  
+jobs:
+  build-and-deploy:
+    
     runs-on: ubuntu-latest
     
     steps:
