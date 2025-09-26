@@ -1,17 +1,14 @@
 #define UTL_ASSERTION_ENABLE_SHORTCUT
-#define UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
+#define UTL_ASSERTION_ENABLE_IN_RELEASE
 #include "include/UTL/assertion.hpp"
 
 #include <csignal>
 
-const auto before_main = [](){
-    return std::signal(SIGABRT, [](int){
-        std::cerr << "\nReceived SIGABRT\n";
-        std::exit(EXIT_SUCCESS);
-    });
-}();
-
 int main() {
+    std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); });
+    
     // Second argument is optional, this can be used like a regular assert
     ASSERT(2 + 4 == 17);
+    
+    return EXIT_FAILURE; // shouldn't be reached
 }

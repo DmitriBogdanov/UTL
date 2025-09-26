@@ -47,7 +47,6 @@ TRY( ASSERT(rows == cols, "Linear system requires a square matrix."); )
 // Options (declared by the user)
 #define UTL_ASSERTION_ENABLE_SHORTCUT
 #define UTL_ASSERTION_ENABLE_IN_RELEASE
-#define UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
 #define UTL_ASSERTION_ENABLE_FULL_PATHS
 
 // Handler customization
@@ -107,14 +106,6 @@ When defined before including the header, this macro enables shortcut `ASSERT()`
 When defined before including the header, this macro enables assertion checking in `Release` mode.
 
 > ```cpp
-> #define UTL_ASSERTION_ENABLE_THROW_ON_FAILURE // declared by the user
-> ```
-
-When defined before including the header, this macro changes default assertion handler to throw [`std::runtime_error`](https://www.cppreference.com/w/cpp/error/runtime_error.html) instead of calling [`std::abort`](https://en.cppreference.com/w/cpp/utility/program/abort.html).
-
-**Note:** Similar effect can be achieved using a custom handler, this is mostly a convenience option.
-
-> ```cpp
 > #define UTL_ASSERTION_ENABLE_FULL_PATHS // declared by the user
 > ```
 
@@ -165,17 +156,15 @@ Can be stringified with `to_string()` method, which uses ANSI color codes to imp
 >
 > ```cpp
 > #define UTL_ASSERTION_ENABLE_SHORTCUT
+> #define UTL_ASSERTION_ENABLE_IN_RELEASE
 > ```
-> and define
+> to reduce verbosity and wrap the code in
 > ```cpp
-> const auto before_main = [](){
->     return std::signal(SIGABRT, [](int){
->         std::cerr << "\nReceived SIGABRT\n";
->         std::exit(EXIT_SUCCESS);
->     });
-> }();
+> std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); });
+> // ...
+> return EXIT_FAILURE;
 > ```
-> to reduce verbosity and allow running examples as tests.
+> to allow running examples as tests which fail should the assertion not trigger.
 
 ### Unary assertion
 

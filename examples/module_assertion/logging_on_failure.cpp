@@ -1,17 +1,13 @@
 #define UTL_ASSERTION_ENABLE_SHORTCUT
+#define UTL_ASSERTION_ENABLE_IN_RELEASE
 #include "include/UTL/assertion.hpp"
 
 #include <csignal>
 #include <fstream>
 
-const auto before_main = [](){
-    return std::signal(SIGABRT, [](int){
-        std::cerr << "\nReceived SIGABRT\n";
-        std::exit(EXIT_SUCCESS);
-    });
-}();
-
 int main() {
+    std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); });
+    
     utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
         // Forward assertion message to some logging facility with colors disabled
         std::ofstream("failure.txt") << info.to_string();
@@ -22,4 +18,6 @@ int main() {
     });
     
     ASSERT(3 + 4 < 6);
+    
+    return EXIT_FAILURE; // shouldn't be reached
 }
