@@ -6,7 +6,11 @@
 #include <fstream>
 
 int main() {
-    std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); });
+	#ifdef _WIN32
+	 _set_abort_behavior(0, _WRITE_ABORT_MSG); // prevents Windows abort pop-up from appearing
+	#endif
+
+    std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); }); // treat assert trigger as success
     
     utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
         // Forward assertion message to some logging facility with colors disabled
@@ -19,5 +23,5 @@ int main() {
     
     ASSERT(3 + 4 < 6);
     
-    return EXIT_FAILURE; // shouldn't be reached
+    return EXIT_FAILURE; // treat no assert trigger as failure
 }
