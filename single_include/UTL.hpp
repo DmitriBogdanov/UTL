@@ -14,7 +14,7 @@
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 1
+#define UTL_ASSERTION_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -199,7 +199,7 @@ public:
 // --- Failure handler ---
 // =======================
 
-void standard_handler(const FailureInfo& info) {
+inline void standard_handler(const FailureInfo& info) {
     std::cerr << info.to_string(true) << std::endl;
     std::abort();
 }
@@ -229,7 +229,7 @@ public:
     }
 };
 
-void set_handler(std::function<void(const FailureInfo&)> new_handler) {
+inline void set_handler(std::function<void(const FailureInfo&)> new_handler) {
     GlobalHandler::instance().set(std::move(new_handler));
 }
 
@@ -259,9 +259,9 @@ struct UnaryCapture {
 };
 
 template <class T>
-UnaryCapture<T> operator<(const Info& info, T&& value) {
+UnaryCapture<T> operator<(const Info& info, T&& value) noexcept(noexcept(T(std::forward<T>(value)))) {
     return {info, std::forward<T>(value)};
-}
+} // Note: Successful assertions should be 'noexcept' if possible, this also applies to the binary case
 
 template <class T>
 void handle_capture(UnaryCapture<T>&& capture) {
@@ -277,7 +277,7 @@ template <class T, class U, Operation Op>
 struct BinaryCapture {
     static_assert(is_printable<T>::value && is_printable<U>::value,
                   "Decomposed expression values should be printable with 'std::ostream::operator<<()'.");
-    
+
     const Info& info;
 
     T lhs;
@@ -294,7 +294,9 @@ struct BinaryCapture {
 // Macro to avoid 6x code repetition
 #define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
     template <class T, class U>                                                                                        \
-    BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) {                                       \
+    BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) noexcept(                               \
+        std::is_nothrow_move_constructible_v<T>&& noexcept(U(std::forward<U>(rhs)))) {                                 \
+                                                                                                                       \
         return {lhs.info, std::move(lhs).value, std::forward<U>(rhs)};                                                 \
     }                                                                                                                  \
                                                                                                                        \
