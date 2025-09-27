@@ -12,13 +12,14 @@
 #ifndef UTLHEADERGUARD_ASSERTION
 #define UTLHEADERGUARD_ASSERTION
 
-#define UTL_ASSERTION_VERSION_MAJOR 0
-#define UTL_ASSERTION_VERSION_MINOR 1
+#define UTL_ASSERTION_VERSION_MAJOR 1
+#define UTL_ASSERTION_VERSION_MINOR 0
 #define UTL_ASSERTION_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <array>       // array<>
+#include <cstdlib>     // abort()
 #include <functional>  // function<>
 #include <iostream>    // cerr
 #include <mutex>       // mutex, scoped_lock
@@ -26,12 +27,6 @@
 #include <string>      // string
 #include <string_view> // string_view
 #include <utility>     // forward(), move()
-
-#ifdef UTL_ASSERTION_ENABLE_THROW_ON_FAILURE
-#include <stdexcept> // runtime_error
-#else
-#include <cstdlib> // abort()
-#endif
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -78,7 +73,7 @@ namespace utl::assertion::impl {
 
 template <class T>
 [[nodiscard]] std::string stringify(const T& value) {
-    return (std::ostringstream{} << value).str();
+    return (std::ostringstream{} << value).str(); // in C++20 can be done much faster with std::format
 }
 
 template <class... Args>
@@ -100,6 +95,16 @@ constexpr std::string_view bold_magenta = "\033[35;1m";
 constexpr std::string_view reset        = "\033[0m";
 
 } // namespace colors
+
+// SFINAE to restrict assertion captures to printable types. It doesn't affect functionality
+// since non-printable types would cause compile error regardless, but we can use it to
+// improve LSP highlighting and error message by failing the instantiation early
+template <class T, class = void>
+struct is_printable : std::false_type {};
+
+template <class T>
+struct is_printable<T, std::void_t<decltype(std::declval<std::ostringstream>() << std::declval<T>())>>
+    : std::true_type {};
 
 // =============================
 // --- Decomposed operations ---
@@ -234,6 +239,9 @@ void set_handler(std::function<void(const FailureInfo&)> new_handler) {
 
 template <class T>
 struct UnaryCapture {
+    static_assert(is_printable<T>::value,
+                  "Decomposed expression values should be printable with 'std::ostream::operator<<()'.");
+
     const Info& info;
 
     T value;
@@ -267,6 +275,9 @@ void handle_capture(UnaryCapture<T>&& capture) {
 
 template <class T, class U, Operation Op>
 struct BinaryCapture {
+    static_assert(is_printable<T>::value && is_printable<U>::value,
+                  "Decomposed expression values should be printable with 'std::ostream::operator<<()'.");
+    
     const Info& info;
 
     T lhs;
@@ -401,4 +412,4 @@ using impl::set_handler;
 } // namespace utl::assertion
 
 #endif
-#endif // module utl::XXXXXXXXXXXX
+#endif // module utl::assertion

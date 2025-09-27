@@ -14,20 +14,9 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](../include/UTL/math.hpp)
+[<- to implementation.hpp](../include/UTL/assertion.hpp)
 
 **utl::assertion** header provides an (almost) drop-in replacement for the standard `assert()` with nicer semantics and more diagnostic info.
-
-**Quick showcase:**
-
-```cpp
-const int rows = 10;
-const int cols = 12;
-
-TRY( ASSERT(rows == cols, "Linear system requires a square matrix."); )
-```
-
-<img src ="images/assertion_binary_assertion.png">
 
 **Main features:**
 
@@ -36,7 +25,17 @@ TRY( ASSERT(rows == cols, "Linear system requires a square matrix."); )
 - Customizable assert handler
 - Nicely colored output
 - An option to enable assertions in `Release`
-- An option to throw instead of aborting
+
+**Quick showcase:**
+
+```cpp
+const int rows = 10;
+const int cols = 12;
+
+ASSERT(rows == cols, "Linear system requires a square matrix.");
+```
+
+<img src ="images/assertion_binary_assertion.png">
 
 ## Definitions
 
@@ -75,9 +74,9 @@ void set_handler(std::function<void(const FailureInfo&)> handler);
 
 A macro semantically similar to [`assert()`](https://en.cppreference.com/w/cpp/error/assert.html).
 
-In `Debug` mode (which means `NDEBUG` is defined) checks whether `condition` is `true` and invokes assert handler in the case of failure.
+In `Debug` mode (which means `NDEBUG` is not defined) checks whether `condition` is `true` and invokes assert handler in the case of failure.
 
-In `Release` mode (which means `NDEBUG` is not defined) compiles to nothing.
+In `Release` mode (which means `NDEBUG` is defined) compiles to nothing.
 
 **Differences relative to the standard `assert()`:**
 
@@ -131,15 +130,15 @@ When defined before including the header, this macro enables full filepath displ
 
 A struct that contains all of the information about a failed assertion:
 
-| Field                      | Content                                                      |
-| -------------------------- | ------------------------------------------------------------ |
-| `file` / `line` / `func`   | File / line / function from which assertion failure was triggered |
-| `expression `/ `evaluated` | Asserted condition before / after being evaluated            |
-| `context`                  | Optional message                                             |
+| Field                      | Content                                                               |
+| -------------------------- | --------------------------------------------------------------------- |
+| `file` / `line` / `func`   | File / line / function from which the assertion failure was triggered |
+| `expression `/ `evaluated` | Asserted condition before / after being evaluated                     |
+| `context`                  | Optional message                                                      |
 
-Can be stringified with `to_string()` method, which uses ANSI color codes to improve readability when `color` is set to `true`.
+It can be stringified with `to_string()` method, which uses ANSI color codes to improve readability when `color` is set to `true`.
 
-**Note:** If `context` was no provided, it defaults to `<no context provided>`
+**Note:** If `context` was no provided, it defaults to `<no context provided>`.
 
 > ```cpp
 > void set_handler(std::function<void(const FailureInfo&)> handler);
@@ -168,7 +167,7 @@ Can be stringified with `to_string()` method, which uses ANSI color codes to imp
 
 ### Unary assertion
 
-[ [Run this code]() ] [ [Open source file](../examples/module_assertion/unary_assertion.cpp) ]
+[ [Run this code](https://godbolt.org/z/3c7zsdjs7) ] [ [Open source file](../examples/module_assertion/unary_assertion.cpp) ]
 
 ```cpp
 std::unique_ptr<int> component;
@@ -182,7 +181,7 @@ Output:
 
 ### Binary assertion
 
-[ [Run this code]() ] [ [Open source file](../examples/module_assertion/binary_assertion.cpp) ]
+[ [Run this code](https://godbolt.org/z/3n4aqxqx7) ] [ [Open source file](../examples/module_assertion/binary_assertion.cpp) ]
 
 ```cpp
 const int rows = 10;
@@ -197,18 +196,18 @@ Output:
 
 ### Default message
 
-[ [Run this code]() ] [ [Open source file]() ]
+[ [Run this code](https://godbolt.org/z/4zjqP4zad) ] [ [Open source file](../examples/module_assertion/default_message.cpp) ]
 
 ```cpp
 // Second argument is optional, this can be used like a regular assert
 ASSERT(2 + 4 == 17);
 ```
 
-Output:
+<img src ="images/assertion_default_message.png">
 
 ### Logging on failure
 
-[ [Run this code]() ] [ [Open source file]() ]
+[ [Run this code](https://godbolt.org/z/bhdfj7a91) ] [ [Open source file](../examples/module_assertion/logging_on_failure.cpp) ]
 
 ```cpp
 utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
@@ -225,7 +224,17 @@ ASSERT(3 + 4 < 6);
 
 Output:
 
+<img src ="images/assertion_logging_on_failure.png">
+
 `failure.txt`:
 
 ```
+Assertion failed at logging_on_failure.cpp:24: int main()
+    Where condition:
+        3 + 4 < 6
+    Evaluated to:
+        7 < 6
+    Context:
+        <no context provided>
+
 ```

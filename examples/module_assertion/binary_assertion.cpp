@@ -3,7 +3,6 @@
 #include "include/UTL/assertion.hpp"
 
 #include <csignal>
-#include <cassert>
 
 int main() {
 	#ifdef _WIN32

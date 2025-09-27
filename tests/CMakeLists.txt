@@ -25,6 +25,7 @@ endfunction()
 #         color codes. Without this flag doctest suppresses color because it detects CTest writing output to the file.
 
 # Tests
+utl_add_test("module_assertion/assertions")
 utl_add_test("module_bit/enum_bitflags")
 utl_add_test("module_bit/group_bit_operations")
 utl_add_test("module_bit/individual_bit_operations")
