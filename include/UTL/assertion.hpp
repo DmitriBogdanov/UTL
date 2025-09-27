@@ -14,7 +14,7 @@
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 0
+#define UTL_ASSERTION_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -265,7 +265,7 @@ UnaryCapture<T> operator<(const Info& info, T&& value) {
 
 template <class T>
 void handle_capture(UnaryCapture<T>&& capture) {
-    if (capture.value) return;
+    if (static_cast<bool>(capture.value)) return; // some compilers might complain without explicit casting
     GlobalHandler::instance().invoke(capture.get_failure_info());
 }
 
