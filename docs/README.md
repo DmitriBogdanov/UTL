@@ -40,6 +40,7 @@ Quality goals include:
 
 | Module                                              | Short description                                                    |
 | --------------------------------------------------- | -------------------------------------------------------------------- |
+| [**utl::assertion**](module_assertion.md)           | Assert macro with more diagnostic info                               |
 | [**utl::bit**](module_bit.md)                       | Bit-twiddling, enum bitflags                                         |
 | [**utl::enum_reflect**](module_enum_reflect.md)     | Enum reflection                                                      |
 | [**utl::integral**](module_integral.md)             | Saturated math, safe integer casts, literals, rounding and etc.      |
