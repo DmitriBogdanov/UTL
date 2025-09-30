@@ -7889,9 +7889,9 @@ using impl::hardware_concurrency;
 #ifndef utl_predef_headerguard
 #define utl_predef_headerguard
 
-#define UTL_PREDEF_VERSION_MAJOR 2
+#define UTL_PREDEF_VERSION_MAJOR 3
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 3
+#define UTL_PREDEF_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -7979,7 +7979,7 @@ constexpr std::string_view compiler_full_name =
 #elif defined(UTL_PREDEF_COMPILER_IS_LLVM)
     "LLVM Compiler"
 #elif defined(UTL_PREDEF_COMPILER_IS_ICC)
-    "Inter C/C++ Compiler"
+    "Intel C/C++ Compiler"
 #elif defined(UTL_PREDEF_COMPILER_IS_PGI)
     "Portland Group C/C++ Compiler"
 #elif defined(UTL_PREDEF_COMPILER_IS_IBMCPP)
@@ -8069,28 +8069,25 @@ constexpr std::string_view architecture_name =
 // =========================================
 
 #if defined(UTL_PREDEF_COMPILER_IS_MSVC)
-#define UTL_PREDEF_CPP_VERSION _MSVC_LANG
+#define utl_predef_cpp_version _MSVC_LANG
 #else
-#define UTL_PREDEF_CPP_VERSION __cplusplus
+#define utl_predef_cpp_version __cplusplus
 #endif
-// Note 1:
-// MSVC '__cplusplus' is defined, but stuck at '199711L'. It uses '_MSVC_LANG' instead.
-//
-// Note 2:
-// '__cplusplus' is defined by the standard, it's only Microsoft who think standards are for other people.
-//
-// Note 3:
-// MSVC has a flag '/Zc:__cplusplus' that enables standard behaviour for '__cplusplus'
 
-#if (UTL_PREDEF_CPP_VERSION >= 202302L)
+// Note:
+// MSVC defines '__cplusplus', but it's stuck at '199711L'. We should use '_MSVC_LANG' instead.
+// Since this macro is a part of the standard, this is a case of MSVC being non-compliant.
+// Standard-compliant behavior for MSVC can be enabled with '/Zc:__cplusplus'.
+
+#if (utl_predef_cpp_version >= 202302L)
 #define UTL_PREDEF_STANDARD_IS_23_PLUS
-#elif (UTL_PREDEF_CPP_VERSION >= 202002L)
+#elif (utl_predef_cpp_version >= 202002L)
 #define UTL_PREDEF_STANDARD_IS_20_PLUS
-#elif (UTL_PREDEF_CPP_VERSION >= 201703L)
+#elif (utl_predef_cpp_version >= 201703L)
 #define UTL_PREDEF_STANDARD_IS_17_PLUS
-#elif (UTL_PREDEF_CPP_VERSION >= 201402L)
+#elif (utl_predef_cpp_version >= 201402L)
 #define UTL_PREDEF_STANDARD_IS_14_PLUS
-#elif (UTL_PREDEF_CPP_VERSION >= 201103L)
+#elif (utl_predef_cpp_version >= 201103L)
 #define UTL_PREDEF_STANDARD_IS_11_PLUS
 #else // everything below C++11 has the same value of '199711L'
 #define UTL_PREDEF_STANDARD_IS_UNKNOWN
@@ -8119,15 +8116,19 @@ constexpr std::string_view standard_name =
 // --- Compilation Mode Detection Macro ---
 // ========================================
 
-#if defined(_DEBUG)
+#if defined(NDEBUG)
+#define UTL_PREDEF_MODE_IS_RELEASE
+#else
 #define UTL_PREDEF_MODE_IS_DEBUG
 #endif
 
-constexpr bool debug =
-#if defined(UTL_PREDEF_MODE_IS_DEBUG)
-    true
+constexpr std::string_view mode_name =
+#if defined(UTL_PREDEF_MODE_IS_RELEASE)
+    "Release"
+#elif defined(UTL_PREDEF_MODE_IS_DEBUG)
+    "Debug"
 #else
-    false
+    "<unknown>"
 #endif
     ;
 
@@ -8135,9 +8136,23 @@ constexpr bool debug =
 // --- Optimization macros ---
 // ===========================
 
-// Note:
+// Note 1:
 // These are mainly valuable as a reference implementation for portable optimization built-ins,
 // which is why they are made to independent of other macros in this module.
+
+// Note 2:
+// While https://en.cppreference.com/w/cpp/utility/unreachable.html suggests implementing
+// unreachable as a function, this approach ends up being incompatible with MSVC at W4
+// warning level, which warns about unreachable functions regardless of their nature.
+
+// Unreachable code
+#if defined(UTL_PREDEF_STANDARD_IS_23_PLUS)
+#define UTL_PREDEF_UNREACHABLE std::unreachable()
+#elif defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
+#define UTL_PREDEF_UNREACHABLE __builtin_unreachable()
+#else
+#define UTL_PREDEF_UNREACHABLE static_assert(true)
+#endif
 
 // Force inline
 #if defined(_MSC_VER)
@@ -8172,19 +8187,6 @@ constexpr bool debug =
 #define UTL_PREDEF_ASSUME(...) assert(__VA_ARGS__)
 #endif
 
-[[noreturn]] inline void unreachable() {
-#if defined(UTL_PREDEF_STANDARD_IS_23_PLUS)
-    std::unreachable();
-#elif defined(UTL_PREDEF_COMPILER_IS_MSVC)
-    __assume(false);
-#elif defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
-    __builtin_unreachable();
-#else
-    // even if no extension is used, undefined behavior is still raised
-    // by an empty function body and the '[[noreturn]]' attribute
-#endif
-}
-
 // ===================
 // --- Other Utils ---
 // ===================
@@ -8214,8 +8216,8 @@ constexpr bool debug =
     buffer += '\n';
 #endif // not (currently) implemented in GCC / clang despite being a C++17 feature
 
-    buffer += "Compiled in DEBUG: ";
-    buffer += debug ? "true" : "false";
+    buffer += "Compiled in mode:  ";
+    buffer += mode_name;
     buffer += '\n';
 
     buffer += "Compiled under OS: ";
@@ -8250,17 +8252,15 @@ using impl::architecture_name;
 // macro -> UTL_PREDEF_STANDARD_IS_...
 using impl::standard_name;
 
-// macro -> UTL_PREDEF_MODE_IS_DEBUG
-using impl::debug;
+// macro -> UTL_PREDEF_MODE_IS_...
+using impl::mode_name;
 
+// macro -> UTL_UNREACHABLE
 // macro -> UTL_PREDEF_FORCE_INLINE
 // macro -> UTL_PREDEF_NO_INLINE
 // macro -> UTL_PREDEF_ASSUME
-using impl::unreachable;
 
 using impl::compilation_summary;
-// macro -> UTL_PREDEF_VA_ARGS_COUNT
-// macro -> UTL_PREDEF_IS_FUNCTION_DEFINED_TRAIT
 
 } // namespace utl::predef
 

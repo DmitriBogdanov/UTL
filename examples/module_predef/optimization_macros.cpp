@@ -4,11 +4,12 @@
 
 enum class State { YES, NO };
 
-UTL_PREDEF_FORCE_INLINE std::string to_string(State value) {
+UTL_PREDEF_FORCE_INLINE
+std::string to_string(State value) {
     switch (value) {
         case State::YES: return "YES";
         case State::NO : return "NO" ;
-        default:         utl::predef::unreachable();
+        default        : UTL_PREDEF_UNREACHABLE;
     }
 }
 

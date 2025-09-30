@@ -21,7 +21,7 @@
 It uses known implementation-defined macros to deduce compilation details and abstracts them away behind a unified API.
 
 > [!Note]
-> There exists a very similar [boost library](https://www.boost.org/doc/libs/1_55_0/libs/predef/doc/html/index.html) with the same name, it supports more exotic platforms, but has a different API and doesn't provide some of the things defined in this module.
+> There exists a very similar [Boost library](https://www.boost.org/doc/libs/1_55_0/libs/predef/doc/html/index.html) with the same name, it supports more exotic platforms, but has a different API and doesn't provide some of the things defined in this module.
 
 ## Definitions
 
@@ -71,19 +71,19 @@ constexpr std::string_view architecture_name;
 constexpr std::string_view standard_name;
 
 // Compilation mode detection
+#define UTL_PREDEF_MODE_IS_RELEASE // only one of these macros will be defined
 #define UTL_PREDEF_MODE_IS_DEBUG
 
-constexpr bool debug;
+constexpr std::string_view mode_name
+
+// Compilation summary    
+std::string compilation_summary();
 
 // Optimization macros
+#define UTL_PREDEF_UNREACHABLE
 #define UTL_PREDEF_FORCE_INLINE
 #define UTL_PREDEF_NO_INLINE
 #define UTL_PREDEF_ASSUME
-
-[[noreturn]] void unreachable();
-
-// Other utils
-std::string compilation_summary();
 ```
 
 ## Methods
@@ -121,7 +121,7 @@ Possible values: `MSVC`, `GCC`, `clang`, `LLVM`, `ICC`, `PGI`, `IBMCPP`, `NVCC`,
 
 `constexpr` string that evaluates to the full name of the detected compiler.
 
-Possible values: `Microsoft Visual C++ Compiler`, `GNU C/C++ Compiler`, `Clang Compiler`, `LLVM Compiler`, `Inter C/C++ Compiler`, `Portland Group C/C++ Compiler`, `IBM XL C/C++ Compiler`, `Nvidia Cuda Compiler Driver`, `<unknown>`.
+Possible values: `Microsoft Visual C++ Compiler`, `GNU C/C++ Compiler`, `Clang Compiler`, `LLVM Compiler`, `Intel C/C++ Compiler`, `Portland Group C/C++ Compiler`, `IBM XL C/C++ Compiler`, `Nvidia Cuda Compiler Driver`, `<unknown>`.
 
 ### Platform detection
 
@@ -181,7 +181,7 @@ Possible values: `x86-64`, `x86-32`, `ARM`, `<unknown>`
 > #define UTL_DEFINE_STANDARD_IS_UNKNOWN
 > ```
 
-**Multiple of these macros can be defined.** Macro that get defined correspond to the available C++ standard. If no other option is suitable, unknown is used as a fallback.
+**Multiple of these macros can be defined.** The macro that gets defined corresponds to the available C++ standard. If no other option is suitable, unknown is used as a fallback.
 
 This is useful for conditional compilation based on available standard.
 
@@ -196,66 +196,69 @@ This is useful for conditional compilation based on available standard.
 ### Compilation mode detection
 
 > ```cpp
+> #define UTL_PREDEF_MODE_IS_RELEASE
 > #define UTL_PREDEF_MODE_IS_DEBUG
 > ```
 
-Defined when compiling in debug mode. Works as an alias for `_DEBUG`, provided for the sake of feature completeness.
+**Multiple of these macros can be defined.** The macro that gets defined corresponds to the selected compilation mode.
+
+This is useful for conditional compilation in `Debug` mode.
 
 > ```cpp
-> constexpr bool debug;
+> constexpr std::string_view mode_name
 > ```
 
-`constexpr` bool that evaluates to `true` when compiling in debug mode.
+`constexpr` string that evaluates to the name of the mode. Possible values: `Release`, `Debug`, `<unknown>`
 
-This is useful for `if constexpr` conditional compilation of debug code.
-
-### Optimization macros
-
-```cpp
-#define UTL_PREDEF_FORCE_INLINE
-```
-
-Hints (`MSVC`) or forces (`GCC`, `clang` and `ICX`) function inlining using compiler built-ins.
-
-**Note**: Compiles to nothing if there is no suitable compiler support.
-
-```cpp
-#define UTL_PREDEF_NO_INLINE
-```
-
-Disables function inlining using compiler built-ins.
-
-**Note**: Compiles to regular `inline` if there is no suitable compiler support.
-
-```cpp
-#define UTL_PREDEF_ASSUME(condition)
-```
-
-Equivalent to [C++23 `[[assume(condition)]]`](https://en.cppreference.com/w/cpp/language/attributes/assume) that supports earlier standards using `MSVC` and `clang` built-ins.
-
-Invokes undefined behavior if statement `condition` evaluates to false, which provides compiler with additional optimization opportunities since implementations may assume that undefined behavior can never happen and the statement always holds.
-
-**Note 1**: Compiles to nothing if there is no suitable compiler support.
-
-**Note 2:** In debug mode also works like an `assert()`.
-
-```cpp
-[[noreturn]] void unreachable();
-```
-
-Equivalent to [C++23 std::unreachable](https://en.cppreference.com/w/cpp/utility/unreachable) that supports earlier standards using `MSVC`, `clang` and `GCC` built-ins.
-
-Compiler implementation may use this to optimize impossible code branches away.
-
-**Note**: Even without compiler extensions UB is still raised by invoking an empty function as `[[noreturn]]`.
-
-### Other utils
+### Compilation summary
 
 > ```cpp
 > std::string compilation_summary();
 > ```
 
-Returns a string containing a detailed summary of compilation details based on the other functionality of this header. See [example](#compilation-summary).
+Returns a string containing a detailed summary of compilation details based on the other functionality of this header. See the [example](#compilation-summary).
+
+### Optimization macros
+
+> ```cpp
+> #define UTL_PREDEF_UNREACHABLE
+> ```
+
+Equivalent to **C++23** [`std::unreachable`](https://en.cppreference.com/w/cpp/utility/unreachable) that supports earlier standards using compiler builtins.
+
+Compiler implementations may use this to optimize impossible code branches away.
+
+**Note 1**: Requires semicolon at the end similarly to a regular function.
+
+**Note 2:** Compiles to nothing if there is no suitable compiler support.
+
+> ```cpp
+> #define UTL_PREDEF_FORCE_INLINE
+> ```
+
+Hints (`MSVC`) or forces (`GCC`, `clang` and `ICX`) function inlining using compiler built-ins.
+
+**Note**: Compiles to nothing if there is no suitable compiler support.
+
+> ```cpp
+> #define UTL_PREDEF_NO_INLINE
+> ```
+
+Disables function inlining using compiler built-ins.
+
+**Note**: Compiles to regular `inline` if there is no suitable compiler support.
+
+> ```cpp
+> #define UTL_PREDEF_ASSUME(condition)
+> ```
+
+Equivalent to **C++23** [`[[assume(condition)]]`](https://en.cppreference.com/w/cpp/language/attributes/assume) that supports earlier standards using `MSVC` and `clang` built-ins.
+
+Invokes undefined behavior if statement `condition` evaluates to false, which provides compiler with additional optimization opportunities since implementations may assume that undefined behavior can never happen and the statement always holds.
+
+**Note 1**: Compiles to nothing if there is no suitable compiler support.
+
+**Note 2:** In debug mode also works like an [`assert()`](https://en.cppreference.com/w/cpp/error/assert.html).
 
 ## Examples
 
@@ -278,26 +281,6 @@ Output:
 Running Clang or GCC
 ```
 
-### Optimization macros
-
-[ [Run this code](https://godbolt.org/z/jYzfTrEdE) ] [ [Open source file](../examples/module_predef/optimization_macros.cpp) ]
-
-```cpp
-enum class State { YES, NO };
-
-UTL_PREDEF_FORCE_INLINE std::string to_string(State value) {
-    switch (value) {
-        case State::YES: return "YES";
-        case State::NO : return "NO" ;
-        default:         utl::predef::unreachable();
-    }
-}
-
-// ...
-
-assert( to_string(State::YES) == "YES" );
-```
-
 ### Compilation summary
 
 [ [Run this code](https://godbolt.org/z/PGYreYKor) ] [ [Open source file](../examples/module_predef/compilation_summary.cpp) ]
@@ -313,7 +296,28 @@ Platform:          Linux
 Architecture:      x86-64
 L1 cache line (D): 64
 L1 cache line (C): 64
-Compiled in DEBUG: false
+Compiled in mode:  Debug
 Compiled under OS: true
 Compilation date:  Jul 19 2025 12:25:37
+```
+
+### Optimization macros
+
+[ [Run this code](https://godbolt.org/z/qqrfbvfMG) ] [ [Open source file](../examples/module_predef/optimization_macros.cpp) ]
+
+```cpp
+enum class State { YES, NO };
+
+UTL_PREDEF_FORCE_INLINE
+std::string to_string(State value) {
+    switch (value) {
+        case State::YES: return "YES";
+        case State::NO : return "NO" ;
+        default        : UTL_PREDEF_UNREACHABLE;
+    }
+}
+
+// ...
+
+assert( to_string(State::YES) == "YES" );
 ```

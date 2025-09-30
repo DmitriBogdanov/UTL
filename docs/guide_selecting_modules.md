@@ -52,7 +52,7 @@ int main() {
 
 ### Selecting modules in different locations
 
-[ [Run this code](https://godbolt.org/z/5vxsdbvWE) ]
+[ [Run this code](https://godbolt.org/z/zdKW3fhqx) ]
 ```cpp
 // Pick some modules in one header
 #define UTL_PICK_MODULES
@@ -76,7 +76,7 @@ int main() {
 // This allows one to pull only necessary modules in each header.
 // Essentially, as long as UTL_PICK_MODULES is defined, "UTL.hpp"
 // acts as a collection of individual module headers concatenated
-// into a single file and enabled with #define UTLMODULE_{NAME}
+// into a single file and enabled with #define UTL_MODULE_{NAME}
 //
 // Alternatively, just grab individual modules directly from the repo.
 
