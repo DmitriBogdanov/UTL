@@ -15,7 +15,7 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 3
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 0
+#define UTL_PREDEF_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -272,6 +272,8 @@ constexpr std::string_view mode_name =
 // Unreachable code
 #if defined(UTL_PREDEF_STANDARD_IS_23_PLUS)
 #define UTL_PREDEF_UNREACHABLE std::unreachable()
+#elif defined(UTL_PREDEF_COMPILER_IS_MSVC)
+#define UTL_PREDEF_UNREACHABLE __assume(false)
 #elif defined(UTL_PREDEF_COMPILER_IS_GCC) || defined(UTL_PREDEF_COMPILER_IS_CLANG)
 #define UTL_PREDEF_UNREACHABLE __builtin_unreachable()
 #else
