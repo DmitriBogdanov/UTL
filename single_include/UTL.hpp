@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_ASSERTION)
-#ifndef UTLHEADERGUARD_ASSERTION
-#define UTLHEADERGUARD_ASSERTION
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_ASSERTION)
+
+#ifndef utl_assertion_headerguard
+#define utl_assertion_headerguard
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 2
+#define UTL_ASSERTION_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -431,13 +432,14 @@ using impl::set_handler;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_BIT)
-#ifndef UTLHEADERGUARD_BIT
-#define UTLHEADERGUARD_BIT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_BIT)
+
+#ifndef utl_bit_headerguard
+#define utl_bit_headerguard
 
 #define UTL_BIT_VERSION_MAJOR 1
 #define UTL_BIT_VERSION_MINOR 0
-#define UTL_BIT_VERSION_PATCH 1
+#define UTL_BIT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -723,13 +725,14 @@ using impl::Flags;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_ENUM_REFLECT)
-#ifndef UTLHEADERGUARD_ENUM_REFLECT
-#define UTLHEADERGUARD_ENUM_REFLECT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_ENUM_REFLECT)
+
+#ifndef utl_enum_reflect_headerguard
+#define utl_enum_reflect_headerguard
 
 #define UTL_ENUM_REFLECT_VERSION_MAJOR 1
 #define UTL_ENUM_REFLECT_VERSION_MINOR 0
-#define UTL_ENUM_REFLECT_VERSION_PATCH 0
+#define UTL_ENUM_REFLECT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -928,13 +931,14 @@ using impl::from_string;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_INTEGRAL)
-#ifndef UTLHEADERGUARD_INTEGRAL
-#define UTLHEADERGUARD_INTEGRAL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_INTEGRAL)
+
+#ifndef utl_integral_headerguard
+#define utl_integral_headerguard
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 1
+#define UTL_INTEGRAL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -1302,13 +1306,14 @@ namespace literals = impl::literals;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_JSON)
-#ifndef UTLHEADERGUARD_JSON
-#define UTLHEADERGUARD_JSON
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_JSON)
+
+#ifndef utl_json_headerguard
+#define utl_json_headerguard
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 3
+#define UTL_JSON_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -3066,13 +3071,14 @@ using impl::is_reflected_struct;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_LOG)
-#ifndef UTLHEADERGUARD_LOG
-#define UTLHEADERGUARD_LOG
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_LOG)
+
+#ifndef utl_log_headerguard
+#define utl_log_headerguard
 
 #define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
 #define UTL_LOG_VERSION_MINOR 1
-#define UTL_LOG_VERSION_PATCH 1
+#define UTL_LOG_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -4076,13 +4082,14 @@ using impl::add_file_sink;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_MATH)
-#ifndef UTLHEADERGUARD_MATH
-#define UTLHEADERGUARD_MATH
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_MATH)
+
+#ifndef utl_math_headerguard
+#define utl_math_headerguard
 
 #define UTL_MATH_VERSION_MAJOR 1
 #define UTL_MATH_VERSION_MINOR 2
-#define UTL_MATH_VERSION_PATCH 0
+#define UTL_MATH_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -4344,13 +4351,14 @@ using impl::prod;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_MVL)
-#ifndef UTLHEADERGUARD_MVL
-#define UTLHEADERGUARD_MVL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_MVL)
+
+#ifndef utl_mvl_headerguard
+#define utl_mvl_headerguard
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 1 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 2 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 
@@ -6938,13 +6946,14 @@ return_type operator*(const L& left, const R& right) {
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PARALLEL)
-#ifndef UTLHEADERGUARD_PARALLEL
-#define UTLHEADERGUARD_PARALLEL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PARALLEL)
+
+#ifndef utl_parallel_headerguard
+#define utl_parallel_headerguard
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 2
+#define UTL_PARALLEL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -7875,13 +7884,14 @@ using impl::hardware_concurrency;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PREDEF)
-#ifndef UTLHEADERGUARD_PREDEF
-#define UTLHEADERGUARD_PREDEF
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PREDEF)
+
+#ifndef utl_predef_headerguard
+#define utl_predef_headerguard
 
 #define UTL_PREDEF_VERSION_MAJOR 2
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 2
+#define UTL_PREDEF_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -8272,13 +8282,14 @@ using impl::compilation_summary;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PROFILER)
-#ifndef UTLHEADERGUARD_PROFILER
-#define UTLHEADERGUARD_PROFILER
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PROFILER)
+
+#ifndef utl_profiler_headerguard
+#define utl_profiler_headerguard
 
 #define UTL_PROFILER_VERSION_MAJOR 1
 #define UTL_PROFILER_VERSION_MINOR 0
-#define UTL_PROFILER_VERSION_PATCH 1
+#define UTL_PROFILER_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -9106,13 +9117,14 @@ struct Profiler {
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PROGRESSBAR)
-#ifndef UTLHEADERGUARD_PROGRESSBAR
-#define UTLHEADERGUARD_PROGRESSBAR
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PROGRESSBAR)
+
+#ifndef utl_progressbar_headerguard
+#define utl_progressbar_headerguard
 
 #define UTL_PROGRESSBAR_VERSION_MAJOR 1
 #define UTL_PROGRESSBAR_VERSION_MINOR 0
-#define UTL_PROGRESSBAR_VERSION_PATCH 0
+#define UTL_PROGRESSBAR_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -9396,13 +9408,14 @@ using impl::Ruler;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_RANDOM)
-#ifndef UTLHEADERGUARD_RANDOM
-#define UTLHEADERGUARD_RANDOM
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_RANDOM)
+
+#ifndef utl_random_headerguard
+#define utl_random_headerguard
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 4
+#define UTL_RANDOM_VERSION_PATCH 5
 
 // _______________________ INCLUDES _______________________
 
@@ -10942,13 +10955,14 @@ using impl::choose;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_SHELL)
-#ifndef UTLHEADERGUARD_SHELL
-#define UTLHEADERGUARD_SHELL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_SHELL)
+
+#ifndef utl_shell_headerguard
+#define utl_shell_headerguard
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 2
+#define UTL_SHELL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -11217,13 +11231,14 @@ using impl::run_command;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_SLEEP)
-#ifndef UTLHEADERGUARD_SLEEP
-#define UTLHEADERGUARD_SLEEP
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_SLEEP)
+
+#ifndef utl_sleep_headerguard
+#define utl_sleep_headerguard
 
 #define UTL_SLEEP_VERSION_MAJOR 1
 #define UTL_SLEEP_VERSION_MINOR 0
-#define UTL_SLEEP_VERSION_PATCH 1
+#define UTL_SLEEP_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -11356,13 +11371,14 @@ using impl::hybrid;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRE)
-#ifndef UTLHEADERGUARD_STRE
-#define UTLHEADERGUARD_STRE
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_STRE)
+
+#ifndef utl_stre_headerguard
+#define utl_stre_headerguard
 
 #define UTL_STRE_VERSION_MAJOR 1
 #define UTL_STRE_VERSION_MINOR 1
-#define UTL_STRE_VERSION_PATCH 0
+#define UTL_STRE_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -11652,13 +11668,14 @@ using impl::index_of_difference;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRONG_TYPE)
-#ifndef UTLHEADERGUARD_STRONG_TYPE
-#define UTLHEADERGUARD_STRONG_TYPE
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_STRONG_TYPE)
+
+#ifndef utl_strong_type_headerguard
+#define utl_strong_type_headerguard
 
 #define UTL_STRONG_TYPE_VERSION_MAJOR 1
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 1
+#define UTL_STRONG_TYPE_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -12117,13 +12134,14 @@ using impl::Arithmetic;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRUCT_REFLECT)
-#ifndef UTLHEADERGUARD_STRUCT_REFLECT
-#define UTLHEADERGUARD_STRUCT_REFLECT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_STRUCT_REFLECT)
+
+#ifndef utl_struct_reflect_headerguard
+#define utl_struct_reflect_headerguard
 
 #define UTL_STRUCT_REFLECT_VERSION_MAJOR 1
 #define UTL_STRUCT_REFLECT_VERSION_MINOR 0
-#define UTL_STRUCT_REFLECT_VERSION_PATCH 0
+#define UTL_STRUCT_REFLECT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -12398,13 +12416,14 @@ using impl::tuple_for_each;
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_TABLE)
-#ifndef UTLHEADERGUARD_TABLE
-#define UTLHEADERGUARD_TABLE
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_TABLE)
+
+#ifndef utl_table_headerguard
+#define utl_table_headerguard
 
 #define UTL_TABLE_VERSION_MAJOR 1
 #define UTL_TABLE_VERSION_MINOR 0
-#define UTL_TABLE_VERSION_PATCH 0
+#define UTL_TABLE_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -13233,13 +13252,14 @@ using impl::CSV;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_TIME)
-#ifndef UTLHEADERGUARD_TIME
-#define UTLHEADERGUARD_TIME
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_TIME)
+
+#ifndef utl_time_headerguard
+#define utl_time_headerguard
 
 #define UTL_TIME_VERSION_MAJOR 1
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 2
+#define UTL_TIME_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRUCT_REFLECT)
-#ifndef UTLHEADERGUARD_STRUCT_REFLECT
-#define UTLHEADERGUARD_STRUCT_REFLECT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_STRUCT_REFLECT)
+
+#ifndef utl_struct_reflect_headerguard
+#define utl_struct_reflect_headerguard
 
 #define UTL_STRUCT_REFLECT_VERSION_MAJOR 1
 #define UTL_STRUCT_REFLECT_VERSION_MINOR 0
-#define UTL_STRUCT_REFLECT_VERSION_PATCH 0
+#define UTL_STRUCT_REFLECT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 

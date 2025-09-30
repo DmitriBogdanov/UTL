@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_MVL)
-#ifndef UTLHEADERGUARD_MVL
-#define UTLHEADERGUARD_MVL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_MVL)
+
+#ifndef utl_mvl_headerguard
+#define utl_mvl_headerguard
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 1 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 2 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 

@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_SLEEP)
-#ifndef UTLHEADERGUARD_SLEEP
-#define UTLHEADERGUARD_SLEEP
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_SLEEP)
+
+#ifndef utl_sleep_headerguard
+#define utl_sleep_headerguard
 
 #define UTL_SLEEP_VERSION_MAJOR 1
 #define UTL_SLEEP_VERSION_MINOR 0
-#define UTL_SLEEP_VERSION_PATCH 1
+#define UTL_SLEEP_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

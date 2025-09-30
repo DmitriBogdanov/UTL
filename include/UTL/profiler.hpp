@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PROFILER)
-#ifndef UTLHEADERGUARD_PROFILER
-#define UTLHEADERGUARD_PROFILER
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PROFILER)
+
+#ifndef utl_profiler_headerguard
+#define utl_profiler_headerguard
 
 #define UTL_PROFILER_VERSION_MAJOR 1
 #define UTL_PROFILER_VERSION_MINOR 0
-#define UTL_PROFILER_VERSION_PATCH 1
+#define UTL_PROFILER_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

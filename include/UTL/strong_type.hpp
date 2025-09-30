@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_STRONG_TYPE)
-#ifndef UTLHEADERGUARD_STRONG_TYPE
-#define UTLHEADERGUARD_STRONG_TYPE
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_STRONG_TYPE)
+
+#ifndef utl_strong_type_headerguard
+#define utl_strong_type_headerguard
 
 #define UTL_STRONG_TYPE_VERSION_MAJOR 1
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 1
+#define UTL_STRONG_TYPE_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

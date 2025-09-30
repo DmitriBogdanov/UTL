@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_INTEGRAL)
-#ifndef UTLHEADERGUARD_INTEGRAL
-#define UTLHEADERGUARD_INTEGRAL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_INTEGRAL)
+
+#ifndef utl_integral_headerguard
+#define utl_integral_headerguard
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 1
+#define UTL_INTEGRAL_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

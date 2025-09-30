@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_ASSERTION)
-#ifndef UTLHEADERGUARD_ASSERTION
-#define UTLHEADERGUARD_ASSERTION
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_ASSERTION)
+
+#ifndef utl_assertion_headerguard
+#define utl_assertion_headerguard
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 2
+#define UTL_ASSERTION_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

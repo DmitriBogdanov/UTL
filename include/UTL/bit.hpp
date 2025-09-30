@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_BIT)
-#ifndef UTLHEADERGUARD_BIT
-#define UTLHEADERGUARD_BIT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_BIT)
+
+#ifndef utl_bit_headerguard
+#define utl_bit_headerguard
 
 #define UTL_BIT_VERSION_MAJOR 1
 #define UTL_BIT_VERSION_MINOR 0
-#define UTL_BIT_VERSION_PATCH 1
+#define UTL_BIT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

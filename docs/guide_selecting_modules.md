@@ -8,39 +8,39 @@ This is achievable by declaring `#define UTL_PICK_MODULES` and `#define <module_
 
 ## Module Identifiers
 
-| Name                  | Identifier                 |
-| --------------------- | -------------------------- |
-| `utl::bit`            | `UTLMODULE_BIT`            |
-| `utl::enum_reflect`   | `UTLMODULE_ENUM_REFLECT`   |
-| `utl::integral`       | `UTLMODULE_INTEGRAL`       |
-| `utl::json`           | `UTLMODULE_JSON`           |
-| `utl::log`            | `UTLMODULE_LOG`            |
-| `utl::math`           | `UTLMODULE_MATH`           |
-| `utl::mvl`            | `UTLMODULE_MVL`            |
-| `utl::parallel`       | `UTLMODULE_PARALLEL`       |
-| `utl::predef`         | `UTLMODULE_PREDEF`         |
-| `utl::profiler`       | `UTLMODULE_PROFILER`       |
-| `utl::progressbar`    | `UTLMODULE_PROGRESSBAR`    |
-| `utl::random`         | `UTLMODULE_RANDOM`         |
-| `utl::shell`          | `UTLMODULE_SHELL`          |
-| `utl::sleep`          | `UTLMODULE_SLEEP`          |
-| `utl::stre`           | `UTLMODULE_STRE`           |
-| `utl::struct_reflect` | `UTLMODULE_STRUCT_REFLECT` |
-| `utl::table`          | `UTLMODULE_TABLE`          |
-| `utl::time`           | `UTLMODULE_TIME`           |
+| Name                  | Identifier                  |
+| --------------------- | --------------------------- |
+| `utl::bit`            | `UTL_MODULE_BIT`            |
+| `utl::enum_reflect`   | `UTL_MODULE_ENUM_REFLECT`   |
+| `utl::integral`       | `UTL_MODULE_INTEGRAL`       |
+| `utl::json`           | `UTL_MODULE_JSON`           |
+| `utl::log`            | `UTL_MODULE_LOG`            |
+| `utl::math`           | `UTL_MODULE_MATH`           |
+| `utl::mvl`            | `UTL_MODULE_MVL`            |
+| `utl::parallel`       | `UTL_MODULE_PARALLEL`       |
+| `utl::predef`         | `UTL_MODULE_PREDEF`         |
+| `utl::profiler`       | `UTL_MODULE_PROFILER`       |
+| `utl::progressbar`    | `UTL_MODULE_PROGRESSBAR`    |
+| `utl::random`         | `UTL_MODULE_RANDOM`         |
+| `utl::shell`          | `UTL_MODULE_SHELL`          |
+| `utl::sleep`          | `UTL_MODULE_SLEEP`          |
+| `utl::stre`           | `UTL_MODULE_STRE`           |
+| `utl::struct_reflect` | `UTL_MODULE_STRUCT_REFLECT` |
+| `utl::table`          | `UTL_MODULE_TABLE`          |
+| `utl::time`           | `UTL_MODULE_TIME`           |
 
 ## Examples
 
 ### Selecting specific modules
 
-[ [Run this code](https://godbolt.org/z/T1qEd4Yno) ]
+[ [Run this code](https://godbolt.org/z/v9nzddEvv) ]
 ```cpp
 // Indicate that you want to select specific modules
 #define UTL_PICK_MODULES
 
 // List modules that should be compiled
-#define UTLMODULE_MATH
-#define UTLMODULE_PROGRESSBAR
+#define UTL_MODULE_MATH
+#define UTL_MODULE_PROGRESSBAR
 
 #include "UTL.hpp"
 
@@ -52,19 +52,19 @@ int main() {
 
 ### Selecting modules in different locations
 
-[ [Run this code](https://godbolt.org/z/fbsqssvdq) ]
+[ [Run this code](https://godbolt.org/z/5vxsdbvWE) ]
 ```cpp
 // Pick some modules in one header
 #define UTL_PICK_MODULES
-#define UTLMODULE_JSON
+#define UTL_MODULE_JSON
 #include "UTL.hpp"
 
 // ...
 
 // Pick some more modules in another header
 #define UTL_PICK_MODULES
-#define UTLMODULE_RANDOM
-#define UTLMODULE_LOG
+#define UTL_MODULE_RANDOM
+#define UTL_MODULE_LOG
 #include "UTL.hpp"
 
 // ...

@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_JSON)
-#ifndef UTLHEADERGUARD_JSON
-#define UTLHEADERGUARD_JSON
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_JSON)
+
+#ifndef utl_json_headerguard
+#define utl_json_headerguard
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 3
+#define UTL_JSON_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 

@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PREDEF)
-#ifndef UTLHEADERGUARD_PREDEF
-#define UTLHEADERGUARD_PREDEF
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PREDEF)
+
+#ifndef utl_predef_headerguard
+#define utl_predef_headerguard
 
 #define UTL_PREDEF_VERSION_MAJOR 2
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 2
+#define UTL_PREDEF_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_PARALLEL)
-#ifndef UTLHEADERGUARD_PARALLEL
-#define UTLHEADERGUARD_PARALLEL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_PARALLEL)
+
+#ifndef utl_parallel_headerguard
+#define utl_parallel_headerguard
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 2
+#define UTL_PARALLEL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

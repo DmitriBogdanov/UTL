@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_LOG)
-#ifndef UTLHEADERGUARD_LOG
-#define UTLHEADERGUARD_LOG
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_LOG)
+
+#ifndef utl_log_headerguard
+#define utl_log_headerguard
 
 #define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
 #define UTL_LOG_VERSION_MINOR 1
-#define UTL_LOG_VERSION_PATCH 1
+#define UTL_LOG_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 

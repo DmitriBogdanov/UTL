@@ -9,13 +9,14 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_TIME)
-#ifndef UTLHEADERGUARD_TIME
-#define UTLHEADERGUARD_TIME
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_TIME)
+
+#ifndef utl_time_headerguard
+#define utl_time_headerguard
 
 #define UTL_TIME_VERSION_MAJOR 1
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 2
+#define UTL_TIME_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

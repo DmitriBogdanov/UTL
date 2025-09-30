@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_RANDOM)
-#ifndef UTLHEADERGUARD_RANDOM
-#define UTLHEADERGUARD_RANDOM
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_RANDOM)
+
+#ifndef utl_random_headerguard
+#define utl_random_headerguard
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 4
+#define UTL_RANDOM_VERSION_PATCH 5
 
 // _______________________ INCLUDES _______________________
 

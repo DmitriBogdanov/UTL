@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_MATH)
-#ifndef UTLHEADERGUARD_MATH
-#define UTLHEADERGUARD_MATH
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_MATH)
+
+#ifndef utl_math_headerguard
+#define utl_math_headerguard
 
 #define UTL_MATH_VERSION_MAJOR 1
 #define UTL_MATH_VERSION_MINOR 2
-#define UTL_MATH_VERSION_PATCH 0
+#define UTL_MATH_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 

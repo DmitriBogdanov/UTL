@@ -7,17 +7,18 @@ This file contains templates to ensure a standardized style of source files, doc
 ```cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DmitriBogdanov/UTL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Module:        utl::XXXXXXXXXXXX
-// Documentation: https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_XXXXXXXXXXXX.md
+// Module:        utl::xxxxxxxxxxxx
+// Documentation: https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_xxxxxxxxxxxx.md
 // Source repo:   https://github.com/DmitriBogdanov/UTL
 //
 // This project is licensed under the MIT License
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_XXXXXXXXXXXX)
-#ifndef UTLHEADERGUARD_XXXXXXXXXXXX
-#define UTLHEADERGUARD_XXXXXXXXXXXX
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_XXXXXXXXXXXX)
+
+#ifndef utl_xxxxxxxxxxxx_headerguard
+#define utl_xxxxxxxxxxxx_headerguard
 
 #define UTL_XXXXXXXXXXXX_VERSION_MAJOR 1
 #define UTL_XXXXXXXXXXXX_VERSION_MINOR 0
@@ -33,22 +34,22 @@ This file contains templates to ensure a standardized style of source files, doc
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace utl::XXXXXXXXXXXX::impl {
+namespace utl::xxxxxxxxxxxx::impl {
 
 // NOTE: IMPL
 
-} // namespace utl::XXXXXXXXXXXX
+} // namespace utl::xxxxxxxxxxxx
 
 // ______________________ PUBLIC API ______________________
 
-namespace utl::XXXXXXXXXXXX {
+namespace utl::xxxxxxxxxxxx {
 
 // NOTE: API
 
-} // namespace utl::XXXXXXXXXXXX
+} // namespace utl::xxxxxxxxxxxx
 
 #endif
-#endif // module utl::XXXXXXXXXXXX
+#endif // module utl::xxxxxxxxxxxx
 
 ```
 
@@ -97,7 +98,7 @@ Subcases should be used when there are multiple test cases relying on the same b
 ```cpp
 #include "benchmarks/common.hpp"
 
-#include "include/UTL/XXXXXXXXXXXX.hpp"
+#include "include/UTL/xxxxxxxxxxxx.hpp"
 
 // _______________________ INCLUDES _______________________
 

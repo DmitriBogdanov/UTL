@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_SHELL)
-#ifndef UTLHEADERGUARD_SHELL
-#define UTLHEADERGUARD_SHELL
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_SHELL)
+
+#ifndef utl_shell_headerguard
+#define utl_shell_headerguard
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 2
+#define UTL_SHELL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 

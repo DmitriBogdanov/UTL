@@ -8,13 +8,14 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#if !defined(UTL_PICK_MODULES) || defined(UTLMODULE_ENUM_REFLECT)
-#ifndef UTLHEADERGUARD_ENUM_REFLECT
-#define UTLHEADERGUARD_ENUM_REFLECT
+#if !defined(UTL_PICK_MODULES) || defined(UTL_MODULE_ENUM_REFLECT)
+
+#ifndef utl_enum_reflect_headerguard
+#define utl_enum_reflect_headerguard
 
 #define UTL_ENUM_REFLECT_VERSION_MAJOR 1
 #define UTL_ENUM_REFLECT_VERSION_MINOR 0
-#define UTL_ENUM_REFLECT_VERSION_PATCH 0
+#define UTL_ENUM_REFLECT_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
