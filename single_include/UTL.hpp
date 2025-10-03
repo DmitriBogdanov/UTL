@@ -9417,7 +9417,7 @@ using impl::Ruler;
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 5
+#define UTL_RANDOM_VERSION_PATCH 6
 
 // _______________________ INCLUDES _______________________
 
@@ -9620,19 +9620,38 @@ template <class T, require_integral<T> = true, require<sizeof(T) <= 8> = true>
 }
 
 // Seed sequence helpers
-template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
-std::uint32_t seed_seq_to_uint32(SeedSeq&& seq) {
-    std::array<std::uint32_t, 1> temp;
+template <class SeedSeq, std::size_t size, require_is_seed_seq<SeedSeq> = true>
+void seed_seq_generate(SeedSeq&& seq, std::array<std::uint32_t, size>& dest) noexcept {
+    seq.generate(dest.begin(), dest.end());
+}
+
+template <class SeedSeq, std::size_t size, require_is_seed_seq<SeedSeq> = true>
+void seed_seq_generate(SeedSeq&& seq, std::array<std::uint64_t, size>& dest) noexcept {
+    // since seed_seq produces 32-bit ints, for 64-bit state arrays we have to 
+    // generate twice as much values to properly initialize the entire state
+    
+    std::array<std::uint32_t, size *  2> temp;
     seq.generate(temp.begin(), temp.end());
-    return temp[0];
+    
+    for (std::size_t i = 0; i < size; ++i) dest[i] = merge_uint32_into_uint64(temp[2 * i], temp[2 * i + 1]);
 }
 
 template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
-std::uint64_t seed_seq_to_uint64(SeedSeq&& seq) {
-    std::array<std::uint32_t, 2> temp;
-    seq.generate(temp.begin(), temp.end());
-    return merge_uint32_into_uint64(temp[0], temp[1]);
+void seed_seq_generate(SeedSeq&& seq, std::uint32_t& dest) noexcept {
+    std::array<std::uint32_t, 1> temp;
+    seed_seq_generate(std::forward<SeedSeq>(seq), temp);
+    dest = temp[0];
 }
+
+template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
+void seed_seq_generate(SeedSeq&& seq, std::uint64_t& dest) noexcept {
+    std::array<std::uint64_t, 1> temp;
+    seed_seq_generate(std::forward<SeedSeq>(seq), temp);
+    dest = temp[0];
+}
+
+// Note: 'SeedSeq::generate()' should only throw when used with potentially throwing iterators,
+//       since 'std::array<>::iterator' is non-throwing we can safely mark the functions 'noexcept'
 
 // 'std::rotl()' from C++20, used by many PRNGs
 template <class T, require_uint<T> = true>
@@ -9728,7 +9747,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        this->s = seed_seq_to_uint32(seq);
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
 
         if (this->s == 0) this->seed(default_seed<result_type>);
     }
@@ -9785,7 +9804,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        this->s = seed_seq_to_uint32(seq);
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
     }
 
     constexpr result_type operator()() noexcept {
@@ -9836,7 +9855,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        seq.generate(this->s.begin(), this->s.end());
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
 
         // ensure we don't hit an invalid all-zero state
         if (is_zero_state(this->s)) this->seed(default_seed<result_type>);
@@ -9895,7 +9914,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        seq.generate(this->s.begin(), this->s.end());
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
 
         // ensure we don't hit an invalid all-zero state
         if (is_zero_state(this->s)) this->seed(default_seed<result_type>);
@@ -9949,7 +9968,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        this->s = seed_seq_to_uint64(seq);
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
     }
 
     constexpr result_type operator()() noexcept {
@@ -10000,10 +10019,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        this->s[0] = seed_seq_to_uint64(seq); // since seed_seq produces 32-bit ints,
-        this->s[1] = seed_seq_to_uint64(seq); // we have to generate multiple and then
-        this->s[2] = seed_seq_to_uint64(seq); // join them into std::uint64_t's to
-        this->s[3] = seed_seq_to_uint64(seq); // properly initialize the entire state
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
 
         // ensure we don't hit an invalid all-zero state
         if (is_zero_state(this->s)) this->seed(default_seed<result_type>);
@@ -10061,8 +10077,7 @@ public:
 
     template <class SeedSeq, require_is_seed_seq<SeedSeq> = true>
     void seed(SeedSeq&& seq) {
-        this->s[0] = seed_seq_to_uint64(seq); // seed_seq returns 32-bit ints, we have to generate
-        this->s[1] = seed_seq_to_uint64(seq); // multiple to initialize full state of 64-bit values
+        seed_seq_generate(std::forward<SeedSeq>(seq), this->s);
 
         // ensure we don't hit an invalid all-zero state
         if (is_zero_state(this->s)) this->seed(default_seed<result_type>);
@@ -10268,7 +10283,10 @@ inline std::seed_seq entropy_seq() {
 
 inline std::uint32_t entropy() {
     auto seq = entropy_seq();
-    return seed_seq_to_uint32(seq);
+    
+    std::uint32_t res;
+    seed_seq_generate(std::move(seq), res);
+    return res;
     // returns 'std::uint32_t' to mimic the return type of 'std::random_device', if we return uint64_t
     // brace-initializers will complain about narrowing conversion on some generators. If someone want
     // more entropy than that they can always use the whole sequence as a generic solution.
