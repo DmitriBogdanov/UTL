@@ -3077,7 +3077,7 @@ using impl::is_reflected_struct;
 #define utl_log_headerguard
 
 #define UTL_LOG_VERSION_MAJOR 2
-#define UTL_LOG_VERSION_MINOR 0
+#define UTL_LOG_VERSION_MINOR 1
 #define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
@@ -3096,7 +3096,7 @@ using impl::is_reflected_struct;
 #include <string_view> // string_view
 #include <tuple>       // tuple<>, get<>, tuple_size_v<>, apply()
 #include <type_traits> // enable_if_t<>, is_enum_v<>, is_integral_v<>, is_unsigned_v<>, underlying_type_t<>, ...
-#include <utility>     // forward<>()
+#include <utility>     // forward<>(), integer_sequence<>, make_index_sequence<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -3266,30 +3266,42 @@ constexpr std::size_t max_chars_int   = 20;       // enough to fit 64-bit signed
 constexpr std::size_t buffering_size  = 8 * 1024; // 8 KB, good for most systems
 constexpr auto        buffering_time  = std::chrono::milliseconds{1};
 
-// "Unwrapper" for container adaptors such as 'std::queue', 'std::priority_queue', 'std::stack'
-template <class Adaptor>
-const auto& underlying_container_cref(const Adaptor& adaptor) {
+// --- <chrono> formatting ---
+// ---------------------------
 
-    struct Hack : private Adaptor {
-        static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
-            return adp.*&Hack::c;
-            // An extremely hacky yet standard-compliant way of accessing protected member
-            // of a class without actually creating any instances of the derived class.
-            //
-            // This expression consists of 2 operators: '.*' and '&'.
-            // '.*' takes an object on the left side, and a member pointer on the right side,
-            // and resolves the pointed-to member of the given object, this means
-            // 'object.*&Class::member' is essentially equivalent to 'object.member',
-            // except it reveals a "loophole" in protection semantics that allows us to
-            // interpret base class object as if it was derived class.
-            //
-            // Note that doing seemingly much more logical 'static_cast<Derived&>(object).member'
-            // is technically UB, even through most compilers will do the reasonable thing.
-        }
-    };
+struct SplitDuration {
+    std::chrono::hours        hours;
+    std::chrono::minutes      min;
+    std::chrono::seconds      sec;
+    std::chrono::milliseconds ms;
+    std::chrono::microseconds us;
+    std::chrono::nanoseconds  ns;
 
-    return Hack::get_container(adaptor);
+    constexpr static std::size_t size = 6; // number of time units, avoids magic constants everywhere
+
+    using common_rep = std::common_type_t<decltype(hours)::rep, decltype(min)::rep, decltype(sec)::rep,
+                                          decltype(ms)::rep, decltype(us)::rep, decltype(ns)::rep>;
+    // standard doesn't specify common representation type, usually it's 'std::int64_t'
+
+    std::array<common_rep, SplitDuration::size> count() {
+        return {this->hours.count(), this->min.count(), this->sec.count(),
+                this->ms.count(),    this->us.count(),  this->ns.count()};
+    }
+};
+
+template <class Rep, class Period>
+[[nodiscard]] constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> val) {
+    // for some reason 'duration_cast<>()' is not 'noexcept'
+    const auto hours = std::chrono::duration_cast<std::chrono::hours>(val);
+    const auto min   = std::chrono::duration_cast<std::chrono::minutes>(val - hours);
+    const auto sec   = std::chrono::duration_cast<std::chrono::seconds>(val - hours - min);
+    const auto ms    = std::chrono::duration_cast<std::chrono::milliseconds>(val - hours - min - sec);
+    const auto us    = std::chrono::duration_cast<std::chrono::microseconds>(val - hours - min - sec - ms);
+    const auto ns    = std::chrono::duration_cast<std::chrono::nanoseconds>(val - hours - min - sec - ms - us);
+    return {hours, min, sec, ms, us, ns};
 }
+
+using Sec = std::chrono::duration<double, std::chrono::seconds::period>; // convenient duration-to-float conversion
 
 // --- Other ---
 // -------------
@@ -3319,7 +3331,30 @@ template <class E, require_enum<E> = true>
     return static_cast<bool>(to_underlying(value));
 }
 
-using Sec = std::chrono::duration<double, std::chrono::seconds::period>; // convenient duration-to-float conversion
+// "Unwrapper" for container adaptors such as 'std::queue', 'std::priority_queue', 'std::stack'
+template <class Adaptor>
+const auto& underlying_container_cref(const Adaptor& adaptor) {
+
+    struct Hack : private Adaptor {
+        static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
+            return adp.*&Hack::c;
+            // An extremely hacky yet standard-compliant way of accessing protected member
+            // of a class without actually creating any instances of the derived class.
+            //
+            // This expression consists of 2 operators: '.*' and '&'.
+            // '.*' takes an object on the left side, and a member pointer on the right side,
+            // and resolves the pointed-to member of the given object, this means
+            // 'object.*&Class::member' is essentially equivalent to 'object.member',
+            // except it reveals a "loophole" in protection semantics that allows us to
+            // interpret base class object as if it was derived class.
+            //
+            // Note that doing seemingly much more logical 'static_cast<Derived&>(object).member'
+            // is technically UB, even through most compilers will do the reasonable thing.
+        }
+    };
+
+    return Hack::get_container(adaptor);
+}
 
 // ===============
 // --- Styling ---
@@ -3543,63 +3578,63 @@ utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::de
 template <class Type>
 struct Traits {
     using T = std::decay_t<Type>;
-    
+
     // char types ('char')
-    constexpr static bool is_char_i = std::is_same_v<T, char>;
-    constexpr static bool is_char_e = false;
-    constexpr static bool is_char_v = is_char_i && !is_char_e;
+    constexpr static bool is_char_i               = std::is_same_v<T, char>;
+    constexpr static bool is_char_e               = false;
+    constexpr static bool is_char_v               = is_char_i && !is_char_e;
     // enum types
-    constexpr static bool is_enum_i = std::is_enum_v<T>;
-    constexpr static bool is_enum_e = is_char_e || is_char_i;
-    constexpr static bool is_enum_v = is_enum_i && !is_enum_e;
+    constexpr static bool is_enum_i               = std::is_enum_v<T>;
+    constexpr static bool is_enum_e               = is_char_e || is_char_i;
+    constexpr static bool is_enum_v               = is_enum_i && !is_enum_e;
     // types with '.string()' ('std::path')
-    constexpr static bool is_path_i = has_string_v<T>;
-    constexpr static bool is_path_e = is_enum_e || is_enum_i;
-    constexpr static bool is_path_v = is_path_i && !is_path_e;
+    constexpr static bool is_path_i               = has_string_v<T>;
+    constexpr static bool is_path_e               = is_enum_e || is_enum_i;
+    constexpr static bool is_path_v               = is_path_i && !is_path_e;
     // string-like types ('std::string_view', 'std::string', 'const char*')
-    constexpr static bool is_string_i = std::is_convertible_v<T, std::string_view>;
-    constexpr static bool is_string_e = is_path_e || is_path_i;
-    constexpr static bool is_string_v = is_string_i && !is_string_e;
+    constexpr static bool is_string_i             = std::is_convertible_v<T, std::string_view>;
+    constexpr static bool is_string_e             = is_path_e || is_path_i;
+    constexpr static bool is_string_v             = is_string_i && !is_string_e;
     // string-convertible types (custom classes)
     constexpr static bool is_string_convertible_i = std::is_convertible_v<T, std::string>;
     constexpr static bool is_string_convertible_e = is_string_e || is_string_i;
     constexpr static bool is_string_convertible_v = is_string_convertible_i && !is_string_convertible_e;
     // boolean types ('bool')
-    constexpr static bool is_bool_i = std::is_same_v<T, bool>;
-    constexpr static bool is_bool_e = is_string_convertible_e || is_string_convertible_i;
-    constexpr static bool is_bool_v = is_bool_i && !is_bool_e;
+    constexpr static bool is_bool_i               = std::is_same_v<T, bool>;
+    constexpr static bool is_bool_e               = is_string_convertible_e || is_string_convertible_i;
+    constexpr static bool is_bool_v               = is_bool_i && !is_bool_e;
     // integer types ('int', 'std::uint64_t', etc.)
-    constexpr static bool is_integer_i = std::is_integral_v<T>;
-    constexpr static bool is_integer_e = is_bool_e || is_bool_i;
-    constexpr static bool is_integer_v = is_integer_i && !is_integer_e;
+    constexpr static bool is_integer_i            = std::is_integral_v<T>;
+    constexpr static bool is_integer_e            = is_bool_e || is_bool_i;
+    constexpr static bool is_integer_v            = is_integer_i && !is_integer_e;
     // floating-point types
-    constexpr static bool is_float_i = std::is_floating_point_v<T>;
-    constexpr static bool is_float_e = is_integer_e || is_integer_i;
-    constexpr static bool is_float_v = is_float_i && !is_float_e;
+    constexpr static bool is_float_i              = std::is_floating_point_v<T>;
+    constexpr static bool is_float_e              = is_integer_e || is_integer_i;
+    constexpr static bool is_float_v              = is_float_i && !is_float_e;
     // 'std::complex'-like types
-    constexpr static bool is_complex_i = has_imag_v<T>;
-    constexpr static bool is_complex_e = is_float_e || is_float_i;
-    constexpr static bool is_complex_v = is_complex_i && !is_complex_e;
+    constexpr static bool is_complex_i            = has_imag_v<T>;
+    constexpr static bool is_complex_e            = is_float_e || is_float_i;
+    constexpr static bool is_complex_v            = is_complex_i && !is_complex_e;
     // array-like types
-    constexpr static bool is_array_i = has_begin_v<T> && has_end_v<T> && has_input_it_v<T>;
-    constexpr static bool is_array_e = is_complex_e || is_complex_i;
-    constexpr static bool is_array_v = is_array_i && !is_array_e;
+    constexpr static bool is_array_i              = has_begin_v<T> && has_end_v<T> && has_input_it_v<T>;
+    constexpr static bool is_array_e              = is_complex_e || is_complex_i;
+    constexpr static bool is_array_v              = is_array_i && !is_array_e;
     // tuple-like types
-    constexpr static bool is_tuple_i = has_get_v<T> && has_tuple_size_v<T>;
-    constexpr static bool is_tuple_e = is_array_e || is_array_i;
-    constexpr static bool is_tuple_v = is_tuple_i && !is_tuple_e;
+    constexpr static bool is_tuple_i              = has_get_v<T> && has_tuple_size_v<T>;
+    constexpr static bool is_tuple_e              = is_array_e || is_array_i;
+    constexpr static bool is_tuple_v              = is_tuple_i && !is_tuple_e;
     // container adaptor types
-    constexpr static bool is_adaptor_i = has_container_type_v<T>;
-    constexpr static bool is_adaptor_e = is_tuple_e || is_tuple_i;
-    constexpr static bool is_adaptor_v = is_adaptor_i && !is_adaptor_e;
+    constexpr static bool is_adaptor_i            = has_container_type_v<T>;
+    constexpr static bool is_adaptor_e            = is_tuple_e || is_tuple_i;
+    constexpr static bool is_adaptor_v            = is_adaptor_i && !is_adaptor_e;
     // <chrono> types
-    constexpr static bool is_duration_i = has_rep_v<T> && has_period_v<T>;
-    constexpr static bool is_duration_e = is_adaptor_e || is_adaptor_i;
-    constexpr static bool is_duration_v = is_duration_i && !is_duration_e;
+    constexpr static bool is_duration_i           = has_rep_v<T> && has_period_v<T>;
+    constexpr static bool is_duration_e           = is_adaptor_e || is_adaptor_i;
+    constexpr static bool is_duration_v           = is_duration_i && !is_duration_e;
     // printable types
-    constexpr static bool is_printable_i = has_ostream_insert_v<T>;
-    constexpr static bool is_printable_e = is_duration_e || is_duration_i;
-    constexpr static bool is_printable_v = is_printable_i && !is_printable_e;
+    constexpr static bool is_printable_i          = has_ostream_insert_v<T>;
+    constexpr static bool is_printable_e          = is_duration_e || is_duration_i;
+    constexpr static bool is_printable_v          = is_printable_i && !is_printable_e;
 };
 
 // --- String buffer ---
@@ -3788,7 +3823,50 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_adaptor_v>> {
     }
 };
 
-// TODO: <chrono> types
+// <chrono> types
+template <class T>
+struct Formatter<T, std::enable_if_t<Traits<T>::is_duration_v>> {
+    constexpr static std::size_t relevant_units = 3;
+    
+    constexpr static std::array<std::string_view, SplitDuration::size> names = {"hours", "min", "sec", "ms", "us", "ns"};
+
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        
+        auto string_formatter  = Formatter<std::string_view>{};
+        auto integer_formatter = Formatter<SplitDuration::common_rep>{};
+
+        // Takes 'unit_count' of the highest relevant units and converts them to string,
+        // for example with 'unit_count' equal to '3', we will have:
+        //
+        // timescale <= hours   =>   show { hours, min, sec }   =>   string "___ hours ___ min ___ sec"
+        // timescale <= min     =>   show {   min, sec,  ms }   =>   string "___ min ___ sec ___ ms"
+        // timescale <= sec     =>   show {   sec,  ms,  us }   =>   string "___ sec ___ ms ___ us"
+        // timescale <= ms      =>   show {    ms,  us,  ns }   =>   string "___ ms ___ us ___ ns"
+        // timescale <= us      =>   show {    us,  ns      }   =>   string "___ us ___ ns"
+        // timescale <= ns      =>   show {    ns           }   =>   string "___ ns"
+
+        const std::array<SplitDuration::common_rep, SplitDuration::size> counts = unit_split(arg).count();
+
+        for (std::size_t unit = 0; unit < counts.size(); ++unit) {
+            if (counts[unit]) {
+                const std::size_t last =
+                    (unit + relevant_units < counts.size()) ? (unit + relevant_units) : counts.size();
+                // don't want to include the whole <algorithm> just for 'std::max()'
+
+                for (std::size_t k = unit; k < last; ++k) {
+                    integer_formatter(buffer, counts[k]);
+                    string_formatter(buffer, " ");
+                    string_formatter(buffer, names[k]);
+                    if (k + 1 != last) string_formatter(buffer, " "); // prevents trailing space at the end
+                }
+                return;
+            }
+        }
+
+        string_formatter(buffer, "0 ns"); // fallback, unlikely to ever be triggered
+    }
+};
 
 // printable types
 template <class T>
@@ -4170,13 +4248,9 @@ public:
         }
     }
 
-    void push_string(std::string_view sv) {
-        this->buffer += sv;
-    }
+    void push_string(std::string_view sv) { this->buffer += sv; }
 
-    void push_chars(std::size_t count, char ch) {
-        this->buffer.append(ch, count);
-    }
+    void push_chars(std::size_t count, char ch) { this->buffer.append(ch, count); }
 };
 
 // =========================

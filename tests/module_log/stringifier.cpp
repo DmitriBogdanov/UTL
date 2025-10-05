@@ -114,6 +114,11 @@ TEST_CASE("Stringifier / Arrays") {
     CHECK(log::stringify(std::deque{1, 2, 3}) == "[ 1, 2, 3 ]");
 }
 
+TEST_CASE("Stringifier / Tuples") {
+    CHECK(log::stringify(std::pair{1, 2}) == "< 1, 2 >");
+    CHECK(log::stringify(std::tuple{"lorem", 2, "ipsum"}) == "< lorem, 2, ipsum >");
+}
+
 TEST_CASE("Stringifier / Adaptors") {
 
     class CustomContainerAdaptor {
@@ -135,9 +140,9 @@ TEST_CASE("Stringifier / Adaptors") {
     CHECK(log::stringify(CustomContainerAdaptor{tp}) == "< lorem, ipsum >");
 }
 
-TEST_CASE("Stringifier / Tuples") {
-    CHECK(log::stringify(std::pair{1, 2}) == "< 1, 2 >");
-    CHECK(log::stringify(std::tuple{"lorem", 2, "ipsum"}) == "< lorem, 2, ipsum >");
+TEST_CASE("Stringifier / Duration") {
+    CHECK(log::stringify(std::chrono::microseconds(1'700'067)) == "1 sec 700 ms 67 us");
+    CHECK(log::stringify(std::chrono::nanoseconds(0)) == "0 ns");
 }
 
 struct Printable {};
