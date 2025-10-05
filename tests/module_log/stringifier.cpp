@@ -19,11 +19,10 @@
 // Tests for stringification of various standard types and containers
 
 TEST_CASE("Stringifier / Basic API") {
-    const auto value           = std::make_tuple(true, 'a', 1, 0.5, std::array{1, 2});
-    const auto expected_result = "< true, a, 1, 0.5, { 1, 2 } >";
+    const auto value = std::make_tuple(true, 'a', 1, 0.5, std::array{1, 2});
 
-    CHECK(log::Stringifier{}(value) == expected_result);
-    CHECK(log::Stringifier::stringify(value) == expected_result);
+    const std::string expected_result = "< true, a, 1, 0.5, [ 1, 2 ] >";
+
     CHECK(log::stringify(value) == expected_result);
 }
 
@@ -102,15 +101,17 @@ TEST_CASE("Stringifier / Floats") {
 }
 
 TEST_CASE("Stringifier / std::complex") {
-    CHECK(log::stringify(std::complex<double>{1, 2}) == "1 + 2 i");
-    CHECK(log::stringify(std::complex<double>{4, 0}) == "4 + 0 i");
+    CHECK(log::stringify(std::complex<double>{1, 2}) == "1 + 2i");
+    CHECK(log::stringify(std::complex<double>{4, 0}) == "4 + 0i");
+    CHECK(log::stringify(std::complex<double>{1, -3}) == "1 - 3i");
+    CHECK(log::stringify(std::complex<double>{-1, -3}) == "-1 - 3i");
 }
 
 TEST_CASE("Stringifier / Arrays") {
-    CHECK(log::stringify(std::array{1, 2, 3}) == "{ 1, 2, 3 }");
-    CHECK(log::stringify(std::vector{1, 2, 3}) == "{ 1, 2, 3 }");
-    CHECK(log::stringify(std::set{1, 2, 3}) == "{ 1, 2, 3 }");
-    CHECK(log::stringify(std::deque{1, 2, 3}) == "{ 1, 2, 3 }");
+    CHECK(log::stringify(std::array{1, 2, 3}) == "[ 1, 2, 3 ]");
+    CHECK(log::stringify(std::vector{1, 2, 3}) == "[ 1, 2, 3 ]");
+    CHECK(log::stringify(std::set{1, 2, 3}) == "[ 1, 2, 3 ]");
+    CHECK(log::stringify(std::deque{1, 2, 3}) == "[ 1, 2, 3 ]");
 }
 
 TEST_CASE("Stringifier / Adaptors") {
@@ -128,9 +129,9 @@ TEST_CASE("Stringifier / Adaptors") {
     const auto dq = std::deque{1, 2, 3};
     const auto tp = std::tuple{"lorem", "ipsum"};
 
-    CHECK(log::stringify(std::queue{dq}) == "{ 1, 2, 3 }");
-    CHECK(log::stringify(std::priority_queue{dq.begin(), dq.end()}) == "{ 3, 2, 1 }");
-    CHECK(log::stringify(std::stack{dq}) == "{ 1, 2, 3 }");
+    CHECK(log::stringify(std::queue{dq}) == "[ 1, 2, 3 ]");
+    CHECK(log::stringify(std::priority_queue{dq.begin(), dq.end()}) == "[ 3, 2, 1 ]");
+    CHECK(log::stringify(std::stack{dq}) == "[ 1, 2, 3 ]");
     CHECK(log::stringify(CustomContainerAdaptor{tp}) == "< lorem, ipsum >");
 }
 
@@ -150,8 +151,8 @@ TEST_CASE("Stringifier / Printables") {
 
 TEST_CASE("Stringifier / Compound types") {
     // clang-format off
-    CHECK(log::stringify(std::map{std::pair{"k1", 1},std::pair{"k2", 2}}) == "{ < k1, 1 >, < k2, 2 > }");
-    CHECK(log::stringify(std::vector{std::vector{1, 2},std::vector{3}}) == "{ { 1, 2 }, { 3 } }");
-    CHECK(log::stringify(std::vector<std::vector<std::vector<const char*>>>{{{"lorem"}}}) == "{ { { lorem } } }");
+    CHECK(log::stringify(std::map{std::pair{"k1", 1},std::pair{"k2", 2}}) == "[ < k1, 1 >, < k2, 2 > ]");
+    CHECK(log::stringify(std::vector{std::vector{1, 2},std::vector{3}}) == "[ [ 1, 2 ], [ 3 ] ]");
+    CHECK(log::stringify(std::vector<std::vector<std::vector<const char*>>>{{{"lorem"}}}) == "[ [ [ lorem ] ] ]");
     // clang-format on
 }

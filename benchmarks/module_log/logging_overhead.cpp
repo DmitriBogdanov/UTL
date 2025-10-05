@@ -48,13 +48,8 @@ void benchmark_logging_overhead_raw() {
     };
 
     // Create logging sinks
-    log::Columns cols;
-    cols.datetime = false;
-    cols.uptime   = false;
-    cols.thread   = false;
-    cols.callsite = false;
-    cols.level    = false;
-    log::add_file_sink("temp/log1.log").set_columns(cols);
+    auto logger = log::Logger{log::Sink<log::policy::Type::FILE, log::policy::Level::TRACE, log::policy::Color::NONE,
+                                        log::policy::Format::NONE>{"temp/log1.log"}};
 
     std::ofstream log_file_2("temp/log2.log");
     std::ofstream log_file_3("temp/log3.log");
@@ -64,7 +59,7 @@ void benchmark_logging_overhead_raw() {
 
     benchmark("utl::log", [&]() {
         REPEAT(repeats)
-        UTL_LOG_TRACE("int = ", int_dist(gen), ", float = ", float_dist(gen), ", string = ", random_string());
+        logger.trace("int = ", int_dist(gen), ", float = ", float_dist(gen), ", string = ", random_string());
     });
 
     benchmark("flushed std::ostream::<<", [&]() {

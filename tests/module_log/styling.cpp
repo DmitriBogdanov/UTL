@@ -12,15 +12,15 @@
 
 TEST_CASE("Styling / Alignment") {
     // Left-padded values
-    CHECK(log::stringify(log::PadLeft{"lorem", 10}) == "     lorem");
-    CHECK(log::stringify(log::PadLeft{"lorem", 2}) == "lorem");
+    CHECK(log::stringify("lorem" | log::align_left(10)) == "lorem     ");
+    CHECK(log::stringify("lorem" | log::align_left(2)) == "lorem");
 
     // Right-padded values
-    CHECK(log::stringify(log::PadRight{"lorem", 10}) == "lorem     ");
-    CHECK(log::stringify(log::PadRight{"lorem", 2}) == "lorem");
+    CHECK(log::stringify("lorem" | log::align_right(10)) == "     lorem");
+    CHECK(log::stringify("lorem" | log::align_right(2)) == "lorem");
 
     // Padded (center-aligned) values
-    CHECK(log::stringify(log::Pad{"lorem", 9}) == "  lorem  ");
-    CHECK(log::stringify(log::Pad{"lorem", 10}) == "  lorem   ");
-    CHECK(log::stringify(log::Pad{"lorem", 2}) == "lorem");
+    CHECK(log::stringify("lorem" | log::align_center(9)) == "  lorem  ");
+    CHECK(log::stringify("lorem" | log::align_center(10)) == "  lorem   ");
+    CHECK(log::stringify("lorem" | log::align_center(2)) == "lorem");
 }

@@ -3076,581 +3076,44 @@ using impl::is_reflected_struct;
 #ifndef utl_log_headerguard
 #define utl_log_headerguard
 
-#define UTL_LOG_VERSION_MAJOR 0 // [!] module awaiting a rewrite
-#define UTL_LOG_VERSION_MINOR 1
-#define UTL_LOG_VERSION_PATCH 2
+#define UTL_LOG_VERSION_MAJOR 2
+#define UTL_LOG_VERSION_MINOR 0
+#define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
-#include <array>         // array<>
-#include <charconv>      // to_chars()
-#include <chrono>        // steady_clock
-#include <cstddef>       // size_t
-#include <exception>     // exception
-#include <fstream>       // ofstream
-#include <iostream>      // cout
-#include <iterator>      // next()
-#include <limits>        // numeric_limits<>
-#include <list>          // list<>
-#include <mutex>         // lock_guard<>, mutex
-#include <ostream>       // ostream
-#include <sstream>       // std::ostringstream
-#include <stdexcept>     // std::runtime_error
-#include <string>        // string
-#include <string_view>   // string_view
-#include <system_error>  // errc()
-#include <thread>        // this_thread::get_id()
-#include <tuple>         // tuple_size<>
-#include <type_traits>   // is_integral_v<>, is_floating_point_v<>, is_same_v<>, is_convertible_to_v<>
-#include <unordered_map> // unordered_map<>
-#include <utility>       // forward<>()
-#include <variant>       // variant<>
+#include <array>       // array<>, size_t
+#include <atomic>      // atomic<>
+#include <cassert>     // assert()
+#include <charconv>    // to_chars()
+#include <chrono>      // steady_clock
+#include <fstream>     // ofstream, ostream
+#include <iostream>    // cout
+#include <iterator>    // ostreambuf_iterator<>
+#include <mutex>       // mutex<>
+#include <sstream>     // ostringstream
+#include <string>      // string
+#include <string_view> // string_view
+#include <tuple>       // tuple<>, get<>, tuple_size_v<>, apply()
+#include <type_traits> // enable_if_t<>, is_enum_v<>, is_integral_v<>, is_unsigned_v<>, underlying_type_t<>, ...
+#include <utility>     // forward<>()
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Reasonably performant and convenient logger.
-//
-// The main highlight of this module (and the main performance win relative to 'std::ostream') is a
-// generic stringifier class that is both convenient and quite fast at formatting multiple values.
-//
-// This stringifier can be customized with CRTP to format things in all kinds of specific ways
-// and will likely come in handy in some other modules.
-//
-// The logger implementation itself is actually not that efficient (even though not completely
-// naive either), a proper performance-oriented approach would use following things:
-//
-//    1. More 'constexpr' things to avoid having to constantly check styling conditions at runtime
-//
-//    2. A separate persistent thread to flush the buffer
-//
-//       Note: I did try using a stripped down version of 'utl::parallel::ThreadPool' to upload tasks
-//             for flushing the buffer, it generally improves performance by ~30%, however I decided it
-//             is not worth the added complexity & cpu usage for that little gain
-//
-//    3. Platform-specific methods to query stuff like time & thread id with less overhead
-//
-//    4. A centralized formatting & info querying facility so multiple sinks don't have to repeat
-//       formatting & querying logic.
-//
-//       Such facility would have to decide the bare minimum of work possible base on all existing
-//       sink options, perform the formatting, and then just distribute string view to actual sinks.
-//
-//       This drastically complicates the logic and can be rather at odds with point (1) since unlike
-//       the individual sinks, I don't see a way of making style checks here constexpr, but in the end
-//       that would be a proper solution.
+// We do a lot of internally sketchy codegen to achieve the nice public API
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace utl::log::impl {
 
-// ======================
-// --- Internal utils ---
-// ======================
-
-// - SFINAE to select localtime_s() or localtime_r() -
-template <class TimeMoment, class TimeType>
-auto available_localtime_impl(TimeMoment time_moment, TimeType timer)
-    -> decltype(localtime_s(std::forward<TimeMoment>(time_moment), std::forward<TimeType>(timer))) {
-    return localtime_s(std::forward<TimeMoment>(time_moment), std::forward<TimeType>(timer));
-}
-
-template <class TimeMoment, class TimeType>
-auto available_localtime_impl(TimeMoment time_moment, TimeType timer)
-    -> decltype(localtime_r(std::forward<TimeType>(timer), std::forward<TimeMoment>(time_moment))) {
-    return localtime_r(std::forward<TimeType>(timer), std::forward<TimeMoment>(time_moment));
-}
-
-inline std::size_t get_thread_index(const std::thread::id id) {
-    static std::mutex     mutex;
-    const std::lock_guard lock(mutex);
-
-    static std::unordered_map<std::thread::id, std::size_t> thread_ids;
-    static std::size_t                                      next_id = 0;
-
-    const auto it = thread_ids.find(id);
-    if (it == thread_ids.end()) return thread_ids[id] = next_id++;
-    return it->second;
-    // this map effectively "demangles" platform-specific IDs into human-readable IDs (0, 1, 2, ...)
-}
-
-template <class IntType, std::enable_if_t<std::is_integral<IntType>::value, bool> = true>
-unsigned int integer_digit_count(IntType value) {
-    unsigned int digits = (value <= 0) ? 1 : 0;
-    // (value <  0) => we add 1 digit because of '-' in front
-    // (value == 0) => we add 1 digit for '0' because the loop doesn't account for zero integers
-    while (value) {
-        value /= 10;
-        ++digits;
-    }
-    return digits;
-    // Note: There is probably a faster way of doing it
-}
-
-using clock = std::chrono::steady_clock;
-
-inline const clock::time_point program_entry_time_point = clock::now();
-
-// ===================
-// --- Stringifier ---
-// ===================
-
-// --- Internal type traits ---
-// ----------------------------
-
-#define utl_log_define_trait(trait_name_, ...)                                                                         \
-    template <class T, class = void>                                                                                   \
-    struct trait_name_ : std::false_type {};                                                                           \
-                                                                                                                       \
-    template <class T>                                                                                                 \
-    struct trait_name_<T, std::void_t<decltype(__VA_ARGS__)>> : std::true_type {};                                     \
-                                                                                                                       \
-    template <class T>                                                                                                 \
-    constexpr bool trait_name_##_v = trait_name_<T>::value
-
-utl_log_define_trait(has_real, std::declval<T>().real());
-utl_log_define_trait(has_imag, std::declval<T>().imag());
-utl_log_define_trait(has_string, std::declval<T>().string());
-utl_log_define_trait(has_begin, std::declval<T>().begin());
-utl_log_define_trait(has_end, std::declval<T>().end());
-utl_log_define_trait(has_input_it, std::next(std::declval<T>().begin()));
-utl_log_define_trait(has_get, std::get<0>(std::declval<T>()));
-utl_log_define_trait(has_tuple_size, std::tuple_size<T>::value);
-utl_log_define_trait(has_container_type, std::declval<typename std::decay_t<T>::container_type>());
-utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::declval<T>());
-utl_log_define_trait(is_pad_left, std::declval<std::decay_t<T>>().is_pad_left);
-utl_log_define_trait(is_pad_right, std::declval<std::decay_t<T>>().is_pad_right);
-utl_log_define_trait(is_pad, std::declval<std::decay_t<T>>().is_pad);
-
-// Note:
-// Trait '_has_input_it' is trickier than it may seem. Just doing '++std::declval<T>().begin()' will work
-// most of the time, but there are cases where it returns 'false' for very much iterable types.
-//
-// """
-//    Although the expression '++c.begin()' often compiles, it is not guaranteed to do so: 'c.begin()' is an rvalue
-//    expression, and there is no LegacyInputIterator requirement that specifies that increment of an rvalue is
-///   guaranteed to work. In particular, when iterators are implemented as pointers or its operator++ is
-//    lvalue-ref-qualified, '++c.begin()' does not compile, while 'std::next(c.begin())' does.
-// """ (c) https://en.cppreference.com/w/cpp/iterator/next
-//
-// By checking if 'std::next(c.begin())' compiles we can properly check that iterator satisfies input iterator
-// requirements, which means we can use it with operator '++' to iterate over the container. Trying to just
-// check for operator '++' would lead to false positives, while checking '++c.begin()' would lead to false
-// negatives on containers such as 'std::array'. It would seem that 'std::iterator_traits' is the way to go,
-// but since it provides no good way to test if iterator satisfies a category without checking every possible
-// tag, it ends up being more verbose that existing solution.
-
-#undef utl_log_define_trait
-
-// --- Internal utils ---
-// ----------------------
-
-template <class>
-constexpr bool always_false_v = false;
-
-template <class T>
-constexpr int log10_ceil(T num) {
-    return num < 10 ? 1 : 1 + log10_ceil(num / 10);
-}
-
-template <class T>
-constexpr int max_float_digits =
-    4 + std::numeric_limits<T>::max_digits10 + std::max(2, log10_ceil(std::numeric_limits<T>::max_exponent10));
-// should be the smallest buffer size to account for all possible 'std::to_chars()' outputs,
-// see [https://stackoverflow.com/questions/68472720/stdto-chars-minimal-floating-point-buffer-size]
-
-template <class T>
-constexpr int max_int_digits = 2 + std::numeric_limits<T>::digits10;
-// +2 because 'digits10' returns last digit index rather than the number of digits
-// (aka 1 less than one would expect) and doesn't account for possible '-'.
-// Also note that ints use 'digits10' and not 'max_digits10' which is only valid for floats.
-
-// "Unwrapper" for container adaptors such as 'std::queue', 'std::priority_queue', 'std::stack'
-template <class Adaptor>
-const auto& underlying_container_cref(const Adaptor& adaptor) {
-
-    struct Hack : private Adaptor {
-        static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
-            return adp.*&Hack::c;
-            // An extremely hacky yet standard-compliant way of accessing protected member
-            // of a class without actually creating any instances of derived class.
-            //
-            // This is essentially 2 operators: '.*' and '&',
-            // '.*' takes an object on the left side, and a member pointer on the right side,
-            // and resolves the pointed-to member of the given object, this means
-            // 'object.*&Class::member' is essentially equivalent to 'object.member',
-            // except it reveals a "loophole" in protection semantics that allows us to interpret
-            // base class object as if it was derived class.
-            //
-            // Note that doing seemingly much more logical 'static_cast<Derived&>(object).member'
-            // is technically UB, even through most compilers will do the reasonable thing.
-        }
-    };
-
-    return Hack::get_container(adaptor);
-}
-
-// --- Alignment ---
-// -----------------
-
-// To align/pad values in a stringifier we can wrap then in thin structs
-// that gets some special alignment logic in stringifier formatting selector.
-
-template <class T>
-struct PadLeft {
-    constexpr PadLeft(const T& val, std::size_t size) : val(val), size(size) {} // this is needed for CTAD
-    const T&              val;
-    std::size_t           size;
-    constexpr static bool is_pad_left = true;
-}; // pads value the left (aka right alignment)
-
-template <class T>
-struct PadRight {
-    constexpr PadRight(const T& val, std::size_t size) : val(val), size(size) {}
-    const T&              val;
-    std::size_t           size;
-    constexpr static bool is_pad_right = true;
-}; // pads value the right (aka left alignment)
-
-template <class T>
-struct Pad {
-    constexpr Pad(const T& val, std::size_t size) : val(val), size(size) {}
-    const T&              val;
-    std::size_t           size;
-    constexpr static bool is_pad = true;
-}; // pads value on both sides (aka center alignment)
-
-constexpr std::string_view indent = "    ";
-
-// --- Stringifier ---
-// -------------------
-
-// Generic stringifier with customizable API. Formatting of specific types can be customized by inheriting it
-// and overriding specific methods. This is a reference implementation that is likely to be used in other modules.
-//
-// For example of how to extend stringifier see 'utl::log' documentation.
-//
-template <class Derived>
-struct StringifierBase {
-    using self    = StringifierBase;
-    using derived = Derived;
-
-    // --- Type-wise methods ---
-    // -------------------------
-
-    template <class T>
-    static void append_bool(std::string& buffer, const T& value) {
-        buffer += value ? "true" : "false";
-    }
-
-    template <class T>
-    static void append_int(std::string& buffer, const T& value) {
-        std::array<char, max_int_digits<T>> str;
-        const auto [number_end_ptr, error_code] = std::to_chars(str.data(), str.data() + str.size(), value);
-        if (error_code != std::errc())
-            throw std::runtime_error("Stringifier encountered std::to_chars() error while serializing an integer.");
-        buffer.append(str.data(), number_end_ptr - str.data());
-    }
-
-    template <class T>
-    static void append_enum(std::string& buffer, const T& value) {
-        derived::append_int(buffer, static_cast<std::underlying_type_t<T>>(value));
-    }
-
-    template <class T>
-    static void append_float(std::string& buffer, const T& value) {
-        std::array<char, max_float_digits<T>> str;
-        const auto [number_end_ptr, error_code] = std::to_chars(str.data(), str.data() + str.size(), value);
-        if (error_code != std::errc())
-            throw std::runtime_error("Stringifier encountered std::to_chars() error while serializing a float.");
-        buffer.append(str.data(), number_end_ptr - str.data());
-    }
-
-    template <class T>
-    static void append_complex(std::string& buffer, const T& value) {
-        derived::append_float(buffer, value.real());
-        buffer += " + ";
-        derived::append_float(buffer, value.imag());
-        buffer += " i";
-    }
-
-    template <class T>
-    static void append_path(std::string& buffer, const T& value) {
-        buffer += value.string();
-    }
-
-    template <class T>
-    static void append_string(std::string& buffer, const T& value) {
-        buffer += value;
-    }
-
-    template <class T>
-    static void append_array(std::string& buffer, const T& value) {
-        buffer += "{ ";
-        if (value.begin() != value.end())
-            for (auto it = value.begin();;) {
-                derived::append(buffer, *it);
-                if (++it == value.end()) break; // prevents trailing comma
-                buffer += ", ";
-            }
-        buffer += " }";
-    }
-
-    template <class T>
-    static void append_tuple(std::string& buffer, const T& value) {
-        self::append_tuple_fwd(buffer, value);
-    }
-
-    template <class T>
-    static void append_adaptor(std::string& buffer, const T& value) {
-        derived::append(buffer, underlying_container_cref(value));
-    }
-
-    template <class T>
-    static void append_printable(std::string& buffer, const T& value) {
-        buffer += (std::ostringstream() << value).str();
-    }
-
-    // --- Main API ---
-    // ----------------
-
-    template <class T>
-    static void append(std::string& buffer, const T& value) {
-        self::append_selector(buffer, value);
-    }
-
-    template <class... Args>
-    static void append(std::string& buffer, const Args&... args) {
-        (derived::append(buffer, args), ...);
-    }
-
-    template <class... Args>
-    [[nodiscard]] static std::string stringify(Args&&... args) {
-        std::string buffer;
-        derived::append(buffer, std::forward<Args>(args)...);
-        return buffer;
-    }
-
-    template <class... Args>
-    [[nodiscard]] std::string operator()(Args&&... args) {
-        return derived::stringify(std::forward<Args>(args)...);
-    } // allows stringifier to be used as a functor
-
-    // --- Helpers ---
-    // ---------------
-private:
-    template <class Tuple, std::size_t... Idx>
-    static void append_tuple_impl(std::string& buffer, Tuple value, std::index_sequence<Idx...>) {
-        ((Idx == 0 ? "" : buffer += ", ", derived::append(buffer, std::get<Idx>(value))), ...);
-        // fold expression '( f(args), ... )' invokes 'f(args)' for all arguments in 'args...'
-        // in the same fashion, we can fold over 2 functions by doing '( ( f(args), g(args) ), ... )'
-    }
-
-    template <template <class...> class Tuple, class... Args>
-    static void append_tuple_fwd(std::string& buffer, const Tuple<Args...>& value) {
-        buffer += "< ";
-        self::append_tuple_impl(buffer, value, std::index_sequence_for<Args...>{});
-        buffer += " >";
-    }
-
-    template <class T>
-    static void append_selector(std::string& buffer, const T& value) {
-        // Left-padded something
-        if constexpr (is_pad_left_v<T>) {
-            std::string temp;
-            self::append_selector(temp, value.val);
-            if (temp.size() < value.size) buffer.append(value.size - temp.size(), ' ');
-            buffer += temp;
-        }
-        // Right-padded something
-        else if constexpr (is_pad_right_v<T>) {
-            const std::size_t old_size = buffer.size();
-            self::append_selector(buffer, value.val);
-            const std::size_t appended_size = buffer.size() - old_size;
-            if (appended_size < value.size) buffer.append(value.size - appended_size, ' ');
-            // right-padding is faster than left padding since we don't need a temporary string to get appended size
-        }
-        // Center-padded something
-        else if constexpr (is_pad_v<T>) {
-            std::string temp;
-            self::append_selector(temp, value.val);
-            if (temp.size() < value.size) {
-                const std::size_t lpad_size = (value.size - temp.size()) / 2;
-                const std::size_t rpad_size = value.size - lpad_size - temp.size();
-                buffer.append(lpad_size, ' ');
-                buffer += temp;
-                buffer.append(rpad_size, ' ');
-            } else buffer += temp;
-        }
-        // Bool
-        else if constexpr (std::is_same_v<T, bool>)
-            derived::append_bool(buffer, value);
-        // Char
-        else if constexpr (std::is_same_v<T, char>) derived::append_string(buffer, value);
-        // 'std::filesystemp::path'-like
-        else if constexpr (has_string_v<T>) derived::append_path(buffer, value);
-        // 'std::string_view'-convertible (most strings and string-like types)
-        else if constexpr (std::is_convertible_v<T, std::string_view>) derived::append_string(buffer, value);
-        // 'std::string'-convertible (some "nastier" string-like types, mainly 'std::path')
-        else if constexpr (std::is_convertible_v<T, std::string>) derived::append_string(buffer, std::string(value));
-        // Integral
-        else if constexpr (std::is_integral_v<T>) derived::append_int(buffer, value);
-        // Enum
-        else if constexpr (std::is_enum_v<T>) derived::append_enum(buffer, value);
-        // Floating-point
-        else if constexpr (std::is_floating_point_v<T>) derived::append_float(buffer, value);
-        // Complex
-        else if constexpr (has_real_v<T> && has_imag_v<T>) derived::append_complex(buffer, value);
-        // Array-like
-        else if constexpr (has_begin_v<T> && has_end_v<T> && has_input_it_v<T>) derived::append_array(buffer, value);
-        // Tuple-like
-        else if constexpr (has_get_v<T> && has_tuple_size_v<T>) derived::append_tuple(buffer, value);
-        // Container adaptor
-        else if constexpr (has_container_type_v<T>) derived::append_adaptor(buffer, value);
-        // 'std::ostream' printable
-        else if constexpr (has_ostream_insert_v<T>) derived::append_printable(buffer, value);
-        // No valid stringification exists
-        else static_assert(always_false_v<T>, "No valid stringification exists for the type.");
-
-        // Note: Using if-constexpr chain here allows us to pick and choose priority of different branches,
-        // removing any possible ambiguity we could encounter doing things through SFINAE or overloads.
-    }
-};
-
-// Note:
-// The stringifier shines at stringifying & concatenating multiple values into the same buffer.
-// Single-value is a specific case which allows all 'buffer += ...' to be replaced with most things being formatted
-// straight into a newly created string. We could optimize this, but that would make require an almost full logic
-// duplication and make the class cumbersome to extend since instead of a singular 'append_something()' methods there
-// would be 2: 'append_something()' and 'construct_something()'. It also doesn't seem to be worth it, the difference
-// in performance isn't that significant and we're still faster than most usual approaches to stringification.
-
-// ===============================
-// --- Stringifier derivatives ---
-// ===============================
-
-// "Default" customization of stringifier, here we can optimize a few things.
-//
-// The reason we don't include this in the original stringifier is because it's intended to be a customizable
-// class that can be extended/optimized/decorated by inheriting it and overriding specific methods. The changes
-// made by some optimizations wouldn't be compatible with such philosophy.
-//
-struct Stringifier : public StringifierBase<Stringifier> {
-    using base = StringifierBase<Stringifier>;
-
-    // Optimization overloads
-    using base::stringify;
-
-    [[nodiscard]] static std::string stringify(int arg) { return std::to_string(arg); }
-    [[nodiscard]] static std::string stringify(long arg) { return std::to_string(arg); }
-    [[nodiscard]] static std::string stringify(long long arg) { return std::to_string(arg); }
-    [[nodiscard]] static std::string stringify(unsigned int arg) { return std::to_string(arg); }
-    [[nodiscard]] static std::string stringify(unsigned long arg) { return std::to_string(arg); }
-    [[nodiscard]] static std::string stringify(unsigned long long arg) { return std::to_string(arg); }
-    // for individual ints 'std::to_string()' beats 'append_int()' with <charconv> since any reasonable compiler
-    // implements it using the same <charconv> routine, but formatted directly into the string upon its creation
-
-    [[nodiscard]] static std::string stringify(std::string&& arg) { return std::move(arg); }
-    // no need to do all the appending stuff for individual r-value strings, just forward them as is
-
-    template <class... Args>
-    [[nodiscard]] std::string operator()(Args&&... args) {
-        return Stringifier::stringify(std::forward<Args>(args)...);
-    }
-};
-
-template <class... Args>
-void append_stringified(std::string& str, Args&&... args) {
-    Stringifier::append(str, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-[[nodiscard]] std::string stringify(Args&&... args) {
-    return Stringifier::stringify(std::forward<Args>(args)...);
-}
-
-template <class... Args>
-void print(Args&&... args) {
-    const auto                        res = Stringifier::stringify(std::forward<Args>(args)...);
-    static std::mutex                 mutex;
-    const std::lock_guard<std::mutex> lock(mutex);
-    std::cout << res << std::flush;
-    // print in a thread-safe way and instantly flush every message, this is much slower that buffering
-    // (which regular logging methods do), but for generic console output this is a more robust way
-}
-
-template <class... Args>
-void println(Args&&... args) {
-    print(std::forward<Args>(args)..., '\n');
-}
-
-// ===============
-// --- Options ---
-// ===============
-
-enum class Verbosity { ERR = 0, WARN = 1, NOTE = 2, INFO = 3, DEBUG = 4, TRACE = 5 };
-
-enum class OpenMode { REWRITE, APPEND };
-
-enum class Colors { ENABLE, DISABLE };
-
-struct Columns {
-    bool datetime = true;
-    bool uptime   = true;
-    bool thread   = true;
-    bool callsite = true;
-    bool level    = true;
-    bool message  = true;
-
-    // Columns() : datetime(true), uptime(true), thread(true), callsite(true), level(true), message(true) {}
-};
-
-struct Callsite {
-    std::string_view file;
-    int              line;
-};
-
-struct MessageMetadata {
-    Verbosity verbosity;
-};
-
-constexpr bool operator<(Verbosity l, Verbosity r) { return static_cast<int>(l) < static_cast<int>(r); }
-constexpr bool operator<=(Verbosity l, Verbosity r) { return static_cast<int>(l) <= static_cast<int>(r); }
-
-// --- Column widths ---
-// ---------------------
-
-constexpr unsigned int w_uptime_sec = 4;
-constexpr unsigned int w_uptime_ms  = 3;
-
-constexpr std::size_t w_callsite_before_dot = 22;
-constexpr std::size_t w_callsite_after_dot  = 4;
-
-constexpr std::size_t col_w_datetime = sizeof("yyyy-mm-dd HH:MM:SS") - 1;
-constexpr std::size_t col_w_uptime   = w_uptime_sec + 1 + w_uptime_ms;
-constexpr std::size_t col_w_thread   = sizeof("thread") - 1;
-constexpr std::size_t col_w_callsite = w_callsite_before_dot + 1 + w_callsite_after_dot;
-constexpr std::size_t col_w_level    = sizeof("level") - 1;
-
-// --- Column left/right delimiters ---
-// ------------------------------------
-
-constexpr std::string_view col_ld_datetime = "";
-constexpr std::string_view col_rd_datetime = " ";
-constexpr std::string_view col_ld_uptime   = "(";
-constexpr std::string_view col_rd_uptime   = ")";
-constexpr std::string_view col_ld_thread   = "[";
-constexpr std::string_view col_rd_thread   = "]";
-constexpr std::string_view col_ld_callsite = " ";
-constexpr std::string_view col_rd_callsite = " ";
-constexpr std::string_view col_ld_level    = "";
-constexpr std::string_view col_rd_level    = "|";
-constexpr std::string_view col_ld_message  = " ";
-constexpr std::string_view col_rd_message  = "\n";
+// =================
+// --- Utilities ---
+// =================
 
 // --- ANSI Colors ---
 // -------------------
 
-namespace color {
+namespace ansi {
 
 constexpr std::string_view black          = "\033[30m";
 constexpr std::string_view red            = "\033[31m";
@@ -3688,347 +3151,1510 @@ constexpr std::string_view bold_bright_white   = "\033[97;1m";
 
 constexpr std::string_view reset = "\033[0m";
 
-// logger itself only uses a few of those colors, but since we do it this way might as well provide
-// the whole spectrum so users can color 'cout' and 'log::println()' statements too
+} // namespace ansi
 
+// --- SFINAE helpers ---
+// ----------------------
+
+template <bool Cond>
+using require = std::enable_if_t<Cond, bool>;
+
+template <class T>
+using require_enum = require<std::is_enum_v<T>>;
+
+template <class T>
+using require_uint = require<std::is_integral_v<T> && std::is_unsigned_v<T>>;
+
+template <class T>
+using require_integral = require<std::is_integral_v<T>>;
+
+template <class T>
+using require_float = require<std::is_floating_point_v<T>>;
+
+template <class>
+constexpr bool always_false_v = false;
+
+// --- Thread ID ---
+// -----------------
+
+// Human readable replacement for 'std::this_thread::get_id()'. Usually this is implemented using
+// 'std::unordered_map<std::thread::id, int>' accessed with 'std::this_thread::get_id()' but such
+// approach is considerably slower due to a map lookup and requires additional logic to address
+// possible thread id reuse, which many implementations seem to neglect. We can use thread-locals
+// and an atomic counter to implement lazily initialized thread id count. After a first call the
+// overhead of getting thread id should be approx ~ to a branch + array lookup.
+int get_next_linear_thread_id() {
+    static std::atomic<int> counter = 0;
+    return counter++;
+}
+
+int this_thread_linear_id() {
+    thread_local int thread_id = get_next_linear_thread_id();
+    return thread_id;
+}
+
+// --- Local time ---
+// ------------------
+
+inline std::tm to_localtime(const std::time_t& time) {
+    // There are 3 ways of getting localtime in C-stdlib:
+    //    1. 'std::localtime()' - isn't thread-safe and will be marked as "deprecated" by MSVC
+    //    2. 'localtime_r()'    - isn't a part of C++, it's a part of C11, in reality provided by POSIX
+    //    3. 'localtime_s()'    - isn't a part of C++, it's a part of C23, in reality provided by Windows
+    //                            with reversed order of arguments
+    // Seemingly there is no portable way of getting thread-safe localtime without being screamed at by at least one
+    // compiler, however there is a little known trick that uses a side effect of 'std::mktime()' which normalizes its
+    // inputs should they "overflow" the allowed range. Unlike 'localtime', 'std::mktime()' is thread-safe and portable,
+    // see https://stackoverflow.com/questions/54246983/c-how-to-fix-add-a-time-offset-the-calculation-is-wrong/54248414
+
+    // Create reference time moment at year 2025
+    std::tm reference_tm{};
+    reference_tm.tm_isdst = -1;  // negative => let the implementation deal with daylight savings
+    reference_tm.tm_year  = 125; // counting starts from 1900
+
+    // Get the 'std::time_t' corresponding to the reference time moment
+    const std::time_t reference_time = std::mktime(&reference_tm);
+    if (reference_time == -1)
+        throw std::runtime_error("time::to_localtime(): time moment can't be represented as 'std::time_t'.");
+
+    // Adjusting reference moment by 'time - reference_time' makes it equal to the current time moment,
+    // it is now invalid due to seconds overflowing the allowed range
+    reference_tm.tm_sec += static_cast<int>(time - reference_time);
+    // 'std::time_t' is an arithmetic type, although not defined, this is almost always an
+    // integral value holding the number of seconds since Epoch (see cppreference). This is
+    // why we can substract them and add into the seconds.
+
+    // Normalize time moment, it is now valid and corresponds to a current local time
+    if (std::mktime(&reference_tm) == -1)
+        throw std::runtime_error("time::to_localtime(): time moment can't be represented as 'std::time_t'.");
+
+    return reference_tm;
+}
+
+[[nodiscard]] inline std::string datetime_string(const char* format = "%Y-%m-%d %H:%M:%S") {
+    const auto now    = std::chrono::system_clock::now();
+    const auto c_time = std::chrono::system_clock::to_time_t(now);
+    const auto c_tm   = to_localtime(c_time);
+
+    std::array<char, 256> buffer;
+    if (std::strftime(buffer.data(), buffer.size(), format, &c_tm) == 0)
+        throw std::runtime_error("time::datetime_string(): 'format' does not fit into the buffer.");
+    return std::string(buffer.data());
+
+    // Note 1: C++20 provides <chrono> with a native way of getting date, before that we have to use <ctime>
+    // Note 2: 'std::chrono::system_clock' is unique - its output can be converted into a C-style 'std::time_t'
+    // Note 3: This function is thread-safe, we use a quirky implementation of 'localtime()', see notes above
+}
+
+// --- Thread-local state ---
+// --------------------------
+
+std::string& thread_local_temporary_string() {
+    thread_local std::string str;
+    str.clear();
+    return str; // returned string is always empty, no need to clear it at the callsite
+}
+// In order to compute alignment we have to format things into a temporary string first.
+// The naive way would be to allocate a new function-local string every time. We can reduce
+// allocations by keeping a single temp string per thread and reusing it every time we need a temporary.
+
+// --- Constants ---
+// -----------------
+
+constexpr std::size_t max_chars_float = 30;       // enough to fit 80-bit long double
+constexpr std::size_t max_chars_int   = 20;       // enough to fit 64-bit signed integer
+constexpr std::size_t buffering_size  = 8 * 1024; // 8 KB, good for most systems
+constexpr auto        buffering_time  = std::chrono::milliseconds{1};
+
+// "Unwrapper" for container adaptors such as 'std::queue', 'std::priority_queue', 'std::stack'
+template <class Adaptor>
+const auto& underlying_container_cref(const Adaptor& adaptor) {
+
+    struct Hack : private Adaptor {
+        static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
+            return adp.*&Hack::c;
+            // An extremely hacky yet standard-compliant way of accessing protected member
+            // of a class without actually creating any instances of the derived class.
+            //
+            // This expression consists of 2 operators: '.*' and '&'.
+            // '.*' takes an object on the left side, and a member pointer on the right side,
+            // and resolves the pointed-to member of the given object, this means
+            // 'object.*&Class::member' is essentially equivalent to 'object.member',
+            // except it reveals a "loophole" in protection semantics that allows us to
+            // interpret base class object as if it was derived class.
+            //
+            // Note that doing seemingly much more logical 'static_cast<Derived&>(object).member'
+            // is technically UB, even through most compilers will do the reasonable thing.
+        }
+    };
+
+    return Hack::get_container(adaptor);
+}
+
+// --- Other ---
+// -------------
+
+template <class T>
+[[nodiscard]] constexpr T max(T a, T b) noexcept {
+    return a < b ? b : a;
+} // saves us from including the whole <algorithm> for a one-liner
+
+template <class Tp, class Func> // Func = void(Element&&)
+constexpr void tuple_for_each(Tp&& tuple, Func&& func) {
+    std::apply([&func](auto&&... args) { (func(std::forward<decltype(args)>(args)), ...); }, std::forward<Tp>(tuple));
+}
+
+template <class T, T... Idxs, class Func> // Func = void(std::integral_constant<T, Index>)
+constexpr void for_sequence(std::integer_sequence<T, Idxs...>, Func&& func) {
+    (func(std::integral_constant<std::size_t, Idxs>{}), ...);
+} // effectively a 'constexpr for' where 'constexpr parameters' are passed as integral constants
+
+template <class E, require_enum<E> = true>
+[[nodiscard]] constexpr auto to_underlying(E value) noexcept {
+    return static_cast<std::underlying_type_t<E>>(value); // in C++23 gets replaced by 'std::to_underlying()'
+}
+
+template <class E, require_enum<E> = true>
+[[nodiscard]] constexpr bool to_bool(E value) noexcept {
+    return static_cast<bool>(to_underlying(value));
+}
+
+using Sec = std::chrono::duration<double, std::chrono::seconds::period>; // convenient duration-to-float conversion
+
+// ===============
+// --- Styling ---
+// ===============
+
+// --- Modifiers ---
+// -----------------
+
+// clang-format off
+namespace mods {
+struct FloatFormat   { std::chars_format format; int precision; };
+struct IntegerFormat { int               base;                  };
+struct AlignLeft     { std::size_t       size;                  };
+struct AlignCenter   { std::size_t       size;                  };
+struct AlignRight    { std::size_t       size;                  };
+struct Color         { std::string_view  code;                  };
+} // namespace mods
+// clang-format on
+
+// --- Wrapped values ---
+// ----------------------
+
+// Note:
+// Creating a 'wrapped value' class that doesn't leave dangling references when used with temporaries
+// requires careful application of perfect forwarding, if we were to make a naive struct like this:
+//    > template <class T>
+//    > struct Wrapper { const T& val };
+// Then creating such struct from a temporary and then passing it around further would lead to a dangling reference,
+// we want 'Wrapper' to "take ownership" of the value when it gets constructed from a temporary, but save only a
+// reference when it gets constructed from an l-value (since copying it would be wasteful), this can be achieved
+// through appropriate CTAD with perfect forwarding:
+//    > template <class T>
+//    > struct Wrapper {
+//    >     T val;
+//    >     Wrapper(T&& val) : val(std::forward<T>(val)) {}
+//    > };
+//    >
+//    > template <class T>
+//    > Wrapper(T&& val) -> Wrapper<T>;
+// 'Wrapper{const std::vector<int>&}' => 'T' will be 'const std::vector<int>&'
+// 'Wrapper{      std::vector<int>&}' => 'T' will be '      std::vector<int>&'
+// 'Wrapper{      std::vector<int> }' => 'T' will be '      std::vector<int> '
+
+#define utl_log_define_style_wrapper(wrapper_, style_)                                                                 \
+    template <class T>                                                                                                 \
+    struct wrapper_ {                                                                                                  \
+        T      value;                                                                                                  \
+        style_ mod;                                                                                                    \
+                                                                                                                       \
+        wrapper_(T&& value, style_ mod) : value(std::forward<T>(value)), mod(mod) {}                                   \
+    };                                                                                                                 \
+                                                                                                                       \
+    template <class T>                                                                                                 \
+    wrapper_(T&&, style_)->wrapper_<T>
+
+// clang-format off
+utl_log_define_style_wrapper(FormattedFloat  , mods::FloatFormat  );
+utl_log_define_style_wrapper(FormattedInteger, mods::IntegerFormat);
+utl_log_define_style_wrapper(AlignedLeft     , mods::AlignLeft    );
+utl_log_define_style_wrapper(AlignedCenter   , mods::AlignCenter  );
+utl_log_define_style_wrapper(AlignedRight    , mods::AlignRight   );
+utl_log_define_style_wrapper(Colored         , mods::Color        );
+// clang-format on
+
+#undef utl_log_define_style_wrapper
+
+// --- Style merging ---
+// ---------------------
+
+namespace mods { // necessary for unqualified name lookup to discover operators with 'mods::' types
+
+#define utl_log_define_style_merging(wrapper_, style_, require_)                                                       \
+    template <class T, require_ = true>                                                                                \
+    [[nodiscard]] constexpr wrapper_<T> operator|(T&& value, style_ mod) noexcept {                                    \
+        return {std::forward<T>(value), mod};                                                                          \
+    }                                                                                                                  \
+    static_assert(true)
+
+// clang-format off
+utl_log_define_style_merging(FormattedFloat  , mods::FloatFormat  , require_float   <std::decay_t<T>>);
+utl_log_define_style_merging(FormattedInteger, mods::IntegerFormat, require_integral<std::decay_t<T>>);
+utl_log_define_style_merging(AlignedLeft     , mods::AlignLeft    , bool                             );
+utl_log_define_style_merging(AlignedCenter   , mods::AlignCenter  , bool                             );
+utl_log_define_style_merging(AlignedRight    , mods::AlignRight   , bool                             );
+utl_log_define_style_merging(Colored         , mods::Color        , bool                             );
+// clang-format on
+
+#undef utl_log_define_style_merging
+
+// Prohibit applying alignment after the color (which is necessary to make log color escaping work),
+// doing it at the operator level produces the best error messages and tends to work well with LSPs
+#define utl_log_prohibit_style_merging(wrapper_, style_)                                                               \
+    template <class T>                                                                                                 \
+    constexpr void operator|(wrapper_, style_) noexcept {                                                              \
+        static_assert(always_false_v<T>, "Color modifiers should be applied after alignment.");                        \
+    }                                                                                                                  \
+    static_assert(true)
+
+// clang-format off
+utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignRight );
+utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignCenter);
+utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignLeft  );
+utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignRight );
+utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignCenter);
+utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignLeft  );
+// clang-format on
+
+#undef utl_log_prohibit_style_merging
+
+} // namespace mods
+
+// --- Public API for style modifiers ---
+// --------------------------------------
+
+[[nodiscard]] constexpr auto general(std::size_t precision = 6) noexcept {
+    return mods::FloatFormat{std::chars_format::general, static_cast<int>(precision)};
+}
+[[nodiscard]] constexpr auto fixed(std::size_t precision = 3) noexcept {
+    return mods::FloatFormat{std::chars_format::fixed, static_cast<int>(precision)};
+}
+[[nodiscard]] constexpr auto scientific(std::size_t precision = 3) noexcept {
+    return mods::FloatFormat{std::chars_format::scientific, static_cast<int>(precision)};
+}
+[[nodiscard]] constexpr auto hex(std::size_t precision = 3) noexcept {
+    return mods::FloatFormat{std::chars_format::hex, static_cast<int>(precision)};
+}
+[[nodiscard]] constexpr auto base(std::size_t base) noexcept { return mods::IntegerFormat{static_cast<int>(base)}; }
+[[nodiscard]] constexpr auto align_left(std::size_t size) noexcept { return mods::AlignLeft{size}; }
+[[nodiscard]] constexpr auto align_center(std::size_t size) noexcept { return mods::AlignCenter{size}; }
+[[nodiscard]] constexpr auto align_right(std::size_t size) noexcept { return mods::AlignRight{size}; }
+
+// clang-format off
+namespace color {
+constexpr auto black              = mods::Color{ansi::black              };
+constexpr auto red                = mods::Color{ansi::red                };
+constexpr auto green              = mods::Color{ansi::green              };
+constexpr auto yellow             = mods::Color{ansi::yellow             };
+constexpr auto blue               = mods::Color{ansi::blue               };
+constexpr auto magenta            = mods::Color{ansi::magenta            };
+constexpr auto cyan               = mods::Color{ansi::cyan               };
+constexpr auto white              = mods::Color{ansi::white              };
+constexpr auto bright_black       = mods::Color{ansi::bright_black       };
+constexpr auto bright_red         = mods::Color{ansi::bright_red         };
+constexpr auto bright_green       = mods::Color{ansi::bright_green       };
+constexpr auto bright_yellow      = mods::Color{ansi::bright_yellow      };
+constexpr auto bright_blue        = mods::Color{ansi::bright_blue        };
+constexpr auto bright_magenta     = mods::Color{ansi::bright_magenta     };
+constexpr auto bright_cyan        = mods::Color{ansi::bright_cyan        };
+constexpr auto bright_white       = mods::Color{ansi::bright_white       };
+constexpr auto bold_black         = mods::Color{ansi::bold_black         };
+constexpr auto bold_red           = mods::Color{ansi::bold_red           };
+constexpr auto bold_green         = mods::Color{ansi::bold_green         };
+constexpr auto bold_yellow        = mods::Color{ansi::bold_yellow        };
+constexpr auto bold_blue          = mods::Color{ansi::bold_blue          };
+constexpr auto bold_magenta       = mods::Color{ansi::bold_magenta       };
+constexpr auto bold_cyan          = mods::Color{ansi::bold_cyan          };
+constexpr auto bold_white         = mods::Color{ansi::bold_white         };
+constexpr auto bold_bright_black  = mods::Color{ansi::bold_bright_black  };
+constexpr auto bold_bright_red    = mods::Color{ansi::bold_bright_red    };
+constexpr auto bold_bright_green  = mods::Color{ansi::bold_bright_green  };
+constexpr auto bold_bright_yellow = mods::Color{ansi::bold_bright_yellow };
+constexpr auto bold_bright_blue   = mods::Color{ansi::bold_bright_blue   };
+constexpr auto bold_bright_magenta= mods::Color{ansi::bold_bright_magenta};
+constexpr auto bold_bright_cyan   = mods::Color{ansi::bold_bright_cyan   };
+constexpr auto bold_bright_white  = mods::Color{ansi::bold_bright_white  };
 } // namespace color
+// clang-format on
 
-constexpr std::string_view color_heading = color::bold_cyan;
-constexpr std::string_view color_reset   = color::reset;
+// =================
+// --- Formatter ---
+// =================
 
-constexpr std::string_view color_trace = color::bright_black;
-constexpr std::string_view color_debug = color::green;
-constexpr std::string_view color_note  = color::magenta;
-constexpr std::string_view color_info  = color::white;
-constexpr std::string_view color_warn  = color::yellow;
-constexpr std::string_view color_err   = color::bold_red;
+// --- Member detection type traits ---
+// ------------------------------------
 
-// ==================
-// --- Sink class ---
-// ==================
+#define utl_log_define_trait(trait_name_, ...)                                                                         \
+    template <class T, class = void>                                                                                   \
+    struct trait_name_ : std::false_type {};                                                                           \
+                                                                                                                       \
+    template <class T>                                                                                                 \
+    struct trait_name_<T, std::void_t<decltype(__VA_ARGS__)>> : std::true_type {};                                     \
+                                                                                                                       \
+    template <class T>                                                                                                 \
+    constexpr bool trait_name_##_v = trait_name_<T>::value
 
-class Sink {
+// clang-format off
+utl_log_define_trait(has_string        , std::declval<T>().string()                              );
+utl_log_define_trait(has_real          , std::declval<T>().real()                                );
+utl_log_define_trait(has_imag          , std::declval<T>().imag()                                );
+utl_log_define_trait(has_begin         , std::declval<T>().begin()                               );
+utl_log_define_trait(has_end           , std::declval<T>().end()                                 );
+utl_log_define_trait(has_input_it      , std::next(std::declval<T>().begin())                    );
+utl_log_define_trait(has_get           , std::get<0>(std::declval<T>())                          );
+utl_log_define_trait(has_tuple_size    , std::tuple_size<T>::value                               );
+utl_log_define_trait(has_container_type, std::declval<typename std::decay_t<T>::container_type>());
+utl_log_define_trait(has_rep           , std::declval<typename std::decay_t<T>::rep>()           );
+utl_log_define_trait(has_period        , std::declval<typename std::decay_t<T>::period>()        );
+utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::declval<T>()       );
+// clang-format on
+
+#undef utl_log_define_trait
+
+// --- Type trait chain ---
+// ------------------------
+
+// We want to provide default formatting behaviour based on type traits, however one type
+// might satisfy multiple formatter-suitable type traits. To avoid ambiguity we need to select
+// one based on a certain trait priority.
+//
+// A simple way to do it would be to have and 'if constexpr' chain inside the formatter,
+// however that would leave user with no good customization points.
+//
+// We can emulate an 'if constexpr' chain on the type trait level itself by having a constantly
+// "growing" 'exclude_' trait, which allows traits to reject types that have already satisfied a
+// trait higher on the priority chain:
+//    > template <class T>
+//    > constexpr bool exclude_TYPE_v = exclude_PREV_TYPE_v<T> || is_PREV_TYPE_v<T>;
+//    >
+//    > template <class T>
+//    > constexpr bool is_TYPE_v = !exclude_TYPE_v<T> || TYPE_TRAITS_FOR_CURRENT_TYPE<T>;
+//
+// The last piece of the puzzle is how to make use of our traits. We can use some kind of 'Formatter'
+// class with trait-based partial specialization, this class will contain a method for formatting
+// given type. If user wants to add/override for some type, they can just add a specialization
+// of 'Formatter' for this type and it will take priority over the partial specialization.
+//
+// All this template manipulation might seem too sophisticated for the task, but I'd yet to
+// figure out a better way of achieving such behavior. 'std::conjunction' / 'std::disjunction'
+// provides short-circuiting, so despite the seemingly extreme nesting of trait templates
+// resulting compile times don't seem to be significantly affected.
+
+// char types ('char')
+template <class T>
+using exclude_char = std::disjunction<std::false_type>;
+template <class T>
+using is_char = std::conjunction<std::negation<exclude_char<T>>, std::is_same<T, char>>;
+
+// enum types
+template <class T>
+using exclude_enum = std::disjunction<exclude_char<T>, is_char<T>>;
+template <class T>
+using is_enum = std::conjunction<std::negation<exclude_enum<T>>, std::is_enum<T>>;
+
+// types with '.string()' ('std::path')
+template <class T>
+using exclude_path = std::disjunction<exclude_enum<T>, is_enum<T>>;
+template <class T>
+using is_path = std::conjunction<std::negation<exclude_path<T>>, has_string<T>>;
+
+// string-like types ('std::string_view', 'std::string', 'const char*')
+template <class T>
+using exclude_string = std::disjunction<exclude_path<T>, is_path<T>>;
+template <class T>
+using is_string = std::conjunction<std::negation<exclude_string<T>>, std::is_convertible<T, std::string_view>>;
+
+// string-convertible types (custom classes)
+template <class T>
+using exclude_string_convertible = std::disjunction<exclude_string<T>, is_string<T>>;
+template <class T>
+using is_string_convertible =
+    std::conjunction<std::negation<exclude_string_convertible<T>>, std::is_convertible<T, std::string>>;
+
+// boolean types ('bool')
+template <class T>
+using exclude_bool = std::disjunction<exclude_string_convertible<T>, is_string_convertible<T>>;
+template <class T>
+using is_bool = std::conjunction<std::negation<exclude_bool<T>>, std::is_same<T, bool>>;
+;
+
+// integer types ('int', 'std::uint64_t', etc.)
+template <class T>
+using exclude_integer = std::disjunction<exclude_bool<T>, is_bool<T>>;
+template <class T>
+using is_integer = std::conjunction<std::negation<exclude_integer<T>>, std::is_integral<T>>;
+
+// floating-point types
+template <class T>
+using exclude_float = std::disjunction<exclude_integer<T>, is_integer<T>>;
+template <class T>
+using is_float = std::conjunction<std::negation<exclude_float<T>>, std::is_floating_point<T>>;
+
+// 'std::complex'-like types
+template <class T>
+using exclude_complex = std::disjunction<exclude_float<T>, is_float<T>>;
+template <class T>
+using is_complex = std::conjunction<std::negation<exclude_complex<T>>, has_real<T>, has_imag<T>>;
+
+// array-like types
+template <class T>
+using exclude_array = std::disjunction<exclude_complex<T>, is_complex<T>>;
+template <class T>
+using is_array = std::conjunction<std::negation<exclude_array<T>>, has_begin<T>, has_end<T>, has_input_it<T>>;
+
+// tuple-like types
+template <class T>
+using exclude_tuple = std::disjunction<exclude_array<T>, is_array<T>>;
+template <class T>
+using is_tuple = std::conjunction<std::negation<exclude_tuple<T>>, has_get<T>, has_tuple_size<T>>;
+
+// container adaptor types
+template <class T>
+using exclude_adaptor = std::disjunction<exclude_tuple<T>, is_tuple<T>>;
+template <class T>
+using is_adaptor = std::conjunction<std::negation<exclude_adaptor<T>>, has_container_type<T>>;
+
+// <chrono> types
+template <class T>
+using exclude_duration = std::disjunction<exclude_adaptor<T>, is_adaptor<T>>;
+template <class T>
+using is_duration = std::conjunction<std::negation<exclude_duration<T>>, has_rep<T>, has_period<T>>;
+
+// printable types
+template <class T>
+using exclude_printable = std::disjunction<exclude_duration<T>, is_duration<T>>;
+template <class T>
+using is_printable = std::conjunction<std::negation<exclude_printable<T>>, has_ostream_insert<T>>;
+
+// --- String buffer ---
+// ---------------------
+
+// Simplest case of a 'buffer' concept, wraps 'std::string' into a buffer-like API for appending
+// so we can use it in formatters that require an intermediate string for formatting
+
+class StringBuffer {
+    std::string& str;
+
+public:
+    StringBuffer(std::string& str) noexcept : str(str) {}
+
+    void push_string(std::string_view sv) { this->str += sv; }
+
+    void push_chars(std::size_t count, char ch) { this->str.append(count, ch); }
+};
+
+// --- Partial specializations ---
+// -------------------------------
+
+// Base template
+template <class T, class = void>
+struct Formatter {
+    static_assert(always_false_v<T>, "No formatter could be deduced for the type.");
+};
+
+// char types ('char')
+template <class T>
+struct Formatter<T, std::enable_if_t<is_char<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_chars(1, arg);
+    }
+};
+
+// enum types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_enum<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        Formatter<std::underlying_type_t<std::decay_t<T>>>{}(buffer, to_underlying(arg));
+    }
+};
+
+// types with '.string()' ('std::path')
+template <class T>
+struct Formatter<T, std::enable_if_t<is_path<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_string(arg.string());
+    }
+};
+
+// string-like types ('std::string_view', 'std::string', 'const char*')
+template <class T>
+struct Formatter<T, std::enable_if_t<is_string<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_string(std::string_view{arg});
+    }
+};
+
+// string-convertible types (custom classes)
+template <class T>
+struct Formatter<T, std::enable_if_t<is_string_convertible<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_string(std::string{arg});
+    }
+};
+
+// boolean types ('bool')
+template <class T>
+struct Formatter<T, std::enable_if_t<is_bool<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_string(arg ? "true" : "false");
+    }
+};
+
+// integral types ('int', 'std::uint64_t', etc.)
+template <class T>
+struct Formatter<T, std::enable_if_t<is_integer<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        std::array<char, max_chars_int> res;
+
+        const std::size_t serialized = std::to_chars(res.data(), res.data() + res.size(), arg).ptr - res.data();
+
+        buffer.push_string(std::string_view{res.data(), serialized});
+    }
+};
+
+// floating-point types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_float<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        std::array<char, max_chars_int> res;
+
+        const std::size_t serialized = std::to_chars(res.data(), res.data() + res.size(), arg).ptr - res.data();
+
+        buffer.push_string(std::string_view{res.data(), serialized});
+    }
+};
+
+// 'std::complex'-like types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_complex<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        const auto string_formatter = Formatter<std::string_view>{};
+        const auto value_formatter  = Formatter<decltype(arg.real())>{};
+
+        value_formatter(buffer, arg.real());
+        if (arg.imag() >= 0) {
+            string_formatter(buffer, " + ");
+            value_formatter(buffer, arg.imag());
+        } else {
+            string_formatter(buffer, " - ");
+            value_formatter(buffer, -arg.imag());
+        }
+        string_formatter(buffer, "i");
+    }
+};
+
+// array-like types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_array<std::decay_t<T>>::value>> {
+    static constexpr std::string_view prefix    = "[ ";
+    static constexpr std::string_view suffix    = " ]";
+    static constexpr std::string_view delimiter = ", ";
+
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        const auto string_formatter = Formatter<std::string_view>{};
+        const auto value_formatter  = Formatter<typename std::decay_t<T>::value_type>{};
+
+        string_formatter(buffer, prefix);
+        if (arg.begin() != arg.end()) {
+            for (auto it = arg.begin();;) {
+                value_formatter(buffer, *it);
+                if (++it == arg.end()) break; // prevents trailing comma
+                string_formatter(buffer, delimiter);
+            }
+        }
+        string_formatter(buffer, suffix);
+    }
+};
+
+// tuple-like types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_tuple<std::decay_t<T>>::value>> {
+    static constexpr std::string_view prefix    = "< ";
+    static constexpr std::string_view suffix    = " >";
+    static constexpr std::string_view delimiter = ", ";
+
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        const auto string_formatter = Formatter<std::string_view>{};
+
+        string_formatter(buffer, prefix);
+
+        for_sequence(std::make_index_sequence<std::tuple_size_v<T>>{}, [&](auto index) {
+            const auto& element = std::get<index>(arg); // 'index' is an 'std::integral_constant<std::size_t, i>'
+
+            if constexpr (index != 0) string_formatter(buffer, delimiter);
+
+            Formatter<std::tuple_element_t<index, T>>{}(buffer, element);
+        });
+
+        string_formatter(buffer, suffix);
+    }
+};
+
+// container adaptor types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_adaptor<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        const auto& ref = underlying_container_cref(arg);
+
+        Formatter<std::decay_t<decltype(ref)>>{}(buffer, ref);
+    }
+};
+
+// TODO: <chrono> types
+
+// printable types
+template <class T>
+struct Formatter<T, std::enable_if_t<is_printable<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) const {
+        buffer.push_string((std::ostringstream{} << arg).str());
+        // creating a string stream every time is slow, but there is no way around it,
+        // this is simply a flaw of streams as a design
+    }
+};
+
+// 'FormattedFloat<T>' types
+template <class T>
+struct Formatter<FormattedFloat<T>, std::enable_if_t<is_float<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const FormattedFloat<T>& arg) const {
+        std::array<char, max_chars_int> res;
+
+        const std::size_t serialized =
+            std::to_chars(res.data(), res.data() + res.size(), arg.value, arg.mod.format, arg.mod.precision).ptr -
+            res.data();
+
+        buffer.push_string(std::string_view{res.data(), serialized});
+    }
+};
+
+// 'FormattedInteger<T>' types
+template <class T>
+struct Formatter<FormattedInteger<T>, std::enable_if_t<is_integer<std::decay_t<T>>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const FormattedInteger<T>& arg) const {
+        std::array<char, max_chars_int> res;
+
+        const std::size_t serialized =
+            std::to_chars(res.data(), res.data() + res.size(), arg.value, arg.mod.base).ptr - res.data();
+
+        buffer.push_string(std::string_view{res.data(), serialized});
+    }
+};
+
+// 'AlignedLeft<T>' types
+template <class T>
+struct Formatter<AlignedLeft<T>, void> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const AlignedLeft<T>& arg) const {
+        std::string& temp = thread_local_temporary_string();
+        StringBuffer temp_buffer(temp);
+
+        Formatter<T>{}(temp_buffer, arg.value);
+
+        const std::size_t size_no_pad   = temp.size();
+        const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
+        const std::size_t right_pad     = size_with_pad - size_no_pad;
+
+        buffer.push_string(temp);
+        buffer.push_chars(right_pad, ' ');
+    }
+};
+
+// 'AlignedCenter<T>' types
+template <class T>
+struct Formatter<AlignedCenter<T>, void> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const AlignedCenter<T>& arg) const {
+        std::string& temp = thread_local_temporary_string();
+        StringBuffer temp_buffer(temp);
+
+        Formatter<T>{}(temp_buffer, arg.value);
+
+        const std::size_t size_no_pad   = temp.size();
+        const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
+        const std::size_t left_pad      = (size_with_pad - size_no_pad) / 2;
+        const std::size_t right_pad     = size_with_pad - size_no_pad - left_pad;
+
+        buffer.push_chars(left_pad, ' ');
+        buffer.push_string(temp);
+        buffer.push_chars(right_pad, ' ');
+    }
+};
+
+// 'AlignedRight<T>' types
+template <class T>
+struct Formatter<AlignedRight<T>, void> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const AlignedRight<T>& arg) const {
+        std::string& temp = thread_local_temporary_string();
+        StringBuffer temp_buffer(temp);
+
+        Formatter<T>{}(temp_buffer, arg.value);
+
+        const std::size_t size_no_pad   = temp.size();
+        const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
+        const std::size_t left_pad      = size_with_pad - size_no_pad;
+
+        buffer.push_chars(left_pad, ' ');
+        buffer.push_string(temp);
+    }
+};
+
+// 'Colored<T>' types
+template <class T>
+struct Formatter<Colored<T>, void> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const Colored<T>& arg) const {
+        buffer.push_string(arg.mod.code);
+        Formatter<T>{}(buffer, arg.value);
+        buffer.push_string(ansi::reset);
+    }
+};
+
+// ==============
+// --- Logger ---
+// ==============
+
+// Class layout:
+//
+//    Logger               | Input: Message    | Output: Message    | - Captures meta, forwards message to all sinks
+//    -> tuple<Sink, ...>
+//
+//    Sink                 | Input: Message    | Output: Message    | - Wraps underlying API & provides defaults
+//    -> Protector         | Input: Message    | Output: Message    | - Handles safe/unsafe threading
+//       -> Writer         | Input: Message    | Output: Log string | - Handles message formatting
+//         -> Buffer       | Input: Log string | Output: Log string | - Handles instant/fixed/timed buffering
+//            -> Flusher   | Input: Log string | Output: Log string | - Handles sync/async flushing
+//               -> Output | Input: Log string | Output: Log string | - Wraps underlying IO output
+//
+// Specific instances of all listed components depend on specializations selected though policies.
+
+// --- Message metadata ---
+// ------------------------
+
+using Clock = std::chrono::steady_clock;
+
+// Metadata associated with a logging record, generated once by the 'Logger' and distributed to all sinks
+struct Record {
+    Clock::duration elapsed;
+    const char*     file;
+    std::size_t     line;
+};
+
+// --- Policies ---
+// ----------------
+
+namespace policy {
+
+enum class Type { FILE, STREAM };
+
+enum class Level { ERR = 0, WARN = 1, NOTE = 2, INFO = 3, DEBUG = 4, TRACE = 5 };
+
+enum class Color { NONE, ANSI };
+
+enum class Format {
+    DATE     = 1 << 0,
+    TITLE    = 1 << 1,
+    THREAD   = 1 << 2,
+    UPTIME   = 1 << 3,
+    CALLSITE = 1 << 4,
+    LEVEL    = 1 << 5,
+    NONE     = 0,
+    FULL     = TITLE | THREAD | UPTIME | CALLSITE | LEVEL
+}; // bitmask enum
+
+[[nodiscard]] constexpr Format operator|(Format a, Format b) noexcept {
+    return static_cast<Format>(to_underlying(a) | to_underlying(b));
+}
+
+enum class Buffering { NONE, FIXED, TIMED };
+
+enum class Flushing { SYNC, ASYNC };
+
+enum class Threading { UNSAFE, SAFE };
+
+} // namespace policy
+
+// =========================
+// --- Component: Output ---
+// =========================
+
+template <policy::Type type>
+class Output;
+
+// --- File output ---
+// -------------------
+
+template <>
+class Output<policy::Type::FILE> {
+    std::ofstream file;
+
+public:
+    Output(const std::string& name) : file(name) {}
+    Output(std::ofstream&& file) : file(std::move(file)) {}
+
+    void flush_string(std::string_view sv) {
+        this->file.write(sv.data(), sv.size());
+        this->file.flush();
+    }
+
+    void flush_chars(std::size_t count, char ch) {
+        std::ostreambuf_iterator<char> first(this->file);
+        for (std::size_t i = 0; i < count; ++i) first = ch;
+        // fastest way of writing N chars to a stream, 'std::ostreambuf_iterator' writes character to a stream
+        // when assigned, dereference/increment is no-op making it rather strange for an "iterator"
+    }
+};
+
+// --- Stream output ---
+// ---------------------
+
+template <>
+class Output<policy::Type::STREAM> {
+    std::ostream& os;
+
+public:
+    Output(std::ostream& os) noexcept : os(os) {}
+
+    void flush_string(std::string_view sv) {
+        this->os.write(sv.data(), sv.size());
+        this->os.flush();
+    }
+
+    void flush_chars(std::size_t count, char ch) {
+        std::ostreambuf_iterator<char> first(this->os);
+        for (std::size_t i = 0; i < count; ++i) first = ch;
+        // fastest way of writing N chars to a stream, 'std::ostreambuf_iterator' writes character to a stream
+        // when assigned, dereference/increment is no-op making it a rather strange case of an "iterator"
+    }
+};
+
+// ==========================
+// --- Component: Flusher ---
+// ==========================
+
+template <class OutputType, policy::Flushing flushing>
+class Flusher;
+
+// --- Synchonous flushing ---
+// ---------------------------
+
+template <class OutputType>
+class Flusher<OutputType, policy::Flushing::SYNC> {
+    OutputType output;
+
+public:
+    Flusher(OutputType&& output) : output(std::move(output)) {}
+
+    void flush_string(std::string_view sv) { this->output.flush_string(sv); }
+
+    void flush_chars(std::size_t count, char ch) { this->output.flush_chars(count, ch); }
+};
+
+// --- Async flushing ---
+// ----------------------
+
+// TODO: Async flusher
+
+// =========================
+// --- Component: Buffer ---
+// =========================
+
+template <class FlusherType, policy::Buffering buffering>
+class Buffer;
+
+// --- Instant buffering ---
+// -------------------------
+
+template <class FlusherType>
+class Buffer<FlusherType, policy::Buffering::NONE> {
+    FlusherType flusher;
+
+public:
+    Buffer(FlusherType&& flusher) : flusher(std::move(flusher)) {}
+
+    void push_record(const Record&) const noexcept {} // only matters for timed buffer
+
+    void push_string(std::string_view sv) { this->flusher.flush_string(sv); }
+
+    void push_chars(std::size_t count, char ch) { this->flusher.flush_chars(count, ch); }
+};
+
+// --- Fixed buffering ---
+// -----------------------
+
+template <class FlusherType>
+class Buffer<FlusherType, policy::Buffering::FIXED> {
+    constexpr static std::size_t size = buffering_size;
+
+    FlusherType            flusher;
+    std::array<char, size> buffer{};
+    std::size_t            cursor{};
+
+public:
+    Buffer(FlusherType&& output) : flusher(std::move(output)) {}
+
+    // Buffered flusher need non-trivial destructor and move semantics to ensure correct flushing of
+    // the remaining buffer upon destruction. Moved-from buffer should not flush upon destruction.
+    Buffer(Buffer&& other) : flusher(std::move(other.flusher)), buffer(other.buffer), cursor(other.cursor) {
+        other.cursor = size;
+    }
+
+    ~Buffer() {
+        if (this->cursor == size) return;
+
+        this->flusher.flush_string(std::string_view{this->buffer.data(), this->cursor});
+    }
+
+    void push_record(const Record&) const noexcept {} // only matters for timed buffer
+
+    void push_string(std::string_view sv) {
+        while (true) {
+            const std::size_t space_needed    = sv.size();
+            const std::size_t space_remaining = size - this->cursor;
+
+            // Fast path: Message fits into the buffer
+            if (space_needed <= space_remaining) {
+                for (std::size_t i = 0; i < space_needed; ++i) this->buffer[this->cursor + i] = sv[i];
+                this->cursor += space_needed;
+
+                return;
+            }
+            // Slow path: Message doesn't fit, need to flush
+            else {
+                for (std::size_t i = 0; i < space_remaining; ++i) this->buffer[this->cursor + i] = sv[i];
+                this->cursor = 0;
+                this->flusher.flush_string(std::string_view{this->buffer.data(), this->buffer.size()});
+
+                sv.remove_prefix(space_remaining);
+            }
+        }
+    }
+
+    void push_chars(std::size_t count, char ch) {
+        while (true) {
+            const std::size_t space_needed    = count;
+            const std::size_t space_remaining = size - this->cursor;
+
+            // Fast path: Message fits into the buffer
+            if (space_needed <= space_remaining) {
+                for (std::size_t i = 0; i < space_needed; ++i) this->buffer[this->cursor + i] = ch;
+                this->cursor += space_needed;
+
+                return;
+            }
+            // Slow path: Message doesn't fit, need to flush
+            else {
+                for (std::size_t i = 0; i < space_remaining; ++i) this->buffer[this->cursor + i] = ch;
+                this->cursor = 0;
+                this->flusher.flush_string(std::string_view{this->buffer.data(), this->buffer.size()});
+
+                count -= space_remaining; // guaranteed to not underflow
+            }
+        }
+    }
+};
+
+// --- Timed buffering ---
+// -----------------------
+
+template <class FlusherType>
+class Buffer<FlusherType, policy::Buffering::TIMED> {
+    FlusherType     flusher;
+    std::string     buffer;
+    Clock::duration last_flush_uptime{};
+
+public:
+    Buffer(FlusherType&& flusher) : flusher(std::move(flusher)) {}
+
+    void push_record(const Record& record) noexcept {
+        // retrieving timestamps is expensive, we can reuse the one already produced by the logger
+
+        if (record.elapsed - this->last_flush_uptime > buffering_time) {
+            this->flusher.flush_string(this->buffer);
+
+            this->buffer.clear();
+            // standard doesn't guarantee that this doesn't reallocate (unlike 'std::vector<>'), however all
+            // existing implementations do the reasonable thing and don't reallocate so we can mostly rely on it
+
+            this->last_flush_uptime = record.elapsed;
+        }
+    }
+
+    void push_string(std::string_view sv) {
+        this->buffer += sv;
+        this->try_flush();
+    }
+
+    void push_chars(std::size_t count, char ch) {
+        this->buffer.append(ch, count);
+        this->try_flush();
+    }
+};
+
+// =========================
+// --- Component: Writer ---
+// =========================
+
+// --- Style configuration ---
+// ---------------------------
+
+namespace config {
+
+constexpr std::size_t width_thread        = 6;
+constexpr std::size_t width_uptime        = 8;
+constexpr std::size_t width_callsize_name = 24; // split used for file:line alignment
+constexpr std::size_t width_callsite_line = 4;
+constexpr std::size_t width_callsite      = width_callsize_name + 1 + width_callsite_line;
+constexpr std::size_t width_level         = 5;
+constexpr std::size_t width_message       = 30; // doesn't limit actual message size, used for separator width
+
+constexpr std::string_view delimiter_front = "| ";
+constexpr std::string_view delimiter_mid   = " | ";
+
+constexpr std::string_view title_thread   = "thread";
+constexpr std::string_view title_uptime   = "  uptime";
+constexpr std::string_view title_callsite = "                     callsite";
+constexpr std::string_view title_level    = "level";
+constexpr std::string_view title_message  = "message";
+
+constexpr std::string_view date_prefix = "date -> ";
+
+constexpr char hline_fill = '-';
+
+constexpr std::string_view line_break = "\n";
+
+constexpr std::string_view name_err   = "  ERR";
+constexpr std::string_view name_warn  = " WARN";
+constexpr std::string_view name_note  = " NOTE";
+constexpr std::string_view name_info  = " INFO";
+constexpr std::string_view name_debug = "DEBUG";
+constexpr std::string_view name_trace = "TRACE";
+
+constexpr std::string_view color_header = ansi::bold_cyan;
+
+constexpr std::string_view color_err   = ansi::bold_red;
+constexpr std::string_view color_warn  = ansi::yellow;
+constexpr std::string_view color_note  = ansi::magenta;
+constexpr std::string_view color_info  = ansi::white;
+constexpr std::string_view color_debug = ansi::green;
+constexpr std::string_view color_trace = ansi::bright_black;
+
+static_assert(width_thread == title_thread.size());
+static_assert(width_uptime == title_uptime.size());
+static_assert(width_callsite == title_callsite.size());
+static_assert(width_level == title_level.size());
+static_assert(width_message > title_message.size());
+
+static_assert(width_level == name_trace.size());
+static_assert(width_level == name_debug.size());
+static_assert(width_level == name_info.size());
+static_assert(width_level == name_note.size());
+static_assert(width_level == name_warn.size());
+static_assert(width_level == name_err.size());
+
+} // namespace config
+
+// --- Component ---
+// -----------------
+
+// Component that wraps 'Formatter' with sink-specific formatting
+
+template <class BufferType, policy::Level level, policy::Color color, policy::Format format>
+struct Writer {
 private:
-    using os_ref_wrapper = std::reference_wrapper<std::ostream>;
+    BufferType buffer;
 
-    std::variant<os_ref_wrapper, std::ofstream> os_variant;
-    Verbosity                                   verbosity;
-    Colors                                      colors;
-    clock::duration                             flush_interval;
-    Columns                                     columns;
-    clock::time_point                           last_flushed;
-    bool                                        print_header = true;
-    mutable std::mutex                          ostream_mutex;
+    constexpr static bool has_color = color == policy::Color::ANSI;
 
-    friend struct Logger;
+    constexpr static bool format_date  = to_bool(format | policy::Format::DATE);
+    constexpr static bool format_title = to_bool(format | policy::Format::TITLE);
 
-    std::ostream& ostream_ref() {
-        if (const auto ref_wrapper_ptr = std::get_if<os_ref_wrapper>(&this->os_variant)) return ref_wrapper_ptr->get();
-        else return std::get<std::ofstream>(this->os_variant);
+    constexpr static auto delimiter_date = config::delimiter_front;
+
+    constexpr static bool format_thread   = to_bool(format | policy::Format::THREAD);
+    constexpr static bool format_uptime   = to_bool(format | policy::Format::UPTIME);
+    constexpr static bool format_callsite = to_bool(format | policy::Format::CALLSITE);
+    constexpr static bool format_level    = to_bool(format | policy::Format::LEVEL);
+    constexpr static bool format_message  = true;
+
+    constexpr static bool front_is_thread   = format_thread;
+    constexpr static bool front_is_uptime   = format_uptime && !front_is_thread;
+    constexpr static bool front_is_callsite = format_callsite && !front_is_uptime;
+    constexpr static bool front_is_level    = format_level && !front_is_callsite;
+    constexpr static bool front_is_message  = format_message && !front_is_level;
+
+    constexpr static auto delimiter_thread   = front_is_thread ? config::delimiter_front : config::delimiter_mid;
+    constexpr static auto delimiter_uptime   = front_is_uptime ? config::delimiter_front : config::delimiter_mid;
+    constexpr static auto delimiter_callsite = front_is_callsite ? config::delimiter_front : config::delimiter_mid;
+    constexpr static auto delimiter_level    = front_is_level ? config::delimiter_front : config::delimiter_mid;
+    constexpr static auto delimiter_message  = front_is_message ? config::delimiter_front : config::delimiter_mid;
+
+    void write_thread() {
+        using styled_type     = AlignedLeft<int>;
+        const styled_type arg = this_thread_linear_id() | align_left(config::width_thread);
+
+        Formatter<styled_type>{}(this->buffer, arg);
+    }
+
+    template <class Rec>
+    void write_uptime(const Rec& record) {
+        using styled_type     = AlignedRight<FormattedFloat<double>>;
+        const styled_type arg = Sec(record.elapsed).count() | fixed(2) | align_right(config::width_uptime);
+
+        Formatter<styled_type>{}(this->buffer, arg);
+    }
+
+    template <policy::Level message_level>
+    void write_level() {
+        // clang-format off
+        if constexpr (message_level == policy::Level::ERR  ) this->buffer.push_string(config::name_err  );
+        if constexpr (message_level == policy::Level::WARN ) this->buffer.push_string(config::name_warn );
+        if constexpr (message_level == policy::Level::NOTE ) this->buffer.push_string(config::name_note );
+        if constexpr (message_level == policy::Level::INFO ) this->buffer.push_string(config::name_info );
+        if constexpr (message_level == policy::Level::DEBUG) this->buffer.push_string(config::name_debug);
+        if constexpr (message_level == policy::Level::TRACE) this->buffer.push_string(config::name_trace);
+        // clang-format on
+    }
+
+    template <policy::Level message_level>
+    void write_color_message() {
+        // clang-format off
+        if constexpr (message_level == policy::Level::ERR  ) this->buffer.push_string(config::color_err  );
+        if constexpr (message_level == policy::Level::WARN ) this->buffer.push_string(config::color_warn );
+        if constexpr (message_level == policy::Level::NOTE ) this->buffer.push_string(config::color_note );
+        if constexpr (message_level == policy::Level::INFO ) this->buffer.push_string(config::color_info );
+        if constexpr (message_level == policy::Level::DEBUG) this->buffer.push_string(config::color_debug);
+        if constexpr (message_level == policy::Level::TRACE) this->buffer.push_string(config::color_trace);
+        // clang-format on
+    }
+
+    void write_color_header() { this->buffer.push_string(config::color_header); }
+
+    void write_color_reset() { this->buffer.push_string(ansi::reset); }
+
+    template <policy::Level message_level, class T>
+    void write_arg(const T& arg) {
+        Formatter<T>{}(this->buffer, arg);
+    }
+
+    // Color modifier requires special handling at the logger level since we need to properly escape & restore
+    // current logging level color. This wouldn't be required if ANSI codes could be nested.
+    template <policy::Level message_level, class T>
+    void write_arg(const Colored<T>& arg) {
+        // Switch to message color
+        if constexpr (has_color) this->write_color_reset();
+        if constexpr (has_color) this->buffer.push_string(arg.mod.code);
+
+        this->write_arg<message_level>(arg.value);
+
+        // Restore logger color
+        if constexpr (has_color) this->buffer.push_string(ansi::reset);
+        if constexpr (has_color) this->write_color_message<message_level>();
+    }
+
+    void write_header_datetime() {
+        this->buffer.push_string(config::delimiter_front);
+        this->buffer.push_string(config::date_prefix);
+        this->buffer.push_string(datetime_string());
+        this->buffer.push_string(config::line_break);
+    }
+
+    void write_header_separator() {
+        if constexpr (format_thread) this->buffer.push_string(delimiter_thread);
+        if constexpr (format_thread) this->buffer.push_chars(config::width_thread, config::hline_fill);
+        if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
+        if constexpr (format_uptime) this->buffer.push_chars(config::width_uptime, config::hline_fill);
+        if constexpr (format_level) this->buffer.push_string(delimiter_level);
+        if constexpr (format_level) this->buffer.push_chars(config::width_level, config::hline_fill);
+        this->buffer.push_string(delimiter_message);
+        this->buffer.push_chars(config::width_message, config::hline_fill);
+        this->buffer.push_string(config::line_break);
+    }
+
+    void write_header_hline() {
+        constexpr std::size_t w_thread  = format_thread ? (config::width_thread + delimiter_thread.size()) : 0;
+        constexpr std::size_t w_uptime  = format_uptime ? (config::width_uptime + delimiter_uptime.size()) : 0;
+        constexpr std::size_t w_level   = format_level ? (config::width_level + delimiter_level.size()) : 0;
+        constexpr std::size_t w_message = config::width_message + delimiter_message.size();
+
+        constexpr std::size_t hline_total = w_thread + w_uptime + w_level + w_message - config::delimiter_front.size();
+
+        this->buffer.push_string(config::delimiter_front);
+        this->buffer.push_chars(hline_total, config::hline_fill);
+        this->buffer.push_string(config::line_break);
+    }
+
+    void write_header_title() {
+        if constexpr (format_thread) this->buffer.push_string(delimiter_thread);
+        if constexpr (format_thread) this->buffer.push_string(config::title_thread);
+        if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
+        if constexpr (format_uptime) this->buffer.push_string(config::title_uptime);
+        if constexpr (format_level) this->buffer.push_string(delimiter_level);
+        if constexpr (format_level) this->buffer.push_string(config::title_level);
+        this->buffer.push_string(delimiter_message);
+        this->buffer.push_string(config::title_message);
+        this->buffer.push_string(config::line_break);
     }
 
 public:
-    Sink()            = delete;
-    Sink(const Sink&) = delete;
-    Sink(Sink&&)      = delete;
+    Writer(BufferType&& buffer) : buffer(std::move(buffer)) {}
 
-    Sink(std::ofstream&& os, Verbosity verbosity, Colors colors, clock::duration flush_interval, const Columns& columns)
-        : os_variant(std::move(os)), verbosity(verbosity), colors(colors), flush_interval(flush_interval),
-          columns(columns) {}
+    void header() {
+        if constexpr (!format_date && !format_title) return;
 
-    Sink(std::reference_wrapper<std::ostream> os, Verbosity verbosity, Colors colors, clock::duration flush_interval,
-         const Columns& columns)
-        : os_variant(os), verbosity(verbosity), colors(colors), flush_interval(flush_interval), columns(columns) {}
+        // Start color
+        if constexpr (has_color) this->write_color_header();
 
-    // We want a way of changing sink options using its handle / reference returned by the logger
-    Sink& set_verbosity(Verbosity new_verbosity) {
-        this->verbosity = new_verbosity;
-        return *this;
-    }
-    Sink& set_colors(Colors new_colors) {
-        this->colors = new_colors;
-        return *this;
-    }
-    Sink& set_flush_interval(clock::duration new_flush_interval) {
-        this->flush_interval = new_flush_interval;
-        return *this;
-    }
-    Sink& set_columns(const Columns& new_columns) {
-        this->columns = new_columns;
-        return *this;
-    }
-    Sink& skip_header(bool skip = true) {
-        this->print_header = !skip;
-        return *this;
-    }
-
-private:
-    template <class... Args>
-    void format(const Callsite& callsite, const MessageMetadata& meta, const Args&... args) {
-        if (meta.verbosity > this->verbosity) return;
-
-        thread_local std::string buffer;
-
-        const clock::time_point now = clock::now();
-
-        // To minimize logging overhead we use string buffer, append characters to it and then write the whole buffer
-        // to `std::ostream`. This avoids the inherent overhead of ostream formatting (caused largely by
-        // virtualization, syncronization and locale handling, neither of which are relevant for the logger).
-        //
-        // This buffer gets reused between calls. Note the 'thread_local', if buffer was just a class member, multiple
-        // threads could fight trying to clear and resize the buffer while it's being written to by another thread.
-        //
-        // Buffer may grow when formatting a message longer that any one that was formatted before, otherwise we just
-        // reuse the reserved memory and no new allocations take place.
-
-        buffer.clear();
-
-        // Print log header on the first call
-        {
-            static std::mutex     header_mutex;
-            const std::lock_guard lock(header_mutex);
-            if (this->print_header) {
-                this->print_header = false;
-                this->format_header(buffer);
-            }
-            // no need to lock the buffer, other threads can't reach buffer
-            // output code while they're stuck waiting for the header to print
+        if constexpr (format_date) {
+            this->write_header_hline();
+            this->write_header_datetime();
+            this->write_header_separator();
         }
 
-        // Format columns one-by-one
-        if (this->colors == Colors::ENABLE) switch (meta.verbosity) {
-            case Verbosity::ERR: buffer += color_err; break;
-            case Verbosity::WARN: buffer += color_warn; break;
-            case Verbosity::NOTE: buffer += color_note; break;
-            case Verbosity::INFO: buffer += color_info; break;
-            case Verbosity::DEBUG: buffer += color_debug; break;
-            case Verbosity::TRACE: buffer += color_trace; break;
-            }
-
-        if (this->columns.datetime) this->format_column_datetime(buffer);
-        if (this->columns.uptime) this->format_column_uptime(buffer, now);
-        if (this->columns.thread) this->format_column_thread(buffer);
-        if (this->columns.callsite) this->format_column_callsite(buffer, callsite);
-        if (this->columns.level) this->format_column_level(buffer, meta.verbosity);
-        if (this->columns.message) this->format_column_message(buffer, args...);
-
-        if (this->colors == Colors::ENABLE) buffer += color_reset;
-
-        // 'std::ostream' isn't guaranteed to be thread-safe, even through many implementations seem to have
-        // some thread-safety built into `std::cout` the same cannot be said about a generic 'std::ostream'
-        const std::lock_guard ostream_lock(this->ostream_mutex);
-
-        this->ostream_ref().write(buffer.data(), buffer.size());
-
-        // flush every message immediately
-        if (this->flush_interval.count() == 0) {
-            this->ostream_ref().flush();
+        if constexpr (format_title) {
+            this->write_header_title();
+            this->write_header_separator();
         }
-        // or flush periodically
-        else if (now - this->last_flushed > this->flush_interval) {
-            this->last_flushed = now;
-            this->ostream_ref().flush();
-        }
+
+        // End color
+        if constexpr (has_color) this->write_color_reset();
     }
 
-    void format_header(std::string& buffer) {
-        if (this->colors == Colors::ENABLE) buffer += color_heading;
-        if (this->columns.datetime)
-            append_stringified(buffer, col_ld_datetime, PadRight{"date       time", col_w_datetime}, col_rd_datetime);
-        if (this->columns.uptime)
-            append_stringified(buffer, col_ld_uptime, PadRight{"uptime", col_w_uptime}, col_rd_uptime);
-        if (this->columns.thread)
-            append_stringified(buffer, col_ld_thread, PadRight{"thread", col_w_thread}, col_rd_thread);
-        if (this->columns.callsite)
-            append_stringified(buffer, col_ld_callsite, PadRight{"callsite", col_w_callsite}, col_rd_callsite);
-        if (this->columns.level) append_stringified(buffer, col_ld_level, PadRight{"level", col_w_level}, col_rd_level);
-        if (this->columns.message) append_stringified(buffer, col_ld_message, "message", col_rd_message);
-        if (this->colors == Colors::ENABLE) buffer += color_reset;
-    }
+    template <policy::Level message_level, class Rec, class... Args>
+    void message(const Rec& record, const Args&... args) {
+        if constexpr (message_level > level) return; // filters messages above writer verbosity level
 
-    void format_column_datetime(std::string& buffer) {
-        std::time_t timer = std::time(nullptr);
-        std::tm     time_moment{};
+        // Start color
+        if constexpr (has_color) this->write_color_message<message_level>();
 
-        available_localtime_impl(&time_moment, &timer);
+        // Format info & message
+        if constexpr (format_thread) this->buffer.push_string(delimiter_thread);
+        if constexpr (format_thread) this->write_thread();
+        if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
+        if constexpr (format_uptime) this->write_uptime(record);
+        if constexpr (format_level) this->buffer.push_string(delimiter_level);
+        if constexpr (format_level) this->write_level<message_level>();
 
-        // Format time straight into the buffer
-        std::array<char, col_w_datetime + 1> strftime_buffer; // size includes the null terminator added by 'strftime()'
-        std::strftime(strftime_buffer.data(), strftime_buffer.size(), "%Y-%m-%d %H:%M:%S", &time_moment);
+        this->buffer.push_string(delimiter_message);
+        (this->write_arg<message_level>(args), ...);
+        this->buffer.push_string(config::line_break);
 
-        // strftime_buffer.back() = ' '; // replace null-terminator added by 'strftime()' with a space
-        buffer += col_ld_datetime;
-        buffer.append(strftime_buffer.data(), col_w_datetime);
-        buffer += col_rd_datetime;
-    }
+        // Notify buffer of the record metadata it can potentially use
+        this->buffer.push_record(record);
 
-    void format_column_uptime(std::string& buffer, clock::time_point now) {
-        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - program_entry_time_point);
-        const auto sec        = (elapsed_ms / 1000).count();
-        const auto ms         = (elapsed_ms % 1000).count(); // is 'elapsed_ms - 1000 * full_seconds; faster?
-
-        const unsigned int sec_digits = integer_digit_count(sec);
-        const unsigned int ms_digits  = integer_digit_count(ms);
-
-        buffer += col_ld_uptime;
-
-        // Left-pad the value to column width (doing it manually is a bit faster than using PadLeft{})
-        if (sec_digits < w_uptime_sec) buffer.append(w_uptime_sec - sec_digits, ' ');
-        append_stringified(buffer, sec);
-
-        buffer += '.';
-
-        // Add leading zeroes to a fixed length
-        if (ms_digits < w_uptime_ms) buffer.append(w_uptime_ms - ms_digits, '0');
-        append_stringified(buffer, ms);
-
-        buffer += col_rd_uptime;
-    }
-
-    void format_column_thread(std::string& buffer) {
-        const auto thread_id       = get_thread_index(std::this_thread::get_id());
-        const auto thread_id_width = integer_digit_count(thread_id);
-
-        buffer += col_ld_thread;
-        if (thread_id_width < col_w_thread) buffer.append(col_w_thread - thread_id_width, ' ');
-        append_stringified(buffer, thread_id);
-        buffer += col_rd_thread;
-    }
-
-    void format_column_callsite(std::string& buffer, const Callsite& callsite) {
-        // Get just filename from the full path
-        std::string_view filename = callsite.file.substr(callsite.file.find_last_of("/\\") + 1);
-
-        // Left-pad callsite to column width, trim first characters if it's too long
-        if (filename.size() < w_callsite_before_dot) buffer.append(w_callsite_before_dot - filename.size(), ' ');
-        else filename.remove_prefix(w_callsite_before_dot - filename.size());
-
-        buffer += col_ld_callsite;
-        buffer += filename;
-        buffer += ':';
-        // Right-pad line number
-        append_stringified(buffer, callsite.line);
-        buffer.append(w_callsite_after_dot - integer_digit_count(callsite.line), ' ');
-        buffer += col_rd_callsite;
-    }
-
-    void format_column_level(std::string& buffer, Verbosity level) {
-        buffer += col_ld_level;
-        switch (level) {
-        case Verbosity::ERR: buffer += "  ERR"; break;
-        case Verbosity::WARN: buffer += " WARN"; break;
-        case Verbosity::NOTE: buffer += " NOTE"; break;
-        case Verbosity::INFO: buffer += " INFO"; break;
-        case Verbosity::DEBUG: buffer += "DEBUG"; break;
-        case Verbosity::TRACE: buffer += "TRACE"; break;
-        }
-        buffer += col_rd_level;
-    }
-
-    template <class... Args>
-    void format_column_message(std::string& buffer, const Args&... args) {
-        buffer += col_ld_message;
-        append_stringified(buffer, args...);
-        buffer += col_rd_message;
+        // End color
+        if constexpr (has_color) this->write_color_reset();
     }
 };
 
-// ====================
-// --- Logger class ---
-// ====================
+// ============================
+// --- Component: Protector ---
+// ============================
 
-struct Logger {
-    inline static std::list<Sink> sinks;
-    // we use list<> because we don't want sinks to ever reallocate when growing / shrinking
-    // (reallocation requires a move-constructor, which 'std::mutex' doesn't have),
-    // the added overhead of iterating a list is negligible
+template <class WriterType, policy::Threading>
+class Protector;
 
-    static inline Sink default_sink{std::cout, Verbosity::TRACE, Colors::ENABLE, std::chrono::milliseconds(0),
-                                    Columns{}};
+// --- Thread-unsafe writing ---
+// -----------------------------
 
-    static Logger& instance() {
-        static Logger logger;
-        return logger;
+template <class WriterType>
+class Protector<WriterType, policy::Threading::UNSAFE> {
+    WriterType writer;
+
+public:
+    Protector(WriterType&& writer) : writer(std::move(writer)) {}
+
+    template <class Writer>
+    void header() {
+        this - writer.header();
     }
 
-    template <class... Args>
-    void push_message(const Callsite& callsite, const MessageMetadata& meta, const Args&... args) {
-        // When no sinks were manually created, default sink-to-terminal takes over
-        if (this->sinks.empty()) {
-            // static Sink default_sink(std::cout, Verbosity::TRACE, Colors::ENABLE, ms(0), Columns{});
-            default_sink.format(callsite, meta, args...);
-        } else
-            for (auto& sink : this->sinks) sink.format(callsite, meta, args...);
+    template <policy::Level message_level, class Rec, class... Args>
+    void message(const Rec& record, const Args&... args) {
+        this->writer.template message<message_level>(record, std::forward<Args>(args)...);
+    }
+};
+
+// --- Thread-safe writing ---
+// ---------------------------
+
+template <class WriterType>
+class Protector<WriterType, policy::Threading::SAFE> {
+    WriterType writer;
+    std::mutex mutex;
+
+public:
+    Protector(WriterType&& writer) : writer(std::move(writer)) {}
+
+    Protector(Protector&& other) : writer(std::move(other.writer)) {}
+    // we assume move to be thread-safe since it should only be done in logger constructor which is thread-safe
+    // by itself due being either 'static' or function-local, otherwise we'd need to lock 'other.mutex'
+
+    void header() { this->writer.header(); }
+
+    template <policy::Level message_level, class Rec, class... Args>
+    void message(const Rec& record, const Args&... args) {
+        const std::lock_guard lock(this->mutex);
+        this->writer.template message<message_level>(record, args...);
     }
 };
 
 // =======================
-// --- Sink public API ---
+// --- Component: Sink ---
 // =======================
 
-inline Sink& add_ostream_sink(std::ostream&   os,                                           //
-                              Verbosity       verbosity      = Verbosity::INFO,             //
-                              Colors          colors         = Colors::ENABLE,              //
-                              clock::duration flush_interval = std::chrono::milliseconds{}, //
-                              const Columns&  columns        = Columns{}                    //
-) {
-    return Logger::instance().sinks.emplace_back(os, verbosity, colors, flush_interval, columns);
+// Component that wraps all the previous components into a public API with defaults & CTAD
+
+// clang-format off
+template <
+    policy::Type      type,
+    policy::Level     level     = (type == policy::Type::STREAM) ? policy::Level::INFO : policy::Level::TRACE,
+    policy::Color     color     = (type == policy::Type::STREAM) ? policy::Color::ANSI : policy::Color::NONE,
+    policy::Format    format    = policy::Format::FULL,
+    policy::Buffering buffering = (type == policy::Type::STREAM) ? policy::Buffering::NONE : policy::Buffering::FIXED,
+    policy::Flushing  flushing  = policy::Flushing::SYNC,
+    policy::Threading threading = policy::Threading::SAFE
+>
+// clang-format on
+class Sink {
+    using output_type    = Output<type>;
+    using flusher_type   = Flusher<output_type, flushing>;
+    using buffer_type    = Buffer<flusher_type, buffering>;
+    using writer_type    = Writer<buffer_type, level, color, format>;
+    using protector_type = Protector<writer_type, threading>;
+
+    protector_type protector;
+
+public:
+    Sink(protector_type&& protector) : protector(std::move(protector)) { this->protector.header(); }
+
+    template <policy::Level message_level, class Rec, class... Args>
+    void message(const Rec& record, const Args&... args) {
+        this->protector.template message<message_level>(record, args...);
+    }
+
+    // Stream sink preset
+    Sink(std::ostream& os) : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(os)))))) {}
+    // File sink preset
+    Sink(std::ofstream&& file)
+        : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(std::move(file))))))) {}
+    Sink(std::string_view name)
+        : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(std::string(name))))))) {}
+};
+
+// CTAD for presets
+Sink(std::ostream&)->Sink<policy::Type::STREAM>;
+Sink(std::ofstream&&)->Sink<policy::Type::FILE>;
+Sink(std::string_view)->Sink<policy::Type::FILE>;
+
+// =========================
+// --- Component: Logger ---
+// =========================
+
+// Component that wraps a number of sinks and distributes records to them
+
+template <class... Sinks>
+class Logger {
+    std::tuple<Sinks...> sinks;
+    Clock::time_point    creation_time_point = Clock::now();
+
+    template <policy::Level message_level, class... Args>
+    void message(const Args&... args) {
+        // Get record info
+        Record record;
+        record.elapsed = Clock::now() - this->creation_time_point;
+
+        // Forward record & message to every sink
+        tuple_for_each(this->sinks, [&](auto&& sink) { sink.template message<message_level>(record, args...); });
+    }
+
+public:
+    Logger(Sinks&&... sinks) : sinks(std::move(sinks)...) {}
+
+    // clang-format off
+    template <class... Args> void err  (const Args&... args) { this->message<policy::Level::ERR  >(args...); }
+    template <class... Args> void warn (const Args&... args) { this->message<policy::Level::WARN >(args...); }
+    template <class... Args> void note (const Args&... args) { this->message<policy::Level::NOTE >(args...); }
+    template <class... Args> void info (const Args&... args) { this->message<policy::Level::INFO >(args...); }
+    template <class... Args> void debug(const Args&... args) { this->message<policy::Level::DEBUG>(args...); }
+    template <class... Args> void trace(const Args&... args) { this->message<policy::Level::TRACE>(args...); }
+    // clang-format on
+};
+
+// =============================
+// --- Pre-configured logger ---
+// =============================
+
+inline auto& default_logger() {
+    static auto logger = Logger{Sink{std::cout}, Sink{"latest.log"}};
+    return logger;
 }
 
-inline Sink& add_file_sink(const std::string& filename,                                       //
-                           OpenMode           open_mode      = OpenMode::REWRITE,             //
-                           Verbosity          verbosity      = Verbosity::TRACE,              //
-                           Colors             colors         = Colors::DISABLE,               //
-                           clock::duration    flush_interval = std::chrono::milliseconds{15}, //
-                           const Columns&     columns        = Columns{}                      //
-) {
-    const auto ios_open_mode = (open_mode == OpenMode::APPEND) ? std::ios::out | std::ios::app : std::ios::out;
-    return Logger::instance().sinks.emplace_back(std::ofstream(filename, ios_open_mode), verbosity, colors,
-                                                 flush_interval, columns);
+// clang-format off
+template <class... Args> void err  (const Args&... args) { default_logger().err  (args...); }
+template <class... Args> void warn (const Args&... args) { default_logger().warn (args...); }
+template <class... Args> void note (const Args&... args) { default_logger().note (args...); }
+template <class... Args> void info (const Args&... args) { default_logger().info (args...); }
+template <class... Args> void debug(const Args&... args) { default_logger().debug(args...); }
+template <class... Args> void trace(const Args&... args) { default_logger().trace(args...); }
+// clang-format on
+
+// ================
+// --- Printing ---
+// ================
+
+template <class... Args>
+void stringify_append(std::string& str, const Args&... args) {
+    // Format all 'args' into a string using the same buffer abstraction as logging sinks, this doesn't add overhead
+    StringBuffer buffer(str);
+    (Formatter<Args>{}(buffer, args), ...);
 }
 
-// ======================
-// --- Logging macros ---
-// ======================
+template <class... Args>
+std::string stringify(const Args&... args) {
+    std::string res;
+    stringify_append(res, args...);
+    return res;
+}
 
-#define UTL_LOG_ERR(...)                                                                                               \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::ERR}, __VA_ARGS__)
+template <class... Args>
+void print(const Args&... args) {
+    // Print all 'args' to console in a thread-safe way with instant flushing
+    static std::mutex     mutex;
+    const std::lock_guard lock(mutex);
 
-#define UTL_LOG_WARN(...)                                                                                              \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::WARN},           \
-                                                    __VA_ARGS__)
+    std::cout << stringify(args...) << std::flush;
+}
 
-#define UTL_LOG_NOTE(...)                                                                                              \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::NOTE},           \
-                                                    __VA_ARGS__)
-
-#define UTL_LOG_INFO(...)                                                                                              \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::INFO},           \
-                                                    __VA_ARGS__)
-
-#define UTL_LOG_DEBUG(...)                                                                                             \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::DEBUG},          \
-                                                    __VA_ARGS__)
-
-#define UTL_LOG_TRACE(...)                                                                                             \
-    utl::log::impl::Logger::instance().push_message({__FILE__, __LINE__}, {utl::log::impl::Verbosity::TRACE},          \
-                                                    __VA_ARGS__)
-
-#ifdef _DEBUG
-#define UTL_LOG_DERR(...) UTL_LOG_ERR(__VA_ARGS__)
-#define UTL_LOG_DWARN(...) UTL_LOG_WARN(__VA_ARGS__)
-#define UTL_LOG_DNOTE(...) UTL_LOG_NOTE(__VA_ARGS__)
-#define UTL_LOG_DINFO(...) UTL_LOG_INFO(__VA_ARGS__)
-#define UTL_LOG_DDEBUG(...) UTL_LOG_DEBUG(__VA_ARGS__)
-#define UTL_LOG_DTRACE(...) UTL_LOG_TRACE(__VA_ARGS__)
-#else
-#define UTL_LOG_DERR(...)
-#define UTL_LOG_DWARN(...)
-#define UTL_LOG_DNOTE(...)
-#define UTL_LOG_DINFO(...)
-#define UTL_LOG_DDEBUG(...)
-#define UTL_LOG_DTRACE(...)
-#endif
+template <class... Args>
+void println(const Args&... args) {
+    print(args..., '\n');
+}
 
 } // namespace utl::log::impl
 
@@ -4036,31 +4662,33 @@ inline Sink& add_file_sink(const std::string& filename,                         
 
 namespace utl::log {
 
-using impl::PadLeft;
-using impl::PadRight;
-using impl::Pad;
-
-using impl::StringifierBase;
-using impl::Stringifier;
-
-using impl::append_stringified;
-using impl::stringify;
-
-using impl::print;
-using impl::println;
-
-using impl::Verbosity;
-using impl::OpenMode;
-using impl::Colors;
-
-using impl::Columns;
-
+using impl::Logger;
 using impl::Sink;
 
-using impl::add_ostream_sink;
-using impl::add_file_sink;
+namespace policy = impl::policy;
 
-// macro -> ...
+using impl::general;
+using impl::fixed;
+using impl::scientific;
+using impl::hex;
+using impl::base;
+using impl::align_left;
+using impl::align_center;
+using impl::align_right;
+
+namespace color = impl::color;
+
+using impl::err;
+using impl::warn;
+using impl::note;
+using impl::info;
+using impl::debug;
+using impl::trace;
+
+using impl::stringify_append;
+using impl::stringify;
+using impl::print;
+using impl::println;
 
 } // namespace utl::log
 

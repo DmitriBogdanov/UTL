@@ -30,7 +30,7 @@ void benchmark_stringification_int() {
 
     benchmark("log::append_stringified()", [&]() {
         std::string str;
-        REPEAT(repeats) log::append_stringified(str, dist(gen));
+        REPEAT(repeats) log::stringify_append(str, dist(gen));
         DO_NOT_OPTIMIZE_AWAY(str);
     });
 
@@ -76,7 +76,7 @@ void benchmark_stringification_float() {
 
     benchmark("log::append_stringified()", [&]() {
         std::string str;
-        REPEAT(repeats) log::append_stringified(str, dist(gen));
+        REPEAT(repeats) log::stringify_append(str, dist(gen));
         DO_NOT_OPTIMIZE_AWAY(str);
     });
 
@@ -115,7 +115,7 @@ void benchmark_stringification_bool() {
 
     benchmark("log::append_stringified()", [&]() {
         std::string str;
-        REPEAT(repeats) log::append_stringified(str, dist(gen));
+        REPEAT(repeats) log::stringify_append(str, dist(gen));
         DO_NOT_OPTIMIZE_AWAY(str);
     });
 
@@ -163,7 +163,7 @@ void benchmark_stringification_vector_of_strings() {
 
     benchmark("log::append_stringified()", [&]() {
         std::string str;
-        REPEAT(repeats) log::append_stringified(str, random_vector_of_strings());
+        REPEAT(repeats) log::stringify_append(str, random_vector_of_strings());
         DO_NOT_OPTIMIZE_AWAY(str);
     });
 
