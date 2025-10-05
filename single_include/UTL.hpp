@@ -3532,110 +3532,75 @@ utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::de
 // A simple way to do it would be to have and 'if constexpr' chain inside the formatter,
 // however that would leave user with no good customization points.
 //
-// We can emulate an 'if constexpr' chain on the type trait level itself by having a constantly
-// "growing" 'exclude_' trait, which allows traits to reject types that have already satisfied a
-// trait higher on the priority chain:
-//    > template <class T>
-//    > constexpr bool exclude_TYPE_v = exclude_PREV_TYPE_v<T> || is_PREV_TYPE_v<T>;
-//    >
-//    > template <class T>
-//    > constexpr bool is_TYPE_v = !exclude_TYPE_v<T> || TYPE_TRAITS_FOR_CURRENT_TYPE<T>;
+// We can emulate an 'if constexpr' chain on the type trait level by arranging them in a following pattern:
+//    > is_TYPE_i = /* if TYPE should be included due to its properties         */;
+//    > is_TYPE_e = /* if TYPE should be excluded due to already having a match */;
+//    > is_TYPE_v = is_TYPE_i && !is_TYPE_e;
 //
-// The last piece of the puzzle is how to make use of our traits. We can use some kind of 'Formatter'
-// class with trait-based partial specialization, this class will contain a method for formatting
-// given type. If user wants to add/override for some type, they can just add a specialization
-// of 'Formatter' for this type and it will take priority over the partial specialization.
-//
-// All this template manipulation might seem too sophisticated for the task, but I'd yet to
-// figure out a better way of achieving such behavior. 'std::conjunction' / 'std::disjunction'
-// provides short-circuiting, so despite the seemingly extreme nesting of trait templates
-// resulting compile times don't seem to be significantly affected.
+// Similar effect could be achieved in other ways, but this one proved to be so far the least impactful
+// in terms of compile times, as we don't introduce and deep template nesting & minimize instantiations.
 
-// char types ('char')
-template <class T>
-using exclude_char = std::disjunction<std::false_type>;
-template <class T>
-using is_char = std::conjunction<std::negation<exclude_char<T>>, std::is_same<T, char>>;
-
-// enum types
-template <class T>
-using exclude_enum = std::disjunction<exclude_char<T>, is_char<T>>;
-template <class T>
-using is_enum = std::conjunction<std::negation<exclude_enum<T>>, std::is_enum<T>>;
-
-// types with '.string()' ('std::path')
-template <class T>
-using exclude_path = std::disjunction<exclude_enum<T>, is_enum<T>>;
-template <class T>
-using is_path = std::conjunction<std::negation<exclude_path<T>>, has_string<T>>;
-
-// string-like types ('std::string_view', 'std::string', 'const char*')
-template <class T>
-using exclude_string = std::disjunction<exclude_path<T>, is_path<T>>;
-template <class T>
-using is_string = std::conjunction<std::negation<exclude_string<T>>, std::is_convertible<T, std::string_view>>;
-
-// string-convertible types (custom classes)
-template <class T>
-using exclude_string_convertible = std::disjunction<exclude_string<T>, is_string<T>>;
-template <class T>
-using is_string_convertible =
-    std::conjunction<std::negation<exclude_string_convertible<T>>, std::is_convertible<T, std::string>>;
-
-// boolean types ('bool')
-template <class T>
-using exclude_bool = std::disjunction<exclude_string_convertible<T>, is_string_convertible<T>>;
-template <class T>
-using is_bool = std::conjunction<std::negation<exclude_bool<T>>, std::is_same<T, bool>>;
-;
-
-// integer types ('int', 'std::uint64_t', etc.)
-template <class T>
-using exclude_integer = std::disjunction<exclude_bool<T>, is_bool<T>>;
-template <class T>
-using is_integer = std::conjunction<std::negation<exclude_integer<T>>, std::is_integral<T>>;
-
-// floating-point types
-template <class T>
-using exclude_float = std::disjunction<exclude_integer<T>, is_integer<T>>;
-template <class T>
-using is_float = std::conjunction<std::negation<exclude_float<T>>, std::is_floating_point<T>>;
-
-// 'std::complex'-like types
-template <class T>
-using exclude_complex = std::disjunction<exclude_float<T>, is_float<T>>;
-template <class T>
-using is_complex = std::conjunction<std::negation<exclude_complex<T>>, has_real<T>, has_imag<T>>;
-
-// array-like types
-template <class T>
-using exclude_array = std::disjunction<exclude_complex<T>, is_complex<T>>;
-template <class T>
-using is_array = std::conjunction<std::negation<exclude_array<T>>, has_begin<T>, has_end<T>, has_input_it<T>>;
-
-// tuple-like types
-template <class T>
-using exclude_tuple = std::disjunction<exclude_array<T>, is_array<T>>;
-template <class T>
-using is_tuple = std::conjunction<std::negation<exclude_tuple<T>>, has_get<T>, has_tuple_size<T>>;
-
-// container adaptor types
-template <class T>
-using exclude_adaptor = std::disjunction<exclude_tuple<T>, is_tuple<T>>;
-template <class T>
-using is_adaptor = std::conjunction<std::negation<exclude_adaptor<T>>, has_container_type<T>>;
-
-// <chrono> types
-template <class T>
-using exclude_duration = std::disjunction<exclude_adaptor<T>, is_adaptor<T>>;
-template <class T>
-using is_duration = std::conjunction<std::negation<exclude_duration<T>>, has_rep<T>, has_period<T>>;
-
-// printable types
-template <class T>
-using exclude_printable = std::disjunction<exclude_duration<T>, is_duration<T>>;
-template <class T>
-using is_printable = std::conjunction<std::negation<exclude_printable<T>>, has_ostream_insert<T>>;
+template <class Type>
+struct Traits {
+    using T = std::decay_t<Type>;
+    
+    // char types ('char')
+    constexpr static bool is_char_i = std::is_same_v<T, char>;
+    constexpr static bool is_char_e = false;
+    constexpr static bool is_char_v = is_char_i && !is_char_e;
+    // enum types
+    constexpr static bool is_enum_i = std::is_enum_v<T>;
+    constexpr static bool is_enum_e = is_char_e || is_char_i;
+    constexpr static bool is_enum_v = is_enum_i && !is_enum_e;
+    // types with '.string()' ('std::path')
+    constexpr static bool is_path_i = has_string_v<T>;
+    constexpr static bool is_path_e = is_enum_e || is_enum_i;
+    constexpr static bool is_path_v = is_path_i && !is_path_e;
+    // string-like types ('std::string_view', 'std::string', 'const char*')
+    constexpr static bool is_string_i = std::is_convertible_v<T, std::string_view>;
+    constexpr static bool is_string_e = is_path_e || is_path_i;
+    constexpr static bool is_string_v = is_string_i && !is_string_e;
+    // string-convertible types (custom classes)
+    constexpr static bool is_string_convertible_i = std::is_convertible_v<T, std::string>;
+    constexpr static bool is_string_convertible_e = is_string_e || is_string_i;
+    constexpr static bool is_string_convertible_v = is_string_convertible_i && !is_string_convertible_e;
+    // boolean types ('bool')
+    constexpr static bool is_bool_i = std::is_same_v<T, bool>;
+    constexpr static bool is_bool_e = is_string_convertible_e || is_string_convertible_i;
+    constexpr static bool is_bool_v = is_bool_i && !is_bool_e;
+    // integer types ('int', 'std::uint64_t', etc.)
+    constexpr static bool is_integer_i = std::is_integral_v<T>;
+    constexpr static bool is_integer_e = is_bool_e || is_bool_i;
+    constexpr static bool is_integer_v = is_integer_i && !is_integer_e;
+    // floating-point types
+    constexpr static bool is_float_i = std::is_floating_point_v<T>;
+    constexpr static bool is_float_e = is_integer_e || is_integer_i;
+    constexpr static bool is_float_v = is_float_i && !is_float_e;
+    // 'std::complex'-like types
+    constexpr static bool is_complex_i = has_imag_v<T>;
+    constexpr static bool is_complex_e = is_float_e || is_float_i;
+    constexpr static bool is_complex_v = is_complex_i && !is_complex_e;
+    // array-like types
+    constexpr static bool is_array_i = has_begin_v<T> && has_end_v<T> && has_input_it_v<T>;
+    constexpr static bool is_array_e = is_complex_e || is_complex_i;
+    constexpr static bool is_array_v = is_array_i && !is_array_e;
+    // tuple-like types
+    constexpr static bool is_tuple_i = has_get_v<T> && has_tuple_size_v<T>;
+    constexpr static bool is_tuple_e = is_array_e || is_array_i;
+    constexpr static bool is_tuple_v = is_tuple_i && !is_tuple_e;
+    // container adaptor types
+    constexpr static bool is_adaptor_i = has_container_type_v<T>;
+    constexpr static bool is_adaptor_e = is_tuple_e || is_tuple_i;
+    constexpr static bool is_adaptor_v = is_adaptor_i && !is_adaptor_e;
+    // <chrono> types
+    constexpr static bool is_duration_i = has_rep_v<T> && has_period_v<T>;
+    constexpr static bool is_duration_e = is_adaptor_e || is_adaptor_i;
+    constexpr static bool is_duration_v = is_duration_i && !is_duration_e;
+    // printable types
+    constexpr static bool is_printable_i = has_ostream_insert_v<T>;
+    constexpr static bool is_printable_e = is_duration_e || is_duration_i;
+    constexpr static bool is_printable_v = is_printable_i && !is_printable_e;
+};
 
 // --- String buffer ---
 // ---------------------
@@ -3665,7 +3630,7 @@ struct Formatter {
 
 // char types ('char')
 template <class T>
-struct Formatter<T, std::enable_if_t<is_char<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_char_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_chars(1, arg);
@@ -3674,7 +3639,7 @@ struct Formatter<T, std::enable_if_t<is_char<std::decay_t<T>>::value>> {
 
 // enum types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_enum<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_enum_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         Formatter<std::underlying_type_t<std::decay_t<T>>>{}(buffer, to_underlying(arg));
@@ -3683,7 +3648,7 @@ struct Formatter<T, std::enable_if_t<is_enum<std::decay_t<T>>::value>> {
 
 // types with '.string()' ('std::path')
 template <class T>
-struct Formatter<T, std::enable_if_t<is_path<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_path_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(arg.string());
@@ -3692,7 +3657,7 @@ struct Formatter<T, std::enable_if_t<is_path<std::decay_t<T>>::value>> {
 
 // string-like types ('std::string_view', 'std::string', 'const char*')
 template <class T>
-struct Formatter<T, std::enable_if_t<is_string<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_string_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(std::string_view{arg});
@@ -3701,7 +3666,7 @@ struct Formatter<T, std::enable_if_t<is_string<std::decay_t<T>>::value>> {
 
 // string-convertible types (custom classes)
 template <class T>
-struct Formatter<T, std::enable_if_t<is_string_convertible<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_string_convertible_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(std::string{arg});
@@ -3710,7 +3675,7 @@ struct Formatter<T, std::enable_if_t<is_string_convertible<std::decay_t<T>>::val
 
 // boolean types ('bool')
 template <class T>
-struct Formatter<T, std::enable_if_t<is_bool<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_bool_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(arg ? "true" : "false");
@@ -3719,7 +3684,7 @@ struct Formatter<T, std::enable_if_t<is_bool<std::decay_t<T>>::value>> {
 
 // integral types ('int', 'std::uint64_t', etc.)
 template <class T>
-struct Formatter<T, std::enable_if_t<is_integer<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_integer_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         std::array<char, max_chars_int> res;
@@ -3732,7 +3697,7 @@ struct Formatter<T, std::enable_if_t<is_integer<std::decay_t<T>>::value>> {
 
 // floating-point types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_float<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_float_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         std::array<char, max_chars_int> res;
@@ -3745,7 +3710,7 @@ struct Formatter<T, std::enable_if_t<is_float<std::decay_t<T>>::value>> {
 
 // 'std::complex'-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_complex<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_complex_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         const auto string_formatter = Formatter<std::string_view>{};
@@ -3765,7 +3730,7 @@ struct Formatter<T, std::enable_if_t<is_complex<std::decay_t<T>>::value>> {
 
 // array-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_array<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_array_v>> {
     static constexpr std::string_view prefix    = "[ ";
     static constexpr std::string_view suffix    = " ]";
     static constexpr std::string_view delimiter = ", ";
@@ -3789,7 +3754,7 @@ struct Formatter<T, std::enable_if_t<is_array<std::decay_t<T>>::value>> {
 
 // tuple-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_tuple<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_tuple_v>> {
     static constexpr std::string_view prefix    = "< ";
     static constexpr std::string_view suffix    = " >";
     static constexpr std::string_view delimiter = ", ";
@@ -3814,7 +3779,7 @@ struct Formatter<T, std::enable_if_t<is_tuple<std::decay_t<T>>::value>> {
 
 // container adaptor types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_adaptor<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_adaptor_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         const auto& ref = underlying_container_cref(arg);
@@ -3827,7 +3792,7 @@ struct Formatter<T, std::enable_if_t<is_adaptor<std::decay_t<T>>::value>> {
 
 // printable types
 template <class T>
-struct Formatter<T, std::enable_if_t<is_printable<std::decay_t<T>>::value>> {
+struct Formatter<T, std::enable_if_t<Traits<T>::is_printable_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string((std::ostringstream{} << arg).str());
@@ -3838,7 +3803,7 @@ struct Formatter<T, std::enable_if_t<is_printable<std::decay_t<T>>::value>> {
 
 // 'FormattedFloat<T>' types
 template <class T>
-struct Formatter<FormattedFloat<T>, std::enable_if_t<is_float<std::decay_t<T>>::value>> {
+struct Formatter<FormattedFloat<T>, std::enable_if_t<Traits<T>::is_float_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const FormattedFloat<T>& arg) const {
         std::array<char, max_chars_int> res;
@@ -3853,7 +3818,7 @@ struct Formatter<FormattedFloat<T>, std::enable_if_t<is_float<std::decay_t<T>>::
 
 // 'FormattedInteger<T>' types
 template <class T>
-struct Formatter<FormattedInteger<T>, std::enable_if_t<is_integer<std::decay_t<T>>::value>> {
+struct Formatter<FormattedInteger<T>, std::enable_if_t<Traits<T>::is_integer_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const FormattedInteger<T>& arg) const {
         std::array<char, max_chars_int> res;
@@ -4207,12 +4172,10 @@ public:
 
     void push_string(std::string_view sv) {
         this->buffer += sv;
-        this->try_flush();
     }
 
     void push_chars(std::size_t count, char ch) {
         this->buffer.append(ch, count);
-        this->try_flush();
     }
 };
 
