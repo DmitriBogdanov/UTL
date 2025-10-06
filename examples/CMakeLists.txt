@@ -44,6 +44,7 @@ utl_add_example("module_json/parse_serialize_json")
 utl_add_example("module_json/setters_and_type_conversions")
 utl_add_example("module_json/structure_reflection")
 # TODO: Add 'module_log/' examples after the rewrite
+utl_add_example("module_log/sink_configuration")
 utl_add_example("module_math/conversions")
 utl_add_example("module_math/index_functions")
 utl_add_example("module_math/summation_and_product")

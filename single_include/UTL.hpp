@@ -3077,30 +3077,36 @@ using impl::is_reflected_struct;
 #define utl_log_headerguard
 
 #define UTL_LOG_VERSION_MAJOR 2
-#define UTL_LOG_VERSION_MINOR 1
+#define UTL_LOG_VERSION_MINOR 2
 #define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // array<>, size_t
-#include <atomic>      // atomic<>
-#include <cassert>     // assert()
-#include <charconv>    // to_chars()
-#include <chrono>      // steady_clock
-#include <fstream>     // ofstream, ostream
-#include <iostream>    // cout
-#include <iterator>    // ostreambuf_iterator<>
-#include <mutex>       // mutex<>
-#include <sstream>     // ostringstream
-#include <string>      // string
-#include <string_view> // string_view
-#include <tuple>       // tuple<>, get<>, tuple_size_v<>, apply()
-#include <type_traits> // enable_if_t<>, is_enum_v<>, is_integral_v<>, is_unsigned_v<>, underlying_type_t<>, ...
-#include <utility>     // forward<>(), integer_sequence<>, make_index_sequence<>
+#include <array>              // array<>, size_t
+#include <atomic>             // atomic<>
+#include <cassert>            // assert()
+#include <charconv>           // to_chars()
+#include <chrono>             // steady_clock
+#include <condition_variable> // condition_variable
+#include <fstream>            // ofstream, ostream
+#include <functional>         // function<>
+#include <iostream>           // cout
+#include <iterator>           // ostreambuf_iterator<>
+#include <memory>             // unique_ptr<>, make_unique<>()
+#include <mutex>              // mutex<>, scoped_lock<>
+#include <queue>              // queue<>
+#include <sstream>            // ostringstream
+#include <string>             // string
+#include <string_view>        // string_view
+#include <thread>             // thread
+#include <tuple>              // tuple<>, get<>, tuple_size_v<>, apply()
+#include <type_traits>        // enable_if_t<>, is_enum_v<>, is_integral_v<>, is_unsigned_v<>, underlying_type_t<>, ...
+#include <utility>            // forward<>(), integer_sequence<>, make_index_sequence<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// We do a lot of internally sketchy codegen to achieve the nice public API
+// A lot of includes, no way around it without reducing the feature set. In a hpp/cpp split most of
+// these includes could be moved to the corresponding translation unit and hidden behind indirection.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -3302,6 +3308,63 @@ template <class Rep, class Period>
 }
 
 using Sec = std::chrono::duration<double, std::chrono::seconds::period>; // convenient duration-to-float conversion
+
+// --- Worker thread ---
+// ---------------------
+
+// A single persistent thread that executes detached tasks, effectively a single-thread thread pool
+class WorkerThread {
+    bool                              terminating;
+    std::queue<std::function<void()>> tasks;
+    std::mutex                        mutex;
+    std::condition_variable           polling_cv;
+    std::thread                       thread;
+
+    void thread_main() {
+        while (true) {
+            std::unique_lock lock(this->mutex);
+
+            this->polling_cv.wait(lock, [this] { return this->terminating || !this->tasks.empty(); });
+
+            while (!this->tasks.empty()) {
+                auto task = std::move(this->tasks.front());
+                this->tasks.pop();
+
+                lock.unlock();
+                task();
+                lock.lock();
+            }
+
+            if (this->terminating) break;
+        }
+    }
+
+public:
+    WorkerThread() : terminating(false), thread([this] { this->thread_main(); }) {}
+
+    ~WorkerThread() { // stops the worker thread & joins once the tasks are done
+        {
+            const std::scoped_lock lock(this->mutex);
+            this->terminating = true;
+        }
+
+        this->polling_cv.notify_one();
+
+        if (this->thread.joinable()) this->thread.join();
+    }
+
+    template <class F, class... Args>
+    void detached_task(F&& f, Args&&... args) {
+        auto closure = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+
+        {
+            const std::scoped_lock lock(this->mutex);
+            this->tasks.emplace(std::move(closure));
+        }
+
+        this->polling_cv.notify_one();
+    }
+};
 
 // --- Other ---
 // -------------
@@ -3827,12 +3890,13 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_adaptor_v>> {
 template <class T>
 struct Formatter<T, std::enable_if_t<Traits<T>::is_duration_v>> {
     constexpr static std::size_t relevant_units = 3;
-    
-    constexpr static std::array<std::string_view, SplitDuration::size> names = {"hours", "min", "sec", "ms", "us", "ns"};
+
+    constexpr static std::array<std::string_view, SplitDuration::size> names = {"hours", "min", "sec",
+                                                                                "ms",    "us",  "ns"};
 
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
-        
+
         auto string_formatter  = Formatter<std::string_view>{};
         auto integer_formatter = Formatter<SplitDuration::common_rep>{};
 
@@ -4034,6 +4098,10 @@ enum class Format {
     return static_cast<Format>(to_underlying(a) | to_underlying(b));
 }
 
+[[nodiscard]] constexpr Format operator&(Format a, Format b) noexcept {
+    return static_cast<Format>(to_underlying(a) & to_underlying(b));
+}
+
 enum class Buffering { NONE, FIXED, TIMED };
 
 enum class Flushing { SYNC, ASYNC };
@@ -4121,7 +4189,26 @@ public:
 // --- Async flushing ---
 // ----------------------
 
-// TODO: Async flusher
+template <class OutputType>
+class Flusher<OutputType, policy::Flushing::ASYNC> {
+    OutputType output;
+
+    std::unique_ptr<WorkerThread> worker = std::make_unique<WorkerThread>();
+
+public:
+    Flusher(OutputType&& output) : output(std::move(output)) {}
+
+    void flush_string(std::string_view sv) {
+        auto copy = std::string{sv};
+        // the underlying buffer might be mutated while the other thread flushes it, we have to pass a copy
+
+        this->worker->detached_task([=, copy = std::move(copy)] { this->output.flush_string(copy); });
+    }
+
+    void flush_chars(std::size_t count, char ch) {
+        this->worker->detached_task([=] { this->output.flush_chars(count, ch); });
+    }
+};
 
 // =========================
 // --- Component: Buffer ---
@@ -4231,26 +4318,39 @@ class Buffer<FlusherType, policy::Buffering::TIMED> {
     std::string     buffer;
     Clock::duration last_flush_uptime{};
 
+    void flush() {
+        this->flusher.flush_string(this->buffer);
+
+        this->buffer.clear();
+        // standard doesn't guarantee that this doesn't reallocate (unlike 'std::vector<>'), however all
+        // existing implementations do the reasonable thing and don't reallocate so we can mostly rely on it
+    }
+
 public:
     Buffer(FlusherType&& flusher) : flusher(std::move(flusher)) {}
+
+    Buffer(Buffer&& other)
+        : flusher(std::move(other).flusher), buffer(std::move(other).buffer),
+          last_flush_uptime(other.last_flush_uptime) {
+        other.buffer.clear(); // ensures moved-from buffer will not flush in destructor
+    }
+
+    ~Buffer() {
+        if (!this->buffer.empty()) this->flush();
+    }
 
     void push_record(const Record& record) noexcept {
         // retrieving timestamps is expensive, we can reuse the one already produced by the logger
 
         if (record.elapsed - this->last_flush_uptime > buffering_time) {
-            this->flusher.flush_string(this->buffer);
-
-            this->buffer.clear();
-            // standard doesn't guarantee that this doesn't reallocate (unlike 'std::vector<>'), however all
-            // existing implementations do the reasonable thing and don't reallocate so we can mostly rely on it
-
+            this->flush();
             this->last_flush_uptime = record.elapsed;
         }
     }
 
     void push_string(std::string_view sv) { this->buffer += sv; }
 
-    void push_chars(std::size_t count, char ch) { this->buffer.append(ch, count); }
+    void push_chars(std::size_t count, char ch) { this->buffer.append(count, ch); }
 };
 
 // =========================
@@ -4328,22 +4428,23 @@ private:
 
     constexpr static bool has_color = color == policy::Color::ANSI;
 
-    constexpr static bool format_date  = to_bool(format | policy::Format::DATE);
-    constexpr static bool format_title = to_bool(format | policy::Format::TITLE);
+    constexpr static bool format_date  = to_bool(format & policy::Format::DATE);
+    constexpr static bool format_title = to_bool(format & policy::Format::TITLE);
 
     constexpr static auto delimiter_date = config::delimiter_front;
 
-    constexpr static bool format_thread   = to_bool(format | policy::Format::THREAD);
-    constexpr static bool format_uptime   = to_bool(format | policy::Format::UPTIME);
-    constexpr static bool format_callsite = to_bool(format | policy::Format::CALLSITE);
-    constexpr static bool format_level    = to_bool(format | policy::Format::LEVEL);
+    constexpr static bool format_thread   = to_bool(format & policy::Format::THREAD);
+    constexpr static bool format_uptime   = to_bool(format & policy::Format::UPTIME);
+    constexpr static bool format_callsite = to_bool(format & policy::Format::CALLSITE);
+    constexpr static bool format_level    = to_bool(format & policy::Format::LEVEL);
     constexpr static bool format_message  = true;
 
     constexpr static bool front_is_thread   = format_thread;
     constexpr static bool front_is_uptime   = format_uptime && !front_is_thread;
-    constexpr static bool front_is_callsite = format_callsite && !front_is_uptime;
-    constexpr static bool front_is_level    = format_level && !front_is_callsite;
-    constexpr static bool front_is_message  = format_message && !front_is_level;
+    constexpr static bool front_is_callsite = format_callsite && !front_is_thread && !front_is_uptime;
+    constexpr static bool front_is_level = format_level && !front_is_thread && !front_is_uptime && !front_is_callsite;
+    constexpr static bool front_is_message =
+        format_message && !front_is_thread && !front_is_uptime && !front_is_callsite && !front_is_level;
 
     constexpr static auto delimiter_thread   = front_is_thread ? config::delimiter_front : config::delimiter_mid;
     constexpr static auto delimiter_uptime   = front_is_uptime ? config::delimiter_front : config::delimiter_mid;
@@ -4526,14 +4627,11 @@ class Protector<WriterType, policy::Threading::UNSAFE> {
 public:
     Protector(WriterType&& writer) : writer(std::move(writer)) {}
 
-    template <class Writer>
-    void header() {
-        this - writer.header();
-    }
+    void header() { this->writer.header(); }
 
     template <policy::Level message_level, class Rec, class... Args>
     void message(const Rec& record, const Args&... args) {
-        this->writer.template message<message_level>(record, std::forward<Args>(args)...);
+        this->writer.template message<message_level>(record, args...);
     }
 };
 
