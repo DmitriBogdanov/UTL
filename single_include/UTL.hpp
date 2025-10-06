@@ -3078,7 +3078,7 @@ using impl::is_reflected_struct;
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 2
-#define UTL_LOG_VERSION_PATCH 0
+#define UTL_LOG_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -4191,7 +4191,7 @@ public:
 
 template <class OutputType>
 class Flusher<OutputType, policy::Flushing::ASYNC> {
-    OutputType output;
+    OutputType output; // destruction order matters here, 'output' should be available until 'worker' thread joins
 
     std::unique_ptr<WorkerThread> worker = std::make_unique<WorkerThread>();
 
@@ -4199,14 +4199,18 @@ public:
     Flusher(OutputType&& output) : output(std::move(output)) {}
 
     void flush_string(std::string_view sv) {
-        auto copy = std::string{sv};
-        // the underlying buffer might be mutated while the other thread flushes it, we have to pass a copy
-
-        this->worker->detached_task([=, copy = std::move(copy)] { this->output.flush_string(copy); });
+        this->worker->detached_task(                                         //
+            [](OutputType& out, std::string str) { out.flush_string(str); }, //
+            this->output, std::string{sv}                                    //
+        );                                                                   //
+        // the underlying buffer might be mutated while the other thread flushes it, we have to pass a copy,
     }
 
     void flush_chars(std::size_t count, char ch) {
-        this->worker->detached_task([=] { this->output.flush_chars(count, ch); });
+        this->worker->detached_task(                                                         //
+            [](OutputType& out, std::size_t count, char ch) { out.flush_chars(count, ch); }, //
+            this->output, count, ch                                                          //
+        );                                                                                   //
     }
 };
 

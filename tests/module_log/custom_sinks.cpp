@@ -50,17 +50,22 @@ void test_config() {
 }
 
 TEST_CASE("Sinks / Flushing") {
-    // 3 x 2 x 2 = 12 different configuration to test, all of them should output the same string
-    test_config<Buffering::NONE, Flushing::SYNC, Threading::UNSAFE>();
-    test_config<Buffering::NONE, Flushing::ASYNC, Threading::UNSAFE>();
-    test_config<Buffering::NONE, Flushing::SYNC, Threading::SAFE>();
-    test_config<Buffering::NONE, Flushing::ASYNC, Threading::SAFE>();
-    test_config<Buffering::FIXED, Flushing::SYNC, Threading::UNSAFE>();
-    test_config<Buffering::FIXED, Flushing::ASYNC, Threading::UNSAFE>();
-    test_config<Buffering::FIXED, Flushing::SYNC, Threading::SAFE>();
-    test_config<Buffering::FIXED, Flushing::ASYNC, Threading::SAFE>();
-    test_config<Buffering::TIMED, Flushing::SYNC, Threading::UNSAFE>();
-    test_config<Buffering::TIMED, Flushing::ASYNC, Threading::UNSAFE>();
-    test_config<Buffering::TIMED, Flushing::SYNC, Threading::SAFE>();
-    test_config<Buffering::TIMED, Flushing::ASYNC, Threading::SAFE>();
+    // 3 x 2 x 2 = 12 different configuration to test, all of them should output the same string,
+    // repeat multiple times to increase the chance of catching threading issues
+    constexpr std::size_t repeats = 30;
+    
+    for (std::size_t i = 0; i < repeats; ++i) {
+        test_config<Buffering::NONE, Flushing::SYNC, Threading::UNSAFE>();
+        test_config<Buffering::NONE, Flushing::ASYNC, Threading::UNSAFE>();
+        test_config<Buffering::NONE, Flushing::SYNC, Threading::SAFE>();
+        test_config<Buffering::NONE, Flushing::ASYNC, Threading::SAFE>();
+        test_config<Buffering::FIXED, Flushing::SYNC, Threading::UNSAFE>();
+        test_config<Buffering::FIXED, Flushing::ASYNC, Threading::UNSAFE>();
+        test_config<Buffering::FIXED, Flushing::SYNC, Threading::SAFE>();
+        test_config<Buffering::FIXED, Flushing::ASYNC, Threading::SAFE>();
+        test_config<Buffering::TIMED, Flushing::SYNC, Threading::UNSAFE>();
+        test_config<Buffering::TIMED, Flushing::ASYNC, Threading::UNSAFE>();
+        test_config<Buffering::TIMED, Flushing::SYNC, Threading::SAFE>();
+        test_config<Buffering::TIMED, Flushing::ASYNC, Threading::SAFE>();
+    }
 }
