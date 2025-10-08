@@ -1,553 +1,362 @@
-[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
-[<img src ="images/badge_license_mit.svg">](LICENSE.md)
-[<img src ="images/badge_semver.svg">](guide_versioning.md)
-[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
-[<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
-[<img src ="images/badge_no_dependencies.svg">](https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL)
-
-[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml)
-[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml)
-[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
-[<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
-
-# utl::log (experimental)
+# utl::loh
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](../include/UTL/log.hpp)
+[<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/log.hpp)
 
-**utl::log** module aims to provide simple logging facilities for prototyping and small projects.
-
-Goals:
-
-- Intuitive simple to use API
-- Unintrusive macros
-- Nicely colored formatting that is easy to look at and to `grep`
-- Concise syntax (no `<<` or `printf`-like specifiers), just list the arguments and let the variadic handle formatting and conversion
-- Reasonably fast performance (in most cases faster than logging things with `std::ofstream`)
-- Thread-safe logging with no interweaving messages
+**utl::log** is a lean logging library that tries to make syntax as simple as possible. It uses type traits to deduce how to serialize various types without depending on its their support, while still providing customization points through formatter specialization. Due to compile-time parametrization & formatting the logger achieves significantly lower overhead than standard [`std::ostream`]()-based solutions.
 
 Key features:
 
-- Supports multiple sinks
-- Supports indentation
-- Stringifies arbitrary types based on their type traits
+- Simple API with no macros
+- Serializes [almost every type & container](#serialization-support)
+- Automatically adapts to containers with std-like API
+- Concise syntax for alignment / color / number formatting
+- Sync/async logging with various buffering policies  
+- Convenient `println()` and `stringify()`
 
-> [!Warning]
-> This module is currently **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation coverage.
+Quirks of the library:
+
+- Variadic syntax
+- Compile-time parametrization
+- Built-in formatting system
+
+**Quick showcase:**
+
+```cpp
+log::trace("Message 1");
+log::info ("Message 2");
+log::warn ("Message 3");
+```
+
+IMAGE:
+
+```cpp
+log::println("Vector ", {1, 2, 3} | log::color::red, " is out of bounds.");
+```
+
+IMAGE:
 
 ## Definitions
 
 ```cpp
-// Padding wrappers
-template <class T> struct PadLeft  { constexpr PadLeft( const T& val, std::size_t size); }
-template <class T> struct PadRight { constexpr PadRight(const T& val, std::size_t size); }
-template <class T> struct Pad      { constexpr Pad(     const T& val, std::size_t size); }
-
-// Extendable stringifier (advanced feature)
-template <class Derived>
-struct StringifierBase {
-    template <class T> static void append_bool(     std::string& buffer, const T& value);
-    template <class T> static void append_int(      std::string& buffer, const T& value);
-    template <class T> static void append_float(    std::string& buffer, const T& value);
-    template <class T> static void append_complex(  std::string& buffer, const T& value);
-    template <class T> static void append_string(   std::string& buffer, const T& value);
-    template <class T> static void append_array(    std::string& buffer, const T& value);
-    template <class T> static void append_tuple(    std::string& buffer, const T& value);
-    template <class T> static void append_printable(std::string& buffer, const T& value);
+// Logger
+template <class... Sinks>
+struct Logger {
+    Logger(Sinks&&... sinks);
     
-    template <class T>       static void append(std::string& buffer, const T& value);
-    template <class... Args> static void append(std::string& buffer, const Args&... args);
+    template <class... Args> void err  (const Args&... args);
+    template <class... Args> void warn (const Args&... args);
+    template <class... Args> void note (const Args&... args);
+    template <class... Args> void info (const Args&... args);
+    template <class... Args> void debug(const Args&... args);
+    template <class... Args> void trace(const Args&... args);
+};
+
+// Sink
+template <
+    policy::Type      type,     = /* inferred from constructor */,
+    policy::Level     level     = /* defaults based on 'type'  */,
+    policy::Color     color     = /* defaults based on 'type'  */,
+    policy::Format    format    = /* defaults based on 'type'  */,
+    policy::Buffering buffering = /* defaults based on 'type'  */,
+    policy::Flushing  flushing  = /* defaults based on 'type'  */,
+    policy::Threading threading = /* defaults based on 'type'  */,
+    class             Callback  = /* empty callback            */
+> struct Sink {
+    Sink(std::ofstream&&  file); // for file   loggers
+    Sink(std::string_view name); // for file   loggers
+    Sink(std::ostream&      os); // for stream loggers
+    Sink(std::string&      str); // for string loggers
+}
+
+// Policies
+namespace policy {
+    enum class Type      { FILE, STREAM };
+    enum class Level     { ERR, WARN, NOTE, INFO, DEBUG, TRACE };
+    enum class Color     { NONE, ANSI };
+    enum class Format    { DATE, TITLE, THREAD, UPTIME, CALLSITE, LEVEL, NONE, FULL }; // bitmask
+    enum class Buffering { NONE, FIXED, TIMED };
+    enum class Flushing  { SYNC, ASYNC };
+    enum class Threading { UNSAFE, SAFE };
     
-    template <class... Args> static std::string stringify(Args&&... args);
-    template <class... Args> std::string operator()(Args&&... args);
-};
+    template <auto function> class Callback;
+}
 
-// Stringification & printing
-struct Stringifier { /* same API as StringifierBase<> */ };
+// Pre-defined global logger
+template <class... Args> void err  (const Args&... args);
+template <class... Args> void warn (const Args&... args);
+template <class... Args> void note (const Args&... args);
+template <class... Args> void info (const Args&... args);
+template <class... Args> void debug(const Args&... args);
+template <class... Args> void trace(const Args&... args);
 
-template <class... Args> void append_stringified(std::string& buffer, Args&&... args);
-template <class... Args> std::string stringify(Args&&... args);
+// Printing
+template <class... Args> void print  (const Args&... args);
+template <class... Args> void println(const Args&... args);
 
-template <class... Args> void print(  Args&&... args);
-template <class... Args> void println(Args&&... args);
+template <class... Args> std::string stringify(const Args&... args);
 
-// Logging options
-enum class Verbosity { ERR, WARN, NOTE, INFO, DEBUG, TRACE };
-enum class OpenMode { REWRITE, APPEND };
-enum class Colors { ENABLE, DISABLE };
+// Formatting modifiers
+constexpr mods::FloatFormat general     (std::size_t precision = 6) noexcept;
+constexpr mods::FloatFormat fixed       (std::size_t precision = 3) noexcept;
+constexpr mods::FloatFormat scientific  (std::size_t precision = 3) noexcept;
+constexpr mods::FloatFormat hex         (std::size_t precision = 3) noexcept;
+constexpr mods::IntFormat   base        (std::size_t base         ) noexcept;
+constexpr mods::AlignLeft   align_left  (std::size_t size         ) noexcept;
+constexpr mods::AlignCenter align_center(std::size_t size         ) noexcept;
+constexpr mods::AlignRight  align_right (std::size_t size         ) noexcept;
+// + all ANSI colors, see methods for the full list
 
-struct Columns {
-    bool datetime = true;
-    bool uptime   = true;
-    bool thread   = true;
-    bool callsite = true;
-    bool level    = true;
-    bool message  = true;
-};
-
-// Logger sink
-struct Sink {
-    Sink& set_verbosity(Verbosity verbosity);
-    Sink& set_colors(Colors colors);
-    Sink& set_flush_interval(clock::duration flush_interval);
-    Sink& set_flush_interval(const Columns& columns);
-    Sink& skip_header(bool skip = true);
-};
-
-Sink& add_ostream_sink(
-    std::ostream& os,
-    Verbosity verbosity            = Verbosity::INFO,
-    Colors colors                  = Colors::ENABLE,
-    clock::duration flush_interval = std::chrono::milliseconds{},
-    const Columns& columns         = Columns{}
-);
-
-Sink& add_file_sink(
-    const std::string& filename,
-    OpenMode open_mode             = OpenMode::REWRITE,
-    Verbosity verbosity            = Verbosity::TRACE,
-    Colors colors                  = Colors::DISABLE,
-    clock::duration flush_interval = std::chrono::milliseconds{15},
-    const Columns& columns         = Columns{}
-);
-
-// Logging macros
-#define UTL_LOG_ERR(...)
-#define UTL_LOG_WARN(...)
-#define UTL_LOG_NOTE(...)
-#define UTL_LOG_INFO(...)
-#define UTL_LOG_DEBUG(...)
-#define UTL_LOG_TRACE(...)
-
-#define UTL_LOG_DERR(...)
-#define UTL_LOG_DWARN(...)
-#define UTL_LOG_DNOTE(...)
-#define UTL_LOG_DINFO(...)
-#define UTL_LOG_DDEBUG(...)
-#define UTL_LOG_DTRACE(...)
+template <class T>
+constexpr /*formatted-value*/ operator|(T&& value, /*formatting-mod*/ modifier) noexcept;
 ```
 
 ## Methods
 
-### Padding wrappers
-
-```cpp
-template <class T> struct PadLeft  { constexpr PadLeft( const T& val, std::size_t size); }
-template <class T> struct PadRight { constexpr PadRight(const T& val, std::size_t size); }
-template <class T> struct Pad      { constexpr Pad(     const T& val, std::size_t size); }
-```
-
-Wrappers used to pad values with specific alignment when using this module's stringification.
-
-| Padding wrapper         | Equivalent `std::ostream` operator                   | Example for { "text", 10 } |
-| ----------------------- | ---------------------------------------------------- | -------------------------- |
-| `PadLeft{ val, size }`  | `<< std::setw(size) << std::right << val`            | **<**`      text`**>**    |
-| `PadRight{ val, size }` | `<< std::setw(size) << std::left << val`             | **<**`text      `**>**     |
-| `Pad{ val, size }`      | No center alignment function in the standard library | **<**`    text    `**>**   |
-
-### Extendable stringifier (advanced feature)
-
-`template <class Derived> struct StringifierBase` is compile-time polymorphism base used to build custom stringifier.
-
-It is an advanced feature and not need for the regular logging, see [section at the end](#advanced-guide-to-custom-stringifiers) for a proper usage guide.
-
-### Stringification & printing
-
-```cpp
-struct Stringifier { /* ... */ };
-```
-
-Functor class that contains stringification logic of this module. Can be used to provide third-party APIs with stringification logic of `utl::log`.
-
-Compatible with `utl::mvl` formatters.
-
-```cpp
-template <class... Args> void append_stringified(std::string& buffer, Args&&... args);
-```
-
-Stringifies all `args...` and appends them to a string `buffer`.
-
-```cpp
-template <class... Args> std::string stringify(Args&&... args);
-```
-
-Stringifies all `args...` and concatenates them into a string.
-
-```cpp
-template <class... Args> void print(  Args&&... args);
-template <class... Args> void println(Args&&... args);
-```
-
-Stringifies all `args...` and prints the result to `std::cout`.
-
-`println()` also starts a new line at the end.
-
-**Note:** `print`-functions are thread-safe and flush their output instantly.
-
-### Logging options
-
-```cpp
-enum class Verbosity { ERR, WARN, NOTE, INFO, DEBUG, TRACE };
-```
-
-Enumeration that determines verbosity level of the logger sink. Sinks will only output messages that are at or above the their priority. Different levels have following priorities:
-
-| Verbosity level | Priority | Logging style  |
-| --------------- | -------- | -------------- |
-| `ERR`           | **0**    | 🔴 **Bold red** |
-| `WARN`          | **1**    | 🟡 Yellow       |
-| `NOTE`          | **2**    | 🟣 Magenta      |
-| `INFO`          | **3**    | ⚪ White        |
-| `DEBUG`         | **4**    | 🟢 Green        |
-| `TRACE`         | **5**    | ⚫ Gray         |
-
-**Note 1:** "Logging style" column applies only of sink colors are set to`Colors::ENABLE`.
-
-**Note 2:** By default `std::ostream` sinks will have verbosity level `INFO`, while file sinks will have verbosity level `TRACE`.
-
-```cpp
-enum class OpenMode { REWRITE, APPEND };
-```
-
-Enumeration that determines whether file sinks opens the file for rewrite or appends to it.
-
-**Note:** By default file sinks will open in a `REWRITE` mode, use `APPEND` if you want to grow an existing log.
-
-```cpp
-enum class Colors { ENABLE, DISABLE };
-```
-
-Enumeration that determines whether the sink uses [ANSI color codes](https://en.wikipedia.org/wiki/ANSI_escape_code) to color its output.
-
-This should work in most modern terminals.
-
-**Note:** By default `std::ostream` sinks will be colored, while file sinks will have their colors disabled.
-
-```cpp
-struct Columns {
-    bool datetime = true;
-    bool uptime   = true;
-    bool thread   = true;
-    bool callsite = true;
-    bool level    = true;
-    bool message  = true;
-};
-```
-
-POD struct that determines which columns should be formatted and logged.
-
-### Logger sink
-
-```cpp
-struct Sink {
-    Sink& set_verbosity(Verbosity verbosity);
-    Sink& set_colors(Colors colors);
-    Sink& set_flush_interval(clock::duration flush_interval);
-    Sink& set_flush_interval(const Columns& columns);
-    Sink& skip_header(bool skip = true);
-};
-```
-
-Class that represents a logger sink (whether it is an `std::ofstream` reference or a managed file).
-
-`set_...()` methods can be used to modify sink options using a reference returned by `add_ostream_sink()` or `add_file_sink()`, rather than passing them all the start.
-
-`skip_header()` method disables the line with column titles at the start, this is mainly useful for appending new data to an existing log.
-
-```cpp
-Sink& add_ostream_sink(
-    std::ostream& os,
-    Verbosity verbosity            = Verbosity::INFO,
-    Colors colors                  = Colors::ENABLE,
-    clock::duration flush_interval = std::chrono::milliseconds{},
-    const Columns& columns         = Columns{}
-);
-```
-
-Adds sink to ostream `os` with a given set of options. Returns reference to the added sink.
-
-```cpp
-Sink& add_file_sink(
-    const std::string& filename,
-    OpenMode open_mode             = OpenMode::REWRITE,
-    Verbosity verbosity            = Verbosity::TRACE,
-    Colors colors                  = Colors::DISABLE,
-    clock::duration flush_interval = std::chrono::milliseconds{15},
-    const Columns& columns         = Columns{}
-);
-```
-
-Adds sink to the log file `filename` with a given set of options. Returns reference to the added sink.
-
-### Logging macros
-
-```cpp
-#define UTL_LOG_ERR(...)
-#define UTL_LOG_WARN(...)
-#define UTL_LOG_NOTE(...)
-#define UTL_LOG_INFO(...)
-#define UTL_LOG_DEBUG(...)
-#define UTL_LOG_TRACE(...)
-```
-
-Stringifies arguments `...` and logs them at the corresponding verbosity level.
-
-```cpp
-#define UTL_LOG_DERR(...)
-#define UTL_LOG_DWARN(...)
-#define UTL_LOG_DNOTE(...)
-#define UTL_LOG_DINFO(...)
-#define UTL_LOG_DDEBUG(...)
-#define UTL_LOG_DTRACE(...)
-```
-
-Logging macros that only compile in *debug* mode.
+TODO:
 
 ## Examples
 
-### Logging to the terminal
-
-[ [Run this code](https://godbolt.org/z/qqof6KqWj) ]
-
-```cpp
-using namespace utl;
-using namespace std::chrono_literals;
-
-// Create some complex objects that need logging
-auto vertex_ids = std::vector{4, 8, 17};
-auto success    = true;
-auto weights    = std::map{ std::pair{ "left_bc", 0.13}, std::pair{"right_bc", 0.34} };
-auto solver     = std::filesystem::path{"/usr/bin/solver"};
-auto state      = std::tuple{ "STRUCT_172", std::set{0, -2} };
-
-// Log stuff to console
-UTL_LOG_TRACE("Received boundary condition for edges ", vertex_ids);
-UTL_LOG_TRACE("Set up status: ", success, ", computing proper weights...");
-std::this_thread::sleep_for(75ms);
-
-UTL_LOG_INFO("Done! BC weights are: ", weights);
-UTL_LOG_TRACE("Starting solver [", solver, "] with state ", state, "...");
-std::this_thread::sleep_for(120ms);
-
-UTL_LOG_WARN("Low element quality, solution might be unstable");
-UTL_LOG_TRACE("Err -> ", log::PadLeft{1.2e+3, 8});
-UTL_LOG_TRACE("Err -> ", log::PadLeft{1.7e+5, 8});
-UTL_LOG_TRACE("Err -> ", log::PadLeft{4.8e+8, 8});
-UTL_LOG_ERR("The solver has burst into flames!");
-
-// no sinks were specified => 'std::cout' chosen by default
-```
-
-Output:
-
-<img src ="images/log_colored_output.png">
-
-### Logging to multiple sinks
-
-[ [Run this code](https://godbolt.org/z/sd4cY71n1) ]
+### Basic logging
 
 ```cpp
 using namespace utl;
 
-// Log everything to file
-log::add_file_sink("verbose.log").set_verbosity(log::Verbosity::TRACE);
-
-// Log meaningful events to a separate file with colors enabled for easier viewing
-log::add_file_sink("info.log").set_verbosity(log::Verbosity::INFO).set_colors(log::Colors::ENABLE);
-
-// Instead of calling 'set_...()' we can also pass arguments directly into 'add_..._sink()' function,
-// let's also append all logs to a persistent file that doesn't get rewritten between executions
-log::add_file_sink("history.log", log::OpenMode::APPEND).skip_header();
-
-// Add another file for logged messages only (no date/uptime/thread/callsite columns)
-log::Columns cols;
-cols.datetime = false;
-cols.uptime   = false;
-cols.thread   = false;
-cols.callsite = false;
-log::add_file_sink("messages.log").set_columns(cols);
-
-// Log warnings and errors to 'std::cerr'
-log::add_ostream_sink(std::cerr, log::Verbosity::WARN, log::Colors::ENABLE);
-
-// Log some stuff
-UTL_LOG_DTRACE("Some meaningless stuff"); // 'D' prefix means this will only compile in debug
-UTL_LOG_INFO("Some meaningful stuff");
-UTL_LOG_WARN("Some warning");
-UTL_LOG_ERR("Some error");
+// Log with a default global logger
+log::trace("Message 1");
+log::info ("Message 2");
+log::warn ("Message 3");
 ```
 
 Output:
 
-<img src ="images/log_multiple_sinks_output.png">
+TODO:
 
-*+ several log files created*
+`latest.log`:
 
-### Printing & stringification
+TODO:
 
-[ [Run this code](https://godbolt.org/z/jozfWb5YG) ]
+### Logging objects
 
 ```cpp
-// A custom printable type
-struct SomeCustomType {};
+using namespace utl;
 
-std::ostream& operator<<(std::ostream& os, SomeCustomType) {
-    return os << "<custom type string>";
+const auto start = std::chrono::steady_clock::now();
+
+log::info("Starting the solver, x0 = ", std::vector{2e-3, 3e-3, 4e-3}           );
+log::warn("Solution diverges, err = " , std::complex<double>{2e14, 3e28}        );
+log::err ("Terminated after "         , std::chrono::steady_clock::now() - start);
+```
+
+Output:
+
+TODO:
+
+`latest.log`:
+
+TODO:
+
+### Formatting modifiers
+
+> [!Tip]
+> The exact same syntax can be used with `println()` / `stringify()`, which is both performant and convenient even outside of logging.
+
+```cpp
+using namespace utl;
+
+log::info("Colored:        ", "text" | log::color::red                );
+log::info("Left-aligned:   ", "text" | log::align_left(10)            );
+log::info("Center-aligned: ", "text" | log::align_center(10)          );
+log::info("Right-aligned:  ", "text" | log::align_right(10)           );
+log::info("Fixed:          ", 2.3578 | log::fixed(2)                  );
+log::info("Scientific:     ", 2.3578 | log::scientific(2)             );
+log::info("Hex:            ", 2.3578 | log::hex(2)                    );
+log::info("Base-2:         ", 1024   | log::base(2)                   );
+log::info("Multiple:       ", 1024   | log::base(2) | log::color::blue);
+```
+
+Output:
+
+TODO:
+
+`latest.log`:
+
+TODO:
+
+### Local logger
+
+```cpp
+using namespace utl;
+
+// Create a local logger
+auto logger = log::Logger{
+    log::Sink{"log.txt"},
+    log::Sink{std::cout}
+};
+
+// Use it
+logger.info("Message");
+```
+
+Output:
+
+TODO:
+
+`log.txt`:
+
+TODO:
+
+### Global logger
+
+```cpp
+using namespace utl;
+
+// Create global logger
+auto& logger() {
+    static auto logger = log::Logger{
+        log::Sink{"log.txt"},
+        log::Sink{std::cout}
+    };
+    
+    return logger;
 }
 
 // ...
 
-using namespace utl;
-
-// Printing
-log::println("Print any objects you want, for example: ", std::tuple{ "lorem", 0.25, "ipsum" });
-log::println("This is almost like Python!");
-log::println("Except compiled...");
-
-// Stringification
-assert( log::stringify("int is ", 5)          == "int is 5"             );
-assert( log::stringify(std::array{ 4, 5, 6 }) == "{ 4, 5, 6 }"          );
-assert( log::stringify(std::pair{ -1, 1 })    == "< -1, 1 >"            );
-assert( log::stringify(SomeCustomType{})      == "<custom type string>" );
-// ...and so on for any reasonable type including nested containers,
-// if you append values to an existing string 'log::append_stringified(str, ...)'
-// can be used instead of ' += log::stringify(...)' for even better performance
+// Use it
+logger().info("Message");
 ```
 
 Output:
-```
-Print any objects you want, for example: < lorem, 0.25, ipsum >
-This is almost like Python!
-Except compiled...
-```
 
-## Advanced guide to custom stringifiers
+TODO:
 
-In some cases, it can be quite beneficial to declare a custom stringifier that uses a generic logic of this module's stringification, but adds a few alterations. The usual use cases for this include:
+`log.txt`:
 
-- Adding decorators for text-based export formats (JSON, LaTeX, Mathematica, etc.)
-- Adding type-specific optimizations
-- Customizing formatting to taste
+TODO:
 
-The structure of `StringifierBase<>` can be described by a following call graph:
+### Sink configuration
+
+> [!Tip]
+> Most of the time default configuration works well enough: stream sinks are colored with instant buffering, while file sinks are buffered, async and stripped of any color codes.
 
 ```cpp
-template <class... Args> std::string operator()(Args&&... args);
-    // Calls ->
-	template <class... Args> static std::string stringify(Args&&... args);
-    	// Calls ->
-        template <class... Args> static void append(std::string& buffer, const Args&... args);
-            // Calls multiple times ->
-            template <class T> static void append(std::string& buffer, const T& value);
-                // Calls one of ->
-                template <class T> static void append_bool(     std::string& buffer, const T& value);
-                template <class T> static void append_int(      std::string& buffer, const T& value);
-                template <class T> static void append_enum(     std::string& buffer, const T& value);
-                template <class T> static void append_float(    std::string& buffer, const T& value);
-                template <class T> static void append_complex(  std::string& buffer, const T& value);
-                template <class T> static void append_string(   std::string& buffer, const T& value);
-                template <class T> static void append_array(    std::string& buffer, const T& value);
-                template <class T> static void append_tuple(    std::string& buffer, const T& value);
-                template <class T> static void append_adaptor(  std::string& buffer, const T& value);
-                template <class T> static void append_printable(std::string& buffer, const T& value);
+using namespace utl;
+
+// Verbose async file logger
+auto logger = log::Logger{
+    log::Sink<
+        log::policy::Type::FILE,
+        log::policy::Level::TRACE,
+        log::policy::Color::NONE,
+        log::policy::Format::FULL,
+        log::policy::Buffering::FIXED,
+        log::policy::Flushing::ASYNC
+    >{"latest.log"}
+};
+
+logger.info("Message 1");
+logger.note("Message 2");
+logger.warn("Message 3");
 ```
 
-By inheriting it with [CRTP]() we can inject additional logic into that chain to customize behavior. 
+`latest.log`:
 
-### Examples
 
-#### Add additional formatting to values 
+### Extending formatter for custom types
 
-Let's say we want a version of stringifier that adds `$` around the floats so we can export them to [LaTeX]() as formulas. To do so we can declare a derived class that overrides `append_bool()` with additional behavior:
+> [!Tip]
+> This can also be used to override behavior for types that are already supported, user-defined explicit specialization always gets higher priority.
 
 ```cpp
-struct LaTeXStringifier : public log::StringifierBase<LaTeXStringifier> {
-    using base = log::StringifierBase<LaTeXStringifier>;
-    
-    template <class T>
-    static void append_float(std::string &buffer, const T& value) {
-        buffer += '$';
-        base::append_float(buffer, value);
-        buffer += '$';
+using namespace utl;
+
+// Custom type
+struct Vec3 { double x, y, z; };
+
+// Extend formatter to support 'Vec3'
+template <>
+struct log::Formatter<Vec3> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const Vec3& vec) {
+        Formatter<const char*>{}(buffer, "Vec3{");
+        Formatter<     double>{}(buffer, vec.x  );
+        Formatter<const char*>{}(buffer, ", "   );
+        Formatter<     double>{}(buffer, vec.y  );
+        Formatter<const char*>{}(buffer, ", "   );
+        Formatter<     double>{}(buffer, vec.z  );
+        Formatter<const char*>{}(buffer, "}"    );
     }
 };
+
+// ...
+
+// Test
+assert(log::stringify(Vec3{1, 2, 3}) == "Vec3{1, 2, 3}");
 ```
 
-This new stringifier will now wrap all floats in dollar signs:
+### Extending formatter for custom type traits
 
 ```cpp
-assert( log::Stringifier{}(0.5)      == "0.5"  );
-assert( log::LaTeXStringifier{}(0.5) == "$0.5$" );
+using namespace utl;
 
-// Works in compound types too
-assert( log::Stringifier{}(std::array{ 0.5, 2.5 })      == "{ 0.5, 2.5 }"     );
-assert( log::LaTeXStringifier{}(std::array{ 0.5, 2.5 }) == "{ $0.5$, $2.5$ }" );
-```
+// Several custom classes
+struct Class1 { std::string to_string() const { return "Class 1"; }; };
+struct Class2 { std::string to_string() const { return "Class 2"; }; };
+struct Class3 { std::string to_string() const { return "Class 3"; }; };
 
-#### Override formatting of specific types
+// Type trait corresponding to those classes
+template <class T, class = void>
+struct has_to_string : std::false_type {};
 
-Let's say we want out stringifier to handle `std::vector<int>` in a completely specific way and print it as `integers: [ 1 2 3 ... ]` instead of the usual `{ 1, 2, 3, ... }`. To do so we can add overloads of `append()` for that type, overloads will take priority over the template:
+template <class T>
+struct has_to_string<T, std::void_t<decltype(std::declval<T>().to_string())>> : std::true_type {};
 
-```cpp
-struct SpecialStringifier : public log::StringifierBase<SpecialStringifier> {
-    using base = log::StringifierBase<SpecialStringifier>;
-    
-    // Bring base class 'append()' here so we don't shadow it
-    using base::append;
-    
-    // Declare overloads for types with specific formatting
-    static void append(std::string &buffer, const std::vector<int> &value) {
-        buffer += "integers: [ ";
-        for (auto e : value) buffer += std::to_string(e) + " ";
-        buffer += " ]";
+// Extend formatter to support anything that provides '.to_string()' member function
+template <class T>
+struct log::Formatter<T, std::enable_if_t<has_to_string<T>::value>> {
+    template <class Buffer>
+    void operator()(Buffer& buffer, const T& arg) {
+        Formatter<std::string>{}(buffer, arg.to_string());
     }
 };
+
+// ...
+
+// Test
+assert(log::stringify(Class1{}) == "Class 1");
+assert(log::stringify(Class2{}) == "Class 2");
+assert(log::stringify(Class2{}) == "Class 3");
 ```
 
-This new stringifier will now format `std::vector<int>` in a unique way:
+## Serialization support
 
-```cpp
-assert( log::Stringifier{}(std::vector{ 1, 2, 3 })        == "{ 1, 2, 3 }"         );
-assert( log::SpecialStringifier{}(std::vector{ 1, 2, 3 }) == "integers: [ 1 2 3 ]" );
-```
+Serialization of following types is supported out of the box:
 
-**Trivia:** The underlying mechanism that allows us to do this is based the on standard overload resolution priority, which is *regular functions* > *template functions* > *variadic template functions*.
+- Character types
+- Enumerations
+- [`std::path`]() and anything else that provides `.string()`
+- Anything convertible to [`std::string_view`]()
+- Anything convertible to [`std::string`]()
+- Booleans
+- Integers
+- Floats
+- Pointers
+- [`std::complex`]() and anything else that provides `.real()` & `.imag()`
+- Array-like types (anything that provides a forward iterator)
+- Tuple-like types (anything that supports `std::get<>()` and `std::tuple_size_v<>`)
+- Container adaptors ([`std::queue`](), [`std::deque`]() and etc.)
+- [`<chrono>`]() duration
+- Anything printable with [`std::ostream`]()
+- Nested containers and types that can be resolved recursively (such as `std::map`, `std::unordered_map` and etc.)
 
-**Note:** The same technique can be used to add optimizations for specific types, for example, `log::FastStringifier` adds overloads for faster formatting of singular integers that don't require any of the "appending" logic.
+Additional types added by fully or partially specializing the `Formatter<>`.
 
-#### Make custom type compatible with stringifier
+## Compatibility with other modules
 
-Most custom containers should be compatible with `log::Stringifier` (and by consequence, `log::stringify()`, `log::println()` and etc.) out of the box, the stringifier will automatically expand over the type `T` recursively as long as it fits into one of the following groups:
-
-| Group                | Priority | Criteria                                                     |
-| -------------------- | -------- | ------------------------------------------------------------ |
-| `append_bool()`      | **1**    | `T` is `bool`                                                |
-| `append_string()`    | **2**    | `T` is `char` or convertible to `std::string` / `std::string_view` |
-| `append_int()`       | **3**    | `T` is integral                                              |
-| `append_enum()`      | **4**    | `T` is enumeration                                           |
-| `append_float()`     | **5**    | `T` is floating point                                        |
-| `append_complex()`   | **6**    | `T` has `real()`, `imag()` methods                           |
-| `append_array()`     | **7**    | `T` has `begin()`, `end()` methods that return an incrementable iterator |
-| `append_tuple()`     | **8**    | `T` supports `std::get<>()` and `std::tuple_size()`          |
-| `append_adaptor()`   | **9**    | `T` has member type `container_type`                         |
-| `append_printable()` | **10**   | `T` supports `std::ostream` output with `operator <<`        |
-
-If none of this is the case, the easiest way would be to just declare an `std::ostream` output operator like this:
-
-```cpp
-std::ostream& operator<<(std::ostream os, const CustomType& value) {
-    return os << "<some string corresponding to the value>";
-}
-```
-
-A more "proper" and performant way however, would be to create a custom stringifier that has an overload for `CustomType` like it was done in previous example.
-
-## Roadmap for v1.0.0 release
-
-- Rewrite the formatting engine to support colors and non-allocating alignment
-- Rewrite the logging API to be macro-free and non-global
-- Improve logger & sink configurability, move configuration to compile-time
-- Rework formatting engine to allow extension though partial specialization
-- Improve buffering logic
-- Add formatter support for: `T*`, `std::chrono::duration<>`
+- [utl::assertion](module_assertion.md) ‒ can be set up to log assertion failures
+- [utl::enum_reflect](module_enum_reflect.md) ‒ provides an easy way to serialize enums
+- [utl::struct_reflect](module_struct_reflect.md) ‒ provides an easy way to serialize classes
+- [utl::table](module_table.md) ‒ provides a way  to serialize tables
+- [utl::time](module_time.md) ‒ provides a way to serialize time and date in various formats

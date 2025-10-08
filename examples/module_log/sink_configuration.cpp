@@ -10,9 +10,9 @@ int main() {
             log::policy::Level::TRACE,
             log::policy::Color::NONE,
             log::policy::Format::FULL,
-            log::policy::Buffering::TIMED,
-            log::policy::Flushing::SYNC,
-            log::policy::Threading::UNSAFE
+            log::policy::Buffering::FIXED,
+            log::policy::Flushing::ASYNC,
+            log::policy::Threading::SAFE
         >{"latest.log"}
     };
     

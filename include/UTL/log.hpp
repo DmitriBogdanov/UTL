@@ -15,7 +15,7 @@
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 2
-#define UTL_LOG_VERSION_PATCH 1
+#define UTL_LOG_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -26,7 +26,7 @@
 #include <chrono>             // steady_clock
 #include <condition_variable> // condition_variable
 #include <fstream>            // ofstream, ostream
-#include <functional>         // function<>
+#include <functional>         // function<>, ref()
 #include <iostream>           // cout
 #include <iterator>           // ostreambuf_iterator<>
 #include <memory>             // unique_ptr<>, make_unique<>()
@@ -290,13 +290,10 @@ public:
         if (this->thread.joinable()) this->thread.join();
     }
 
-    template <class F, class... Args>
-    void detached_task(F&& f, Args&&... args) {
-        auto closure = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
-
+    void detached_task(std::function<void()> task) {
         {
             const std::scoped_lock lock(this->mutex);
-            this->tasks.emplace(std::move(closure));
+            this->tasks.emplace(std::move(task));
         }
 
         this->polling_cv.notify_one();
@@ -1135,19 +1132,17 @@ class Flusher<OutputType, policy::Flushing::ASYNC> {
 public:
     Flusher(OutputType&& output) : output(std::move(output)) {}
 
+    Flusher(Flusher&& other) : output(std::move(other.output)), worker(std::move(other.worker)) {}
+
     void flush_string(std::string_view sv) {
-        this->worker->detached_task(                                         //
-            [](OutputType& out, std::string str) { out.flush_string(str); }, //
-            this->output, std::string{sv}                                    //
-        );                                                                   //
-        // the underlying buffer might be mutated while the other thread flushes it, we have to pass a copy,
+        this->worker->detached_task([&out = output, str = std::string(sv)]() { out.flush_string(str); });
+
+        // Note 1: The buffer might be mutated while the other thread flushes it, we have to pass a copy
+        // Note 2: 'std::bind' doesn't bind reference arguments, we have to add a wrapper with 'std::ref'
     }
 
     void flush_chars(std::size_t count, char ch) {
-        this->worker->detached_task(                                                         //
-            [](OutputType& out, std::size_t count, char ch) { out.flush_chars(count, ch); }, //
-            this->output, count, ch                                                          //
-        );                                                                                   //
+        this->worker->detached_task([&out = output, count, ch] { out.flush_chars(count, ch); });
     }
 };
 
@@ -1627,7 +1622,9 @@ class Sink {
     protector_type protector;
 
 public:
-    Sink(protector_type&& protector) : protector(std::move(protector)) { this->protector.header(); }
+    Sink(protector_type&& protector) : protector(std::move(protector)) {}
+
+    void header() { this->protector.header(); }
 
     template <policy::Level message_level, class Rec, class... Args>
     void message(const Rec& record, const Args&... args) {
@@ -1670,7 +1667,11 @@ class Logger {
     }
 
 public:
-    Logger(Sinks&&... sinks) : sinks(std::move(sinks)...) {}
+    Logger(Sinks&&... sinks) : sinks(std::move(sinks)...) {
+        tuple_for_each(this->sinks, [&](auto&& sink) { sink.header(); }); // [Important!]
+        // any buffer operations should happen AFTER the sink construction, since during construction
+        // buffer & output pointers can change, which would break the async case (single-threaded case is fine)
+    }
 
     // clang-format off
     template <class... Args> void err  (const Args&... args) { this->message<policy::Level::ERR  >(args...); }
@@ -1737,6 +1738,8 @@ void println(const Args&... args) {
 // ______________________ PUBLIC API ______________________
 
 namespace utl::log {
+
+using impl::Formatter;
 
 using impl::Logger;
 using impl::Sink;

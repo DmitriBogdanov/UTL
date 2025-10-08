@@ -4,7 +4,7 @@
 
 // _______________________ INCLUDES _______________________
 
-// None
+#include <future> // async(), future<>
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -15,7 +15,7 @@ using namespace log::policy;
 constexpr auto type   = Type::STREAM;
 constexpr auto level  = Level::TRACE;
 constexpr auto color  = Color::NONE;
-constexpr auto format = Format::TITLE | Format::THREAD | Format::LEVEL;
+constexpr auto format = Format::TITLE | Format::LEVEL;
 // don't format time dependent fields that are not reproducible
 
 template <Buffering buffering, Flushing flushing, Threading threading>
@@ -30,15 +30,15 @@ void test_config() {
         logger.warn("Message 3");
     }
 
-    const std::string expected = R"(| thread | level | message)"
+    const std::string expected = R"(| level | message)"
                                  "\n"
-                                 R"(| ------ | ----- | ------------------------------)"
+                                 R"(| ----- | ------------------------------)"
                                  "\n"
-                                 R"(| 0      |  INFO | Message 1)"
+                                 R"(|  INFO | Message 1)"
                                  "\n"
-                                 R"(| 0      |  NOTE | Message 2)"
+                                 R"(|  NOTE | Message 2)"
                                  "\n"
-                                 R"(| 0      |  WARN | Message 3)"
+                                 R"(|  WARN | Message 3)"
                                  "\n";
 
     const std::string result = oss.str();
@@ -49,23 +49,34 @@ void test_config() {
     // prefix & suffix with newlines make the output more readable in the case of a failure
 }
 
-TEST_CASE("Sinks / Flushing") {
+TEST_CASE("Sinks / Configuration") {
     // 3 x 2 x 2 = 12 different configuration to test, all of them should output the same string,
-    // repeat multiple times to increase the chance of catching threading issues
-    constexpr std::size_t repeats = 30;
-    
-    for (std::size_t i = 0; i < repeats; ++i) {
-        test_config<Buffering::NONE, Flushing::SYNC, Threading::UNSAFE>();
-        test_config<Buffering::NONE, Flushing::ASYNC, Threading::UNSAFE>();
-        test_config<Buffering::NONE, Flushing::SYNC, Threading::SAFE>();
-        test_config<Buffering::NONE, Flushing::ASYNC, Threading::SAFE>();
-        test_config<Buffering::FIXED, Flushing::SYNC, Threading::UNSAFE>();
-        test_config<Buffering::FIXED, Flushing::ASYNC, Threading::UNSAFE>();
-        test_config<Buffering::FIXED, Flushing::SYNC, Threading::SAFE>();
-        test_config<Buffering::FIXED, Flushing::ASYNC, Threading::SAFE>();
-        test_config<Buffering::TIMED, Flushing::SYNC, Threading::UNSAFE>();
-        test_config<Buffering::TIMED, Flushing::ASYNC, Threading::UNSAFE>();
-        test_config<Buffering::TIMED, Flushing::SYNC, Threading::SAFE>();
-        test_config<Buffering::TIMED, Flushing::ASYNC, Threading::SAFE>();
+    // repeat multiple times on multiple threads to increase the chance of catching threading issues
+    constexpr std::size_t repeats          = 4;
+    constexpr std::size_t tasks_per_repeat = 20;
+
+    for (std::size_t repeat = 0; repeat < repeats; ++repeat) {
+        std::array<std::future<void>, tasks_per_repeat> futures;
+
+        for (std::size_t task = 0; task < tasks_per_repeat; ++task) {
+            println("========================\n> Repeat = ", repeat, ", task = ", task);
+            
+            futures[task] = std::async([] {
+                test_config<Buffering::NONE, Flushing::SYNC, Threading::UNSAFE>();
+                test_config<Buffering::NONE, Flushing::ASYNC, Threading::UNSAFE>();
+                test_config<Buffering::NONE, Flushing::SYNC, Threading::SAFE>();
+                test_config<Buffering::NONE, Flushing::ASYNC, Threading::SAFE>();
+                test_config<Buffering::FIXED, Flushing::SYNC, Threading::UNSAFE>();
+                test_config<Buffering::FIXED, Flushing::ASYNC, Threading::UNSAFE>();
+                test_config<Buffering::FIXED, Flushing::SYNC, Threading::SAFE>();
+                test_config<Buffering::FIXED, Flushing::ASYNC, Threading::SAFE>();
+                test_config<Buffering::TIMED, Flushing::SYNC, Threading::UNSAFE>();
+                test_config<Buffering::TIMED, Flushing::ASYNC, Threading::UNSAFE>();
+                test_config<Buffering::TIMED, Flushing::SYNC, Threading::SAFE>();
+                test_config<Buffering::TIMED, Flushing::ASYNC, Threading::SAFE>();
+            });
+        }
+        
+        for (std::size_t task = 0; task < tasks_per_repeat; ++task) futures[task].wait();
     }
 }
