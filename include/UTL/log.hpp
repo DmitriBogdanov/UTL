@@ -14,8 +14,8 @@
 #define utl_log_headerguard
 
 #define UTL_LOG_VERSION_MAJOR 2
-#define UTL_LOG_VERSION_MINOR 2
-#define UTL_LOG_VERSION_PATCH 3
+#define UTL_LOG_VERSION_MINOR 3
+#define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -42,12 +42,148 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// A lot of includes, no way around it without reducing the feature set. In a hpp/cpp split most of
-// these includes could be moved to the corresponding translation unit and hidden behind indirection.
+// A somewhat overengineered logger that uses a lot of compile-time magic and internal macro codegen
+// to generate a concise macro-free API that provides features usually associated with macros. 
+//
+// We also want simple customizability on user side while squeezing out as much formatting
+// performance as we reasonably can using compile-time logic. Combined with the inherent
+// weirdness of variadic formatting this at times leads to some truly horrific constructs.
+//
+// All things considered, format strings are a much simpler solution from the implementation
+// perspective, however properly using them isn't possible without bringing in fmtlib as a dependency.
 
 // ____________________ IMPLEMENTATION ____________________
 
+// ===============================================
+// --- Optional 'std::source_location' support ---
+// ===============================================
+
+// clang-format off
+
+// Detect if we have C++20 or above
+
+#ifdef _MSC_VER
+    #define utl_log_cpp_standard _MSVC_LANG
+#else
+    #define utl_log_cpp_standard __cplusplus
+#endif
+
+// For C++20 and above use typedef for 'std::source_location'
+
+#if utl_log_cpp_standard >= 202002L
+    #include <source_location>
+    namespace utl::log::impl {
+        using SourceLocation = std::source_location;
+    }
+    #define utl_log_has_source_location
+#endif
+
+// Below C++20 detect compiler version and intrinsics that allow its emulation.
+// Emulation works similarly for all 3 major compilers and is quite simple to implement.
+// It provides the entire standard API except '.column()' which is not supported by GCC.
+
+// MSVC: requires at least VS 2019 16.6 Preview 2
+#ifndef utl_log_has_source_location
+    #ifdef _MSC_VER
+        #if _MSC_VER >= 1927
+            #define utl_log_use_source_location_builtin
+            #define utl_log_has_source_location
+        #endif
+    #endif
+#endif
+
+// GCC, clang: can be detected with '__has_builtin()'
+#ifndef utl_log_has_source_location 
+    #ifdef __has_builtin
+        #if __has_builtin(__builtin_LINE) && __has_builtin(__builtin_FUNCTION) && __has_builtin(__builtin_FILE)
+            #define utl_log_use_source_location_builtin
+            #define utl_log_has_source_location
+        #endif
+    #endif
+#endif
+
+// clang-format on
+
+#ifdef utl_log_use_source_location_builtin
 namespace utl::log::impl {
+class SourceLocation {
+    int         _line = -1;
+    const char* _func = nullptr;
+    const char* _file = nullptr;
+
+    constexpr SourceLocation(int line, const char* func, const char* file) noexcept
+        : _line(line), _func(func), _file(file) {}
+
+public:
+    constexpr SourceLocation()                      = default;
+    constexpr SourceLocation(const SourceLocation&) = default;
+    constexpr SourceLocation(SourceLocation&&)      = default;
+
+    [[nodiscard]] constexpr static SourceLocation
+    current(int line = __builtin_LINE(), const char* func = __builtin_FUNCTION(), const char* file = __builtin_FILE()) {
+        return SourceLocation{line, func, file};
+    }
+
+    [[nodiscard]] constexpr int         line() const noexcept { return this->_line; }
+    [[nodiscard]] constexpr const char* file_name() const noexcept { return this->_file; }
+    [[nodiscard]] constexpr const char* function_name() const noexcept { return this->_func; }
+};
+} // namespace utl::log::impl
+#endif
+
+// If all else fails, provide a mock class that returns nothing
+
+#ifndef utl_log_has_source_location
+#define utl_log_has_source_location
+namespace utl::log::impl {
+struct SourceLocation {
+    [[nodiscard]] constexpr static SourceLocation current() { return SourceLocation{}; }
+
+    [[nodiscard]] constexpr int         line() const noexcept { return 0; }
+    [[nodiscard]] constexpr const char* file_name() const noexcept { return ""; }
+    [[nodiscard]] constexpr const char* function_name() const noexcept { return ""; }
+};
+} // namespace utl::log::impl
+#endif
+
+namespace utl::log::impl {
+
+// =================
+// --- Map-macro ---
+// =================
+
+#define utl_log_eval_0(...) __VA_ARGS__
+#define utl_log_eval_1(...) utl_log_eval_0(utl_log_eval_0(utl_log_eval_0(__VA_ARGS__)))
+#define utl_log_eval_2(...) utl_log_eval_1(utl_log_eval_1(utl_log_eval_1(__VA_ARGS__)))
+#define utl_log_eval_3(...) utl_log_eval_2(utl_log_eval_2(utl_log_eval_2(__VA_ARGS__)))
+#define utl_log_eval_4(...) utl_log_eval_3(utl_log_eval_3(utl_log_eval_3(__VA_ARGS__)))
+#define utl_log_eval(...) utl_log_eval_4(utl_log_eval_4(utl_log_eval_4(__VA_ARGS__)))
+
+#define utl_log_map_end(...)
+#define utl_log_map_out
+#define utl_log_map_comma ,
+
+#define utl_log_map_get_end_2() 0, utl_log_map_end
+#define utl_log_map_get_end_1(...) utl_log_map_get_end_2
+#define utl_log_map_get_end(...) utl_log_map_get_end_1
+#define utl_log_map_next_0(test, next, ...) next utl_log_map_out
+#define utl_log_map_next_1(test, next) utl_log_map_next_0(test, next, 0)
+#define utl_log_map_next(test, next) utl_log_map_next_1(utl_log_map_get_end test, next)
+
+#define utl_log_map_0(f, x, peek, ...) f(x) utl_log_map_next(peek, utl_log_map_1)(f, peek, __VA_ARGS__)
+#define utl_log_map_1(f, x, peek, ...) f(x) utl_log_map_next(peek, utl_log_map_0)(f, peek, __VA_ARGS__)
+
+#define utl_log_map_list_next_1(test, next) utl_log_map_next_0(test, utl_log_map_comma next, 0)
+#define utl_log_map_list_next(test, next) utl_log_map_list_next_1(utl_log_map_get_end test, next)
+
+#define utl_log_map_list_0(f, x, peek, ...) f(x) utl_log_map_list_next(peek, utl_log_map_list_1)(f, peek, __VA_ARGS__)
+#define utl_log_map_list_1(f, x, peek, ...) f(x) utl_log_map_list_next(peek, utl_log_map_list_0)(f, peek, __VA_ARGS__)
+
+// Applies the function macro 'f' to all '__VA_ARGS__'
+#define utl_log_map(f, ...) utl_log_eval(utl_log_map_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
+
+// Applies the function macro 'f' to to all '__VA_ARGS__' and inserts commas between the results
+#define utl_log_map_list(f, ...) utl_log_eval(utl_log_map_list_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
 
 // =================
 // --- Utilities ---
@@ -1001,9 +1137,9 @@ using Clock = std::chrono::steady_clock;
 
 // Metadata associated with a logging record, generated once by the 'Logger' and distributed to all sinks
 struct Record {
-    Clock::duration elapsed;
-    const char*     file;
-    std::size_t     line;
+    Clock::duration  elapsed;
+    std::string_view file;
+    std::size_t      line;
 };
 
 // --- Policies ---
@@ -1025,7 +1161,7 @@ enum class Format {
     CALLSITE = 1 << 4,
     LEVEL    = 1 << 5,
     NONE     = 0,
-    FULL     = TITLE | THREAD | UPTIME | CALLSITE | LEVEL
+    FULL     = DATE | TITLE | THREAD | UPTIME | CALLSITE | LEVEL
 }; // bitmask enum
 
 [[nodiscard]] constexpr Format operator|(Format a, Format b) noexcept {
@@ -1300,9 +1436,9 @@ namespace config {
 
 constexpr std::size_t width_thread        = 6;
 constexpr std::size_t width_uptime        = 8;
-constexpr std::size_t width_callsize_name = 24; // split used for file:line alignment
+constexpr std::size_t width_callsite_name = 24; // split used for file:line alignment
 constexpr std::size_t width_callsite_line = 4;
-constexpr std::size_t width_callsite      = width_callsize_name + 1 + width_callsite_line;
+constexpr std::size_t width_callsite      = width_callsite_name + 1 + width_callsite_line;
 constexpr std::size_t width_level         = 5;
 constexpr std::size_t width_message       = 30; // doesn't limit actual message size, used for separator width
 
@@ -1395,12 +1531,23 @@ private:
         Formatter<styled_type>{}(this->buffer, arg);
     }
 
-    template <class Rec>
-    void write_uptime(const Rec& record) {
+    void write_uptime(const Record& record) {
         using styled_type     = AlignedRight<FormattedFloat<double>>;
         const styled_type arg = Sec(record.elapsed).count() | fixed(2) | align_right(config::width_uptime);
 
         Formatter<styled_type>{}(this->buffer, arg);
+    }
+
+    void write_callsite([[maybe_unused]] const Record& record) {
+        using styled_file      = AlignedRight<const std::string_view&>;
+        const styled_file file = record.file | align_right(config::width_callsite_name);
+
+        using styled_line      = AlignedLeft<const std::size_t&>;
+        const styled_line line = record.line | align_left(config::width_callsite_line);
+
+        Formatter<styled_file>{}(this->buffer, file);
+        Formatter<char>{}(this->buffer, ':');
+        Formatter<styled_line>{}(this->buffer, line);
     }
 
     template <policy::Level message_level>
@@ -1463,6 +1610,8 @@ private:
         if constexpr (format_thread) this->buffer.push_chars(config::width_thread, config::hline_fill);
         if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
         if constexpr (format_uptime) this->buffer.push_chars(config::width_uptime, config::hline_fill);
+        if constexpr (format_callsite) this->buffer.push_string(delimiter_callsite);
+        if constexpr (format_callsite) this->buffer.push_chars(config::width_callsite, config::hline_fill);
         if constexpr (format_level) this->buffer.push_string(delimiter_level);
         if constexpr (format_level) this->buffer.push_chars(config::width_level, config::hline_fill);
         this->buffer.push_string(delimiter_message);
@@ -1471,12 +1620,14 @@ private:
     }
 
     void write_header_hline() {
-        constexpr std::size_t w_thread  = format_thread ? (config::width_thread + delimiter_thread.size()) : 0;
-        constexpr std::size_t w_uptime  = format_uptime ? (config::width_uptime + delimiter_uptime.size()) : 0;
-        constexpr std::size_t w_level   = format_level ? (config::width_level + delimiter_level.size()) : 0;
-        constexpr std::size_t w_message = config::width_message + delimiter_message.size();
+        constexpr std::size_t w_thread   = format_thread ? (config::width_thread + delimiter_thread.size()) : 0;
+        constexpr std::size_t w_uptime   = format_uptime ? (config::width_uptime + delimiter_uptime.size()) : 0;
+        constexpr std::size_t w_callsite = format_callsite ? (config::width_callsite + delimiter_callsite.size()) : 0;
+        constexpr std::size_t w_level    = format_level ? (config::width_level + delimiter_level.size()) : 0;
+        constexpr std::size_t w_message  = config::width_message + delimiter_message.size();
 
-        constexpr std::size_t hline_total = w_thread + w_uptime + w_level + w_message - config::delimiter_front.size();
+        constexpr std::size_t hline_total =
+            w_thread + w_uptime + w_callsite + w_level + w_message - config::delimiter_front.size();
 
         this->buffer.push_string(config::delimiter_front);
         this->buffer.push_chars(hline_total, config::hline_fill);
@@ -1488,6 +1639,8 @@ private:
         if constexpr (format_thread) this->buffer.push_string(config::title_thread);
         if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
         if constexpr (format_uptime) this->buffer.push_string(config::title_uptime);
+        if constexpr (format_callsite) this->buffer.push_string(delimiter_callsite);
+        if constexpr (format_callsite) this->buffer.push_string(config::title_callsite);
         if constexpr (format_level) this->buffer.push_string(delimiter_level);
         if constexpr (format_level) this->buffer.push_string(config::title_level);
         this->buffer.push_string(delimiter_message);
@@ -1514,8 +1667,8 @@ private:
         if constexpr (has_color) this->write_color_reset();
     }
 
-    template <policy::Level message_level, class Rec, class... Args>
-    void write_message(const Rec& record, const Args&... args) {
+    template <policy::Level message_level, class... Args>
+    void write_message(const Record& record, const Args&... args) {
         // Start color
         if constexpr (has_color) this->write_color_message<message_level>();
 
@@ -1524,6 +1677,8 @@ private:
         if constexpr (format_thread) this->write_thread();
         if constexpr (format_uptime) this->buffer.push_string(delimiter_uptime);
         if constexpr (format_uptime) this->write_uptime(record);
+        if constexpr (format_callsite) this->buffer.push_string(delimiter_callsite);
+        if constexpr (format_callsite) this->write_callsite(record);
         if constexpr (format_level) this->buffer.push_string(delimiter_level);
         if constexpr (format_level) this->write_level<message_level>();
 
@@ -1545,9 +1700,12 @@ public:
         if constexpr (format_date || format_title) this->write_header();
     }
 
-    template <policy::Level message_level, class Rec, class... Args>
-    void message(const Rec& record, const Args&... args) {
+    template <policy::Level message_level, class... Args>
+    void message([[maybe_unused]] const Record& record, [[maybe_unused]] const Args&... args) {
         if constexpr (message_level <= level) this->write_message<message_level>(record, args...);
+        // Note: Both '[[maybe_unused]]' and splitting 'write_message()' into a separate method are
+        //       necessary to prevent MSVC from complaining about unused code at W4 warning level
+        //       in cases where this methods should intentionally compile to nothing.
     }
 };
 
@@ -1570,8 +1728,8 @@ public:
 
     void header() { this->writer.header(); }
 
-    template <policy::Level message_level, class Rec, class... Args>
-    void message(const Rec& record, const Args&... args) {
+    template <policy::Level message_level, class... Args>
+    void message(const Record& record, const Args&... args) {
         this->writer.template message<message_level>(record, args...);
     }
 };
@@ -1593,8 +1751,8 @@ public:
 
     void header() { this->writer.header(); }
 
-    template <policy::Level message_level, class Rec, class... Args>
-    void message(const Rec& record, const Args&... args) {
+    template <policy::Level message_level, class... Args>
+    void message(const Record& record, const Args&... args) {
         const std::lock_guard lock(this->mutex);
         this->writer.template message<message_level>(record, args...);
     }
@@ -1631,8 +1789,8 @@ public:
 
     void header() { this->protector.header(); }
 
-    template <policy::Level message_level, class Rec, class... Args>
-    void message(const Rec& record, const Args&... args) {
+    template <policy::Level message_level, class... Args>
+    void message(const Record& record, const Args&... args) {
         this->protector.template message<message_level>(record, args...);
     }
 
@@ -1654,6 +1812,96 @@ Sink(std::string_view)->Sink<policy::Type::FILE>;
 // --- Component: Logger ---
 // =========================
 
+// --- Codegen macros ---
+// ----------------------
+
+// Since we want to have macro-free API on the user side, the only way of capturing callsite is
+// 'std::source_location' or its re-implementation. The only way to capture callsite with such class
+// in C++17 is by using it as a defaulted function parameter, however we cannot have defaulted parameters
+// after a variadic pack (which is what logging functions accept).
+//
+// Some loggers that use global logging functions work around this by replacing such functions with class constructor,
+// that use special CTAD to omit the need to pass source location. However, we cannot use this with a local logger API
+// without making it weird for the user. The only way to achieve the desired regular syntax is to manually provide
+// overloads for every number of arguments up to a certain large N. Since doing that truly manually would require
+// an unreasonable amount of code repetition, we use map-macro in combination with some codegen macros to declare
+// those function with preprocessor.
+//
+// This is truly horrible, but sacrifices must be made if we want a nice user API.
+
+#define utl_log_template_param(number_) class T##number_
+#define utl_log_function_param(number_) const T##number_& t##number_
+#define utl_log_function_arg(number_) t##number_
+
+#define utl_log_member_fwd(...)                                                                                        \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void err(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                    \
+             SourceLocation location = SourceLocation::current()) {                                                    \
+        this->message<policy::Level::ERR>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));              \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void warn(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        this->message<policy::Level::WARN>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void note(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        this->message<policy::Level::NOTE>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void info(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        this->message<policy::Level::INFO>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void debug(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
+               SourceLocation location = SourceLocation::current()) {                                                  \
+        this->message<policy::Level::DEBUG>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));            \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void trace(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
+               SourceLocation location = SourceLocation::current()) {                                                  \
+        this->message<policy::Level::TRACE>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));            \
+    }                                                                                                                  \
+    static_assert(true)
+
+#define utl_log_function_fwd(...)                                                                                      \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void err(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                    \
+             SourceLocation location = SourceLocation::current()) {                                                    \
+        default_logger().err(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);              \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void warn(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        default_logger().warn(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void note(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        default_logger().note(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void info(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
+              SourceLocation location = SourceLocation::current()) {                                                   \
+        default_logger().info(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void debug(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
+               SourceLocation location = SourceLocation::current()) {                                                  \
+        default_logger().debug(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);            \
+    }                                                                                                                  \
+    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
+    void trace(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
+               SourceLocation location = SourceLocation::current()) {                                                  \
+        default_logger().trace(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);            \
+    }                                                                                                                  \
+    static_assert(true)
+
+// --- Component ---
+// -----------------
+
 // Component that wraps a number of sinks and distributes records to them
 
 template <class... Sinks>
@@ -1662,10 +1910,22 @@ class Logger {
     Clock::time_point    creation_time_point = Clock::now();
 
     template <policy::Level message_level, class... Args>
-    void message(const Args&... args) {
+    void message(SourceLocation location, const Args&... args) {
         // Get record info
         Record record;
         record.elapsed = Clock::now() - this->creation_time_point;
+
+        std::string_view path = location.function_name();
+
+        record.file = path.substr(path.find_last_of("\\/") + 1);
+        record.line = static_cast<std::size_t>(location.line());
+
+        // Note 1: Even if there is nothing to trim, the 'file' will be correct due to the 'npos + 1 == 0' wrap-around
+
+        // Note 2: We have no choice, but to evaluate 'std::source_location' at runtime due to a deficiency in its
+        //         design. In C++20 we do get potential constexpr source location through non-type template parameters,
+        //         but even we have to implement a custom source location using compiler build-ins since standard one
+        //         doesn't work as a non-type parameter.
 
         // Forward record & message to every sink
         tuple_for_each(this->sinks, [&](auto&& sink) { sink.template message<message_level>(record, args...); });
@@ -1678,14 +1938,33 @@ public:
         // buffer & output pointers can change, which would break the async case (single-threaded case is fine)
     }
 
-    // clang-format off
-    template <class... Args> void err  (const Args&... args) { this->message<policy::Level::ERR  >(args...); }
-    template <class... Args> void warn (const Args&... args) { this->message<policy::Level::WARN >(args...); }
-    template <class... Args> void note (const Args&... args) { this->message<policy::Level::NOTE >(args...); }
-    template <class... Args> void info (const Args&... args) { this->message<policy::Level::INFO >(args...); }
-    template <class... Args> void debug(const Args&... args) { this->message<policy::Level::DEBUG>(args...); }
-    template <class... Args> void trace(const Args&... args) { this->message<policy::Level::TRACE>(args...); }
-    // clang-format on
+    // Create err() / warn() / note() / info() / debug() / trace() for up to 25 arguments
+    utl_log_member_fwd(0);
+    utl_log_member_fwd(0, 1);
+    utl_log_member_fwd(0, 1, 2);
+    utl_log_member_fwd(0, 1, 2, 3);
+    utl_log_member_fwd(0, 1, 2, 3, 4);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
+    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
 };
 
 // =============================
@@ -1697,14 +1976,33 @@ inline auto& default_logger() {
     return logger;
 }
 
-// clang-format off
-template <class... Args> void err  (const Args&... args) { default_logger().err  (args...); }
-template <class... Args> void warn (const Args&... args) { default_logger().warn (args...); }
-template <class... Args> void note (const Args&... args) { default_logger().note (args...); }
-template <class... Args> void info (const Args&... args) { default_logger().info (args...); }
-template <class... Args> void debug(const Args&... args) { default_logger().debug(args...); }
-template <class... Args> void trace(const Args&... args) { default_logger().trace(args...); }
-// clang-format on
+// Expose default logger err() / warn() / note() / info() / debug() / trace() as functions in the global namespace
+utl_log_function_fwd(0);
+utl_log_function_fwd(0, 1);
+utl_log_function_fwd(0, 1, 2);
+utl_log_function_fwd(0, 1, 2, 3);
+utl_log_function_fwd(0, 1, 2, 3, 4);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
+utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
 
 // ================
 // --- Printing ---
