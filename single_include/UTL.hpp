@@ -3078,7 +3078,7 @@ using impl::is_reflected_struct;
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 2
-#define UTL_LOG_VERSION_PATCH 2
+#define UTL_LOG_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -4558,12 +4558,7 @@ private:
         this->buffer.push_string(config::line_break);
     }
 
-public:
-    Writer(BufferType&& buffer) : buffer(std::move(buffer)) {}
-
-    void header() {
-        if constexpr (!format_date && !format_title) return;
-
+    void write_header() {
         // Start color
         if constexpr (has_color) this->write_color_header();
 
@@ -4583,9 +4578,7 @@ public:
     }
 
     template <policy::Level message_level, class Rec, class... Args>
-    void message(const Rec& record, const Args&... args) {
-        if constexpr (message_level > level) return; // filters messages above writer verbosity level
-
+    void write_message(const Rec& record, const Args&... args) {
         // Start color
         if constexpr (has_color) this->write_color_message<message_level>();
 
@@ -4606,6 +4599,18 @@ public:
 
         // End color
         if constexpr (has_color) this->write_color_reset();
+    }
+
+public:
+    Writer(BufferType&& buffer) : buffer(std::move(buffer)) {}
+
+    void header() {
+        if constexpr (format_date || format_title) this->write_header();
+    }
+
+    template <policy::Level message_level, class Rec, class... Args>
+    void message(const Rec& record, const Args&... args) {
+        if constexpr (message_level <= level) this->write_message<message_level>(record, args...);
     }
 };
 
