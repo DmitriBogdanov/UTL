@@ -102,7 +102,7 @@ Below is an **example table** for the reflection of `struct Struct { int x; };`:
 | `value` is an r-value reference to a struct | `S&&` corresponds to `Struct&&`       | `std:tuple<int&&>`       |
 
 > [!Tip]
-> This effectively means that `field_view` allows struct members to be accessed exactly as one would expect when working with struct members directly, except using a tuple API. See [examples]().
+> This effectively means that `field_view` allows struct members to be accessed exactly as one would expect when working with struct members directly, except using a tuple API. See the [examples](#field--entry-views).
 
 > ```cpp
 > template <class S> constexpr auto entry_view(S&& value) noexcept;
@@ -140,7 +140,7 @@ Applies function `func` to all fields of the struct `value`.
 
 Applies function `func` to all fields of a struct pair `value_1`, `value_2`.
 
-**Note:** This is useful for defining binary functions over custom types, see [examples]().
+**Note:** This is useful for defining binary functions over custom types, see the [examples](#using-reflection-to-define-binary-operations).
 
 > ```cpp
 > template <class S, class Pred>

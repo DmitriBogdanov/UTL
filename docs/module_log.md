@@ -4,7 +4,7 @@
 
 [<- to implementation.hpp](https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/log.hpp)
 
-**utl::log** is a lean logging library that tries to make log syntax as simple as possible. It uses type traits to deduce how to serialize various types without depending on its their explicit support, while still providing customization points through formatter specialization. Due to compile-time parametrization & custom formatting the logger achieves significantly lower overhead than standard [`std::ostream`]()-based solutions.
+**utl::log** is a lean logging library that tries to make log syntax as simple as possible. It uses type traits to deduce how to serialize various types without depending on its their explicit support, while still providing customization points through formatter specialization. Due to compile-time parametrization & custom formatting the logger achieves significantly lower overhead than standard [`std::ostream`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)-based solutions.
 
 Key features:
 
@@ -430,7 +430,7 @@ Modifiers that specify the color & font of the serialized value.
 
 ### Basic logging
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/basic_logging.cpp) ]
+[ [Run this code](https://godbolt.org/z/KE5jbnE8a) ] [ [Open source file](../examples/module_log/basic_logging.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -460,7 +460,7 @@ Output:
 
 ### Logging objects
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/logging_objects.cpp) ]
+[ [Run this code](https://godbolt.org/z/PT8qhe7Po) ] [ [Open source file](../examples/module_log/logging_objects.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -494,7 +494,7 @@ Output:
 > [!Tip]
 > The exact same syntax can be used with `println()` / `stringify()`, which is both performant and convenient even outside of logging.
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/formatting_modifiers.cpp) ]
+[ [Run this code](https://godbolt.org/z/9cYvx97Tz) ] [ [Open source file](../examples/module_log/formatting_modifiers.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -535,7 +535,7 @@ Output:
 
 ### Local logger
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/local_logger.cpp) ]
+[ [Run this code](https://godbolt.org/z/eMvzf88da) ] [ [Open source file](../examples/module_log/local_logger.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -567,7 +567,7 @@ Output:
 
 ### Global logger
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/global_logger.cpp) ]
+[ [Run this code](https://godbolt.org/z/Y9Ynjczsj) ] [ [Open source file](../examples/module_log/global_logger.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -608,7 +608,7 @@ Output:
 > [!Tip]
 > Most of the time default configuration works well enough: stream sinks are colored and flush instantly, while file sinks are buffered, async and stripped of any color codes.
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/sink_configuration.cpp) ]
+[ [Run this code](https://godbolt.org/z/qrKn834xW) ] [ [Open source file](../examples/module_log/sink_configuration.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -649,7 +649,7 @@ logger.warn("Message 3");
 > [!Tip]
 > This can also be used to override behavior for types that are already supported, user-defined explicit specialization always gets higher priority.
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_types.cpp) ]
+[ [Run this code](https://godbolt.org/z/hYeqavYEq) ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_types.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -680,7 +680,7 @@ assert(log::stringify(Vec3{1, 2, 3}) == "Vec3{1, 2, 3}");
 
 ### Extending formatter for custom type traits
 
-[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_type_traits.cpp) ]
+[ [Run this code](https://godbolt.org/z/Ec4h38x7o) ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_type_traits.cpp) ]
 
 ```cpp
 using namespace utl;
