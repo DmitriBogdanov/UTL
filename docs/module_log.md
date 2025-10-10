@@ -12,7 +12,7 @@ Key features:
 - Serializes [almost every type & container](#serialization-support)
 - Automatically adapts to containers with std-like API
 - Concise syntax for alignment / color / number formatting
-- Sync/async logging with various buffering policies  
+- Sync/async logging with various buffering policies
 - Convenient `println()` and `stringify()`
 
 Quirks of the library:
@@ -24,18 +24,23 @@ Quirks of the library:
 **Quick showcase:**
 
 ```cpp
-log::trace("Message 1");
-log::info ("Message 2");
-log::warn ("Message 3");
+log::info("Message 1");
+log::warn("Message 2");
+log::err ("Message 3");
 ```
 
-IMAGE:
+<img src="images/log_basic_logging.png">
 
 ```cpp
-log::println("Vector ", {1, 2, 3} | log::color::red, " is out of bounds.");
+const auto start = std::chrono::steady_clock::now();
+
+log::println("value   = "  , std::vector{2e-3, 3e-3, 4e-3}           );
+log::println("error   = "  , 1.357 | log::scientific(2)              );
+log::println("message = "  , "low tolerance" | log::color::bold_red  );
+log::println("Finished in ", std::chrono::steady_clock::now() - start);
 ```
 
-IMAGE:
+<img src="images/log_showcase_println.png">
 
 ## Definitions
 
@@ -120,71 +125,112 @@ TODO:
 
 ### Basic logging
 
+[ [Run this code]() ] [ [Open source file](../examples/module_log/basic_logging.cpp) ]
+
 ```cpp
 using namespace utl;
 
 // Log with a default global logger
-log::trace("Message 1");
-log::info ("Message 2");
-log::warn ("Message 3");
+log::info("Message 1");
+log::warn("Message 2");
+log::err ("Message 3");
 ```
 
 Output:
 
-TODO:
+<img src="images/log_basic_logging.png">
 
 `latest.log`:
 
-TODO:
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 03:05:49
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:7    |  INFO | Message 1
+| 0      |     0.00 |                     main:8    |  WARN | Message 2
+| 0      |     0.00 |                     main:9    |   ERR | Message 3
+```
 
 ### Logging objects
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/logging_objects.cpp) ]
 
 ```cpp
 using namespace utl;
 
 const auto start = std::chrono::steady_clock::now();
 
-log::info("Starting the solver, x0 = ", std::vector{2e-3, 3e-3, 4e-3}           );
-log::warn("Solution diverges, err = " , std::complex<double>{2e14, 3e28}        );
-log::err ("Terminated after "         , std::chrono::steady_clock::now() - start);
+log::info("val = "      , std::vector{2e-3, 3e-3, 4e-3}           );
+log::warn("err = "      , std::complex<double>{2e14, 3e28}        );
+log::err ("Finished in ", std::chrono::steady_clock::now() - start);
 ```
 
 Output:
 
-TODO:
+<img src="images/log_logging_objects.png">
 
 `latest.log`:
 
-TODO:
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 02:58:38
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:10   |  INFO | val = [ 0.002, 0.003, 0.004 ]
+| 0      |     0.00 |                     main:11   |  WARN | err = 2e+14 + 3e+28i
+| 0      |     0.00 |                     main:12   |   ERR | Finished in 683 us 74 ns
+```
 
 ### Formatting modifiers
 
 > [!Tip]
 > The exact same syntax can be used with `println()` / `stringify()`, which is both performant and convenient even outside of logging.
 
+[ [Run this code]() ] [ [Open source file](../examples/module_log/formatting_modifiers.cpp) ]
+
 ```cpp
 using namespace utl;
 
-log::info("Colored:        ", "text" | log::color::red                );
-log::info("Left-aligned:   ", "text" | log::align_left(10)            );
-log::info("Center-aligned: ", "text" | log::align_center(10)          );
-log::info("Right-aligned:  ", "text" | log::align_right(10)           );
-log::info("Fixed:          ", 2.3578 | log::fixed(2)                  );
-log::info("Scientific:     ", 2.3578 | log::scientific(2)             );
-log::info("Hex:            ", 2.3578 | log::hex(2)                    );
-log::info("Base-2:         ", 1024   | log::base(2)                   );
-log::info("Multiple:       ", 1024   | log::base(2) | log::color::blue);
+log::note("Colored:        ", "text" | log::color::red                );
+log::note("Left-aligned:   ", "text" | log::align_left(10)            );
+log::note("Center-aligned: ", "text" | log::align_center(10)          );
+log::note("Right-aligned:  ", "text" | log::align_right(10)           );
+log::note("Fixed:          ", 2.3578 | log::fixed(2)                  );
+log::note("Scientific:     ", 2.3578 | log::scientific(2)             );
+log::note("Hex:            ", 2.3578 | log::hex(2)                    );
+log::note("Base-2:         ", 1024   | log::base(2)                   );
+log::note("Multiple:       ", 1024   | log::base(2) | log::color::blue);
 ```
 
 Output:
 
-TODO:
+<img src="images/log_formatting_modifiers.png">
 
 `latest.log`:
 
-TODO:
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 02:47:01
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:6    |  NOTE | Colored:        text
+| 0      |     0.00 |                     main:7    |  NOTE | Left-aligned:   text      
+| 0      |     0.00 |                     main:8    |  NOTE | Center-aligned:    text   
+| 0      |     0.00 |                     main:9    |  NOTE | Right-aligned:        text
+| 0      |     0.00 |                     main:10   |  NOTE | Fixed:          2.36
+| 0      |     0.00 |                     main:11   |  NOTE | Scientific:     2.36e+00
+| 0      |     0.00 |                     main:12   |  NOTE | Hex:            1.2ep+1
+| 0      |     0.00 |                     main:13   |  NOTE | Base-2:         10000000000
+| 0      |     0.00 |                     main:14   |  NOTE | Multiple:       10000000000
+```
 
 ### Local logger
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/local_logger.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -201,13 +247,22 @@ logger.info("Message");
 
 Output:
 
-TODO:
+<img src="images/log_local_logger.png">
 
 `log.txt`:
 
-TODO:
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 03:08:24
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:13   |  INFO | Message
+```
 
 ### Global logger
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/global_logger.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -230,16 +285,25 @@ logger().info("Message");
 
 Output:
 
-TODO:
+<img src="images/log_global_logger.png">
 
 `log.txt`:
 
-TODO:
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 03:10:57
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:17   |  INFO | Message
+```
 
 ### Sink configuration
 
 > [!Tip]
-> Most of the time default configuration works well enough: stream sinks are colored with instant buffering, while file sinks are buffered, async and stripped of any color codes.
+> Most of the time default configuration works well enough: stream sinks are colored and flush instantly, while file sinks are buffered, async and stripped of any color codes.
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/sink_configuration.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -253,6 +317,7 @@ auto logger = log::Logger{
         log::policy::Format::FULL,
         log::policy::Buffering::FIXED,
         log::policy::Flushing::ASYNC
+        log::policy::Threading::SAFE
     >{"latest.log"}
 };
 
@@ -263,11 +328,23 @@ logger.warn("Message 3");
 
 `latest.log`:
 
+```
+| ------------------------------------------------------------------------------------------
+| date -> 2025-10-10 03:12:56
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| thread |   uptime |                      callsite | level | message
+| ------ | -------- | ----------------------------- | ----- | ------------------------------
+| 0      |     0.00 |                     main:19   |  INFO | Message 1
+| 0      |     0.00 |                     main:20   |  NOTE | Message 2
+| 0      |     0.00 |                     main:21   |  WARN | Message 3
+```
 
 ### Extending formatter for custom types
 
 > [!Tip]
 > This can also be used to override behavior for types that are already supported, user-defined explicit specialization always gets higher priority.
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_types.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -297,6 +374,8 @@ assert(log::stringify(Vec3{1, 2, 3}) == "Vec3{1, 2, 3}");
 ```
 
 ### Extending formatter for custom type traits
+
+[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_type_traits.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -358,5 +437,5 @@ Additional types added by fully or partially specializing the `Formatter<>`.
 - [utl::assertion](module_assertion.md) ‒ can be set up to log assertion failures
 - [utl::enum_reflect](module_enum_reflect.md) ‒ provides an easy way to serialize enums
 - [utl::struct_reflect](module_struct_reflect.md) ‒ provides an easy way to serialize classes
-- [utl::table](module_table.md) ‒ provides a way  to serialize tables
+- [utl::table](module_table.md) ‒ provides a way to serialize tables
 - [utl::time](module_time.md) ‒ provides a way to serialize time and date in various formats

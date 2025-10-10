@@ -4,7 +4,7 @@ int main() {
     using namespace utl;
     
     // Log with a default global logger
-    log::trace("Message 1");
-    log::info ("Message 2");
-    log::warn ("Message 3");
+    log::info("Message 1");
+    log::warn("Message 2");
+    log::err ("Message 3");
 }
