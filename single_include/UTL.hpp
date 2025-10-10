@@ -3078,7 +3078,7 @@ using impl::is_reflected_struct;
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 3
-#define UTL_LOG_VERSION_PATCH 0
+#define UTL_LOG_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -3112,8 +3112,32 @@ using impl::is_reflected_struct;
 // performance as we reasonably can using compile-time logic. Combined with the inherent
 // weirdness of variadic formatting this at times leads to some truly horrific constructs.
 //
-// All things considered, format strings are a much simpler solution from the implementation
-// perspective, however properly using them isn't possible without bringing in fmtlib as a dependency.
+// All things considered, format strings are a much simpler solution from the implementation perspective,
+// however properly using them isn't possible without bringing in fmtlib as a dependency. In theory,
+// if we wanted to to push for truly top-notch performance the plan would be as follows:
+//    1. Bring in fmtlib as a dependency and use format strings as a syntax of choice
+//    2. Bring in llfio / glaze or another low latency IO library as a dependency
+//    3. Implement async formatting & IO backend:
+//    |  A. Loging threads push entries into a MPSC lock-free queue
+//    |  B. Serialized types are limited to a specific set which can be encoded
+//    |  C. Each queue entry consists of a:
+//    |  |  a. Timestamp
+//    |  |  b. Pointer to a constexpr metadata struct that contains callsite,
+//    |  |     format string and a pointer to a generated template decoder function
+//    |  |  c. Binary copy encoding the arguments
+//    |  D. Backend thread pops entries from the queue and puts them into an unbounded transit buffer
+//    |     ordered by the entry timestamp, this buffer gets periodically flushed, this is necessary
+//    |     to sort multi-threaded logs by time without introducing syncronization on the logging
+//    |     threads, perfect ordering is not theoretically guaranteed it is good enough in practice
+//    |  E. When flushing, backend thread performs:
+//    |  |  a. Decoding using the received function pointer
+//    |  |  b. Formatting using fmtlib
+//    |  |  c. Buffered IO using the manual buffer and the underlying IO library
+//    4. Use macro API to generate & format callsite and other metadata at compile-time,
+//       doing the same with functions is non-feasible / extremely difficult due to the
+//       design of 'std::source_location' which prevent proper compile-time evaluation 
+//    5. Use a custom <chrono> clock based on RDTSC timestamps for lower overhead
+// this, however, would require a project of a whole different scale and integration complexity.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -3406,7 +3430,7 @@ std::string& thread_local_temporary_string() {
 constexpr std::size_t max_chars_float = 30;       // enough to fit 80-bit long double
 constexpr std::size_t max_chars_int   = 20;       // enough to fit 64-bit signed integer
 constexpr std::size_t buffering_size  = 8 * 1024; // 8 KB, good for most systems
-constexpr auto        buffering_time  = std::chrono::milliseconds{1};
+constexpr auto        buffering_time  = std::chrono::milliseconds{5};
 
 // --- <chrono> formatting ---
 // ---------------------------
@@ -3684,38 +3708,38 @@ utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignLeft  );
 
 // clang-format off
 namespace color {
-constexpr auto black              = mods::Color{ansi::black              };
-constexpr auto red                = mods::Color{ansi::red                };
-constexpr auto green              = mods::Color{ansi::green              };
-constexpr auto yellow             = mods::Color{ansi::yellow             };
-constexpr auto blue               = mods::Color{ansi::blue               };
-constexpr auto magenta            = mods::Color{ansi::magenta            };
-constexpr auto cyan               = mods::Color{ansi::cyan               };
-constexpr auto white              = mods::Color{ansi::white              };
-constexpr auto bright_black       = mods::Color{ansi::bright_black       };
-constexpr auto bright_red         = mods::Color{ansi::bright_red         };
-constexpr auto bright_green       = mods::Color{ansi::bright_green       };
-constexpr auto bright_yellow      = mods::Color{ansi::bright_yellow      };
-constexpr auto bright_blue        = mods::Color{ansi::bright_blue        };
-constexpr auto bright_magenta     = mods::Color{ansi::bright_magenta     };
-constexpr auto bright_cyan        = mods::Color{ansi::bright_cyan        };
-constexpr auto bright_white       = mods::Color{ansi::bright_white       };
-constexpr auto bold_black         = mods::Color{ansi::bold_black         };
-constexpr auto bold_red           = mods::Color{ansi::bold_red           };
-constexpr auto bold_green         = mods::Color{ansi::bold_green         };
-constexpr auto bold_yellow        = mods::Color{ansi::bold_yellow        };
-constexpr auto bold_blue          = mods::Color{ansi::bold_blue          };
-constexpr auto bold_magenta       = mods::Color{ansi::bold_magenta       };
-constexpr auto bold_cyan          = mods::Color{ansi::bold_cyan          };
-constexpr auto bold_white         = mods::Color{ansi::bold_white         };
-constexpr auto bold_bright_black  = mods::Color{ansi::bold_bright_black  };
-constexpr auto bold_bright_red    = mods::Color{ansi::bold_bright_red    };
-constexpr auto bold_bright_green  = mods::Color{ansi::bold_bright_green  };
-constexpr auto bold_bright_yellow = mods::Color{ansi::bold_bright_yellow };
-constexpr auto bold_bright_blue   = mods::Color{ansi::bold_bright_blue   };
-constexpr auto bold_bright_magenta= mods::Color{ansi::bold_bright_magenta};
-constexpr auto bold_bright_cyan   = mods::Color{ansi::bold_bright_cyan   };
-constexpr auto bold_bright_white  = mods::Color{ansi::bold_bright_white  };
+constexpr auto black               = mods::Color{ansi::black              };
+constexpr auto red                 = mods::Color{ansi::red                };
+constexpr auto green               = mods::Color{ansi::green              };
+constexpr auto yellow              = mods::Color{ansi::yellow             };
+constexpr auto blue                = mods::Color{ansi::blue               };
+constexpr auto magenta             = mods::Color{ansi::magenta            };
+constexpr auto cyan                = mods::Color{ansi::cyan               };
+constexpr auto white               = mods::Color{ansi::white              };
+constexpr auto bright_black        = mods::Color{ansi::bright_black       };
+constexpr auto bright_red          = mods::Color{ansi::bright_red         };
+constexpr auto bright_green        = mods::Color{ansi::bright_green       };
+constexpr auto bright_yellow       = mods::Color{ansi::bright_yellow      };
+constexpr auto bright_blue         = mods::Color{ansi::bright_blue        };
+constexpr auto bright_magenta      = mods::Color{ansi::bright_magenta     };
+constexpr auto bright_cyan         = mods::Color{ansi::bright_cyan        };
+constexpr auto bright_white        = mods::Color{ansi::bright_white       };
+constexpr auto bold_black          = mods::Color{ansi::bold_black         };
+constexpr auto bold_red            = mods::Color{ansi::bold_red           };
+constexpr auto bold_green          = mods::Color{ansi::bold_green         };
+constexpr auto bold_yellow         = mods::Color{ansi::bold_yellow        };
+constexpr auto bold_blue           = mods::Color{ansi::bold_blue          };
+constexpr auto bold_magenta        = mods::Color{ansi::bold_magenta       };
+constexpr auto bold_cyan           = mods::Color{ansi::bold_cyan          };
+constexpr auto bold_white          = mods::Color{ansi::bold_white         };
+constexpr auto bold_bright_black   = mods::Color{ansi::bold_bright_black  };
+constexpr auto bold_bright_red     = mods::Color{ansi::bold_bright_red    };
+constexpr auto bold_bright_green   = mods::Color{ansi::bold_bright_green  };
+constexpr auto bold_bright_yellow  = mods::Color{ansi::bold_bright_yellow };
+constexpr auto bold_bright_blue    = mods::Color{ansi::bold_bright_blue   };
+constexpr auto bold_bright_magenta = mods::Color{ansi::bold_bright_magenta};
+constexpr auto bold_bright_cyan    = mods::Color{ansi::bold_bright_cyan   };
+constexpr auto bold_bright_white   = mods::Color{ansi::bold_bright_white  };
 } // namespace color
 // clang-format on
 

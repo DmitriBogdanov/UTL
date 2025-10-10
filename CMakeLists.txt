@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21.0...3.22.1)
 
 project(
     UTL
-    VERSION 8.3.0
+    VERSION 8.3.1
     DESCRIPTION "Collection of self-contained header-only libraries for C++17."
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/UTL"
 )
