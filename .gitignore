@@ -1,44 +1,48 @@
 # Ignore everything
 *
 
-# Whitelist directories
-!*/
-# Whitelist git config
+# Toolchain
+# > Git
 !.gitignore
 !.gitattributes
-# Whitelist toolchain configuration files
+# > CI
+!.github/
+!.github/**
+# > LLVM
 !.clang-format
 !.clang-tidy
 !.clangd
+# > Static analysis
 !.cppcheck
-# Whitelist allowed extensions
-# > Code
-!*.h
-!*.hpp
-!*.c
-!*.cpp
-# > Scripts
-!*.txt
-!*.sh
-!*.js
-!*.css
-!*.py
-# > Docs
-!*.md
-!*.svg
-!*.ico
-!*.jpg
-!*.png
-# > Data
-!*.json
-# > Website
-!*.yml
 
-# Ignore build & temporary directories regardless of their contents
-.cache/
-.cache-cppcheck/
-.vscode/
-.vs/
-build/
-temp/
-snippets/
+# Build
+# > CMake
+!CMakePresets.json
+!CMakeLists.txt
+# > Scripts
+!actions.sh
+!bash/
+!bash/**
+
+# Docs
+# > Config
+!mkdocs.yml
+# > Content
+!docs/
+!docs/**
+
+# Code
+# > Library
+!include/
+!include/**
+!single_include/
+!single_include/**
+# > Developer
+!tests/
+!tests/**
+!examples/
+!examples/**
+!benchmarks/
+!benchmarks/**
+!auxiliary/
+!auxiliary/**
