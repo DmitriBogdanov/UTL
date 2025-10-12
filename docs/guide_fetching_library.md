@@ -22,7 +22,7 @@ include(FetchContent)
 FetchContent_Declare(
     UTL
     GIT_REPOSITORY https://github.com/DmitriBogdanov/UTL.git
-    GIT_TAG        v6.2.1
+    GIT_TAG        v8.3.2
 )
 
 FetchContent_MakeAvailable(UTL)

@@ -107,7 +107,6 @@ While the library itself consists of isolated headers with no embedded dependenc
 * Create packages for `Conan` and `vcpkg`
 * Possibly provide PCH targets for internal and external use
 * Set up better test coverage statistics
-* `utl::log` v1.0.0 release, involves a formatting rework and better parametrization
 * `utl::mvl` v1.0.0 release, involves a large scale refactor and several bug fixes
 * `utl::random` v3.0.0 release, includes CBPRNGs and fixed-entropy seeding sequence
 

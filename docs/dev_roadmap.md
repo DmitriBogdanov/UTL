@@ -1,6 +1,6 @@
-# Project road-map
+# Project roadmap
 
-This file contains a rough road-map of planned features.
+This file contains a rough roadmap of planned features.
 
 ## Future C++20 migration
 
@@ -11,10 +11,10 @@ This file contains a rough road-map of planned features.
 ### Minimal task list
 
 Before migration following tasks are to be finished:
-- Finish all modules below version `1.0.0`
+- Finish all modules below version `1.0.0` **(mvl remaining)**
 - Standardize benchmarks (using standard `benchmarks/common.hpp`) **(done ✔)**
 - Standardize tests (using standard `tests/common.hpp`) **(done ✔)**
-- Write unit tests for all reasonably testable modules
+- Write unit tests for all reasonably testable modules **(mvl remaining)**
 - Add all documentation examples to the build process **(done ✔)**
 - Switch building to CMake presets **(done ✔)**
 - Add CI workflows for all major platforms **(done ✔)**
@@ -29,7 +29,7 @@ Once this is done, the current branch can be archived as `cpp17` branch, while `
 | Replace SFINAE with concepts                                 | `mvl` everything, `math` constraints, `log` stringification, `integral`, `random`, almost everything really | Better clarity, improved compile times, better error messages | ✘          |
 | Do a pass on possible `constexpr` expansion for all the functions that got `constexpr` support | ?                                                            | More `constexpr`, better testing and UB guarantees           | ✘          |
 | Replace some stream-based formatting with `std::format`      | `log`, possibly others                                       | Better performance                                           | ✘          |
-| Replace `std::thread` with `std::jthread`                    | `parallel`                                                   | Stop token support, automatic joining                        | ✘          |
+| Replace `std::thread` with `std::jthread`                    | `parallel`, `log`                                            | Stop token support, automatic joining                        | ✘          |
 | See if some uses of `std::conditional_variable` waiting can be replaced with `std::atomic` wait | `parallel`                                                   | Possible performance enhancement                             | ✘          |
 | Replace class operators `<, >, ==, !=` with a spaceship operator `<=>` | ?                                                            | More generic                                                 | ✘          |
 | Add `[[likely]]` and `[[unlikely]]` attributes where appropriate | `json` exceptions, `mvl` bound checking                      | Possible performance enhancement                             | ✘          |
