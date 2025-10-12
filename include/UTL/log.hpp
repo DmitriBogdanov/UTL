@@ -15,7 +15,7 @@
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 3
-#define UTL_LOG_VERSION_PATCH 1
+#define UTL_LOG_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -43,7 +43,7 @@
 // ____________________ DEVELOPER DOCS ____________________
 
 // A somewhat overengineered logger that uses a lot of compile-time magic and internal macro codegen
-// to generate a concise macro-free API that provides features usually associated with macros. 
+// to generate a concise macro-free API that provides features usually associated with macros.
 //
 // We also want simple customizability on user side while squeezing out as much formatting
 // performance as we reasonably can using compile-time logic. Combined with the inherent
@@ -72,7 +72,7 @@
 //    |  |  c. Buffered IO using the manual buffer and the underlying IO library
 //    4. Use macro API to generate & format callsite and other metadata at compile-time,
 //       doing the same with functions is non-feasible / extremely difficult due to the
-//       design of 'std::source_location' which prevent proper compile-time evaluation 
+//       design of 'std::source_location' which prevent proper compile-time evaluation
 //    5. Use a custom <chrono> clock based on RDTSC timestamps for lower overhead
 // this, however, would require a project of a whole different scale and integration complexity.
 
@@ -171,43 +171,6 @@ struct SourceLocation {
 #endif
 
 namespace utl::log::impl {
-
-// =================
-// --- Map-macro ---
-// =================
-
-#define utl_log_eval_0(...) __VA_ARGS__
-#define utl_log_eval_1(...) utl_log_eval_0(utl_log_eval_0(utl_log_eval_0(__VA_ARGS__)))
-#define utl_log_eval_2(...) utl_log_eval_1(utl_log_eval_1(utl_log_eval_1(__VA_ARGS__)))
-#define utl_log_eval_3(...) utl_log_eval_2(utl_log_eval_2(utl_log_eval_2(__VA_ARGS__)))
-#define utl_log_eval_4(...) utl_log_eval_3(utl_log_eval_3(utl_log_eval_3(__VA_ARGS__)))
-#define utl_log_eval(...) utl_log_eval_4(utl_log_eval_4(utl_log_eval_4(__VA_ARGS__)))
-
-#define utl_log_map_end(...)
-#define utl_log_map_out
-#define utl_log_map_comma ,
-
-#define utl_log_map_get_end_2() 0, utl_log_map_end
-#define utl_log_map_get_end_1(...) utl_log_map_get_end_2
-#define utl_log_map_get_end(...) utl_log_map_get_end_1
-#define utl_log_map_next_0(test, next, ...) next utl_log_map_out
-#define utl_log_map_next_1(test, next) utl_log_map_next_0(test, next, 0)
-#define utl_log_map_next(test, next) utl_log_map_next_1(utl_log_map_get_end test, next)
-
-#define utl_log_map_0(f, x, peek, ...) f(x) utl_log_map_next(peek, utl_log_map_1)(f, peek, __VA_ARGS__)
-#define utl_log_map_1(f, x, peek, ...) f(x) utl_log_map_next(peek, utl_log_map_0)(f, peek, __VA_ARGS__)
-
-#define utl_log_map_list_next_1(test, next) utl_log_map_next_0(test, utl_log_map_comma next, 0)
-#define utl_log_map_list_next(test, next) utl_log_map_list_next_1(utl_log_map_get_end test, next)
-
-#define utl_log_map_list_0(f, x, peek, ...) f(x) utl_log_map_list_next(peek, utl_log_map_list_1)(f, peek, __VA_ARGS__)
-#define utl_log_map_list_1(f, x, peek, ...) f(x) utl_log_map_list_next(peek, utl_log_map_list_0)(f, peek, __VA_ARGS__)
-
-// Applies the function macro 'f' to all '__VA_ARGS__'
-#define utl_log_map(f, ...) utl_log_eval(utl_log_map_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
-
-// Applies the function macro 'f' to to all '__VA_ARGS__' and inserts commas between the results
-#define utl_log_map_list(f, ...) utl_log_eval(utl_log_map_list_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
 
 // =================
 // --- Utilities ---
@@ -1848,80 +1811,67 @@ Sink(std::string_view)->Sink<policy::Type::FILE>;
 // that use special CTAD to omit the need to pass source location. However, we cannot use this with a local logger API
 // without making it weird for the user. The only way to achieve the desired regular syntax is to manually provide
 // overloads for every number of arguments up to a certain large N. Since doing that truly manually would require
-// an unreasonable amount of code repetition, we use map-macro in combination with some codegen macros to declare
-// those function with preprocessor.
+// an unreasonable amount of code repetition, we use macros to generate those function with preprocessor.
 //
 // This is truly horrible, but sacrifices must be made if we want a nice user API.
+//
+// Such codegen could also be implemented in a more concise way using map-macro, however this adds a lot of
+// nested preprocessing which bloats the compile time and slows down LSPs, so we use simple & shallow macros
+// even through it requires more boilerplate on the use site, this results in no measurable slowdown.
 
-#define utl_log_template_param(number_) class T##number_
-#define utl_log_function_param(number_) const T##number_& t##number_
-#define utl_log_function_arg(number_) t##number_
+#define utl_log_hold(...) __VA_ARGS__
 
-#define utl_log_member_fwd(...)                                                                                        \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void err(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                    \
-             SourceLocation location = SourceLocation::current()) {                                                    \
-        this->message<policy::Level::ERR>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));              \
+#define utl_log_member_alias(template_params_, function_params_, args_)                                                \
+    template <template_params_>                                                                                        \
+    void err(function_params_, SourceLocation location = SourceLocation::current()) {                                  \
+        this->message<policy::Level::ERR>(location, args_);                                                            \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void warn(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        this->message<policy::Level::WARN>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    template <template_params_>                                                                                        \
+    void warn(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        this->message<policy::Level::WARN>(location, args_);                                                           \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void note(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        this->message<policy::Level::NOTE>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    template <template_params_>                                                                                        \
+    void note(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        this->message<policy::Level::NOTE>(location, args_);                                                           \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void info(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        this->message<policy::Level::INFO>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));             \
+    template <template_params_>                                                                                        \
+    void info(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        this->message<policy::Level::INFO>(location, args_);                                                           \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void debug(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
-               SourceLocation location = SourceLocation::current()) {                                                  \
-        this->message<policy::Level::DEBUG>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));            \
+    template <template_params_>                                                                                        \
+    void debug(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+        this->message<policy::Level::DEBUG>(location, args_);                                                          \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void trace(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
-               SourceLocation location = SourceLocation::current()) {                                                  \
-        this->message<policy::Level::TRACE>(location, utl_log_map_list(utl_log_function_arg, __VA_ARGS__));            \
-    }                                                                                                                  \
-    static_assert(true)
+    template <template_params_>                                                                                        \
+    void trace(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+        this->message<policy::Level::TRACE>(location, args_);                                                          \
+    }
 
-#define utl_log_function_fwd(...)                                                                                      \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void err(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                    \
-             SourceLocation location = SourceLocation::current()) {                                                    \
-        default_logger().err(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);              \
+#define utl_log_function_alias(template_params_, function_params_, args_)                                              \
+    template <template_params_>                                                                                        \
+    void err(function_params_, SourceLocation location = SourceLocation::current()) {                                  \
+        default_logger().err(args_, location);                                                                         \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void warn(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        default_logger().warn(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    template <template_params_>                                                                                        \
+    void warn(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        default_logger().warn(args_, location);                                                                        \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void note(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        default_logger().note(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    template <template_params_>                                                                                        \
+    void note(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        default_logger().note(args_, location);                                                                        \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void info(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                   \
-              SourceLocation location = SourceLocation::current()) {                                                   \
-        default_logger().info(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);             \
+    template <template_params_>                                                                                        \
+    void info(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+        default_logger().info(args_, location);                                                                        \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void debug(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
-               SourceLocation location = SourceLocation::current()) {                                                  \
-        default_logger().debug(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);            \
+    template <template_params_>                                                                                        \
+    void debug(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+        default_logger().debug(args_, location);                                                                       \
     }                                                                                                                  \
-    template <utl_log_map_list(utl_log_template_param, __VA_ARGS__)>                                                   \
-    void trace(utl_log_map_list(utl_log_function_param, __VA_ARGS__),                                                  \
-               SourceLocation location = SourceLocation::current()) {                                                  \
-        default_logger().trace(utl_log_map_list(utl_log_function_arg, __VA_ARGS__), location);            \
-    }                                                                                                                  \
-    static_assert(true)
+    template <template_params_>                                                                                        \
+    void trace(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+        default_logger().trace(args_, location);                                                                       \
+    }
 
 // --- Component ---
 // -----------------
@@ -1962,33 +1912,126 @@ public:
         // buffer & output pointers can change, which would break the async case (single-threaded case is fine)
     }
 
-    // Create err() / warn() / note() / info() / debug() / trace() for up to 25 arguments
-    utl_log_member_fwd(0);
-    utl_log_member_fwd(0, 1);
-    utl_log_member_fwd(0, 1, 2);
-    utl_log_member_fwd(0, 1, 2, 3);
-    utl_log_member_fwd(0, 1, 2, 3, 4);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
-    utl_log_member_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
+    // Create err() / warn() / note() / info() / debug() / trace() for up to 18 arguments
+    // clang-format off
+    utl_log_member_alias( // 1
+        utl_log_hold(class A   ),
+        utl_log_hold(const A& a),
+        utl_log_hold(         a)
+    )
+    utl_log_member_alias( // 2
+        utl_log_hold(class A   , class B   ),
+        utl_log_hold(const A& a, const B& b),
+        utl_log_hold(         a,          b)
+    )
+    utl_log_member_alias( // 3
+        utl_log_hold(class A   , class B   , class C   ),
+        utl_log_hold(const A& a, const B& b, const C& c),
+        utl_log_hold(         a,          b,          c)
+    )
+    utl_log_member_alias( // 4
+        utl_log_hold(class A   , class B   , class C   , class D   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d),
+        utl_log_hold(         a,          b,          c,          d)
+    )
+    utl_log_member_alias( // 5
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e),
+        utl_log_hold(         a,          b,          c,          d,          e)
+    )
+    utl_log_member_alias( // 6
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f),
+        utl_log_hold(         a,          b,          c,          d,          e,          f)
+    )
+    utl_log_member_alias( // 7
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g)
+    )
+    utl_log_member_alias( // 8
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h)
+    )
+    utl_log_member_alias( // 9
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i)
+    )
+    utl_log_member_alias( // 10
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J                                                                                                   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j                                                                                                ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j                                                                                                )
+    )
+    utl_log_member_alias( // 11
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K                                                                                       ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k                                                                                    ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k                                                                                    )
+    )
+    utl_log_member_alias( // 12
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L                                                                           ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l                                                                        ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l                                                                        )
+    )
+    utl_log_member_alias( // 13
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M                                                               ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m                                                            ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m                                                            )
+    )
+    utl_log_member_alias( // 14
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M   , class N                                                   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m, const N& n                                                ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m,          n                                                )
+    )
+    utl_log_member_alias( // 15
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M   , class N   , class O                                       ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m, const N& n, const O& o                                    ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m,          n,          o                                    )
+    )
+    utl_log_member_alias( // 16
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M   , class N   , class O   , class P                           ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p                        ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m,          n,          o,          p                        )
+    )
+    utl_log_member_alias( // 17
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M   , class N   , class O   , class P   , class Q               ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p, const Q& q            ),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m,          n,          o,          p,          q            )
+    )
+    utl_log_member_alias( // 18
+        utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                     class J   , class K   , class L   , class M   , class N   , class O   , class P   , class Q   , class R   ),
+        utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                     const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p, const Q& q, const R& r),
+        utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                              j,          k,          l,          m,          n,          o,          p,          q,          r)
+    )
+    // clang-format on
 };
 
 // =============================
@@ -2001,32 +2044,125 @@ inline auto& default_logger() {
 }
 
 // Expose default logger err() / warn() / note() / info() / debug() / trace() as functions in the global namespace
-utl_log_function_fwd(0);
-utl_log_function_fwd(0, 1);
-utl_log_function_fwd(0, 1, 2);
-utl_log_function_fwd(0, 1, 2, 3);
-utl_log_function_fwd(0, 1, 2, 3, 4);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
-utl_log_function_fwd(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
+// clang-format off
+utl_log_function_alias( // 1
+    utl_log_hold(class A   ),
+    utl_log_hold(const A& a),
+    utl_log_hold(         a)
+)
+utl_log_function_alias( // 2
+    utl_log_hold(class A   , class B   ),
+    utl_log_hold(const A& a, const B& b),
+    utl_log_hold(         a,          b)
+)
+utl_log_function_alias( // 3
+    utl_log_hold(class A   , class B   , class C   ),
+    utl_log_hold(const A& a, const B& b, const C& c),
+    utl_log_hold(         a,          b,          c)
+)
+utl_log_function_alias( // 4
+    utl_log_hold(class A   , class B   , class C   , class D   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d),
+    utl_log_hold(         a,          b,          c,          d)
+)
+utl_log_function_alias( // 5
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e),
+    utl_log_hold(         a,          b,          c,          d,          e)
+)
+utl_log_function_alias( // 6
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f),
+    utl_log_hold(         a,          b,          c,          d,          e,          f)
+)
+utl_log_function_alias( // 7
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g)
+)
+utl_log_function_alias( // 8
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h)
+)
+utl_log_function_alias( // 9
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i)
+)
+utl_log_function_alias( // 10
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J                                                                                                   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j                                                                                                ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j                                                                                                )
+)
+utl_log_function_alias( // 11
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K                                                                                       ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k                                                                                    ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k                                                                                    )
+)
+utl_log_function_alias( // 12
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L                                                                           ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l                                                                        ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l                                                                        )
+)
+utl_log_function_alias( // 13
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M                                                               ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m                                                            ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m                                                            )
+)
+utl_log_function_alias( // 14
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M   , class N                                                   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m, const N& n                                                ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m,          n                                                )
+)
+utl_log_function_alias( // 15
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M   , class N   , class O                                       ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m, const N& n, const O& o                                    ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m,          n,          o                                    )
+)
+utl_log_function_alias( // 16
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M   , class N   , class O   , class P                           ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p                        ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m,          n,          o,          p                        )
+)
+utl_log_function_alias( // 17
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M   , class N   , class O   , class P   , class Q               ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p, const Q& q            ),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m,          n,          o,          p,          q            )
+)
+utl_log_function_alias( // 18
+    utl_log_hold(class A   , class B   , class C   , class D   , class E   , class F   , class G   , class H   , class I   ,
+                 class J   , class K   , class L   , class M   , class N   , class O   , class P   , class Q   , class R   ),
+    utl_log_hold(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f, const G& g, const H& h, const I& i,
+                 const J& j, const K& k, const L& l, const M& m, const N& n, const O& o, const P& p, const Q& q, const R& r),
+    utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
+                          j,          k,          l,          m,          n,          o,          p,          q,          r)
+)
+// clang-format on
 
 // ================
 // --- Printing ---
