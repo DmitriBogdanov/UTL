@@ -22,7 +22,7 @@ include(FetchContent)
 FetchContent_Declare(
     UTL
     GIT_REPOSITORY https://github.com/DmitriBogdanov/UTL.git
-    GIT_TAG        v8.3.2
+    GIT_TAG        v8.3.3
 )
 
 FetchContent_MakeAvailable(UTL)
@@ -38,7 +38,7 @@ The same thing can be done using [CPM](https://github.com/cpm-cmake/CPM.cmake) f
 # Fetch library from GitHub
 include(cmake/CPM.cmake)
 
-CPMAddPackage("gh:DmitriBogdanov/UTL#v6.2.1")
+CPMAddPackage("gh:DmitriBogdanov/UTL#v8.3.3")
 ```
 
 **Note:** Use [commit SHA](https://github.com/DmitriBogdanov/UTL/commits/master/) instead of the tag to download specific commits.
