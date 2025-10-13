@@ -15,7 +15,7 @@
 
 #define UTL_STRONG_TYPE_VERSION_MAJOR 1
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 2
+#define UTL_STRONG_TYPE_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -293,7 +293,7 @@ public:
     
     // Conversion
     constexpr Arithmetic           (T new_value) noexcept : value(new_value) {}
-    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; }
+    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
@@ -385,7 +385,7 @@ public:
     
     // Conversion
     constexpr Arithmetic           (T other) noexcept : value(other) {}
-    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; }
+    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }

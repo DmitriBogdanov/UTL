@@ -15,21 +15,17 @@
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 2 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 3 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 
-#include <algorithm>        // swap(), find(), count(), is_sorted(), min_element(),
-                            // max_element(), sort(), stable_sort(), min(), max(), remove_if(), copy()
+#include <algorithm>        // swap(), find(), count(), is_sorted(), min_element(), max_element(), ...
 #include <cassert>          // assert() // Note: Perhaps temporary
 #include <charconv>         // to_chars()
 #include <cmath>            // isfinite()
 #include <cstddef>          // size_t, ptrdiff_t, nullptr_t
-#include <exception>        // exception
 #include <functional>       // reference_wrapper<>, multiplies<>
 #include <initializer_list> // initializer_list<>
-#include <iomanip>          // setw()
-#include <ios>              // right(), boolalpha(), ios::boolalpha
 #include <iterator>         // random_access_iterator_tag, reverse_iterator<>
 #include <memory>           // unique_ptr<>
 #include <numeric>          // accumulate()
@@ -783,7 +779,7 @@ struct _2d_dense_data {
 private:
     using value_type = typename _types<T>::value_type;
     using _data_t    = _choose_based_on_ownership<_ownership, std::unique_ptr<value_type[]>, _observer_ptr<value_type>,
-                                               _observer_ptr<const value_type>>;
+                                                  _observer_ptr<const value_type>>;
 
 public:
     _data_t _data;
@@ -979,7 +975,8 @@ public:
         }
         // Different sparsity comparison
         // TODO: Impl here and use .all_of() OR .any_of()
-        else return true;
+        else
+            return true;
     }
 
     // --- Indexation ---

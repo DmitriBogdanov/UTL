@@ -15,13 +15,13 @@
 
 #define UTL_STRUCT_REFLECT_VERSION_MAJOR 1
 #define UTL_STRUCT_REFLECT_VERSION_MINOR 0
-#define UTL_STRUCT_REFLECT_VERSION_PATCH 1
+#define UTL_STRUCT_REFLECT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // array<>
+#include <array>       // IWYU pragma: keep (used in a macro) | array<>
 #include <cstddef>     // size_t
-#include <string_view> // string_view
+#include <string_view> // IWYU pragma: keep (used in a macro) | string_view
 #include <tuple>       // tuple<>, tuple_size<>, apply<>(), get<>()
 #include <type_traits> // add_lvalue_reference_t<>, add_const_t<>, remove_reference_t<>, decay_t<>
 #include <utility>     // forward<>(), pair<>
@@ -30,7 +30,7 @@
 
 // Reflection mechanism is based entirely around the map macro and a single struct with partial specialization for the
 // reflected enum. Map macro itself is quire non-trivial, but completely standard, a good explanation of how it works
-// can be found here: [https://github.com/swansontec/map-macro].
+// can be found here: https://github.com/swansontec/map-macro.
 //
 // Once we have a map macro all reflection is a matter of simply mapping __VA_ARGS__ into various
 // arrays and tuples, which allows us to work with structures in a generic tuple-like way.

@@ -15,7 +15,7 @@
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 2
+#define UTL_INTEGRAL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -25,7 +25,6 @@
 #include <cstdint>     // uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
 #include <limits>      // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
 #include <stdexcept>   // domain_error
-#include <string>      // string, to_string()
 #include <type_traits> // enable_if_t<>, is_integral_v<>, is_unsigned_v<>, make_unsigned_t<>
 
 // ____________________ DEVELOPER DOCS ____________________

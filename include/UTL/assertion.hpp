@@ -15,7 +15,7 @@
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 3
+#define UTL_ASSERTION_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -296,7 +296,7 @@ struct BinaryCapture {
 #define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
     template <class T, class U>                                                                                        \
     BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) noexcept(                               \
-        std::is_nothrow_move_constructible_v<T>&& noexcept(U(std::forward<U>(rhs)))) {                                 \
+        std::is_nothrow_move_constructible_v<T> && noexcept(U(std::forward<U>(rhs)))) {                                \
                                                                                                                        \
         return {lhs.info, std::move(lhs).value, std::forward<U>(rhs)};                                                 \
     }                                                                                                                  \

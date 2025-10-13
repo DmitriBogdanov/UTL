@@ -15,7 +15,7 @@
 
 #define UTL_ASSERTION_VERSION_MAJOR 1
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 3
+#define UTL_ASSERTION_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -296,7 +296,7 @@ struct BinaryCapture {
 #define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
     template <class T, class U>                                                                                        \
     BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) noexcept(                               \
-        std::is_nothrow_move_constructible_v<T>&& noexcept(U(std::forward<U>(rhs)))) {                                 \
+        std::is_nothrow_move_constructible_v<T> && noexcept(U(std::forward<U>(rhs)))) {                                \
                                                                                                                        \
         return {lhs.info, std::move(lhs).value, std::forward<U>(rhs)};                                                 \
     }                                                                                                                  \
@@ -732,18 +732,17 @@ using impl::Flags;
 
 #define UTL_ENUM_REFLECT_VERSION_MAJOR 1
 #define UTL_ENUM_REFLECT_VERSION_MINOR 0
-#define UTL_ENUM_REFLECT_VERSION_PATCH 1
+#define UTL_ENUM_REFLECT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // array<>
-#include <cstddef>     // size_t
+#include <array>       // IWYU pragma: keep (used in a macro) | array<>, size_t
 #include <stdexcept>   // out_of_range
 #include <string>      // string
 #include <string_view> // string_view
 #include <tuple>       // tuple_size_v<>
 #include <type_traits> // underlying_type_t<>, enable_if_t<>, is_enum_v<>
-#include <utility>     // pair<>
+#include <utility>     // IWYU pragma: keep (used in a macro) | pair<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -938,7 +937,7 @@ using impl::from_string;
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 2
+#define UTL_INTEGRAL_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -948,7 +947,6 @@ using impl::from_string;
 #include <cstdint>     // uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
 #include <limits>      // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
 #include <stdexcept>   // domain_error
-#include <string>      // string, to_string()
 #include <type_traits> // enable_if_t<>, is_integral_v<>, is_unsigned_v<>, make_unsigned_t<>
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -1313,7 +1311,7 @@ namespace literals = impl::literals;
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 4
+#define UTL_JSON_VERSION_PATCH 5
 
 // _______________________ INCLUDES _______________________
 
@@ -3015,7 +3013,7 @@ void assign_node_to_value_recursively(std::array<T, N>& value, const Node& node)
     }                                                                                                                  \
                                                                                                                        \
     template <>                                                                                                        \
-    inline auto utl::json::impl::Node::to_struct<struct_name_>() const->struct_name_ {                                 \
+    inline auto utl::json::impl::Node::to_struct<struct_name_>() const -> struct_name_ {                               \
         struct_name_ val;                                                                                              \
         /* map 'val.<FIELDNAME> = this->at("<FIELDNAME>").get<decltype(val.<FIELDNAME>)>();' */                        \
         utl_json_map(utl_json_to_struct_assign, __VA_ARGS__);                                                          \
@@ -3078,7 +3076,7 @@ using impl::is_reflected_struct;
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 3
-#define UTL_LOG_VERSION_PATCH 2
+#define UTL_LOG_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -3312,12 +3310,12 @@ constexpr bool always_false_v = false;
 // possible thread id reuse, which many implementations seem to neglect. We can use thread-locals
 // and an atomic counter to implement lazily initialized thread id count. After a first call the
 // overhead of getting thread id should be approx ~ to a branch + array lookup.
-int get_next_linear_thread_id() {
+[[nodiscard]] inline int get_next_linear_thread_id() {
     static std::atomic<int> counter = 0;
     return counter++;
 }
 
-int this_thread_linear_id() {
+[[nodiscard]] inline int this_thread_linear_id() {
     thread_local int thread_id = get_next_linear_thread_id();
     return thread_id;
 }
@@ -3325,7 +3323,7 @@ int this_thread_linear_id() {
 // --- Local time ---
 // ------------------
 
-inline std::tm to_localtime(const std::time_t& time) {
+[[nodiscard]] inline std::tm to_localtime(const std::time_t& time) {
     // There are 3 ways of getting localtime in C-stdlib:
     //    1. 'std::localtime()' - isn't thread-safe and will be marked as "deprecated" by MSVC
     //    2. 'localtime_r()'    - isn't a part of C++, it's a part of C11, in reality provided by POSIX
@@ -3378,7 +3376,7 @@ inline std::tm to_localtime(const std::time_t& time) {
 // --- Thread-local state ---
 // --------------------------
 
-std::string& thread_local_temporary_string() {
+[[nodiscard]] inline std::string& thread_local_temporary_string() {
     thread_local std::string str;
     str.clear();
     return str; // returned string is always empty, no need to clear it at the callsite
@@ -4854,9 +4852,9 @@ public:
 };
 
 // CTAD for presets
-Sink(std::ostream&)->Sink<policy::Type::STREAM>;
-Sink(std::ofstream&&)->Sink<policy::Type::FILE>;
-Sink(std::string_view)->Sink<policy::Type::FILE>;
+Sink(std::ostream&) -> Sink<policy::Type::STREAM>;
+Sink(std::ofstream&&) -> Sink<policy::Type::FILE>;
+Sink(std::string_view) -> Sink<policy::Type::FILE>;
 
 // =========================
 // --- Component: Logger ---
@@ -5225,14 +5223,14 @@ utl_log_function_alias( // 18
     utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
                           j,          k,          l,          m,          n,          o,          p,          q,          r)
 )
-// clang-format on
+    // clang-format on
 
-// ================
-// --- Printing ---
-// ================
+    // ================
+    // --- Printing ---
+    // ================
 
-template <class... Args>
-void stringify_append(std::string& str, const Args&... args) {
+    template <class... Args>
+    void stringify_append(std::string& str, const Args&... args) {
     // Format all 'args' into a string using the same buffer abstraction as logging sinks, this doesn't add overhead
     StringBuffer buffer(str);
     (Formatter<Args>{}(buffer, args), ...);
@@ -5591,21 +5589,17 @@ using impl::prod;
 
 #define UTL_MVL_VERSION_MAJOR 0 // [!] module in early experimental stage,
 #define UTL_MVL_VERSION_MINOR 1 //     functional, but needs significant work
-#define UTL_MVL_VERSION_PATCH 2 //     to complete and bring up-to-date
+#define UTL_MVL_VERSION_PATCH 3 //     to complete and bring up-to-date
 
 // _______________________ INCLUDES _______________________
 
-#include <algorithm>        // swap(), find(), count(), is_sorted(), min_element(),
-                            // max_element(), sort(), stable_sort(), min(), max(), remove_if(), copy()
+#include <algorithm>        // swap(), find(), count(), is_sorted(), min_element(), max_element(), ...
 #include <cassert>          // assert() // Note: Perhaps temporary
 #include <charconv>         // to_chars()
 #include <cmath>            // isfinite()
 #include <cstddef>          // size_t, ptrdiff_t, nullptr_t
-#include <exception>        // exception
 #include <functional>       // reference_wrapper<>, multiplies<>
 #include <initializer_list> // initializer_list<>
-#include <iomanip>          // setw()
-#include <ios>              // right(), boolalpha(), ios::boolalpha
 #include <iterator>         // random_access_iterator_tag, reverse_iterator<>
 #include <memory>           // unique_ptr<>
 #include <numeric>          // accumulate()
@@ -6359,7 +6353,7 @@ struct _2d_dense_data {
 private:
     using value_type = typename _types<T>::value_type;
     using _data_t    = _choose_based_on_ownership<_ownership, std::unique_ptr<value_type[]>, _observer_ptr<value_type>,
-                                               _observer_ptr<const value_type>>;
+                                                  _observer_ptr<const value_type>>;
 
 public:
     _data_t _data;
@@ -6555,7 +6549,8 @@ public:
         }
         // Different sparsity comparison
         // TODO: Impl here and use .all_of() OR .any_of()
-        else return true;
+        else
+            return true;
     }
 
     // --- Indexation ---
@@ -8186,7 +8181,7 @@ return_type operator*(const L& left, const R& right) {
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 3
+#define UTL_PARALLEL_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -8429,9 +8424,9 @@ public:
 
         void fallthrough() const {
             ThreadPool* pool = ws_this_thread::thread_pool_ptr;
-            
+
             if (!pool) return;
-            
+
             // Execute recursive tasks from local queues until this future is ready
             task_type task;
             while (pool->try_pop_local(task) || pool->try_steal(task)) {
@@ -8439,20 +8434,18 @@ public:
                 --pool->tasks_pending;
                 ++pool->tasks_running;
                 pool->task_mutex.unlock();
-            
+
                 task();
-            
+
                 pool->task_mutex.lock();
                 --pool->tasks_running;
                 pool->task_mutex.unlock();
-                
+
                 if (this->is_ready()) return;
             }
         }
-        
-    bool is_ready() const {
-        return this->future.wait_for(std::chrono::seconds{0}) == std::future_status::ready;
-    }
+
+        bool is_ready() const { return this->future.wait_for(std::chrono::seconds{0}) == std::future_status::ready; }
 
     public:
         future_type(std::future<T>&& future) : future(std::move(future)) {} // conversion from regular future
@@ -8738,7 +8731,7 @@ struct Scheduler {
     void detached_loop(Range<It> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](It low, It high) { // combine individual index
             for (It it = low; it < high; ++it) f(it);                    // calls into blocks and forward
-        };                                                               // into a blocked loop iteration overload
+        }; // into a blocked loop iteration overload
         this->detached_loop(range, std::move(iterate_block));
     }
 
@@ -8840,7 +8833,7 @@ struct Scheduler {
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true> // without SFINAE reqs
     void detached_loop(Container&& container, F&& f) {                                         // such overloads would
         this->detached_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));    // always get picked
-    }                                                                                          // over the others
+    } // over the others
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
     void blocking_loop(Container&& container, F&& f) {
@@ -8960,7 +8953,7 @@ struct max<void> {
 
 // A convenient copy of the threadpool & scheduler API hooked up to a global lazily-initialized thread pool
 
-auto& global_scheduler() {
+inline auto& global_scheduler() {
     static Scheduler scheduler;
     return scheduler;
 }
@@ -8968,13 +8961,13 @@ auto& global_scheduler() {
 // --- Thread pool API ---
 // -----------------------
 
-void set_thread_count(std::size_t count = hardware_concurrency()) {
+inline void set_thread_count(std::size_t count = hardware_concurrency()) {
     global_scheduler().backend.set_thread_count(count);
 }
 
-std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
+inline std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
 
-void wait() { global_scheduler().backend.wait(); }
+inline void wait() { global_scheduler().backend.wait(); }
 
 // --- Scheduler API ---
 // ---------------------
@@ -9124,14 +9117,13 @@ using impl::hardware_concurrency;
 
 #define UTL_PREDEF_VERSION_MAJOR 3
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 1
+#define UTL_PREDEF_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
 #include <cassert>     // assert()
 #include <string>      // string, to_string()
 #include <string_view> // string_view
-#include <utility>     // declval<>()
 
 #ifdef __cpp_lib_hardware_interference_size
 #include <new> // hardware_destructive_interference_size, hardware_constructive_interference_size
@@ -10650,7 +10642,7 @@ using impl::Ruler;
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 6
+#define UTL_RANDOM_VERSION_PATCH 7
 
 // _______________________ INCLUDES _______________________
 
@@ -10860,12 +10852,12 @@ void seed_seq_generate(SeedSeq&& seq, std::array<std::uint32_t, size>& dest) noe
 
 template <class SeedSeq, std::size_t size, require_is_seed_seq<SeedSeq> = true>
 void seed_seq_generate(SeedSeq&& seq, std::array<std::uint64_t, size>& dest) noexcept {
-    // since seed_seq produces 32-bit ints, for 64-bit state arrays we have to 
+    // since seed_seq produces 32-bit ints, for 64-bit state arrays we have to
     // generate twice as much values to properly initialize the entire state
-    
-    std::array<std::uint32_t, size *  2> temp;
+
+    std::array<std::uint32_t, size * 2> temp;
     seq.generate(temp.begin(), temp.end());
-    
+
     for (std::size_t i = 0; i < size; ++i) dest[i] = merge_uint32_into_uint64(temp[2 * i], temp[2 * i + 1]);
 }
 
@@ -11516,7 +11508,7 @@ inline std::seed_seq entropy_seq() {
 
 inline std::uint32_t entropy() {
     auto seq = entropy_seq();
-    
+
     std::uint32_t res;
     seed_seq_generate(std::move(seq), res);
     return res;
@@ -12067,7 +12059,7 @@ struct ApproxNormalDistribution {
 
 using PRNG = generators::Xoshiro256PP;
 
-PRNG& thread_local_prng() {
+inline PRNG& thread_local_prng() {
     // no '[[nodiscard]]' as it can be used for a side effect of initializing PRNG
     // no 'noexcept' because entropy source can allocate & fail
     thread_local PRNG prng(entropy_seq());
@@ -12215,7 +12207,7 @@ using impl::choose;
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 3
+#define UTL_SHELL_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -12253,7 +12245,7 @@ namespace utl::shell::impl {
 //    2. It should be different on each thread
 //    3. It should be thread-safe
 // Good statistical quality isn't particularly important.
-std::uint64_t entropy() {
+inline std::uint64_t entropy() {
     const std::uint64_t time_entropy   = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     const std::uint64_t thread_entropy = std::hash<std::thread::id>{}(std::this_thread::get_id());
     return time_entropy ^ thread_entropy;
@@ -12491,7 +12483,7 @@ using impl::run_command;
 
 #define UTL_SLEEP_VERSION_MAJOR 1
 #define UTL_SLEEP_VERSION_MINOR 0
-#define UTL_SLEEP_VERSION_PATCH 2
+#define UTL_SLEEP_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -12526,7 +12518,12 @@ void spinlock(std::chrono::duration<Rep, Period> duration) {
 
     volatile std::uint64_t i = 0;
 
-    while (clock::now() - start_timepoint < duration) ++i;
+    while (clock::now() - start_timepoint < duration) {
+        const std::uint64_t j = i;
+        i                     = j + 1;
+        // same thing as '++i', but doesn't trigger C++20 warning about 'volatile' being non-atomic,
+        // we don't care about atomicity in this case - the only purpose is to prevent loop optimization
+    }
 
     // volatile 'i' prevents standard-compliant compilers from optimizing away the loop,
     // 'std::uint64_t' is large enough to never overflow and even if it hypothetically would,
@@ -12928,7 +12925,7 @@ using impl::index_of_difference;
 
 #define UTL_STRONG_TYPE_VERSION_MAJOR 1
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 2
+#define UTL_STRONG_TYPE_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -13206,7 +13203,7 @@ public:
     
     // Conversion
     constexpr Arithmetic           (T new_value) noexcept : value(new_value) {}
-    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; }
+    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
@@ -13298,7 +13295,7 @@ public:
     
     // Conversion
     constexpr Arithmetic           (T other) noexcept : value(other) {}
-    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; }
+    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
@@ -13394,13 +13391,13 @@ using impl::Arithmetic;
 
 #define UTL_STRUCT_REFLECT_VERSION_MAJOR 1
 #define UTL_STRUCT_REFLECT_VERSION_MINOR 0
-#define UTL_STRUCT_REFLECT_VERSION_PATCH 1
+#define UTL_STRUCT_REFLECT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // array<>
+#include <array>       // IWYU pragma: keep (used in a macro) | array<>
 #include <cstddef>     // size_t
-#include <string_view> // string_view
+#include <string_view> // IWYU pragma: keep (used in a macro) | string_view
 #include <tuple>       // tuple<>, tuple_size<>, apply<>(), get<>()
 #include <type_traits> // add_lvalue_reference_t<>, add_const_t<>, remove_reference_t<>, decay_t<>
 #include <utility>     // forward<>(), pair<>
@@ -13409,7 +13406,7 @@ using impl::Arithmetic;
 
 // Reflection mechanism is based entirely around the map macro and a single struct with partial specialization for the
 // reflected enum. Map macro itself is quire non-trivial, but completely standard, a good explanation of how it works
-// can be found here: [https://github.com/swansontec/map-macro].
+// can be found here: https://github.com/swansontec/map-macro.
 //
 // Once we have a map macro all reflection is a matter of simply mapping __VA_ARGS__ into various
 // arrays and tuples, which allows us to work with structures in a generic tuple-like way.
@@ -13676,7 +13673,7 @@ using impl::tuple_for_each;
 
 #define UTL_TABLE_VERSION_MAJOR 1
 #define UTL_TABLE_VERSION_MINOR 0
-#define UTL_TABLE_VERSION_PATCH 1
+#define UTL_TABLE_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -13684,7 +13681,6 @@ using impl::tuple_for_each;
 #include <cassert>  // assert()
 #include <charconv> // to_chars()
 #include <string>   // string
-#include <variant>  // variant<>
 #include <vector>   // vector<>
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -13925,7 +13921,7 @@ inline std::string mathematica_reformat(std::string str) { return replace_all_oc
 // ====================
 
 // Avoids including '<algorithm>' for a single tiny function
-[[nodiscard]] std::size_t max(std::size_t lhs, std::size_t rhs) noexcept { return lhs < rhs ? rhs : lhs; }
+[[nodiscard]] inline std::size_t max(std::size_t lhs, std::size_t rhs) noexcept { return lhs < rhs ? rhs : lhs; }
 
 // Used in delimiter placement
 [[nodiscard]] constexpr bool not_last(std::size_t i, std::size_t size) noexcept { return i < size - 1; }
@@ -14405,7 +14401,7 @@ public:
 
 // CSV is a format with no standard specification. As per RFC-4180 (see https://www.rfc-editor.org/info/rfc4180):
 //    "While there are various specifications and implementations for the CSV format (for ex. ...), there is
-//    no formal specification in existence, which allows for a wide variety of interpretations of CSV files. 
+//    no formal specification in existence, which allows for a wide variety of interpretations of CSV files.
 //    This section documents the format that seems to be followed by most implementations."
 // This implementation complies with requirements posed by RFC.
 

@@ -15,7 +15,7 @@
 
 #define UTL_LOG_VERSION_MAJOR 2
 #define UTL_LOG_VERSION_MINOR 3
-#define UTL_LOG_VERSION_PATCH 2
+#define UTL_LOG_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -249,12 +249,12 @@ constexpr bool always_false_v = false;
 // possible thread id reuse, which many implementations seem to neglect. We can use thread-locals
 // and an atomic counter to implement lazily initialized thread id count. After a first call the
 // overhead of getting thread id should be approx ~ to a branch + array lookup.
-int get_next_linear_thread_id() {
+[[nodiscard]] inline int get_next_linear_thread_id() {
     static std::atomic<int> counter = 0;
     return counter++;
 }
 
-int this_thread_linear_id() {
+[[nodiscard]] inline int this_thread_linear_id() {
     thread_local int thread_id = get_next_linear_thread_id();
     return thread_id;
 }
@@ -262,7 +262,7 @@ int this_thread_linear_id() {
 // --- Local time ---
 // ------------------
 
-inline std::tm to_localtime(const std::time_t& time) {
+[[nodiscard]] inline std::tm to_localtime(const std::time_t& time) {
     // There are 3 ways of getting localtime in C-stdlib:
     //    1. 'std::localtime()' - isn't thread-safe and will be marked as "deprecated" by MSVC
     //    2. 'localtime_r()'    - isn't a part of C++, it's a part of C11, in reality provided by POSIX
@@ -315,7 +315,7 @@ inline std::tm to_localtime(const std::time_t& time) {
 // --- Thread-local state ---
 // --------------------------
 
-std::string& thread_local_temporary_string() {
+[[nodiscard]] inline std::string& thread_local_temporary_string() {
     thread_local std::string str;
     str.clear();
     return str; // returned string is always empty, no need to clear it at the callsite
@@ -1791,9 +1791,9 @@ public:
 };
 
 // CTAD for presets
-Sink(std::ostream&)->Sink<policy::Type::STREAM>;
-Sink(std::ofstream&&)->Sink<policy::Type::FILE>;
-Sink(std::string_view)->Sink<policy::Type::FILE>;
+Sink(std::ostream&) -> Sink<policy::Type::STREAM>;
+Sink(std::ofstream&&) -> Sink<policy::Type::FILE>;
+Sink(std::string_view) -> Sink<policy::Type::FILE>;
 
 // =========================
 // --- Component: Logger ---
@@ -2162,14 +2162,14 @@ utl_log_function_alias( // 18
     utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
                           j,          k,          l,          m,          n,          o,          p,          q,          r)
 )
-// clang-format on
+    // clang-format on
 
-// ================
-// --- Printing ---
-// ================
+    // ================
+    // --- Printing ---
+    // ================
 
-template <class... Args>
-void stringify_append(std::string& str, const Args&... args) {
+    template <class... Args>
+    void stringify_append(std::string& str, const Args&... args) {
     // Format all 'args' into a string using the same buffer abstraction as logging sinks, this doesn't add overhead
     StringBuffer buffer(str);
     (Formatter<Args>{}(buffer, args), ...);

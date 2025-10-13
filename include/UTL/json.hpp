@@ -15,7 +15,7 @@
 
 #define UTL_JSON_VERSION_MAJOR 1
 #define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 4
+#define UTL_JSON_VERSION_PATCH 5
 
 // _______________________ INCLUDES _______________________
 
@@ -1717,7 +1717,7 @@ void assign_node_to_value_recursively(std::array<T, N>& value, const Node& node)
     }                                                                                                                  \
                                                                                                                        \
     template <>                                                                                                        \
-    inline auto utl::json::impl::Node::to_struct<struct_name_>() const->struct_name_ {                                 \
+    inline auto utl::json::impl::Node::to_struct<struct_name_>() const -> struct_name_ {                               \
         struct_name_ val;                                                                                              \
         /* map 'val.<FIELDNAME> = this->at("<FIELDNAME>").get<decltype(val.<FIELDNAME>)>();' */                        \
         utl_json_map(utl_json_to_struct_assign, __VA_ARGS__);                                                          \

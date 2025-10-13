@@ -15,18 +15,17 @@
 
 #define UTL_ENUM_REFLECT_VERSION_MAJOR 1
 #define UTL_ENUM_REFLECT_VERSION_MINOR 0
-#define UTL_ENUM_REFLECT_VERSION_PATCH 1
+#define UTL_ENUM_REFLECT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // array<>
-#include <cstddef>     // size_t
+#include <array>       // IWYU pragma: keep (used in a macro) | array<>, size_t
 #include <stdexcept>   // out_of_range
 #include <string>      // string
 #include <string_view> // string_view
 #include <tuple>       // tuple_size_v<>
 #include <type_traits> // underlying_type_t<>, enable_if_t<>, is_enum_v<>
-#include <utility>     // pair<>
+#include <utility>     // IWYU pragma: keep (used in a macro) | pair<>
 
 // ____________________ DEVELOPER DOCS ____________________
 

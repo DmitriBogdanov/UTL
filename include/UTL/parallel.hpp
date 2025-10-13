@@ -15,7 +15,7 @@
 
 #define UTL_PARALLEL_VERSION_MAJOR 2
 #define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 3
+#define UTL_PARALLEL_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -258,9 +258,9 @@ public:
 
         void fallthrough() const {
             ThreadPool* pool = ws_this_thread::thread_pool_ptr;
-            
+
             if (!pool) return;
-            
+
             // Execute recursive tasks from local queues until this future is ready
             task_type task;
             while (pool->try_pop_local(task) || pool->try_steal(task)) {
@@ -268,20 +268,18 @@ public:
                 --pool->tasks_pending;
                 ++pool->tasks_running;
                 pool->task_mutex.unlock();
-            
+
                 task();
-            
+
                 pool->task_mutex.lock();
                 --pool->tasks_running;
                 pool->task_mutex.unlock();
-                
+
                 if (this->is_ready()) return;
             }
         }
-        
-    bool is_ready() const {
-        return this->future.wait_for(std::chrono::seconds{0}) == std::future_status::ready;
-    }
+
+        bool is_ready() const { return this->future.wait_for(std::chrono::seconds{0}) == std::future_status::ready; }
 
     public:
         future_type(std::future<T>&& future) : future(std::move(future)) {} // conversion from regular future
@@ -567,7 +565,7 @@ struct Scheduler {
     void detached_loop(Range<It> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](It low, It high) { // combine individual index
             for (It it = low; it < high; ++it) f(it);                    // calls into blocks and forward
-        };                                                               // into a blocked loop iteration overload
+        }; // into a blocked loop iteration overload
         this->detached_loop(range, std::move(iterate_block));
     }
 
@@ -669,7 +667,7 @@ struct Scheduler {
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true> // without SFINAE reqs
     void detached_loop(Container&& container, F&& f) {                                         // such overloads would
         this->detached_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));    // always get picked
-    }                                                                                          // over the others
+    } // over the others
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
     void blocking_loop(Container&& container, F&& f) {
@@ -789,7 +787,7 @@ struct max<void> {
 
 // A convenient copy of the threadpool & scheduler API hooked up to a global lazily-initialized thread pool
 
-auto& global_scheduler() {
+inline auto& global_scheduler() {
     static Scheduler scheduler;
     return scheduler;
 }
@@ -797,13 +795,13 @@ auto& global_scheduler() {
 // --- Thread pool API ---
 // -----------------------
 
-void set_thread_count(std::size_t count = hardware_concurrency()) {
+inline void set_thread_count(std::size_t count = hardware_concurrency()) {
     global_scheduler().backend.set_thread_count(count);
 }
 
-std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
+inline std::size_t get_thread_count() { return global_scheduler().backend.get_thread_count(); }
 
-void wait() { global_scheduler().backend.wait(); }
+inline void wait() { global_scheduler().backend.wait(); }
 
 // --- Scheduler API ---
 // ---------------------

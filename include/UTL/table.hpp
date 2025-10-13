@@ -15,7 +15,7 @@
 
 #define UTL_TABLE_VERSION_MAJOR 1
 #define UTL_TABLE_VERSION_MINOR 0
-#define UTL_TABLE_VERSION_PATCH 1
+#define UTL_TABLE_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -23,7 +23,6 @@
 #include <cassert>  // assert()
 #include <charconv> // to_chars()
 #include <string>   // string
-#include <variant>  // variant<>
 #include <vector>   // vector<>
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -264,7 +263,7 @@ inline std::string mathematica_reformat(std::string str) { return replace_all_oc
 // ====================
 
 // Avoids including '<algorithm>' for a single tiny function
-[[nodiscard]] std::size_t max(std::size_t lhs, std::size_t rhs) noexcept { return lhs < rhs ? rhs : lhs; }
+[[nodiscard]] inline std::size_t max(std::size_t lhs, std::size_t rhs) noexcept { return lhs < rhs ? rhs : lhs; }
 
 // Used in delimiter placement
 [[nodiscard]] constexpr bool not_last(std::size_t i, std::size_t size) noexcept { return i < size - 1; }
@@ -744,7 +743,7 @@ public:
 
 // CSV is a format with no standard specification. As per RFC-4180 (see https://www.rfc-editor.org/info/rfc4180):
 //    "While there are various specifications and implementations for the CSV format (for ex. ...), there is
-//    no formal specification in existence, which allows for a wide variety of interpretations of CSV files. 
+//    no formal specification in existence, which allows for a wide variety of interpretations of CSV files.
 //    This section documents the format that seems to be followed by most implementations."
 // This implementation complies with requirements posed by RFC.
 

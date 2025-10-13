@@ -15,7 +15,7 @@
 
 #define UTL_SLEEP_VERSION_MAJOR 1
 #define UTL_SLEEP_VERSION_MINOR 0
-#define UTL_SLEEP_VERSION_PATCH 2
+#define UTL_SLEEP_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -50,7 +50,12 @@ void spinlock(std::chrono::duration<Rep, Period> duration) {
 
     volatile std::uint64_t i = 0;
 
-    while (clock::now() - start_timepoint < duration) ++i;
+    while (clock::now() - start_timepoint < duration) {
+        const std::uint64_t j = i;
+        i                     = j + 1;
+        // same thing as '++i', but doesn't trigger C++20 warning about 'volatile' being non-atomic,
+        // we don't care about atomicity in this case - the only purpose is to prevent loop optimization
+    }
 
     // volatile 'i' prevents standard-compliant compilers from optimizing away the loop,
     // 'std::uint64_t' is large enough to never overflow and even if it hypothetically would,

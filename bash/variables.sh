@@ -28,5 +28,5 @@ cppcheck_cache_directory=".cache-cppcheck"
 # ---- Configuration ----
 # =======================
 
-preset="gcc" # gcc / clang
+preset="gcc"
 coverage_flags="-T coverage"

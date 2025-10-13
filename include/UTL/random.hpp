@@ -15,7 +15,7 @@
 
 #define UTL_RANDOM_VERSION_MAJOR 2
 #define UTL_RANDOM_VERSION_MINOR 1
-#define UTL_RANDOM_VERSION_PATCH 6
+#define UTL_RANDOM_VERSION_PATCH 7
 
 // _______________________ INCLUDES _______________________
 
@@ -225,12 +225,12 @@ void seed_seq_generate(SeedSeq&& seq, std::array<std::uint32_t, size>& dest) noe
 
 template <class SeedSeq, std::size_t size, require_is_seed_seq<SeedSeq> = true>
 void seed_seq_generate(SeedSeq&& seq, std::array<std::uint64_t, size>& dest) noexcept {
-    // since seed_seq produces 32-bit ints, for 64-bit state arrays we have to 
+    // since seed_seq produces 32-bit ints, for 64-bit state arrays we have to
     // generate twice as much values to properly initialize the entire state
-    
-    std::array<std::uint32_t, size *  2> temp;
+
+    std::array<std::uint32_t, size * 2> temp;
     seq.generate(temp.begin(), temp.end());
-    
+
     for (std::size_t i = 0; i < size; ++i) dest[i] = merge_uint32_into_uint64(temp[2 * i], temp[2 * i + 1]);
 }
 
@@ -881,7 +881,7 @@ inline std::seed_seq entropy_seq() {
 
 inline std::uint32_t entropy() {
     auto seq = entropy_seq();
-    
+
     std::uint32_t res;
     seed_seq_generate(std::move(seq), res);
     return res;
@@ -1432,7 +1432,7 @@ struct ApproxNormalDistribution {
 
 using PRNG = generators::Xoshiro256PP;
 
-PRNG& thread_local_prng() {
+inline PRNG& thread_local_prng() {
     // no '[[nodiscard]]' as it can be used for a side effect of initializing PRNG
     // no 'noexcept' because entropy source can allocate & fail
     thread_local PRNG prng(entropy_seq());

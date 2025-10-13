@@ -15,7 +15,7 @@
 
 #define UTL_SHELL_VERSION_MAJOR 1
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 3
+#define UTL_SHELL_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -53,7 +53,7 @@ namespace utl::shell::impl {
 //    2. It should be different on each thread
 //    3. It should be thread-safe
 // Good statistical quality isn't particularly important.
-std::uint64_t entropy() {
+inline std::uint64_t entropy() {
     const std::uint64_t time_entropy   = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     const std::uint64_t thread_entropy = std::hash<std::thread::id>{}(std::this_thread::get_id());
     return time_entropy ^ thread_entropy;

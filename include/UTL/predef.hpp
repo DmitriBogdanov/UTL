@@ -15,14 +15,13 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 3
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 1
+#define UTL_PREDEF_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
 #include <cassert>     // assert()
 #include <string>      // string, to_string()
 #include <string_view> // string_view
-#include <utility>     // declval<>()
 
 #ifdef __cpp_lib_hardware_interference_size
 #include <new> // hardware_destructive_interference_size, hardware_constructive_interference_size
