@@ -5,7 +5,7 @@
 int main() {
     using namespace utl;
     
-    assert(stre::starts_with("lorem ipsum", "lorem"));
-    assert(stre::ends_with  ("lorem ipsum", "ipsum"));
-    assert(stre::contains   ("lorem ipsum", "em ip"));
+    static_assert(stre::starts_with("lorem ipsum", "lorem"));
+    static_assert(stre::ends_with  ("lorem ipsum", "ipsum"));
+    static_assert(stre::contains   ("lorem ipsum", "em ip"));
 }

@@ -74,6 +74,10 @@ std::string replace_last  (std::string str, std::string_view from, std::string_v
 std::string replace_prefix(std::string str, std::string_view from, std::string_view to);
 std::string replace_suffix(std::string str, std::string_view from, std::string_view to);
 
+// Tokenization
+std::vector<std::string> tokenize(std::string_view str, std::string_view delimiter);
+std::vector<std::string> split   (std::string_view str, std::string_view delimiter);
+
 // Repeating
 std::string repeat(            char  ch, std::size_t repeats);
 std::string repeat(std::string_view str, std::size_t repeats);
@@ -81,10 +85,6 @@ std::string repeat(std::string_view str, std::size_t repeats);
 // Escaping
 std::string escape(            char ch );
 std::string escape(std::string_view str);
-
-// Tokenization
-std::vector<std::string> tokenize(std::string_view str, std::string_view delimiter);
-std::vector<std::string> split   (std::string_view str, std::string_view delimiter);
 
 // Difference measurement
 constexpr std::size_t first_difference(std::string_view lhs, std::string_view rhs) noexcept;
@@ -271,23 +271,49 @@ Differently sized strings are allowed.
 
 ## Examples
 
-### Trimming strings
+### Character classification
 
-[ [Run this code](https://godbolt.org/z/hjf1anMcb) ] [ [Open source file](../examples/module_stre/trimming_strings.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/character_classification.cpp) ]
 
 ```cpp
 using namespace utl;
 
-assert(stre::trim_left ("   lorem ipsum   ") ==    "lorem ipsum   ");
-assert(stre::trim_right("   lorem ipsum   ") == "   lorem ipsum"   );
-assert(stre::trim      ("   lorem ipsum   ") ==    "lorem ipsum"   );
+static_assert(!stre::is_control( '5'));
+static_assert( stre::is_control('\f'));
+static_assert( stre::is_control('\n'));
 
-assert(stre::trim("__ASSERT_MACRO__", '_') == "ASSERT_MACRO");
+static_assert(!stre::is_graphical(' '));
+static_assert( stre::is_graphical('X'));
 ```
 
-### Padding strings
+### Case conversions
 
-[ [Run this code](https://godbolt.org/z/nG7zdqP11) ] [ [Open source file](../examples/module_stre/padding_strings.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/case_conversions.cpp) ]
+
+```cpp
+using namespace utl;
+
+assert(stre::to_lower("Lorem Ipsum") == "lorem ipsum");
+assert(stre::to_upper("lorem ipsum") == "LOREM IPSUM");
+```
+
+### Trimming
+
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/trimming.cpp) ]
+
+```cpp
+using namespace utl;
+
+static_assert(stre::trim_left ("   lorem ipsum   ") ==    "lorem ipsum   ");
+static_assert(stre::trim_right("   lorem ipsum   ") == "   lorem ipsum"   );
+static_assert(stre::trim      ("   lorem ipsum   ") ==    "lorem ipsum"   );
+
+static_assert(stre::trim("__ASSERT__", '_') == "ASSERT");
+```
+
+### Padding
+
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/padding.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -297,77 +323,78 @@ assert(stre::pad_right("value", 9) == "value    " );
 assert(stre::pad      ("value", 9) == "  value  " );
 
 assert(stre::pad(" label ", 15, '-') == "---- label ----");
-
-assert(stre::pad_with_leading_zeroes(17, 5) == "00017");
-```
-
-### Converting string case
-
-[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ] [ [Open source file](../examples/module_stre/converting_string_case.cpp) ]
-
-```cpp
-using namespace utl;
-
-assert(stre::to_lower("Lorem Ipsum") == "lorem ipsum");
-assert(stre::to_upper("lorem ipsum") == "LOREM IPSUM");
 ```
 
 ### Substring checks
 
-[ [Run this code](https://godbolt.org/z/v8Enfn9a6) ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
 
 ```cpp
 using namespace utl;
 
-assert(stre::starts_with("lorem ipsum", "lorem"));
-assert(stre::ends_with  ("lorem ipsum", "ipsum"));
-assert(stre::contains   ("lorem ipsum", "em ip"));
+static_assert(stre::starts_with("lorem ipsum", "lorem"));
+static_assert(stre::ends_with  ("lorem ipsum", "ipsum"));
+static_assert(stre::contains   ("lorem ipsum", "em ip"));
 ```
 
-### Token manipulation
+### Substring replacement
 
-[ [Run this code](https://godbolt.org/z/osMK6x1be) ] [ [Open source file](../examples/module_stre/token_manipulation.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/substring_replacement.cpp) ]
 
 ```cpp
 using namespace utl;
 
-// Replacing tokens
-assert(stre::replace_all_occurrences("xxxAAxxxAAxxx",  "AA",  "BBB") == "xxxBBBxxxBBBxxx" );
+assert(stre::replace_all  ("__xx__xx__", "xx", "yy") == "__yy__yy__");
+assert(stre::replace_first("__xx__xx__", "xx", "yy") == "__yy__xx__");
+assert(stre::replace_last ("__xx__xx__", "xx", "yy") == "__xx__yy__");
 
-// Splitting by delimiter
-auto tokens = stre::split_by_delimiter("aaa,bbb,ccc,", ",");
+assert(stre::replace_prefix("__xx__xx__", "__xx", "--yy") == "--yy__xx__");
+assert(stre::replace_suffix("__xx__xx__", "xx__", "yy--") == "__xx__yy--");
+```
+
+### Tokenization
+
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/tokenization.cpp) ]
+
+```cpp
+using namespace utl;
+
+auto tokens = stre::tokenize("aaa,bbb,,ccc,", ","); // empty tokens are discarded
 assert(tokens.size() == 3);
 assert(tokens[0] == "aaa");
 assert(tokens[1] == "bbb");
 assert(tokens[2] == "ccc");
 
-// Splitting by complex delimiter while keeping the empty tokens
-tokens = stre::split_by_delimiter("(---)lorem(---)ipsum", "(---)", true);
-assert(tokens.size() == 3);
+tokens = stre::split("(---)lorem(---)ipsum", "(---)"); // empty tokens are preserved
+assert(tokens.size() == 3  );
 assert(tokens[0] == ""     );
 assert(tokens[1] == "lorem");
 assert(tokens[2] == "ipsum");
 ```
 
-### Other utilities
+### Repeating
 
-[ [Run this code](https://godbolt.org/z/xKG6qM79n) ] [ [Open source file](../examples/module_stre/other_utilities.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/repeating.cpp) ]
 
 ```cpp
 using namespace utl;
 
-// Repeating chars/strings
-assert(stre::repeat_char  (  'h', 7) == "hhhhhhh"        );
-assert(stre::repeat_string("xo-", 5) == "xo-xo-xo-xo-xo-");
+assert(stre::repeat(  'h', 7) == "hhhhhhh"        );
+assert(stre::repeat("xo-", 5) == "xo-xo-xo-xo-xo-");
+```
 
-// Escaping control chars in a string   
+### Escaping
+
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/escaping.cpp) ]
+
+```cpp
+using namespace utl;
+
 const std::string text = "this text\r will get messed up due to\r carriage returns.";
-std::cout
-    << "Original string prints like this:\n" <<                            text  << "\n\n"
-    << "Escaped  string prints like this:\n" << stre::escape_control_chars(text) << "\n\n";
 
-// Getting index of difference
-assert(stre::index_of_difference("xxxAxx", "xxxxxx") == 3);
+std::cout
+    << "Original string prints like this:\n" <<              text  << "\n\n"
+    << "Escaped  string prints like this:\n" << stre::escape(text) << "\n\n";
 ```
 
 Output:
@@ -377,4 +404,18 @@ Original string prints like this:
 
 Escaped  string prints like this:
 this text\r will get messed up due to\r carriage returns.
+```
+
+### Difference measurement
+
+[ [Run this code]() ] [ [Open source file](../examples/module_stre/escaping.cpp) ]
+
+```cpp
+using namespace utl;
+
+static_assert(stre::first_difference("xxxxYx", "xxxxXx") == 4);
+static_assert(stre::first_difference("xxx"   , "xxxxxx") == 3);
+
+static_assert(stre::count_difference("xxxxYx", "xxxxXx") == 1);
+static_assert(stre::count_difference("yyy"   , "xxxxxx") == 6);
 ```
