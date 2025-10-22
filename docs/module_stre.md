@@ -96,9 +96,69 @@ constexpr std::size_t count_difference(std::string_view lhs, std::string_view rh
 
 ## Methods
 
+### Character classification
+
+> ```cpp
+> constexpr bool is_digit       (char ch) noexcept;
+> constexpr bool is_lowercase   (char ch) noexcept;
+> constexpr bool is_uppercase   (char ch) noexcept;
+> constexpr bool is_punctuation (char ch) noexcept;
+> constexpr bool is_hexadecimal (char ch) noexcept;
+> constexpr bool is_control     (char ch) noexcept;
+> constexpr bool is_alphabetic  (char ch) noexcept;
+> constexpr bool is_alphanumeric(char ch) noexcept;
+> constexpr bool is_graphical   (char ch) noexcept;
+> constexpr bool is_printable   (char ch) noexcept;
+> constexpr bool is_space       (char ch) noexcept;
+> constexpr bool is_blank       (char ch) noexcept;
+> ```
+
+A safer `constexpr` reimplementation of character classification functions from [`<cctype>`](https://en.cppreference.com/w/cpp/header/cctype.html).
+
+Standard `<cctype>` functions don't operate on `char` parameters as would be intuitive, instead they accept `int` parameters which should be representable as `unsigned char` and invoke UB otherwise, which makes them extremely error-prone for common use cases. In addition, `<cctype>` functions return booleans as `int`, which can be evaluated to any non-zero value, thus breaking some common assumptions.
+
+| `stre::` function   | `<cctype>` equivalent                                        | Description                                         |
+| ------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| `is_digit()`        | [`std::isdigit()`](https://en.cppreference.com/w/cpp/string/byte/isdigit.html) | `true` for digits `0...9`                           |
+| `is_lowercase()`    | [`std::islower()`](https://en.cppreference.com/w/cpp/string/byte/islower.html) | `true` for lowercase letters `a...z`                |
+| `is_uppercase()`    | [`std::isupper()`](https://en.cppreference.com/w/cpp/string/byte/isupper.html) | `true` for uppercase letters `A...Z`                |
+| `is_punctuation()`  | [`std::ispunct()`](https://en.cppreference.com/w/cpp/string/byte/ispunct.html) | `true` for punctuation characters                   |
+| `is_hexadecimal()`  | [`std::isxdigit()`](https://en.cppreference.com/w/cpp/string/byte/isxdigit.html) | `true` for hex digits `0...9`, `A..F`, `a..f`       |
+| `is_control()`      | [`std::iscntrl()`](https://en.cppreference.com/w/cpp/string/byte/iscntrl.html) | `true` for control characters `0x00...0x1F`, `0x7F` |
+| `is_alphabetic()`   | [`std::isalpha()`](https://en.cppreference.com/w/cpp/string/byte/isalpha.html) | `true` for letters `a...z`, `A...Z`                 |
+| `is_alphanumeric()` | [`std::isalnum()`](https://en.cppreference.com/w/cpp/string/byte/isalnum.html) | `true` for letters and digits                       |
+| `is_graphical()`    | [`std::isgraph()`](https://en.cppreference.com/w/cpp/string/byte/isgraph.html) | `true` for letters, digits and punctuation          |
+| `is_printable()`    | [`std::isprint()`](https://en.cppreference.com/w/cpp/string/byte/isprint.html) | `true` for graphical characters and spaces          |
+| `is_space()`        | [`std::isspace()`](https://en.cppreference.com/w/cpp/string/byte/isspace.html) | `true` for spaces, tabs, line feeds and etc.        |
+| `is_blank()`        | [`std::isblank()`](https://en.cppreference.com/w/cpp/string/byte/isblank.html) | `true` for spaces and tabs                          |
+
+### Case conversions
+
+```cpp
+std::string to_lower(       char ch );
+std::string to_lower(std::string str);
+```
+
+Replaces all uppercase letters `A...Z` in the string `str` (or character `ch`) with corresponding lowercase letters `a...z`.
+
+```cpp
+std::string to_upper(       char ch );
+std::string to_upper(std::string str);
+```
+
+Replaces all lowercase letters `a...z` in the string `str` (or character `ch`) with corresponding uppercase letters `A...Z`.
+
 ### Trimming
 
 ```cpp
+constexpr std::string_view trim_left (std::string_view str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim_right(std::string_view str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim      (std::string_view str, char trimmed_char = ' ') noexcept;
+
+constexpr std::string_view trim_left (const char* str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim_right(const char* str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim      (const char* str, char trimmed_char = ' ') noexcept;
+
 std::string trim_left (std::string str, char trimmed_char = ' ');
 std::string trim_right(std::string str, char trimmed_char = ' ');
 std::string trim      (std::string str, char trimmed_char = ' ');
@@ -118,30 +178,6 @@ Pads string `str` with character `padding_char` from left / right / both sides u
 
 **Note:** If `str.size() >= length` the string is left unchanged.
 
-> ```cpp
-> std::string pad_with_leading_zeroes(unsigned int number, std::size_t length = 10);
-> ```
-
-Pads a `number` with leading zeroes until it reaches given `length`. Useful for numbering files/data entries are labeled in lexicographic order.
-
-**Note:** If `number` has more than `length` digits, resulting string is the same as `std::to_string(number)`.
-
-### Case conversions
-
-```cpp
-std::string to_lower(       char ch );
-std::string to_lower(std::string str);
-```
-
-Replaces all uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ` in the string `str` (or character `ch`) with corresponding lowercase letters `abcdefghijklmnopqrstuvwxyz`.
-
-```cpp
-std::string to_upper(       char ch );
-std::string to_upper(std::string str);
-```
-
-Replaces all lowercase letters `abcdefghijklmnopqrstuvwxyz` in the string `str` (or character `ch`) with corresponding uppercase letters `ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
-
 ### Substring checks
 
 ```cpp
@@ -152,23 +188,50 @@ bool contains   (std::string_view str, std::string_view substr);
 
 Returns `true` if string `str` starts with / ends with / contains the substring `substr`.
 
-### Token manipulation
+### Substring replacement
 
 ```cpp
-std::string replace_all_occurrences(std::string str, std::string_view from, std::string_view to);
+std::string replace_all   (std::string str, std::string_view from, std::string_view to);
 ```
 
-Scans through the string `str` and replaces all occurrences of substring `from` with a string `to`.
+Replaces **all** occurrences of substring `from` in the string `str` with `to`.
+
+> ```cpp
+> std::string replace_first (std::string str, std::string_view from, std::string_view to);
+> ```
+
+Replaces the **first** occurrence of substring `from` in the string `str` with `to`.
+
+> ```cpp
+> std::string replace_last  (std::string str, std::string_view from, std::string_view to);
+> ```
+
+Replaces the **last** occurrence of substring `from` in the string `str` with `to`.
+
+> ```cpp
+> std::string replace_prefix(std::string str, std::string_view from, std::string_view to);
+> ```
+
+If `str` **starts** with a substring `from`, replaces it with `to`.
+
+> ```cpp
+> std::string replace_suffix(std::string str, std::string_view from, std::string_view to);
+> ```
+
+If `str` **ends** with a substring `from`, replaces it with `to`.
+
+### Tokenization
 
 ```cpp
-std::vector<std::string> split_by_delimiter(std::string_view str, std::string_view delimiter, bool empty_tokens = false);
+std::vector<std::string> tokenize(std::string_view str, std::string_view delimiter);
+std::vector<std::string> split   (std::string_view str, std::string_view delimiter);
 ```
 
 Splits string `str` into a vector of `std::string` tokens based on `delimiter`.
 
-By default `empty_tokens` is `false` and `""` is not considered to be a valid token — in case of leading / trailing / repeated delimiters, only non-empty tokens are going to be inserted into the resulting vector. Setting `empty_tokens` to `true` overrides this behavior and keeps all the empty tokens intact.
+In the case of leading / trailing / repeated delimiters, `tokenize()` will omit empty the resulting empty tokens, while `split()` preserves them.
 
-### Other utils
+### Repeating
 
 > ```cpp
 > std::string repeat_char  (            char  ch, std::size_t repeats);
@@ -177,23 +240,34 @@ By default `empty_tokens` is `false` and `""` is not considered to be a valid to
 
 Repeats given character or string a given number of times and returns the resulting string.
 
-```cpp
-std::string escape_control_chars(std::string_view str);
-```
-
-Escapes all control & non-printable characters in the string `str` using standard C++ notation (see [corresponding example](#other-utilities) for a better idea).
-
-Useful when printing strings to the terminal during logging & debugging.
+### Escaping
 
 ```cpp
-std::size_t index_of_difference(std::string_view str_1, std::string_view str_2);
+std::string escape(            char ch );
+std::string escape(std::string_view str);
 ```
 
-Returns the index of the first character that is different between string `str_1` and `str_2`.
+Escapes all control & non-printable characters in `ch` / `str` using standard C++ notation. See the [corresponding example](#example).
 
-When both strings are the same, returns `str_1.size()`.
+Useful for viewing string contents and serialization without special characters getting in the way.
 
-Throws `std::logical_error` if `str_1.size() != str_2.size()`.
+### Difference measurement
+
+```cpp
+constexpr std::size_t first_difference(std::string_view lhs, std::string_view rhs) noexcept;
+```
+
+Returns the index of the first character that is different between strings `lhs` and `rhs`.
+
+Differently sized strings are allowed. Should both strings be the same, returns [`std::string_view::npos`](https://en.cppreference.com/w/cpp/string/basic_string_view/npos).
+
+> ```cpp
+> constexpr std::size_t count_difference(std::string_view lhs, std::string_view rhs) noexcept;
+> ```
+
+Returns the number of characters that is different between strings `lhs` and `rhs`.
+
+Differently sized strings are allowed.
 
 ## Examples
 
