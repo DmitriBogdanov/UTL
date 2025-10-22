@@ -1,9 +1,11 @@
 # Function for defining a test with proper args
 function(utl_add_test file_name)
+    cmake_parse_arguments(PARSE_ARGV 0 ARG "" "" "ADDITIONAL_CPP") # optional named argument
+
     string(REPLACE "/" "-" target_name "${file_name}") # CMake doesn't like target names with slashes
     string(PREPEND target_name "test-") # so we don't intersect names with benchmarks & examples
     
-    add_executable(${target_name} ${file_name}.cpp)
+    add_executable(${target_name} ${file_name}.cpp ${ARG_ADDITIONAL_CPP})
     
     target_compile_features   (${target_name} PRIVATE ${UTL_COMPILE_FEATURES} )
     target_compile_options    (${target_name} PRIVATE ${UTL_TEST_FLAGS}       )
@@ -24,7 +26,7 @@ endfunction()
 # Note 2: '--force-colors' makes doctest show colored output in the terminal, but makes up CTest logs save ANSI
 #         color codes. Without this flag doctest suppresses color because it detects CTest writing output to the file.
 
-# Tests
+# Module tests
 utl_add_test("module_assertion/assertions")
 utl_add_test("module_bit/enum_bitflags")
 utl_add_test("module_bit/group_bit_operations")
@@ -70,3 +72,5 @@ utl_add_test("module_struct_reflect/perfect_forwarding")
 utl_add_test("module_struct_reflect/reflection")
 utl_add_test("module_table/formats")
 utl_add_test("module_time/unit_split")
+# General tests
+utl_add_test("general_odr/main" ADDITIONAL_CPP "general_odr/second.cpp")
