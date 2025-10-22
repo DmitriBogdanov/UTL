@@ -273,7 +273,7 @@ Differently sized strings are allowed.
 
 ### Character classification
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/character_classification.cpp) ]
+[ [Run this code](https://godbolt.org/z/8h4ajhhba) ] [ [Open source file](../examples/module_stre/character_classification.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -288,7 +288,7 @@ static_assert( stre::is_graphical('X'));
 
 ### Case conversions
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/case_conversions.cpp) ]
+[ [Run this code](https://godbolt.org/z/YjnhjYqa3) ] [ [Open source file](../examples/module_stre/case_conversions.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -299,7 +299,7 @@ assert(stre::to_upper("lorem ipsum") == "LOREM IPSUM");
 
 ### Trimming
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/trimming.cpp) ]
+[ [Run this code](https://godbolt.org/z/oMTz351fb) ] [ [Open source file](../examples/module_stre/trimming.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -313,7 +313,7 @@ static_assert(stre::trim("__ASSERT__", '_') == "ASSERT");
 
 ### Padding
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/padding.cpp) ]
+[ [Run this code](https://godbolt.org/z/bEh63fo1P) ] [ [Open source file](../examples/module_stre/padding.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -327,7 +327,7 @@ assert(stre::pad(" label ", 15, '-') == "---- label ----");
 
 ### Substring checks
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
+[ [Run this code](https://godbolt.org/z/7afhxW3Kf) ] [ [Open source file](../examples/module_stre/substring_checks.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -339,7 +339,7 @@ static_assert(stre::contains   ("lorem ipsum", "em ip"));
 
 ### Substring replacement
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/substring_replacement.cpp) ]
+[ [Run this code](https://godbolt.org/z/98oshM68r) ] [ [Open source file](../examples/module_stre/substring_replacement.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -354,7 +354,7 @@ assert(stre::replace_suffix("__xx__xx__", "xx__", "yy--") == "__xx__yy--");
 
 ### Tokenization
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/tokenization.cpp) ]
+[ [Run this code](https://godbolt.org/z/rqaKzE5fs) ] [ [Open source file](../examples/module_stre/tokenization.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -374,7 +374,7 @@ assert(tokens[2] == "ipsum");
 
 ### Repeating
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/repeating.cpp) ]
+[ [Run this code](https://godbolt.org/z/xGsKoj767) ] [ [Open source file](../examples/module_stre/repeating.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -385,7 +385,7 @@ assert(stre::repeat("xo-", 5) == "xo-xo-xo-xo-xo-");
 
 ### Escaping
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/escaping.cpp) ]
+[ [Run this code](https://godbolt.org/z/WrM66d6vc) ] [ [Open source file](../examples/module_stre/escaping.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -408,7 +408,7 @@ this text\r will get messed up due to\r carriage returns.
 
 ### Difference measurement
 
-[ [Run this code]() ] [ [Open source file](../examples/module_stre/escaping.cpp) ]
+[ [Run this code](https://godbolt.org/z/xWMvYdj36) ] [ [Open source file](../examples/module_stre/difference_measurement.cpp) ]
 
 ```cpp
 using namespace utl;

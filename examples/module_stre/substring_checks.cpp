@@ -1,7 +1,5 @@
 #include "include/UTL/stre.hpp"
 
-#include <cassert>
-
 int main() {
     using namespace utl;
     
