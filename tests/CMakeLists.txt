@@ -12,7 +12,7 @@ function(utl_add_test file_name)
     
     add_test(
         NAME ${target_name}
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors --success
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors# --success
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
     
@@ -56,10 +56,13 @@ utl_add_test("module_random/uniform_int_range")
 utl_add_test("module_random/uniform_real_range")
 utl_add_test("module_shell/shell_commands")
 utl_add_test("module_stre/case_conversions")
-utl_add_test("module_stre/other_utils")
+utl_add_test("module_stre/character_classification")
+utl_add_test("module_stre/difference_measurement")
 utl_add_test("module_stre/padding")
+utl_add_test("module_stre/repeating")
 utl_add_test("module_stre/substring_checks")
-utl_add_test("module_stre/token_manipulation")
+utl_add_test("module_stre/substring_replacement")
+utl_add_test("module_stre/tokenization")
 utl_add_test("module_stre/trimming")
 utl_add_test("module_strong_type/arithmetic")
 utl_add_test("module_strong_type/unique")

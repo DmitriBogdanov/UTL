@@ -10,6 +10,4 @@ int main() {
     assert(stre::pad      ("value", 9) == "  value  " );
     
     assert(stre::pad(" label ", 15, '-') == "---- label ----");
-    
-    assert(stre::pad_with_leading_zeroes(17, 5) == "00017");
 }

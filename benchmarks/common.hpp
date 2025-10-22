@@ -11,8 +11,8 @@
 
 // ____________________ STD INCLUDES  _____________________
 
-#include <chrono>   // chrono_literals::
-#include <iostream> // cout, endl
+#include <chrono>   // IWYU pragma: keep // chrono_literals::
+#include <iostream> // IWYU pragma: keep // cout, endl
 
 // ____________________ IMPLEMENTATION ____________________
 

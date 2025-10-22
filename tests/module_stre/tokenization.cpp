@@ -8,20 +8,10 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-TEST_CASE("Token manipulation / Replace all occurrences") {
-    CHECK(stre::replace_all_occurrences("xxxAAxxxAAxxx", "AA", "BBB") == "xxxBBBxxxBBBxxx");
+TEST_CASE("Tokenization / Tokenize") { // 'tokenize()' ignores empty tokens
 
-    CHECK(stre::replace_all_occurrences("Some very very cool text ending with very", "very", "really") ==
-          "Some really really cool text ending with really");
-
-    CHECK(stre::replace_all_occurrences("very short string", "super long replacement target",
-                                        "even longer replacement string just to test thing out") ==
-          "very short string");
-}
-
-TEST_CASE("Token manipulation / Split by delimiter (no empty tokens)") {
     { // simplest case
-        const auto tokens = stre::split_by_delimiter("aaa,bbb,ccc", ",");
+        const auto tokens = stre::tokenize("aaa,bbb,ccc", ",");
         CHECK(tokens.size() == 3);
         CHECK(tokens[0] == "aaa");
         CHECK(tokens[1] == "bbb");
@@ -29,21 +19,21 @@ TEST_CASE("Token manipulation / Split by delimiter (no empty tokens)") {
     }
 
     { // leading delimiters
-        const auto tokens = stre::split_by_delimiter("(---)lorem(---)ipsum", "(---)");
+        const auto tokens = stre::tokenize("(---)lorem(---)ipsum", "(---)");
         CHECK(tokens.size() == 2);
         CHECK(tokens[0] == "lorem");
         CHECK(tokens[1] == "ipsum");
     }
 
     { // leading + repeating delimiters
-        const auto tokens = stre::split_by_delimiter("___lorem_________ipsum", "___");
+        const auto tokens = stre::tokenize("___lorem_________ipsum", "___");
         CHECK(tokens.size() == 2);
         CHECK(tokens[0] == "lorem");
         CHECK(tokens[1] == "ipsum");
     }
 
     { // leading + repeating + trailing delimiters
-        const auto tokens = stre::split_by_delimiter("xxAxxxxxBxCxDxxEx", "x");
+        const auto tokens = stre::tokenize("xxAxxxxxBxCxDxxEx", "x");
         CHECK(tokens.size() == 5);
         CHECK(tokens[0] == "A");
         CHECK(tokens[1] == "B");
@@ -53,31 +43,32 @@ TEST_CASE("Token manipulation / Split by delimiter (no empty tokens)") {
     }
 
     { // non-empty string with a single delimiter-like token
-        const auto tokens = stre::split_by_delimiter(",,", ",,,");
+        const auto tokens = stre::tokenize(",,", ",,,");
         CHECK(tokens.size() == 1);
         CHECK(tokens[0] == ",,");
     }
 
     { // non-empty string with no tokens
-        const auto tokens = stre::split_by_delimiter(".........", "...");
+        const auto tokens = stre::tokenize(".........", "...");
         CHECK(tokens.size() == 0);
     }
 
     { // empty string with no tokens
-        const auto tokens = stre::split_by_delimiter("", "...");
+        const auto tokens = stre::tokenize("", "...");
         CHECK(tokens.size() == 0);
     }
 
     { // non-empty string with empty delimiter
-        const auto tokens = stre::split_by_delimiter("text", "");
+        const auto tokens = stre::tokenize("text", "");
         CHECK(tokens.size() == 1);
         CHECK(tokens[0] == "text");
     }
 }
 
-TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
+TEST_CASE("Tokenization / Split") { // 'split()' preserves empty tokens
+
     { // simplest case
-        const auto tokens = stre::split_by_delimiter("aaa,bbb,ccc", ",", true);
+        const auto tokens = stre::split("aaa,bbb,ccc", ",");
         CHECK(tokens.size() == 3);
         CHECK(tokens[0] == "aaa");
         CHECK(tokens[1] == "bbb");
@@ -85,7 +76,7 @@ TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
     }
 
     { // leading delimiters
-        const auto tokens = stre::split_by_delimiter("(---)lorem(---)ipsum", "(---)", true);
+        const auto tokens = stre::split("(---)lorem(---)ipsum", "(---)");
         CHECK(tokens.size() == 3);
         CHECK(tokens[0] == "");
         CHECK(tokens[1] == "lorem");
@@ -93,7 +84,7 @@ TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
     }
 
     { // leading + repeating delimiters
-        const auto tokens = stre::split_by_delimiter("___lorem_________ipsum", "___", true);
+        const auto tokens = stre::split("___lorem_________ipsum", "___");
         CHECK(tokens.size() == 5);
         CHECK(tokens[0] == "");
         CHECK(tokens[1] == "lorem");
@@ -103,7 +94,7 @@ TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
     }
 
     { // leading + repeating + trailing delimiters
-        const auto tokens = stre::split_by_delimiter("xxAxxxxxBxCxDxxEx", "x", true);
+        const auto tokens = stre::split("xxAxxxxxBxCxDxxEx", "x");
         CHECK(tokens.size() == 13);
         CHECK(tokens[0] == "");
         CHECK(tokens[1] == "");
@@ -121,13 +112,13 @@ TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
     }
 
     { // non-empty string with a single delimiter-like token
-        const auto tokens = stre::split_by_delimiter(",,", ",,,", true);
+        const auto tokens = stre::split(",,", ",,,");
         CHECK(tokens.size() == 1);
         CHECK(tokens[0] == ",,");
     }
 
     { // non-empty string with no tokens
-        const auto tokens = stre::split_by_delimiter(".........", "...", true);
+        const auto tokens = stre::split(".........", "...");
         CHECK(tokens.size() == 4);
         CHECK(tokens[0] == "");
         CHECK(tokens[1] == "");
@@ -136,13 +127,13 @@ TEST_CASE("Token manipulation / Split by delimiter (with empty tokens)") {
     }
 
     { // empty string with no tokens
-        const auto tokens = stre::split_by_delimiter("", "...", true);
+        const auto tokens = stre::split("", "...");
         CHECK(tokens.size() == 1);
         CHECK(tokens[0] == "");
     }
 
     { // non-empty string with empty delimiter
-        const auto tokens = stre::split_by_delimiter("text", "", true);
+        const auto tokens = stre::split("text", "");
         CHECK(tokens.size() == 1);
         CHECK(tokens[0] == "text");
     }

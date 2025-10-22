@@ -23,7 +23,36 @@
 ## Definitions
 
 ```cpp
+// Character classification
+constexpr bool is_digit       (char ch) noexcept;
+constexpr bool is_lowercase   (char ch) noexcept;
+constexpr bool is_uppercase   (char ch) noexcept;
+constexpr bool is_punctuation (char ch) noexcept;
+constexpr bool is_hexadecimal (char ch) noexcept;
+constexpr bool is_control     (char ch) noexcept;
+constexpr bool is_alphabetic  (char ch) noexcept;
+constexpr bool is_alphanumeric(char ch) noexcept;
+constexpr bool is_graphical   (char ch) noexcept;
+constexpr bool is_printable   (char ch) noexcept;
+constexpr bool is_space       (char ch) noexcept;
+constexpr bool is_blank       (char ch) noexcept;
+
+// Case conversion
+constexpr char to_lower(char ch) noexcept;
+constexpr char to_upper(char ch) noexcept;
+
+std::string to_lower(std::string str);
+std::string to_upper(std::string str);
+
 // Trimming
+constexpr std::string_view trim_left (std::string_view str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim_right(std::string_view str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim      (std::string_view str, char trimmed_char = ' ') noexcept;
+
+constexpr std::string_view trim_left (const char* str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim_right(const char* str, char trimmed_char = ' ') noexcept;
+constexpr std::string_view trim      (const char* str, char trimmed_char = ' ') noexcept;
+
 std::string trim_left (std::string str, char trimmed_char = ' ');
 std::string trim_right(std::string str, char trimmed_char = ' ');
 std::string trim      (std::string str, char trimmed_char = ' ');
@@ -33,31 +62,33 @@ std::string pad_left (std::string_view str, std::size_t length, char padding_cha
 std::string pad_right(std::string_view str, std::size_t length, char padding_char = ' ');
 std::string pad      (std::string_view str, std::size_t length, char padding_char = ' ');
 
-std::string pad_with_leading_zeroes(unsigned int number, std::size_t length = 10);
-
-// Case conversions
-std::string to_lower(       char ch );
-std::string to_lower(std::string str);
-std::string to_upper(       char ch );
-std::string to_upper(std::string str);
-
 // Substring checks
-bool starts_with(std::string_view str, std::string_view substr);
-bool ends_with  (std::string_view str, std::string_view substr);
-bool contains   (std::string_view str, std::string_view substr);
+constexpr bool starts_with(std::string_view str, std::string_view substr) noexcept;
+constexpr bool ends_with  (std::string_view str, std::string_view substr) noexcept;
+constexpr bool contains   (std::string_view str, std::string_view substr) noexcept;
 
-// Token manipulation
-std::string replace_all_occurrences(std::string str, std::string_view from, std::string_view to);
+// Substring replacement
+std::string replace_all   (std::string str, std::string_view from, std::string_view to);
+std::string replace_first (std::string str, std::string_view from, std::string_view to);
+std::string replace_last  (std::string str, std::string_view from, std::string_view to);
+std::string replace_prefix(std::string str, std::string_view from, std::string_view to);
+std::string replace_suffix(std::string str, std::string_view from, std::string_view to);
 
-std::vector<std::string> split_by_delimiter(std::string_view str, std::string_view delimiter, bool keep_empty_tokens = false);
+// Repeating
+std::string repeat(            char  ch, std::size_t repeats);
+std::string repeat(std::string_view str, std::size_t repeats);
 
-// Other utils
-std::string repeat_char  (            char  ch, std::size_t repeats);
-std::string repeat_string(std::string_view str, std::size_t repeats);
+// Escaping
+std::string escape(            char ch );
+std::string escape(std::string_view str);
 
-std::string escape_control_chars(std::string_view str);
+// Tokenization
+std::vector<std::string> tokenize(std::string_view str, std::string_view delimiter);
+std::vector<std::string> split   (std::string_view str, std::string_view delimiter);
 
-std::size_t index_of_difference(std::string_view str_1, std::string_view str_2);
+// Difference measurement
+constexpr std::size_t first_difference(std::string_view lhs, std::string_view rhs) noexcept;
+constexpr std::size_t count_difference(std::string_view lhs, std::string_view rhs) noexcept;
 ```
 
 > [!Note]
@@ -130,12 +161,12 @@ std::string replace_all_occurrences(std::string str, std::string_view from, std:
 Scans through the string `str` and replaces all occurrences of substring `from` with a string `to`.
 
 ```cpp
-std::vector<std::string> split_by_delimiter(std::string_view str, std::string_view delimiter, bool keep_empty_tokens = false);
+std::vector<std::string> split_by_delimiter(std::string_view str, std::string_view delimiter, bool empty_tokens = false);
 ```
 
 Splits string `str` into a vector of `std::string` tokens based on `delimiter`.
 
-By default `keep_empty_tokens` is `false` and `""` is not considered to be a valid token — in case of leading / trailing / repeated delimiters, only non-empty tokens are going to be inserted into the resulting vector. Setting `keep_empty_tokens` to `true` overrides this behavior and keeps all the empty tokens intact.
+By default `empty_tokens` is `false` and `""` is not considered to be a valid token — in case of leading / trailing / repeated delimiters, only non-empty tokens are going to be inserted into the resulting vector. Setting `empty_tokens` to `true` overrides this behavior and keeps all the empty tokens intact.
 
 ### Other utils
 
