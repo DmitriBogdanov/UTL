@@ -43,4 +43,9 @@ nav:
   - "Blog":
     - "What separates C++ from being a \"perfect\" performance-oriented language" : blog/cpp_performance_issues.md
     - "Map-macro: Emulating reflection"                                           : blog/map_macro_reflection.md
-  - "License": LICENSE.md
+  - "License": guide_license.md
+
+# Note: We use 'guide_license.md' instead of the usual 'LICENSE.md' to work around the GitHub license
+#       detection quirks. The system requires license to be placed in root, while the website needs a
+#       copy in 'docs/'. If 'LICENSE.md' is located in both places GitHub tends to randomly get confused
+#       and show two identical licenses on the website.
