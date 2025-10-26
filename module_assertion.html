@@ -1,0 +1,1709 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dmitribogdanov.github.io/UTL/module_assertion.html">
+      
+      
+        <link rel="prev" href="index.html">
+      
+      
+        <link rel="next" href="module_bit.html">
+      
+      
+      <link rel="icon" href="images/icon_site_logo.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>utl::assertion - UTL</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="mkdocs/callouts.css">
+    
+      <link rel="stylesheet" href="mkdocs/width.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="utl::assertion - UTL" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_assertion.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://dmitribogdanov.github.io/UTL/module_assertion.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="utl::assertion - UTL" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_assertion.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#utlassertion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="UTL" class="md-header__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UTL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              utl::assertion
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="UTL" class="md-nav__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    UTL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="module_assertion.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assertion-macro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion macro
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handler customization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unary-assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unary assertion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binary assertion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default message
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-on-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging on failure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_bit.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::bit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_enum_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::enum_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_integral.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::integral
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_json.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::json
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_log.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_math.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::math
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_mvl.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::mvl
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_parallel.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_predef.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::predef
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_profiler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::profiler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_progressbar.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::progressbar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_random.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_shell.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_sleep.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::sleep
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_stre.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::stre
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_strong_type.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::strong_type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_struct_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::struct_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_table.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::table
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_time.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::time
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_selecting_modules.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Selecting modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_fetching_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetching the library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reserved_names.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reserved names
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_project.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building the repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_versioning.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Semantic versioning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reproducing_figures.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reproducing figures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Blog
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Blog
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/cpp_performance_issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/map_macro_reflection.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Map-macro: Emulating reflection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_license.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assertion-macro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion macro
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handler customization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unary-assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unary assertion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binary assertion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default message
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-on-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging on failure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p><a href="https://en.cppreference.com/w/cpp/17.html"><img src ="images/badge_language_cpp_17.svg"></a>
+<a href="LICENSE.md"><img src ="images/badge_license_mit.svg"></a>
+<a href="guide_versioning.html"><img src ="images/badge_semver.svg"></a>
+<a href="https://dmitribogdanov.github.io/UTL/"><img src ="images/badge_docs.svg"></a>
+<a href="https://en.wikipedia.org/wiki/Header-only"><img src ="images/badge_header_only.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL"><img src ="images/badge_no_dependencies.svg"></a></p>
+<p><a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml"><img src ="images/badge_workflow_windows.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml"><img src ="images/badge_workflow_ubuntu.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml"><img src ="images/badge_workflow_macos.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml"><img src ="images/badge_workflow_freebsd.svg"></a></p>
+<h1 id="utlassertion">utl::assertion<a class="headerlink" href="#utlassertion" title="Permanent link">&para;</a></h1>
+<p><a href="..">&lt;- to README.md</a></p>
+<p><a href="../include/UTL/assertion.hpp">&lt;- to implementation.hpp</a></p>
+<p><strong>utl::assertion</strong> header provides an (almost) drop-in replacement for the standard <code>assert()</code> with nicer semantics and more diagnostic info.</p>
+<p><strong>Main features:</strong></p>
+<ul>
+<li>Decomposes expressions and prints their values</li>
+<li>Has an optional message argument</li>
+<li>Customizable assert handler</li>
+<li>Nicely colored output</li>
+<li>An option to enable assertions in <code>Release</code></li>
+</ul>
+<p><strong>Quick showcase:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12</span><span class="p">;</span>
+
+<span class="n">ASSERT</span><span class="p">(</span><span class="n">rows</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Linear system requires a square matrix.&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><img src ="images/assertion_binary_assertion.png"></p>
+<h2 id="definitions">Definitions<a class="headerlink" href="#definitions" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Assertion macro</span>
+<span class="cp">#define UTL_ASSERTION(condition, ...)</span>
+
+<span class="c1">// Options (declared by the user)</span>
+<span class="cp">#define UTL_ASSERTION_ENABLE_SHORTCUT</span>
+<span class="cp">#define UTL_ASSERTION_ENABLE_IN_RELEASE</span>
+<span class="cp">#define UTL_ASSERTION_ENABLE_FULL_PATHS</span>
+
+<span class="c1">// Handler customization</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">FailureInfo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w">      </span><span class="n">line</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">func</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">expression</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">evaluated</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">to_string</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">set_handler</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FailureInfo</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">handler</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
+<h3 id="assertion-macro">Assertion macro<a class="headerlink" href="#assertion-macro" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="cp">#define UTL_ASSERTION(condition, ...)</span>
+</code></pre></div>
+</blockquote>
+<p>A macro semantically similar to <a href="https://en.cppreference.com/w/cpp/error/assert.html"><code>assert()</code></a>.</p>
+<p>In <code>Debug</code> mode (which means <code>NDEBUG</code> is not defined) checks whether <code>condition</code> is <code>true</code> and invokes assert handler in the case of failure.</p>
+<p>In <code>Release</code> mode (which means <code>NDEBUG</code> is defined) compiles to nothing.</p>
+<p><strong>Differences relative to the standard <code>assert()</code>:</strong></p>
+<ul>
+<li>This macro can be customized using <a href="#options">options</a></li>
+<li>This macro also accepts message as an optional second parameter</li>
+<li>This macro also performs expression decomposition to print more diagnostic info</li>
+<li>Assert handler invoked by the failure is customizable (which is usually used to log failures, print stack traces and change failure behavior)</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Only simple expressions without parenthesis can be decomposed (such as <code>a - b</code>, <code>a + b &lt; c</code> and etc.)</li>
+<li>Decomposed values should be printable using <a href="https://en.cppreference.com/w/cpp/io/basic_ostream.html"><code>std::ostream</code></a></li>
+</ul>
+<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="cp">#define UTL_ASSERTION_ENABLE_SHORTCUT </span><span class="c1">// declared by the user</span>
+</code></pre></div>
+</blockquote>
+<p>When defined before including the header, this macro enables shortcut <code>ASSERT()</code> for <code>UTL_ASSERTION()</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="cp">#define UTL_ASSERTION_ENABLE_IN_RELEASE </span><span class="c1">// declared by the user</span>
+</code></pre></div>
+</blockquote>
+<p>When defined before including the header, this macro enables assertion checking in <code>Release</code> mode.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="cp">#define UTL_ASSERTION_ENABLE_FULL_PATHS </span><span class="c1">// declared by the user</span>
+</code></pre></div>
+</blockquote>
+<p>When defined before including the header, this macro enables full filepath display in failed assertions. By default only filename is displayed.</p>
+<p><strong>Note:</strong> Full filepath can be rather verbose when using build systems such as <strong>CMake</strong> due to their tendency to pass absolute paths to the compiler.</p>
+<h3 id="handler-customization">Handler customization<a class="headerlink" href="#handler-customization" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FailureInfo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w">      </span><span class="n">line</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">func</span><span class="p">;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">expression</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">evaluated</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">to_string</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>A struct that contains all of the information about a failed assertion:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file</code> / <code>line</code> / <code>func</code></td>
+<td>File / line / function from which the assertion failure was triggered</td>
+</tr>
+<tr>
+<td><code>expression</code>/ <code>evaluated</code></td>
+<td>Asserted condition before / after being evaluated</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>Optional message</td>
+</tr>
+</tbody>
+</table>
+<p>It can be stringified with <code>to_string()</code> method, which uses ANSI color codes to improve readability when <code>color</code> is set to <code>true</code>.</p>
+<p><strong>Note:</strong> If <code>context</code> was no provided, it defaults to <code>&lt;no context provided&gt;</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">set_handler</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FailureInfo</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">handler</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p><strong>Note 1:</strong> Assertion failure <code>handler</code> is invoked in a <strong>thread-safe</strong> manner.</p>
+<p><strong>Note 2:</strong> Default handler prints the colored failure info to <a href="https://en.cppreference.com/w/cpp/io/cerr.html"><code>std::cerr</code></a> and calls <a href="https://en.cppreference.com/w/cpp/utility/program/abort.html"><code>std::abort</code></a>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>All of the examples below will use</p>
+<p><div class="highlight"><pre><span></span><code><span class="cp">#define UTL_ASSERTION_ENABLE_SHORTCUT</span>
+<span class="cp">#define UTL_ASSERTION_ENABLE_IN_RELEASE</span>
+</code></pre></div>
+to reduce verbosity and wrap the code in
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">signal</span><span class="p">(</span><span class="n">SIGABRT</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="kt">int</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">quick_exit</span><span class="p">(</span><span class="n">EXIT_SUCCESS</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// ...</span>
+<span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+</code></pre></div>
+to allow running examples as tests which fail should the assertion not trigger.</p>
+</div>
+<h3 id="unary-assertion">Unary assertion<a class="headerlink" href="#unary-assertion" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/3c7zsdjs7">Run this code</a> ] [ <a href="../examples/module_assertion/unary_assertion.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">component</span><span class="p">;</span>
+
+<span class="n">ASSERT</span><span class="p">(</span><span class="n">component</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;Cannot invoke handling for an empty component.&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>Output:</p>
+<p><img src ="images/assertion_unary_assertion.png"></p>
+<h3 id="binary-assertion">Binary assertion<a class="headerlink" href="#binary-assertion" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/3n4aqxqx7">Run this code</a> ] [ <a href="../examples/module_assertion/binary_assertion.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12</span><span class="p">;</span>
+
+<span class="n">ASSERT</span><span class="p">(</span><span class="n">rows</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Linear system requires a square matrix.&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>Output:</p>
+<p><img src ="images/assertion_binary_assertion.png"></p>
+<h3 id="default-message">Default message<a class="headerlink" href="#default-message" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/4zjqP4zad">Run this code</a> ] [ <a href="../examples/module_assertion/default_message.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Second argument is optional, this can be used like a regular assert</span>
+<span class="n">ASSERT</span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">17</span><span class="p">);</span>
+</code></pre></div>
+<p><img src ="images/assertion_default_message.png"></p>
+<h3 id="logging-on-failure">Logging on failure<a class="headerlink" href="#logging-on-failure" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/bhdfj7a91">Run this code</a> ] [ <a href="../examples/module_assertion/logging_on_failure.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="n">utl</span><span class="o">::</span><span class="n">assertion</span><span class="o">::</span><span class="n">set_handler</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">utl</span><span class="o">::</span><span class="n">assertion</span><span class="o">::</span><span class="n">FailureInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">info</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Forward assertion message to some logging facility with colors disabled</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="p">(</span><span class="s">&quot;failure.txt&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">info</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Print &amp; abort like usually</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">info</span><span class="p">.</span><span class="n">to_string</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">abort</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="n">ASSERT</span><span class="p">(</span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">6</span><span class="p">);</span>
+</code></pre></div>
+<p>Output:</p>
+<p><img src ="images/assertion_logging_on_failure.png"></p>
+<p><code>failure.txt</code>:</p>
+<div class="highlight"><pre><span></span><code>Assertion failed at logging_on_failure.cpp:24: int main()
+    Where condition:
+        3 + 4 &lt; 6
+    Evaluated to:
+        7 &lt; 6
+    Context:
+        &lt;no context provided&gt;
+</code></pre></div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023–2025 Dmitri Bogdanov
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DmitriBogdanov" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["toc.follow", "content.code.copy", "search.suggest", "content.tooltips"], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="mkdocs/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="mkdocs/modification/header_title.js"></script>
+      
+        <script src="mkdocs/modification/relative_links.js"></script>
+      
+    
+  </body>
+</html>

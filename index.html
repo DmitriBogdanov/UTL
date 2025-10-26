@@ -1,0 +1,1697 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dmitribogdanov.github.io/UTL/index.html">
+      
+      
+      
+        <link rel="next" href="module_assertion.html">
+      
+      
+      <link rel="icon" href="images/icon_site_logo.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>UTL</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="mkdocs/callouts.css">
+    
+      <link rel="stylesheet" href="mkdocs/width.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="UTL" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/README.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://dmitribogdanov.github.io/UTL/index.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="UTL" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/README.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#utl" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="UTL" class="md-header__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UTL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="UTL" class="md-nav__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    UTL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="index.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design goals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modules-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modules &amp; documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See also
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developer-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developer toolchain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roadmap
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_assertion.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_bit.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::bit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_enum_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::enum_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_integral.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::integral
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_json.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::json
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_log.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_math.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::math
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_mvl.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::mvl
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_parallel.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_predef.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::predef
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_profiler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::profiler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_progressbar.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::progressbar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_random.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_shell.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_sleep.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::sleep
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_stre.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::stre
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_strong_type.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::strong_type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_struct_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::struct_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_table.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::table
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_time.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::time
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_selecting_modules.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Selecting modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_fetching_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetching the library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reserved_names.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reserved names
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_project.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building the repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_versioning.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Semantic versioning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reproducing_figures.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reproducing figures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Blog
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Blog
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/cpp_performance_issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/map_macro_reflection.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Map-macro: Emulating reflection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_license.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design goals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modules-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modules &amp; documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See also
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developer-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developer toolchain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roadmap
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p><a href="https://en.cppreference.com/w/cpp/17.html"><img src ="images/badge_language_cpp_17.svg"></a>
+<a href="LICENSE.md"><img src ="images/badge_license_mit.svg"></a>
+<a href="guide_versioning.html"><img src ="images/badge_semver.svg"></a>
+<a href="https://dmitribogdanov.github.io/UTL/"><img src ="images/badge_docs.svg"></a>
+<a href="https://en.wikipedia.org/wiki/Header-only"><img src ="images/badge_header_only.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL"><img src ="images/badge_no_dependencies.svg"></a></p>
+<p><a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml"><img src ="images/badge_workflow_windows.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml"><img src ="images/badge_workflow_ubuntu.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml"><img src ="images/badge_workflow_macos.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml"><img src ="images/badge_workflow_freebsd.svg"></a></p>
+<h1 id="utl">UTL<a class="headerlink" href="#utl" title="Permanent link">&para;</a></h1>
+<p><strong>UTL</strong> is a collection of small self-contained libraries with a major aim towards usage simplicity. It was mostly created during my work in gamedev and mathematical research for the purpose of fast prototyping.</p>
+<p>For the ease of integration, all libraries are distributed as <strong>individual headers</strong>, which can be found <a href="../include/UTL"><strong>here</strong></a>.</p>
+<p>The entire collection can also be downloaded as an <a href="../single_include/UTL.hpp"><strong>amalgamated single-header</strong></a>.</p>
+<p>CMake <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html"><code>FetchContent()</code></a> support is also <a href="guide_fetching_library.html">provided</a>.</p>
+<h2 id="design-goals">Design goals<a class="headerlink" href="#design-goals" title="Permanent link">&para;</a></h2>
+<p>Implementation of this library sets following design goals:</p>
+<ul>
+<li><strong>Easy integration</strong>. Adding libraries to the project should be as simple as including their corresponding headers.</li>
+<li><strong>Concise syntax</strong>. Library usage should require minimal boilerplate on user side.</li>
+<li><strong>Platform agnostic.</strong> Implementation should be based around the C++ standard. Platform-specific features might be provided as optional addons.</li>
+<li><strong>Non-intrusive.</strong> Every library should reside in its own namespace, use its own macro prefix and not introduce any invasive identifiers.</li>
+</ul>
+<p>Quality goals include:</p>
+<ul>
+<li><strong>Modern C++ style</strong>. Usage of modern C++ idioms is heavily preferred.</li>
+<li><strong>Usage examples</strong>. Documentation should include  practical usage examples for all major methods.</li>
+<li><strong>Test &amp; benchmark coverage.</strong> All modules should have appropriate unit test coverage, performance-focused implementations should be benchmarked against alternative approaches.</li>
+<li><strong>Easy to build.</strong> All headers, tests, benchmarks and examples should build under the strictest warning levels and with minimal tooling.</li>
+</ul>
+<h2 id="modules-documentation">Modules &amp; documentation<a class="headerlink" href="#modules-documentation" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Short description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="module_assertion.html"><strong>utl::assertion</strong></a></td>
+<td>Assert macro with more diagnostic info</td>
+</tr>
+<tr>
+<td><a href="module_bit.html"><strong>utl::bit</strong></a></td>
+<td>Bit-twiddling, enum bitflags</td>
+</tr>
+<tr>
+<td><a href="module_enum_reflect.html"><strong>utl::enum_reflect</strong></a></td>
+<td>Enum reflection</td>
+</tr>
+<tr>
+<td><a href="module_integral.html"><strong>utl::integral</strong></a></td>
+<td>Saturated math, safe integer casts, literals, rounding and etc.</td>
+</tr>
+<tr>
+<td><a href="module_json.html"><strong>utl::json</strong></a></td>
+<td>JSON parsing, serializing &amp; reflection</td>
+</tr>
+<tr>
+<td><a href="module_log.html"><strong>utl::log</strong></a></td>
+<td>Logging library</td>
+</tr>
+<tr>
+<td><a href="module_math.html"><strong>utl::math</strong></a></td>
+<td>Additional math functions</td>
+</tr>
+<tr>
+<td><a href="module_mvl.html"><strong>utl::mvl</strong></a></td>
+<td>Generalized matrix &amp; vector containers</td>
+</tr>
+<tr>
+<td><a href="module_parallel.html"><strong>utl::parallel</strong></a></td>
+<td>Thread pool, async tasks, parallel for, parallel reductions and etc.</td>
+</tr>
+<tr>
+<td><a href="module_predef.html"><strong>utl::predef</strong></a></td>
+<td>Detection of architectures, compilers, platforms and etc.</td>
+</tr>
+<tr>
+<td><a href="module_profiler.html"><strong>utl::profiler</strong></a></td>
+<td>Call graph &amp; thread profiling</td>
+</tr>
+<tr>
+<td><a href="module_progressbar.html"><strong>utl::progressbar</strong></a></td>
+<td>Progress bars for CLI apps</td>
+</tr>
+<tr>
+<td><a href="module_random.html"><strong>utl::random</strong></a></td>
+<td>PRNGs &amp; random number generation</td>
+</tr>
+<tr>
+<td><a href="module_shell.html"><strong>utl::shell</strong></a></td>
+<td>Shell commands and temporary files</td>
+</tr>
+<tr>
+<td><a href="module_sleep.html"><strong>utl::sleep</strong></a></td>
+<td>Precise sleep implementations</td>
+</tr>
+<tr>
+<td><a href="module_stre.html"><strong>utl::stre</strong></a></td>
+<td>Efficient implementations of common string utils</td>
+</tr>
+<tr>
+<td><a href="module_strong_type.html"><strong>utl::strong_type</strong></a></td>
+<td>Strong typedefs &amp; RAII wrappers</td>
+</tr>
+<tr>
+<td><a href="module_struct_reflect.html"><strong>utl::struct_reflect</strong></a></td>
+<td>Struct reflection</td>
+</tr>
+<tr>
+<td><a href="module_table.html"><strong>utl::table</strong></a></td>
+<td>Export ASCII, Markdown, LaTeX, Mathematica and CSV tables</td>
+</tr>
+<tr>
+<td><a href="module_time.html"><strong>utl::time</strong></a></td>
+<td>Floating-point time, timers, stopwatches, datetime</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="guide_selecting_modules.html">How to include only specific modules when using amalgamated header</a></li>
+<li><a href="guide_fetching_library.html">Fetching the library with CMake <code>FetchContent()</code></a></li>
+<li><a href="guide_reserved_names.html">Names reserved for implementation</a></li>
+<li><a href="guide_building_project.html">Building tests &amp; benchmarks</a></li>
+<li><a href="guide_building_docs.html">Building documentation</a></li>
+<li><a href="guide_versioning.html">Semantic versioning</a></li>
+<li><a href="guide_reproducing_figures.html">Reproducing figures</a></li>
+</ul>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Requires <strong>C++17</strong> support</li>
+<li>Some headers require a compliant preprocessor flag (<a href="https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor"><code>/Zc:preprocessor</code></a>) when using <a href="https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B">MSVC</a>, such headers specify it in the docs</li>
+</ul>
+<h2 id="developer-toolchain">Developer toolchain<a class="headerlink" href="#developer-toolchain" title="Permanent link">&para;</a></h2>
+<p>While the library itself consists of isolated headers with no embedded dependencies, it was built and tested using a number of third-party tools and libraries, some of which are embedded in the repo.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Version</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a></td>
+<td><strong>v.14.0.0</strong></td>
+<td>Automatic code formatting</td>
+</tr>
+<tr>
+<td><a href="https://clangd.llvm.org">clangd</a></td>
+<td><strong>v.15.0.7</strong></td>
+<td>Language server functionality</td>
+</tr>
+<tr>
+<td><a href="https://cmake.org">CMake</a></td>
+<td><strong>v.3.2.11</strong></td>
+<td>Build system, <a href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">CTest</a> testing facilities</td>
+</tr>
+<tr>
+<td><a href="https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html">GCC</a></td>
+<td><strong>v.11.4.0</strong></td>
+<td><a href="https://github.com/google/sanitizers/wiki/AddressSanitizer">ASan</a> and <a href="https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html">UBSan</a> test instrumentation</td>
+</tr>
+<tr>
+<td><a href="https://github.com/danmar/cppcheck">cppcheck</a></td>
+<td><strong>v.2.7</strong></td>
+<td>Static analysis</td>
+</tr>
+<tr>
+<td><a href="https://docs.github.com/en/actions/about-github-actions/understanding-github-actions">GitHub Actions</a></td>
+<td><strong>latest</strong></td>
+<td>Multi-platform <a href="https://docs.github.com/en/actions/about-github-actions/about-continuous-integration-with-github-actions">CI testing</a></td>
+</tr>
+<tr>
+<td><a href="https://www.mkdocs.org/">MkDocs</a></td>
+<td><strong>latest</strong></td>
+<td>Building the website</td>
+</tr>
+<tr>
+<td><a href="https://matplotlib.org/">Matplotlib</a></td>
+<td><strong>latest</strong></td>
+<td>Data visualization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Version</th>
+<th>License</th>
+<th>Used for</th>
+<th>Embedded in repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/doctest/doctest">doctest</a></td>
+<td><strong>v.2.4.11</strong></td>
+<td><a href="https://github.com/doctest/doctest/blob/master/LICENSE.txt">MIT</a></td>
+<td>Unit testing</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/martinus/nanobench">nanobench</a></td>
+<td><strong>v.4.3.11</strong></td>
+<td><a href="https://github.com/martinus/nanobench/blob/master/LICENSE">MIT</a></td>
+<td>Benchmarking</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/nlohmann/json">nlohmann json</a></td>
+<td><strong>v.3.11.3</strong></td>
+<td><a href="https://github.com/nlohmann/json/blob/develop/LICENSE.MIT">MIT</a></td>
+<td>Benchmark comparison</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/kazuho/picojson">PicoJSON</a></td>
+<td><strong>v.1.3.0</strong></td>
+<td><a href="https://github.com/kazuho/picojson/blob/master/LICENSE">BSD-2</a></td>
+<td>Benchmark comparison</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Tencent/rapidjson">RapidJSON</a></td>
+<td><strong>v.1.1.0</strong></td>
+<td><a href="https://github.com/Tencent/rapidjson/blob/master/license.txt">MIT, BSD, JSON</a></td>
+<td>Benchmark comparison</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/nst/JSONTestSuite/">JSONTestSuite</a></td>
+<td><strong>commit 1ef36fa</strong></td>
+<td><a href="https://github.com/nst/JSONTestSuite/blob/master/LICENSE">MIT</a></td>
+<td>JSON Validation test suite</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bshoshany/thread-pool">BS::thread_pool</a></td>
+<td><strong>v.5.0.0</strong></td>
+<td><a href="https://github.com/bshoshany/thread-pool/blob/master/LICENSE.txt">MIT</a></td>
+<td>Benchmark comparison</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://github.com/progschj/ThreadPool">progschj/ThreadPool</a></td>
+<td><strong>commit 9a42ec1</strong></td>
+<td><a href="https://github.com/progschj/ThreadPool/blob/master/COPYING">zlib</a></td>
+<td>Benchmark comparison</td>
+<td>✔</td>
+</tr>
+</tbody>
+</table>
+<h2 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Create packages for <code>Conan</code> and <code>vcpkg</code></li>
+<li>Possibly provide PCH targets for internal and external use</li>
+<li>Set up better test coverage statistics</li>
+<li><code>utl::mvl</code> v1.0.0 release, involves a large scale refactor and several bug fixes</li>
+<li><code>utl::random</code> v3.0.0 release, includes CBPRNGs and fixed-entropy seeding sequence</li>
+</ul>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>This project is licensed under the MIT License - see the <a href="../LICENSE.md">LICENSE.md</a> for details.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023–2025 Dmitri Bogdanov
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DmitriBogdanov" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["toc.follow", "content.code.copy", "search.suggest", "content.tooltips"], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="mkdocs/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="mkdocs/modification/header_title.js"></script>
+      
+        <script src="mkdocs/modification/relative_links.js"></script>
+      
+    
+  </body>
+</html>

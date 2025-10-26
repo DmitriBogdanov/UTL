@@ -1,0 +1,2692 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dmitribogdanov.github.io/UTL/module_random.html">
+      
+      
+        <link rel="prev" href="module_progressbar.html">
+      
+      
+        <link rel="next" href="module_shell.html">
+      
+      
+      <link rel="icon" href="images/icon_site_logo.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>utl::random - UTL</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="mkdocs/callouts.css">
+    
+      <link rel="stylesheet" href="mkdocs/width.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="utl::random - UTL" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_random.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://dmitribogdanov.github.io/UTL/module_random.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="utl::random - UTL" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_random.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#utlrandom" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="UTL" class="md-header__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UTL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              utl::random
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="UTL" class="md-nav__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    UTL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_assertion.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_bit.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::bit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_enum_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::enum_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_integral.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::integral
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_json.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::json
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_log.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_math.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::math
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_mvl.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::mvl
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_parallel.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_predef.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::predef
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_profiler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::profiler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_progressbar.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::progressbar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="module_random.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#random-bit-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Random bit generators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entropy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distributions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uniform-integer-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uniform integer distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniform-real-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uniform real distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Normal distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approximate-normal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Approximate normal distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-prng" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default PRNG
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#convenient-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Convenient random
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shortcuts-for-standard-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shortcuts for standard types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-random-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting random values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-custom-prngs-with-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using custom PRNGs with &lt;random&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constexpr-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constexpr random
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improving-entropy-with-x86x64-intrinsics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improving entropy with x86/x64 intrinsics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-on-random-number-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes on random number generation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notes on random number generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview-of-available-prngs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of available PRNGs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-rng-quality-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why RNG quality matters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visual-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visual examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Visual examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#randu" class="md-nav__link">
+    <span class="md-ellipsis">
+      RANDU
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minstd_rand-rand" class="md-nav__link">
+    <span class="md-ellipsis">
+      minstd_rand &amp; rand()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-not-just-use-mersenne-twister" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why not just use Mersenne Twister
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Additional considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seeding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seeding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entropy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distribution-approximations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distribution approximations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_shell.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_sleep.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::sleep
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_stre.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::stre
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_strong_type.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::strong_type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_struct_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::struct_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_table.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::table
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_time.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::time
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_selecting_modules.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Selecting modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_fetching_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetching the library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reserved_names.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reserved names
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_project.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building the repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_versioning.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Semantic versioning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reproducing_figures.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reproducing figures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Blog
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Blog
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/cpp_performance_issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/map_macro_reflection.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Map-macro: Emulating reflection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_license.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#random-bit-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Random bit generators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entropy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distributions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uniform-integer-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uniform integer distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniform-real-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uniform real distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Normal distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approximate-normal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Approximate normal distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-prng" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default PRNG
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#convenient-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Convenient random
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shortcuts-for-standard-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shortcuts for standard types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-random-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting random values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-custom-prngs-with-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using custom PRNGs with &lt;random&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constexpr-random" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constexpr random
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improving-entropy-with-x86x64-intrinsics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improving entropy with x86/x64 intrinsics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-on-random-number-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes on random number generation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notes on random number generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview-of-available-prngs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of available PRNGs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-rng-quality-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why RNG quality matters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visual-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visual examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Visual examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#randu" class="md-nav__link">
+    <span class="md-ellipsis">
+      RANDU
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minstd_rand-rand" class="md-nav__link">
+    <span class="md-ellipsis">
+      minstd_rand &amp; rand()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-not-just-use-mersenne-twister" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why not just use Mersenne Twister
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Additional considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seeding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seeding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entropy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distribution-approximations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distribution approximations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p><a href="https://en.cppreference.com/w/cpp/17.html"><img src ="images/badge_language_cpp_17.svg"></a>
+<a href="LICENSE.md"><img src ="images/badge_license_mit.svg"></a>
+<a href="guide_versioning.html"><img src ="images/badge_semver.svg"></a>
+<a href="https://dmitribogdanov.github.io/UTL/"><img src ="images/badge_docs.svg"></a>
+<a href="https://en.wikipedia.org/wiki/Header-only"><img src ="images/badge_header_only.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL"><img src ="images/badge_no_dependencies.svg"></a></p>
+<p><a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml"><img src ="images/badge_workflow_windows.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml"><img src ="images/badge_workflow_ubuntu.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml"><img src ="images/badge_workflow_macos.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml"><img src ="images/badge_workflow_freebsd.svg"></a></p>
+<h1 id="utlrandom">utl::random<a class="headerlink" href="#utlrandom" title="Permanent link">&para;</a></h1>
+<p><a href="..">&lt;- to README.md</a></p>
+<p><a href="../include/UTL/random.hpp">&lt;- to implementation.hpp</a></p>
+<p><strong>utl::random</strong> module implements several additions to std <a href="https://en.cppreference.com/w/cpp/header/random">&lt;random&gt;</a> that aim to:</p>
+<ul>
+<li>Make random friendlier for the "naive" use without compromising on quality</li>
+<li>Improve random performance</li>
+</ul>
+<p>The module was created during my past work on a thesis that used <a href="https://en.wikipedia.org/wiki/Stochastic_differential_equation">stochastic differential equations</a> and <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method">Monte—Carlo method</a> to model explosive heat transfer in a turbulent flow.</p>
+<p>It implements several random bit generators seamlessly compatible with <a href="https://en.cppreference.com/w/cpp/header/random">&lt;random&gt;</a>:</p>
+<ul>
+<li><a href="https://www.romu-random.org/">16-bit Romu Mono PRNG</a></li>
+<li><a href="https://www.romu-random.org/">32-bit Romu Trio PRNG</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/2714064.2660195">32-bit SplitMix PRNG</a></li>
+<li><a href="https://prng.di.unimi.it/">32-bit Xoshiro128++ PRNG</a></li>
+<li><a href="https://www.romu-random.org/">64-bit Romu Duo Jr. PRNG</a></li>
+<li><a href="https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64">64-bit SplitMix PRNG</a></li>
+<li><a href="https://prng.di.unimi.it/">64-bit Xoshiro256++ PRNG</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant">ChaCha8 CSPRNG</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant">ChaCha12 CSPRNG</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant">ChaCha20 CSPRNG</a></li>
+</ul>
+<p>These pseudorandom number generators (aka <a href="https://en.wikipedia.org/wiki/Pseudorandom_number_generator">PRNGs</a>) cover most of the common uses cases better than somewhat outdated standard library PRNGs, see <a href="#notes-on-random-number-generation">notes on random number generation</a>.</p>
+<p><strong>Why use <code>utl::random</code> over built-in functions?</strong></p>
+<ul>
+<li>Easier API for most "daily" use cases</li>
+<li>Likely to be <a href="#overview-of-available-prngs">faster</a> than built-in methods</li>
+<li>Provides <a href="#notes-on-random-number-generation">better quality random</a> than built-in methods</li>
+<li>Reproducible results, built-in engines may differ compiler to compiler</li>
+<li>Random generators &amp; distributions work even in <code>constexpr</code> context</li>
+<li>Almost everything is <code>noexcept</code></li>
+<li>An option to use <a href="https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator">cryptographically secure PRNGs</a></li>
+<li>More reliable sources of entropy than <a href="https://en.cppreference.com/w/cpp/numeric/random/random_device">std::random_device</a></li>
+</ul>
+<h2 id="definitions">Definitions<a class="headerlink" href="#definitions" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// PRNG implementations</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">generators</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">GeneratorAPI</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="n">result_type</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">min</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">        </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">max</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">constexpr</span><span class="w"> </span><span class="n">GeneratorAPI</span><span class="p">(</span><span class="n">result_type</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">        </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w">    </span><span class="nf">seed</span><span class="p">(</span><span class="n">result_type</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">SeedSeq</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GeneratorAPI</span><span class="p">(</span><span class="n">SeedSeq</span><span class="o">&amp;</span><span class="w"> </span><span class="n">seq</span><span class="p">);</span>
+<span class="w">        </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">SeedSeq</span><span class="o">&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w">    </span><span class="n">seed</span><span class="p">(</span><span class="n">SeedSeq</span><span class="o">&amp;</span><span class="w"> </span><span class="n">seq</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">operator</span><span class="p">()()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="c1">// 16-bit PRNGs</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">RomuMono16</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="c1">// 32-bit PRNGs</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">RomuTrio32</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">SplitMix32</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">Xoshiro128PP</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="c1">// 64-bit PRNGs</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">RomuDuoJr64</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">SplitMix64</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">Xoshiro256PP</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="c1">// CSPRNGs</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">ChaCha8</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">ChaCha12</span><span class="w">     </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">ChaCha20</span><span class="w">     </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="c1">// Entropy</span>
+<span class="n">std</span><span class="o">::</span><span class="n">seed_seq</span><span class="w"> </span><span class="n">entropy_seq</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">entropy</span><span class="p">();</span>
+
+<span class="c1">// Distributions</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UniformIntDistribution</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* same API as std::uniform_int_distribution&lt;T&gt;  */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UniformRealDistribution</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="cm">/* same API as std::uniform_real_distribution&lt;T&gt; */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">NormalDistribution</span><span class="w">       </span><span class="p">{</span><span class="w"> </span><span class="cm">/* same API as std::normal_distribution&lt;T&gt;       */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ApproxNormalDistribution</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* same API as std::normal_distribution&lt;T&gt;       */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Gen</span><span class="o">&gt;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">generate_canonical</span><span class="p">(</span><span class="n">Gen</span><span class="o">&amp;</span><span class="w"> </span><span class="n">gen</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">(</span><span class="k">noexcept</span><span class="p">(</span><span class="n">gen</span><span class="p">()));</span>
+
+<span class="c1">// Default PRNG</span>
+<span class="k">using</span><span class="w"> </span><span class="n">PRNG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">generators</span><span class="o">::</span><span class="n">Xoshiro256PP</span><span class="p">;</span>
+
+<span class="n">PRNG</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">thread_local_prng</span><span class="p">();</span>
+
+<span class="c1">// Convenient random (generic)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Dist</span><span class="o">&gt;</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">variate</span><span class="p">(</span><span class="n">Dist</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">dist</span><span class="p">);</span><span class="w"> </span><span class="c1">// any distribution</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// integer U[min, max]</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="w">            </span><span class="p">);</span><span class="w"> </span><span class="c1">// boolean U[0, 1]</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// float   U[min, max)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="w">            </span><span class="p">);</span><span class="w"> </span><span class="c1">// float   U[0, 1)</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">normal</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// float N(mean, stddev)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">normal</span><span class="p">(</span><span class="w">                </span><span class="p">);</span><span class="w"> </span><span class="c1">// float N(0, 1)</span>
+
+<span class="c1">// Convenient random (shortcuts for standard types)</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Uint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w">    </span><span class="nf">uniform_int</span><span class="w">   </span><span class="p">(</span><span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max]</span>
+<span class="n">Uint</span><span class="w">   </span><span class="nf">uniform_uint</span><span class="w">  </span><span class="p">(</span><span class="w">  </span><span class="n">Uint</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">   </span><span class="n">Uint</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max]</span>
+<span class="kt">bool</span><span class="w">   </span><span class="nf">uniform_bool</span><span class="w">  </span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1]</span>
+<span class="kt">float</span><span class="w">  </span><span class="nf">uniform_float</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">uniform_double</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max)</span>
+<span class="kt">float</span><span class="w">  </span><span class="nf">uniform_float</span><span class="w"> </span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">uniform_double</span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1)</span>
+
+<span class="kt">float</span><span class="w">  </span><span class="nf">normal_float</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// N(mean, stddev)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">normal_double</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// N(mean, stddev)</span>
+<span class="kt">float</span><span class="w">  </span><span class="nf">normal_float</span><span class="w"> </span><span class="p">(</span><span class="w">                          </span><span class="p">);</span><span class="w"> </span><span class="c1">// N(0, 1)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">normal_double</span><span class="p">(</span><span class="w">                          </span><span class="p">);</span><span class="w"> </span><span class="c1">// N(0, 1)</span>
+
+<span class="c1">// Convenient random (other)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w">            </span><span class="n">T</span><span class="w"> </span><span class="n">choose</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">choose</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Container</span><span class="o">&amp;</span><span class="w">         </span><span class="n">list</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
+<h3 id="random-bit-generators">Random bit generators<a class="headerlink" href="#random-bit-generators" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GeneratorAPI</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">result_type</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">min</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">max</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">GeneratorAPI</span><span class="p">(</span><span class="n">result_type</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w">    </span><span class="nf">seed</span><span class="p">(</span><span class="n">result_type</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">SeedSeq</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GeneratorAPI</span><span class="p">(</span><span class="n">SeedSeq</span><span class="o">&amp;</span><span class="w"> </span><span class="n">seq</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">SeedSeq</span><span class="o">&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w">    </span><span class="n">seed</span><span class="p">(</span><span class="n">SeedSeq</span><span class="o">&amp;</span><span class="w"> </span><span class="n">seq</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">result_type</span><span class="w"> </span><span class="nf">operator</span><span class="p">()()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// 16-bit PRNGs</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RomuMono16</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="c1">// 32-bit PRNGs</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RomuTrio32</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SplitMix32</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Xoshiro128PP</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="c1">// 64-bit PRNGs</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RomuDuoJr64</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SplitMix64</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Xoshiro256PP</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="c1">// CSPRNGs</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChaCha8</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChaCha12</span><span class="w">     </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChaCha20</span><span class="w">     </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Generator API */</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>All of these generators satisfy <a href="https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator">uniform random bit generator generator requirements</a> and <a href="https://en.cppreference.com/w/cpp/numeric/random/uniform_random_bit_generator">std::uniform_random_bit_generator</a> concept, which makes them drop-in replacements for standard generators such as <code>std::mt19937</code>.</p>
+<p>Unlike standard generators these can also be used in <code>constexpr</code> functions.</p>
+<p><strong>Note:</strong> All provided PRNGs have <code>min() == 0</code> and <code>max() == std::numeric_limits&lt;result_type&gt;::max()</code>.</p>
+<h3 id="entropy">Entropy<a class="headerlink" href="#entropy" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">seed_seq</span><span class="w"> </span><span class="nf">entropy_seq</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">entropy</span><span class="p">();</span>
+</code></pre></div>
+</blockquote>
+<p>These functions serve a role of a "slightly better and more convenient <a href="https://en.cppreference.com/w/cpp/numeric/random/random_device">std::random_device</a>".</p>
+<p><code>std::random_device</code> has a critical deficiency in it's design — in case its implementation doesn't provide a proper source of entropy, it is free to fallback onto a regular PRNGs that don't change from run to run. The method <a href="https://en.cppreference.com/w/cpp/numeric/random/random_device/entropy">std::random_device::entropy()</a> which should be able to detect that information is notoriously unreliable and returns different things on every platform.</p>
+<p><code>entropy()</code> samples several sources of entropy (including the <code>std::random_device</code> itself) and is (almost) guaranteed to change from run to run even if it can't provide a proper hardware-sourced entropy that would be suitable for cryptography. It can be used as a drop-in replacement to <code>std::random_device{}()</code> calls.</p>
+<p><code>entropy_seq()</code> generates a full <a href="https://en.cppreference.com/w/cpp/numeric/random/seed_seq">std::seed_seq</a> instead of a single number, it is mainly useful for seeding generators with a large state.</p>
+<p><strong>Note:</strong> Entropy functions are thread-safe.</p>
+<h3 id="distributions">Distributions<a class="headerlink" href="#distributions" title="Permanent link">&para;</a></h3>
+<h4 id="uniform-integer-distribution">Uniform integer distribution<a class="headerlink" href="#uniform-integer-distribution" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UniformIntDistribution</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* ... */</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>Uniform integer distribution class that provides a 1-to-1 copy of <a href="https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution"><code>std::uniform_int_distribution</code></a> API, except:</p>
+<ul>
+<li>Everything is <code>constexpr</code> and <code>noexcept</code></li>
+<li><code>operator()</code> is <code>const</code>-qualified</li>
+<li><code>std::uint8_t</code>, <code>std::int8_t</code> and <code>char</code>, <code>std::char8_t</code>, <code>std::char16_t</code>, <code>std::char32_t</code> specializations are properly supported</li>
+<li>Distribution sequence is platform-independent</li>
+</ul>
+<p><strong>Note:</strong> This is a close reimplementation of <code>std::uniform_int_distribution</code> for <a href="https://github.com/gcc-mirror/gcc">GCC libstdc++</a> with some additional considerations, it provides similar performance and in some cases may even produce the same sequence.</p>
+<h4 id="uniform-real-distribution">Uniform real distribution<a class="headerlink" href="#uniform-real-distribution" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UniformRealDistribution</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* ... */</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>Uniform floating-point distribution class that provides a 1-to-1 copy of <a href="https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution"><code>std::uniform_real_distribution</code></a> API, except:</p>
+<ul>
+<li>Everything is <code>constexpr</code> and <code>noexcept</code></li>
+<li><code>operator()</code> is <code>const</code>-qualified</li>
+<li>Performance on a common use case is drastically improved (~1.3 to ~4 times faster <code>double</code> and <code>float</code> generation)</li>
+<li>Distribution sequence is platform-independent</li>
+</ul>
+<p><strong>Note:</strong> This is a close reimplementation of <code>std::uniform_real_distribution</code> for <a href="https://github.com/microsoft/STL">MSVC STL</a> with some additional considerations and special logic for common optimizable cases.</p>
+<p><strong>How is it faster than std:</strong> Parts of <a href="https://en.cppreference.com/w/cpp/numeric/random/generate_canonical"><code>std::generate_canonical&lt;&gt;()</code></a> which is used by  <code>std::uniform_real_distribution</code> can be moved to <code>constexpr</code> , avoiding the runtime <code>std::log()</code> computation. Some cases such as <code>double</code> &amp; <code>float</code> generation with bit-uniform PRNGs (aka all PRNGs of this module and <code>std::mt19937</code>) can be handled with a simple bitmask rather than a generic implementation of <code>std::generate_canonical&lt;&gt;()</code> which accounts for all the esoteric PRNGs with weird ranges that could exist. This produces a speedup of up to 4 times. Combined with a speedup from faster PRNGs it is possible to achieve <strong>over 10 times faster</strong> random <code>double</code> generation in an interval.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Gen</span><span class="o">&gt;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">generate_canonical</span><span class="p">(</span><span class="n">Gen</span><span class="o">&amp;</span><span class="w"> </span><span class="n">gen</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">(</span><span class="k">noexcept</span><span class="p">(</span><span class="n">gen</span><span class="p">()));</span>
+</code></pre></div>
+</blockquote>
+<p>Generates a random floating point number in range <span class="arithmatex">\([0, 1)\)</span> similarly to <a href="https://en.cppreference.com/w/cpp/numeric/random/generate_canonical"><code>std::generate_canonical&lt;&gt;()</code></a>.</p>
+<p>Always generates <code>std::numeric_limits&lt;T&gt;::digits</code> bits of randomness, which is enough to fill the mantissa. See <code>UniformRealDistribution</code> for notes on implementation improvements.</p>
+<h4 id="normal-distribution">Normal distribution<a class="headerlink" href="#normal-distribution" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">NormalDistribution</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* ... */</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>Normal floating-point distribution class that provides a 1-to-1 copy of <a href="https://en.cppreference.com/w/cpp/numeric/random/normal_distribution"><code>std::normal_distribution</code></a> API, except:</p>
+<ul>
+<li>Everything is <code>noexcept</code></li>
+<li>Performance on a common use case is slightly improved (~1.1 to ~1.3 times faster distribution)</li>
+<li>Distribution sequence is platform-independent</li>
+</ul>
+<p><strong>How is it faster than std:</strong> It uses faster uniform real distribution for rejection sampling, the underlying <a href="https://en.wikipedia.org/wiki/Marsaglia_polar_method">Marsaglia polar method</a> itself is implemented exactly the same as in all major compilers.</p>
+<h4 id="approximate-normal-distribution">Approximate normal distribution<a class="headerlink" href="#approximate-normal-distribution" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ApproxNormalDistribution</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* ... */</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>Normal floating-point distribution class that provides a 1-to-1 copy of <a href="https://en.cppreference.com/w/cpp/numeric/random/normal_distribution"><code>std::normal_distribution</code></a> API, except:</p>
+<ul>
+<li>Everything is <code>constexpr</code> and <code>noexcept</code></li>
+<li><code>operator()</code> is <code>const</code>-qualified</li>
+<li><strong>Extremely</strong> good performance (~4 times faster distribution) at the cost of precision (<a href="#distribution-approximations">see distribution approximations</a>)</li>
+<li>Distribution sequence is platform-independent</li>
+</ul>
+<p><strong>How is it faster than std:</strong> It uses the fact that <a href="https://en.cppreference.com/w/cpp/numeric/popcount">popcount</a> of a uniformly distributed integer follows a binomial distribution. By rescaling that binomial distribution and adding some linear fill we can achieve a curve very similar to a proper normal distribution in just a few instructions. While that level of precision is not suitable for a general use, in instances where quality is not particularly important (gamedev, fuzzing) this is perhaps the fastest possible way of generating normally distributed floats.</p>
+<h3 id="default-prng">Default PRNG<a class="headerlink" href="#default-prng" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="n">PRNG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">generators</span><span class="o">::</span><span class="n">Xoshiro256PP</span><span class="p">;</span>
+</code></pre></div>
+</blockquote>
+<p>Typedef for a default PRNG. Good choice for most applications.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">PRNG</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">thread_local_prng</span><span class="p">();</span>
+</code></pre></div>
+</blockquote>
+<p>Thread-local PRNG automatically seeded with entropy.</p>
+<h3 id="convenient-random">Convenient random<a class="headerlink" href="#convenient-random" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a <code>rand()</code>-like API for various distributions. Uses thread-local PRNG lazily seeded with entropy.</p>
+</div>
+<h3 id="generic">Generic<a class="headerlink" href="#generic" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Dist</span><span class="o">&gt;</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">variate</span><span class="p">(</span><span class="n">Dist</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">dist</span><span class="p">);</span><span class="w"> </span><span class="c1">// any distribution</span>
+</code></pre></div>
+</blockquote>
+<p>Returns value from distribution <code>dist</code> using thread-local random generator.</p>
+<p>Effectively equivalent to <code>dist(thread_local_prng())</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// integer U[min, max]</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="w">            </span><span class="p">);</span><span class="w"> </span><span class="c1">// boolean U[0, 1]</span>
+</code></pre></div>
+</blockquote>
+<p>Returns random integer <code>T</code> in a <span class="arithmatex">\([min, max]\)</span> range.</p>
+<p>When <code>T</code> is a <code>bool</code>, function doesn't require any arguments.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// float   U[min, max)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">uniform</span><span class="p">(</span><span class="w">            </span><span class="p">);</span><span class="w"> </span><span class="c1">// float   U[0, 1)</span>
+</code></pre></div>
+</blockquote>
+<p>Returns random floating point <code>T</code> in a <span class="arithmatex">\([min, max)\)</span> range.</p>
+<p>When no arguments are passed uses <span class="arithmatex">\([0, 1)\)</span> range. </p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">normal</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// float N(mean, stddev)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">normal</span><span class="p">(</span><span class="w">                </span><span class="p">);</span><span class="w"> </span><span class="c1">// float N(0, 1)</span>
+</code></pre></div>
+</blockquote>
+<p>Returns random normally distributed <code>T</code> with <code>mean</code> and <code>stddev</code>.</p>
+<p>When no arguments are passed uses standard mean and deviation.</p>
+<h3 id="shortcuts-for-standard-types">Shortcuts for standard types<a class="headerlink" href="#shortcuts-for-standard-types" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w">    </span><span class="nf">uniform_int</span><span class="w">   </span><span class="p">(</span><span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max]</span>
+<span class="n">Uint</span><span class="w">   </span><span class="nf">uniform_uint</span><span class="w">  </span><span class="p">(</span><span class="w">  </span><span class="n">Uint</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">   </span><span class="n">Uint</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max]</span>
+<span class="kt">bool</span><span class="w">   </span><span class="nf">uniform_bool</span><span class="w">  </span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1]</span>
+</code></pre></div>
+</blockquote>
+<p><code>int</code>, <code>unsigned int</code> and <code>bool</code> instantiations of the integer <code>uniform&lt;T&gt;()</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">float</span><span class="w">  </span><span class="nf">uniform_float</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">uniform_double</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">max</span><span class="p">);</span><span class="w"> </span><span class="c1">// U[min, max)</span>
+<span class="kt">float</span><span class="w">  </span><span class="nf">uniform_float</span><span class="w"> </span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">uniform_double</span><span class="p">(</span><span class="w">                      </span><span class="p">);</span><span class="w"> </span><span class="c1">// U[0, 1)</span>
+</code></pre></div>
+</blockquote>
+<p><code>float</code> and <code>double</code> instantiations of the floating point <code>uniform&lt;T&gt;()</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">float</span><span class="w">  </span><span class="nf">normal_float</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// N(mean, stddev)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">normal_double</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">stddev</span><span class="p">);</span><span class="w"> </span><span class="c1">// N(mean, stddev)</span>
+<span class="kt">float</span><span class="w">  </span><span class="nf">normal_float</span><span class="w"> </span><span class="p">(</span><span class="w">                          </span><span class="p">);</span><span class="w"> </span><span class="c1">// N(0, 1)</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">normal_double</span><span class="p">(</span><span class="w">                          </span><span class="p">);</span><span class="w"> </span><span class="c1">// N(0, 1)</span>
+</code></pre></div>
+</blockquote>
+<p><code>float</code> and <code>double</code> instantiations of the <code>normal&lt;T&gt;()</code>.</p>
+<h3 id="other">Other<a class="headerlink" href="#other" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w">            </span><span class="n">T</span><span class="w"> </span><span class="n">choose</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">choose</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Container</span><span class="o">&amp;</span><span class="w">         </span><span class="n">list</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Returns random element from a <code>list</code>.</p>
+<p>Generic template requires <code>Container::at()</code> and <code>Container::size()</code> to exist.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="getting-random-values">Getting random values<a class="headerlink" href="#getting-random-values" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/rfvhEre1P">Run this code</a> ] [ <a href="../examples/module_random/getting_random_values.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="c1">// Generic functions</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;integer U[-5, 5] -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">uniform</span><span class="p">(</span><span class="mi">-5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;boolean U[0, 1]  -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">uniform</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">()</span><span class="w">   </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;float   U[1, 2)  -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">uniform</span><span class="p">(</span><span class="mf">1.f</span><span class="p">,</span><span class="w"> </span><span class="mf">2.f</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;float   U[0, 1)  -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">uniform</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">()</span><span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+
+<span class="c1">// Standard shortcuts</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;U[0, 1] -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">uniform_bool</span><span class="p">()</span><span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;N(0, 1) -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">normal_double</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+
+<span class="c1">// Other distributions</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Exp(4) -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">random</span><span class="o">::</span><span class="n">variate</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exponential_distribution</span><span class="p">{</span><span class="mf">4.f</span><span class="p">})</span><span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</code></pre></div>
+<p>Output:
+<div class="highlight"><pre><span></span><code>integer U[-5, 5] -&gt; 4
+boolean U[0, 1]  -&gt; 1
+float   U[1, 2)  -&gt; 1.57933
+float   U[0, 1)  -&gt; 0.787372
+
+U[0, 1] -&gt; 0
+N(0, 1) -&gt; -0.391094
+
+Exp(4) -&gt; 0.384687
+</code></pre></div></p>
+<h3 id="using-custom-prngs-with-random">Using custom PRNGs with &lt;random&gt;<a class="headerlink" href="#using-custom-prngs-with-random" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/bYesn8hfn">Run this code</a> ] [ <a href="../examples/module_random/using_custom_prngs_with_random.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="n">random</span><span class="o">::</span><span class="n">generators</span><span class="o">::</span><span class="n">SplitMix64</span><span class="w"> </span><span class="n">gen</span><span class="p">{</span><span class="n">random</span><span class="o">::</span><span class="n">entropy</span><span class="p">()};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">chi_squared_distribution</span><span class="w"> </span><span class="n">distr</span><span class="p">{</span><span class="mf">2.</span><span class="p">};</span><span class="w"> </span><span class="c1">// Chi-squared distribution with N = 2</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Random value from distribution -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">distr</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</code></pre></div>
+<p>Output:
+<div class="highlight"><pre><span></span><code>Random value from distribution -&gt; 4.80049
+</code></pre></div></p>
+<h3 id="constexpr-random">Constexpr random<a class="headerlink" href="#constexpr-random" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/vTzWMd9dc">Run this code</a> ] [ <a href="../examples/module_random/constexpr_random.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="o">&gt;</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">random_integers</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">seed</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">max</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="o">&gt;</span><span class="w">          </span><span class="n">res</span><span class="p">{};</span>
+<span class="w">    </span><span class="n">random</span><span class="o">::</span><span class="n">UniformIntDistribution</span><span class="w"> </span><span class="n">dist</span><span class="p">{</span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p">};</span>
+<span class="w">    </span><span class="n">random</span><span class="o">::</span><span class="n">PRNG</span><span class="w">                   </span><span class="nf">gen</span><span class="p">(</span><span class="n">seed</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="o">&amp;</span><span class="n">e</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">res</span><span class="p">)</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dist</span><span class="p">(</span><span class="n">gen</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// ...</span>
+
+<span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">random_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">random_integers</span><span class="o">&lt;</span><span class="mi">6</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+
+<span class="n">log</span><span class="o">::</span><span class="n">println</span><span class="p">(</span><span class="n">random_array</span><span class="p">);</span><span class="w"> </span><span class="c1">// using another module for convenience</span>
+
+<span class="c1">// compile-time random like this can be used to automatically build</span>
+<span class="c1">// lookup tables and generate seemingly random patterns</span>
+</code></pre></div>
+<p>Output:
+<div class="highlight"><pre><span></span><code>{ -4, -2, -3, -10, 0, -10 }
+</code></pre></div></p>
+<h2 id="improving-entropy-with-x86x64-intrinsics">Improving entropy with x86/x64 intrinsics<a class="headerlink" href="#improving-entropy-with-x86x64-intrinsics" title="Permanent link">&para;</a></h2>
+<p><code>utl::random</code> can also make use of x86/x64 intrinsics, to enable their usage simply define <code>UTL_RANDOM_USE_INTRINSICS</code> before including the header:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define UTL_RANDOM_USE_INTRINSICS</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;UTL/random.hpp&quot;</span><span class="c1"> // will now use intrinsics</span>
+</code></pre></div>
+<p>This achieves two things:</p>
+<ul>
+<li><code>entropy()</code> and <code>entropy_seq()</code> will now use CPU-counter intrinsics as an additional source of relatively high-quality entropy</li>
+<li>MSVC will now use a more efficient implementation of 64-bit <code>UniformIntDistribution</code></li>
+</ul>
+<h2 id="notes-on-random-number-generation">Notes on random number generation<a class="headerlink" href="#notes-on-random-number-generation" title="Permanent link">&para;</a></h2>
+<p>As of 2025, the selection of pseudorandom number generators (aka <a href="https://en.wikipedia.org/wiki/Pseudorandom_number_generator">PRNGs</a>) in the standard library <a href="https://en.cppreference.com/w/cpp/header/random">&lt;random&gt;</a> is quite outdated, with most generators being developed before year 2000 and providing sub-par characteristics relative to what can be achieved.</p>
+<p>While suitable for most uses cases, better performance &amp; quality can be achieved virtually "for free" by switching to some of the newer PRNG implementations.</p>
+<p>Thankfully, <code>&lt;random&gt;</code> design is quite flexible and fully abstracts the concept of a random bit generator, which makes it seamlessly compatible with any custom PRNG that exposes the necessary API.</p>
+<p><code>utl::random</code> provides <code>&lt;random&gt;</code>-compatible implementations of several modern PRNGs. By default, rand functions from this header use <strong>Xoshiro256++</strong> as it is well tested, used by several languages (<a href="https://docs.rs/rand/latest/rand/">Rust</a>, <a href="https://docs.julialang.org/en/v1/stdlib/Random/">Julia</a>, slightly different version is used by <a href="https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-6/">.NET</a>, <a href="https://gcc.gnu.org/fortran/">GNU FORTRAN</a> and <a href="https://www.lua.org/manual/5.4/manual.html#pdf-math.random">Lua</a>) as their default and provides an excellent balance of speed and statistical quality.</p>
+<h3 id="overview-of-available-prngs">Overview of available PRNGs<a class="headerlink" href="#overview-of-available-prngs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Generator</th>
+<th>Performance</th>
+<th>Memory</th>
+<th>Result type</th>
+<th>Quality</th>
+<th>Period</th>
+<th>Motivation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RomuMono16</code></td>
+<td>~500%</td>
+<td>4 bytes</td>
+<td><code>std::uint16_t</code></td>
+<td>★★☆☆☆</td>
+<td><span class="arithmatex">\(\approx 2^{32}\)</span></td>
+<td>Fastest 16-bit PRNG <strong>⁽¹⁾</strong></td>
+</tr>
+<tr>
+<td><code>RomuTrio32</code></td>
+<td>~470%</td>
+<td>12 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★☆☆☆</td>
+<td><strong>Chaotic</strong> <strong>⁽²⁾</strong></td>
+<td>Fastest 32-bit PRNG</td>
+</tr>
+<tr>
+<td><code>SplitMix32</code></td>
+<td>~540%</td>
+<td>4 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★☆☆</td>
+<td><span class="arithmatex">\(2^{32}\)</span></td>
+<td>Smallest state 32-bit PRNG</td>
+</tr>
+<tr>
+<td><code>Xoshiro128PP</code></td>
+<td>~375%</td>
+<td>16 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★★☆</td>
+<td><span class="arithmatex">\(2^{128} − 1\)</span></td>
+<td>Best all purpose 32-bit PRNG</td>
+</tr>
+<tr>
+<td><code>RomuDuoJr64</code></td>
+<td>~600%</td>
+<td>16 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★★☆☆☆</td>
+<td><strong>Chaotic</strong></td>
+<td>Fastest 64-bit PRNG</td>
+</tr>
+<tr>
+<td><code>SplitMix64</code></td>
+<td>~540%</td>
+<td>8 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★★★★☆</td>
+<td><span class="arithmatex">\(2^{64}\)</span></td>
+<td>Smallest state 64-bit PRNG</td>
+</tr>
+<tr>
+<td><code>Xoshiro256PP</code></td>
+<td>~385%</td>
+<td>32 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★★★★☆</td>
+<td><span class="arithmatex">\(2^{256} − 1\)</span></td>
+<td>Best all purpose 64-bit PRNG</td>
+</tr>
+<tr>
+<td><code>ChaCha8</code> <strong>⁽³⁾</strong></td>
+<td>~125%</td>
+<td>120 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★★★</td>
+<td><span class="arithmatex">\(2^{128}\)</span></td>
+<td>Cryptographically secure PRNG</td>
+</tr>
+<tr>
+<td><code>ChaCha12</code></td>
+<td>~105%</td>
+<td>120 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★★★</td>
+<td><span class="arithmatex">\(2^{128}\)</span></td>
+<td>Cryptographically secure PRNG</td>
+</tr>
+<tr>
+<td><code>ChaCha20</code></td>
+<td>~70%</td>
+<td>120 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★★★</td>
+<td><span class="arithmatex">\(2^{128}\)</span></td>
+<td>Cryptographically secure PRNG</td>
+</tr>
+<tr>
+<td><code>std::minstd_rand</code></td>
+<td>100%</td>
+<td>8 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★☆☆☆☆</td>
+<td><span class="arithmatex">\(2^{31} − 1\)</span></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rand()</code></td>
+<td>~80%</td>
+<td><strong>Platform-dependent</strong> <strong>⁽⁴⁾</strong></td>
+<td><code>int</code></td>
+<td>★☆☆☆☆</td>
+<td><strong>Platform-dependent</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>std::mt19937</code></td>
+<td>~105%</td>
+<td>5000 bytes</td>
+<td><code>std::uint32_t</code></td>
+<td>★★★☆☆</td>
+<td><span class="arithmatex">\(2^{19937} − 1\)</span></td>
+<td></td>
+</tr>
+<tr>
+<td><code>std::knuth_b</code></td>
+<td>~55%</td>
+<td>2064 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★★☆☆☆</td>
+<td><span class="arithmatex">\(2^{31} − 1\)</span></td>
+<td></td>
+</tr>
+<tr>
+<td><code>std::ranlux48</code></td>
+<td>~4%</td>
+<td>120 bytes</td>
+<td><code>std::uint64_t</code></td>
+<td>★★★★☆</td>
+<td><span class="arithmatex">\(\approx 2^{576}\)</span></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Performance ratings are <strong>relative to the commonly used  <code>std::minstd_rand</code> / <code>rand()</code></strong>.  Particular numbers may differ depending on the hardware and compilation settings, however general trends tend to stay the same. Results above were measured on <code>AMD Ryzen 5 5600H</code> with <code>g++ 11.4.0</code>. Benchmarks can be found <a href="https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_random/">here</a>.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Performance is measured in <strong>values per unit of time</strong>, to get a <em>bytes per unit of time</em> metric, the measurements can be normalized by a <code>sizeof(result_type)</code>, making 32-bit generators effectively two times slower than listed in the table.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>(1)</strong> Here "fastest" also takes into account such things as register pressure and "friendliness" towards instruction-level parallelism, which is not always apparent on a heavily loaded benchmark.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>(2)</strong> Non-linear PRNGs also known as "chaotic PRNGs" have a cycle length that is different for each seed. This introduces a theoretical possibility of encountering short cycles, but opens up several avenues for optimization.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>(3)</strong> The difference between <code>ChaCha8</code>, <code>ChaCha12</code> and <code>ChaCha20</code> is the number of stream cypher rounds — 8, 12 and 20 correspondingly. More rounds make the state more difficult to discover, but have a negative effect on performance. As of now (year 2025) <code>ChaCha12</code> seems like a reasonable default since it provides 5 rounds of security margin over the best known attack.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>(4)</strong> <code>C</code> function <a href="https://en.cppreference.com/w/c/numeric/random/rand">rand()</a> is implementation-defined, on most existing implementations it uses an old <a href="https://en.wikipedia.org/wiki/Linear_congruential_generator">LCG</a> engine similar to <code>std::minstd_rand</code>. It is generally an extremely low-quality way of generating random and faces a host of additional issues on platforms with low <code>RAND_MAX</code>, which includes Windows where <code>RAND_MAX</code> is equal <code>32767</code> (less than <strong>2 bytes</strong> of information, an almost ridiculous value, really). <strong>GCC</strong>, which is used in this benchmark, implements <code>rand()</code> using <a href="http://en.wikipedia.org/wiki/Linear_feedback_shift_register">linear feedback shift register</a>, which is less likely to encounter the most blatant of issues, but is still ultimately an inferior approach.</p>
+</div>
+<p>Random quality ratings are as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Quality rating</th>
+<th>Usage</th>
+<th>Quality description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★★★★★</td>
+<td>Suitable for cryptography</td>
+<td>Cryptographically secure, satisfies <a href="https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator">CSPRNG</a> requirements, this usually comes at the price of performance</td>
+</tr>
+<tr>
+<td>★★★★☆</td>
+<td>Suitable for most use cases</td>
+<td>No significant issues in qualitative testing, passes <a href="https://simul.iro.umontreal.ca/testu01/tu01.html">TestU01 Big Crush</a></td>
+</tr>
+<tr>
+<td>★★★☆☆</td>
+<td>Suitable for most use cases</td>
+<td>No significant issues in qualitative testing, might fail a few tests on Big Crush</td>
+</tr>
+<tr>
+<td>★★☆☆☆</td>
+<td>Suitable for simple applications</td>
+<td>Significant flaws in statistical quality in certain aspects</td>
+</tr>
+<tr>
+<td>★☆☆☆☆</td>
+<td>Suitable for simple applications</td>
+<td>Significant flaws in statistical quality all-around</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-rng-quality-matters">Why RNG quality matters<a class="headerlink" href="#why-rng-quality-matters" title="Permanent link">&para;</a></h3>
+<p>Using low-quality random may introduce artificial biases and unexpected effects into what should be a stochastic simulation. Below are some examples of such effects:</p>
+<ul>
+<li>Inaccurate statical estimates in <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method">Monte—Carlo simulations</a> and stochastic modeling</li>
+<li>Biased optimizations in <a href="https://en.wikipedia.org/wiki/Genetic_algorithm">genetic algorithms</a></li>
+<li>Noticeable biases in entity path finding and behavior in games</li>
+<li>Issues in procedural generation</li>
+</ul>
+<p>These issues become particularly dangerous and difficult to diagnose in multidimensional simulations, as a lot of older PRNGs have significant statistical issues in higher dimensions that simply aren't apparent in a 1D case. </p>
+<p>In general, most statistical issues fall into following groups:</p>
+<ul>
+<li>Shorter-than-expected periods for some seed states</li>
+<li>Non-uniform distribution of values over the output range</li>
+<li>Correlation of successive values</li>
+<li>Correlation of successive bits in a value</li>
+<li>Correlation of successive seeds</li>
+<li>Poor dimensional distribution of the output sequence</li>
+</ul>
+<h3 id="visual-examples">Visual examples<a class="headerlink" href="#visual-examples" title="Permanent link">&para;</a></h3>
+<h4 id="randu">RANDU<a class="headerlink" href="#randu" title="Permanent link">&para;</a></h4>
+<p>The most famous example of low-quality random is IBM's <a href="https://en.wikipedia.org/wiki/RANDU">RANDU</a> (a variation of the same <a href="https://en.wikipedia.org/wiki/Linear_congruential_generator">LCG</a> used by most <code>C</code> programmers to this day) which was widely used in 1960s and 1970s for the lack of a better knowledge.</p>
+<p>As a simplest showcase of its flaws, let's generate <code>10000</code> random points in a <span class="arithmatex">\([0, 1]^3\)</span> cube, each points will generate with coordinates <code>{ randu(), randu(), randu() }</code>. After plotting the resulting picture and looking at it from a correct angle, we can clearly see that all points fall into just <strong>15</strong> distinct planes:</p>
+<p><a href="guide_reproducing_figures.html"><img src ="images/random_spectral_test_angle.svg"></a></p>
+<p><a href="guide_reproducing_figures.html"><img src ="images/random_spectral_test_above.svg"></a></p>
+<p>What we just observed is called "failing the <a href="https://en.wikipedia.org/wiki/Spectral_test">spectral test</a> at an extremely low dimension", and for RANDU that dimension is <strong>3</strong>. Such quality is clearly not something one would want in their Monte—Carlo simulation with "random" realizations.</p>
+<p>In fact, this quality is generic to all LCGs — any LCG with modulus <span class="arithmatex">\(m\)</span> used to generate points in <span class="arithmatex">\(N\)</span>-dimensional space will result in no more that <span class="arithmatex">\((N! \times m)^{1/N}\)</span> hyperplanes, with other LCG implementations it's just not as noticeable that one could see the planes visually.</p>
+<h4 id="minstd_rand-rand">minstd_rand &amp; rand()<a class="headerlink" href="#minstd_rand-rand" title="Permanent link">&para;</a></h4>
+<p>While RANDU algorithm is no longer in use today, its family of algorithms (LCG) is still frequently used through <code>rand()</code> and <code>std::minstd_rand</code>, with <code>rand()</code> being the worst offender as it is the default way of generating random numbers in <code>C</code> (<code>C++</code> guides and documentation tend to prefer <code>std::mt19937</code> which despite not being ideal avoids most of the significant issues).</p>
+<p><strong>Note:</strong> Since nothing in the standard specifies how <code>rand()</code> should be implemented it is generally not something one could rely upon, in most cases it's LCG, sometimes it's <a href="https://en.wikipedia.org/wiki/Linear-feedback_shift_register">linear-feedback shift register</a> which is a little better.</p>
+<p>We can easily demonstrate a significant correlation of successive seeds in the default implementation by creating a <span class="arithmatex">\(160 \times 200\)</span> matrix of random <code>1</code>s and <code>0</code>s, while re-seeding the generator with <code>i</code> at the beginning of each row <code>i</code>. This will lead to a following image:</p>
+<p><a href="guide_reproducing_figures.html"><img src ="images/random_seed_correlation_minstd_rand.svg"></a></p>
+<p>Using <code>std::mt19937</code> (or any other even slightly sensible engine) will not lead to such an horrific correlation, we get a visually uniform image:</p>
+<p><a href="guide_reproducing_figures.html"><img src ="images/random_seed_correlation_mt19937.svg"></a></p>
+<p>In practice, something like this would be encountered during any stochastic simulation where each run is simulated with a new seed.</p>
+<h3 id="why-not-just-use-mersenne-twister">Why not just use Mersenne Twister<a class="headerlink" href="#why-not-just-use-mersenne-twister" title="Permanent link">&para;</a></h3>
+<p>One could argue that a widely used <a href="https://en.wikipedia.org/wiki/Mersenne_Twister">Mersenne Twister</a>, which, in case of <code>C++</code> is called <code>std::mt19937</code> should be good enough for most purposes and that is true. For quite a while Mersenne Twister used to be the default choice for new RNG facilities — it is acceptably performant and has a decent statistical quality with a huge period.</p>
+<p>However Mersenne Twister still fails some of the less obvious statistical tests on <a href="https://en.wikipedia.org/wiki/TestU01">TestU01 BigCrush</a>, combined with rather subpar performance relative to the newer methods and a huge state (<strong>5000</strong> bytes against <strong>32</strong> used by Xoshiro256++) there is little reason to use it in a modern environment.</p>
+<p>This trend can be observed rather clearly by looking at the lineup of default PRNGs used in different programming languages:</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Fist release</th>
+<th>Default PRNG</th>
+<th>Quality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>C</code></td>
+<td>1972</td>
+<td>LCG</td>
+<td>Bad</td>
+</tr>
+<tr>
+<td><code>Matlab</code></td>
+<td>1979</td>
+<td>Mersenne Twister</td>
+<td>Decent</td>
+</tr>
+<tr>
+<td><code>C++</code></td>
+<td>1985</td>
+<td>Mersenne Twister / LCG</td>
+<td>Decent / Bad</td>
+</tr>
+<tr>
+<td><code>Python</code></td>
+<td>1991</td>
+<td>Mersenne Twister</td>
+<td>Decent</td>
+</tr>
+<tr>
+<td><code>GNU Octave</code></td>
+<td>1993</td>
+<td>Mersenne Twister</td>
+<td>Decent</td>
+</tr>
+<tr>
+<td><code>Python NumPy</code></td>
+<td>2006</td>
+<td>Mersenne Twister (below v.1.17) ➔ PCG64 (above v.1.17)</td>
+<td>Decent ➔ Good</td>
+</tr>
+<tr>
+<td><code>Julia</code></td>
+<td>2012</td>
+<td>Xoshiro256++</td>
+<td>Good</td>
+</tr>
+<tr>
+<td><code>Rust</code></td>
+<td>2015</td>
+<td>ChaCha12 / Xoshiro256++</td>
+<td>Good</td>
+</tr>
+<tr>
+<td><code>.NET</code></td>
+<td>2016</td>
+<td>Subtractive Generator (below v.6) ➔ Xoshiro256&ast;&ast; (above v.6)</td>
+<td>Decent ➔ Good</td>
+</tr>
+</tbody>
+</table>
+<p>While older languages usually stick to their already existing implementations, newer projects tend to choose modern PRNGs for the purpose. This establishes a strong case for switching to using <code>Xoshiro</code> / <code>PCG</code> family of PRNGs as a default choice in new projects. Engines of families such as <code>ChaCha</code> and <code>ISAAC</code> also provide cryptographic security to the random sequence, which in essence means that the state of the engine cannot be easily discovered from a piece of its random sequence. This usually has a noticeable performance cost, however even they fair rather well compared to the old monsters such as <code>std::ranlux48</code> which runs almost <strong>80 times slower</strong> than Xoshiro256++.</p>
+<h3 id="additional-considerations">Additional considerations<a class="headerlink" href="#additional-considerations" title="Permanent link">&para;</a></h3>
+<h4 id="output-range">Output range<a class="headerlink" href="#output-range" title="Permanent link">&para;</a></h4>
+<p>In practice, most PRNG outputs aren't used directly as they are generated but rather pass through an additional layer of abstraction such as, for example <a href="https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution"><code>std::uniform_int_distribution</code></a>, to compute a distributed value.</p>
+<p>This has a noticeable effect on quality and performance of some PRNGs, for example, engines with <code>::min() != 0</code> or <code>::max() != std::numeric_limits&lt;result_type&gt;::max()</code> are inherently at a disadvantage due to preventing the usage of <a href="https://arxiv.org/abs/1805.10941">Lemire's algorithm</a> for uniform integer distribution in an interval, which makes <code>libstdc++</code> fallback onto a significantly slower generic algorithm, effectively making the PRNG benchmark misleading about real performance.</p>
+<p>For this reason all generators selected for this module provide a full range from <code>0</code> to <code>std::numeric_limits&lt;result_type&gt;::max()</code> and try to avoid "surprises".</p>
+<h4 id="seeding">Seeding<a class="headerlink" href="#seeding" title="Permanent link">&para;</a></h4>
+<p>Some engines can be "picky" about zero-seeding or require a non-trivial seeding with <a href="https://en.cppreference.com/w/cpp/numeric/random/seed_seq"><code>std::seed_seq</code></a> which is cumbersome and difficult to get right. This is exactly the case with widely used <code>std::mt19937</code> which is usually seeded like this:</p>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">random_device</span><span class="w"> </span><span class="n">rd</span><span class="p">;</span><span class="w"> </span><span class="c1">// create source of entropy</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">mt19937</span><span class="w"> </span><span class="n">gen</span><span class="p">{</span><span class="n">rd</span><span class="p">()};</span><span class="w"> </span><span class="c1">// seed with too little state</span>
+</code></pre></div>
+<p>This is not nearly enough entropy for a huge state of <code>std::mt19937</code>, a "proper" way of seeding would be using more entropy and "spreading" it to the state using <code>std::seed_seq</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">random_device</span><span class="w"> </span><span class="n">rd</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mt19937</span><span class="o">::</span><span class="n">result_type</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">mt19937</span><span class="o">::</span><span class="n">state_size</span><span class="o">&gt;</span><span class="w"> </span><span class="n">seed</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">generate_n</span><span class="p">(</span><span class="n">seed</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">seed</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ref</span><span class="p">(</span><span class="n">rd</span><span class="p">));</span>
+<span class="n">std</span><span class="o">::</span><span class="n">seed_seq</span><span class="w"> </span><span class="nf">seq</span><span class="p">(</span><span class="n">seed</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">seed</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+<span class="n">std</span><span class="o">::</span><span class="n">mt19937</span><span class="w"> </span><span class="nf">gen</span><span class="p">(</span><span class="n">seq</span><span class="p">);</span>
+</code></pre></div>
+<p>Such approach however is beyond cumbersome and is rarely used in practice, which is why it is sensible to pick generators that work well with a single-number seeding as a default option.</p>
+<h4 id="entropy_1">Entropy<a class="headerlink" href="#entropy_1" title="Permanent link">&para;</a></h4>
+<p>Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy in the standard library. Main issues were already mentioned in the section documenting <a href="#entropy"><code>random::entropy_seq()</code></a>, the best we can do without using system API is to sample everything we can (<code>std::random_device</code>, time in nanoseconds, address space, CPU ticks, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.</p>
+<p>The result of such approach is generally satisfactory, however oftentimes not sufficient for proper cryptographic security.</p>
+<h4 id="distribution-approximations">Distribution approximations<a class="headerlink" href="#distribution-approximations" title="Permanent link">&para;</a></h4>
+<p>Most non-uniform distributions transform their inputs with slow non-linear functions like <code>std::sqrt()</code>, <code>std::log()</code>, <code>std::exp()</code> and etc. In many practical cases (gamedev, fuzzing, rendering) we don't need distributions to be particularly precise, this warrants usage of approximations which can completely avoid non-linear functions and get "close enough" results in a fraction of time.</p>
+<p>Below is an example of an empirical <a href="https://en.wikipedia.org/wiki/Probability_density_function">PDF</a> produced by a regular <code>NormalDistribution&lt;&gt;</code> and an  <code>ApproxNormalDistribution&lt;&gt;</code> which is about <strong>3–4 times faster</strong> to compute.</p>
+<p><a href="guide_reproducing_figures.html"><img src ="images/random_approx_distributions.svg"></a></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023–2025 Dmitri Bogdanov
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DmitriBogdanov" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["toc.follow", "content.code.copy", "search.suggest", "content.tooltips"], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="mkdocs/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="mkdocs/modification/header_title.js"></script>
+      
+        <script src="mkdocs/modification/relative_links.js"></script>
+      
+    
+  </body>
+</html>

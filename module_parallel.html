@@ -1,0 +1,2453 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dmitribogdanov.github.io/UTL/module_parallel.html">
+      
+      
+        <link rel="prev" href="module_mvl.html">
+      
+      
+        <link rel="next" href="module_predef.html">
+      
+      
+      <link rel="icon" href="images/icon_site_logo.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>utl::parallel - UTL</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="mkdocs/callouts.css">
+    
+      <link rel="stylesheet" href="mkdocs/width.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="utl::parallel - UTL" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_parallel.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://dmitribogdanov.github.io/UTL/module_parallel.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="utl::parallel - UTL" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/module_parallel.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#utlparallel" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="UTL" class="md-header__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UTL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              utl::parallel
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="UTL" class="md-nav__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    UTL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_assertion.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_bit.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::bit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_enum_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::enum_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_integral.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::integral
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_json.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::json
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_log.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_math.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::math
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_mvl.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::mvl
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="module_parallel.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-for-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel-for API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-reduce-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel-reduce API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread pool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thread pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Threading
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-queuing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task queuing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ranges
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binary operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread introspection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detached-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detached tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#awaitable-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Awaitable tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-for-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel for loop
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducing-over-a-binary-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reducing over a binary operation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-a-local-thread-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a local thread pool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#awaitable-parallel-loop-with-specific-grain-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Awaitable parallel loop with specific grain size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-introspection_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread introspection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Motivation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Motivation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      The problem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-work-stealing" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is work-stealing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uneven-non-recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven non-recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uneven-recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-answers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions &amp; answers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_predef.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::predef
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_profiler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::profiler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_progressbar.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::progressbar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_random.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_shell.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_sleep.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::sleep
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_stre.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::stre
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_strong_type.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::strong_type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_struct_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::struct_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_table.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::table
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="module_time.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::time
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_selecting_modules.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Selecting modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_fetching_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetching the library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reserved_names.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reserved names
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_project.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building the repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_building_docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_versioning.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Semantic versioning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_reproducing_figures.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reproducing figures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Blog
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Blog
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/cpp_performance_issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="blog/map_macro_reflection.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Map-macro: Emulating reflection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide_license.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-for-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel-for API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-reduce-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel-reduce API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread pool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thread pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Threading
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-queuing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task queuing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ranges
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binary operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread introspection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detached-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detached tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#awaitable-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Awaitable tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-for-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel for loop
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducing-over-a-binary-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reducing over a binary operation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-a-local-thread-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a local thread pool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#awaitable-parallel-loop-with-specific-grain-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Awaitable parallel loop with specific grain size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thread-introspection_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread introspection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Motivation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Motivation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      The problem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-work-stealing" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is work-stealing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uneven-non-recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven non-recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uneven-recursive-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uneven recursive tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questions-answers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Questions &amp; answers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p><a href="https://en.cppreference.com/w/cpp/17.html"><img src ="images/badge_language_cpp_17.svg"></a>
+<a href="LICENSE.md"><img src ="images/badge_license_mit.svg"></a>
+<a href="guide_versioning.html"><img src ="images/badge_semver.svg"></a>
+<a href="https://dmitribogdanov.github.io/UTL/"><img src ="images/badge_docs.svg"></a>
+<a href="https://en.wikipedia.org/wiki/Header-only"><img src ="images/badge_header_only.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/tree/master/include/UTL"><img src ="images/badge_no_dependencies.svg"></a></p>
+<p><a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/windows.yml"><img src ="images/badge_workflow_windows.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/ubuntu.yml"><img src ="images/badge_workflow_ubuntu.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml"><img src ="images/badge_workflow_macos.svg"></a>
+<a href="https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml"><img src ="images/badge_workflow_freebsd.svg"></a></p>
+<h1 id="utlparallel">utl::parallel<a class="headerlink" href="#utlparallel" title="Permanent link">&para;</a></h1>
+<p><a href="..">&lt;- to README.md</a></p>
+<p><a href="../include/UTL/parallel.hpp">&lt;- to implementation.hpp</a></p>
+<p><strong>utl::parallel</strong> module is a lightweight threading library providing API somewhat similar to <a href="https://github.com/uxlfoundation/oneTBB">Intel TBB</a>.</p>
+<p>It implements classic building blocks of concurrent algorithms such as tasks, parallel for, reductions and etc. and provides a sane thread pool implementation with work-stealing and recursive parallelism support, in summary:</p>
+<ul>
+<li>Tasks, parallel loops and reductions</li>
+<li>Work-stealing thread pool with a fully thread-safe API</li>
+<li>Support for recursive parallelism</li>
+<li>Focus on simple &amp; uniform API</li>
+<li>Small (~<code>600</code> lines of code)</li>
+<li>Portable (no platform-specific code of any kind)</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><a href="#benchmarks">Benchmarks</a> and <a href="#examples">usage examples</a> can be found at the bottom.</p>
+</div>
+<h2 id="definitions">Definitions<a class="headerlink" href="#definitions" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Scheduler</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ThreadPool</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Scheduler</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Backend</span>
+<span class="w">    </span><span class="n">Backend</span><span class="w"> </span><span class="n">backend</span><span class="p">;</span><span class="w"> </span><span class="c1">// underlying thread pool</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">future_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Backend</span><span class="o">::</span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">Scheduler</span><span class="p">(</span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Task API</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w">           </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Parallel-for API</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Parallel-reduce API</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w">             </span><span class="n">R</span><span class="w">   </span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_reduce</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w">             </span><span class="n">R</span><span class="w">   </span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_reduce</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// Thread pool</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ThreadPool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Initialization</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">ThreadPool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hardware_concurrency</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// Threading</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">        </span><span class="nf">set_thread_count</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hardware_concurrency</span><span class="p">());</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="nf">get_thread_count</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Task queuing</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w">           </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">wait</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Future</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Same API as std::future&lt;T&gt; */</span><span class="w"> </span><span class="p">};</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ThreadPool</span><span class="o">::</span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// Ranges</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">(</span><span class="n">It</span><span class="w"> </span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="n">end</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">(</span><span class="n">It</span><span class="w"> </span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="n">end</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">grain_size</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Range</span><span class="p">(</span><span class="w">      </span><span class="n">Container</span><span class="o">&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Range</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Container</span><span class="o">&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">ptrdiff_t</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IndexRange</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">(</span><span class="n">Idx</span><span class="w"> </span><span class="n">first</span><span class="p">,</span><span class="w"> </span><span class="n">Idx</span><span class="w"> </span><span class="n">last</span><span class="p">);</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">(</span><span class="n">Idx</span><span class="w"> </span><span class="n">first</span><span class="p">,</span><span class="w"> </span><span class="n">Idx</span><span class="w"> </span><span class="n">last</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">grain_size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Binary operations</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">sum</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">prod</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">min</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">max</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// Global scheduler</span>
+<span class="cm">/* &#39;Scheduler&#39;  API, but placed directly into the namespace */</span>
+<span class="cm">/* &#39;ThreadPool&#39; API, but placed directly into the namespace */</span>
+<span class="cm">/* This will use global lazily-initialized thread pool      */</span>
+
+<span class="c1">// Thread introspection</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">this_thread</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="w">      </span><span class="kt">void</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">get_pool</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">get_index</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">hardware_concurrency</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+</code></pre></div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>There is no tight coupling between the <code>Scheduler&lt;&gt;</code> and the <code>ThreadPool</code>, other implementations may be used assuming they provide the 2 methods for submitting tasks.</p>
+</div>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
+<h3 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h3>
+<h4 id="task-api">Task API<a class="headerlink" href="#task-api" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">detached_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Launches asynchronous task to execute callable <code>f</code> with arguments <code>args...</code>.</p>
+<p><strong>Note:</strong> <a href="https://en.cppreference.com/w/cpp/named_req/Callable">Callables</a> constitute any objects with a defined <code>operator()</code>, for example: function pointers, functors, lambdas, <a href="https://en.cppreference.com/w/cpp/utility/functional/function"><code>std::function</code></a>, <a href="https://en.cppreference.com/w/cpp/thread/packaged_task"><code>std::packaged_task</code></a>, <a href="https://en.cppreference.com/w/cpp/utility/functional/bind.html"><code>std::bind()</code></a> result and etc.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Launches asynchronous task to execute callable <code>f</code> with arguments <code>args...</code> and returns its future.</p>
+<h4 id="parallel-for-api">Parallel-for API<a class="headerlink" href="#parallel-for-api" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Detached / blocking / awaitable parallel-for loop over an <strong>iterator range</strong>.</p>
+<p>Loop body <code>f</code> can be defined in two ways:</p>
+<p><strong>1.</strong> Single-argument <code>f(it)</code>, defining the body of a single loop iteration.</p>
+<p><strong>2.</strong> Two-argument <code>f(low, high)</code>, defining how to execute a part of the loop spanning from <code>low</code> to <code>high</code>.</p>
+<p><strong>Note 1:</strong> For most use cases <strong>(1)</strong> is a more intuitive option, closely resembling how we write a regular serial loop.</p>
+<p><strong>Note 2:</strong> <code>It</code> is assumed to be a <a href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator">random access iterator</a>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Detached / blocking / awaitable parallel-for loop over an <strong>index range</strong>.</p>
+<p>Like in the iterator case, loop body <code>f</code> can be defined both for a single iteration and as a block.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">detached_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w">          </span><span class="kt">void</span><span class="w">  </span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Detached / blocking / awaitable parallel-for loop over an <strong>iterator range</strong> spanning <code>container.begin()</code> to <code>container.end()</code>.</p>
+<p>Like in the usual case, loop body <code>f</code> can be defined both for a single iteration and as a block.</p>
+<h4 id="parallel-reduce-api">Parallel-reduce API<a class="headerlink" href="#parallel-reduce-api" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w">             </span><span class="n">R</span><span class="w">   </span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_reduce</span><span class="p">(</span><span class="n">Range</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Detached / blocking / awaitable parallel reduction over a binary operator <code>op</code> over an <strong>iterator range</strong>.</p>
+<p>Binary operator <code>op</code> is defined by the signature <code>T(const T&amp;, const T&amp;)</code> where <code>T</code> corresponds to the iterator <code>::value_type</code>.</p>
+<p><strong>Note:</strong> Most commonly used to compute vector sum / product / min / max in parallel, see <a href="#binary-operations">pre-defined binary operations</a>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w">             </span><span class="n">R</span><span class="w">   </span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Op</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_reduce</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">Op</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Detached / blocking / awaitable parallel reduction over a binary operator <code>op</code> over an <strong>iterator range</strong> spanning <code>container.begin()</code> to <code>container.end()</code>.</p>
+<h3 id="thread-pool">Thread pool<a class="headerlink" href="#thread-pool" title="Permanent link">&para;</a></h3>
+<h4 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">explicit</span><span class="w"> </span><span class="n">ThreadPool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hardware_concurrency</span><span class="p">());</span>
+</code></pre></div>
+</blockquote>
+<p>Creates thread pool with <code>count</code> threads.</p>
+<h4 id="threading">Threading<a class="headerlink" href="#threading" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">set_thread_count</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hardware_concurrency</span><span class="p">());</span>
+</code></pre></div>
+</blockquote>
+<p>Changes the number of threads in the thread pool.</p>
+<p><strong>Note 1:</strong> This method will block &amp; wait for all in-flight tasks to be completed before resizing the thread pool.</p>
+<p><strong>Note 2:</strong> This and all the other thread pool methods are thread-safe, the pool can be resized from any number of external threads concurrently and no tasks will be lost. If called from a thread inside the pool itself (which would be a logical deadlock causing the thread to wait for its own termination)  throws <a href="https://en.cppreference.com/w/cpp/error/runtime_error.html"><code>std::runtime_error</code></a>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="nf">get_thread_count</span><span class="p">();</span>
+</code></pre></div>
+</blockquote>
+<p>Returns the number of threads in the thread pool.</p>
+<h4 id="task-queuing">Task queuing<a class="headerlink" href="#task-queuing" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">detached_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Launches asynchronous task to execute callable <code>f</code> with arguments <code>args...</code>.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">awaitable_task</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+</code></pre></div>
+</blockquote>
+<p>Launches asynchronous task to execute callable <code>f</code> with arguments <code>args...</code> and returns its future.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">wait</span><span class="p">();</span>
+</code></pre></div>
+</blockquote>
+<p>Blocks current thread until all in-flight tasks are completed.</p>
+<h4 id="future">Future<a class="headerlink" href="#future" title="Permanent link">&para;</a></h4>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future_type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Same API as std::future&lt;T&gt; */</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>A thin wrapper around <a href="https://en.cppreference.com/w/cpp/thread/future"><code>std::future</code></a> used by the thread pool. Exposes the same API as a standard future and can be constructed from it.</p>
+<p>This future allows the usage of recursive awaitable tasks. When waited with <code>get()</code> / <code>wait()</code> / <code>wait_for()</code> / <code>wait_until()</code> instead of just blocking it first looks for recursive work to do in the meantime.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ThreadPool</span><span class="o">::</span><span class="n">future_type</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+</blockquote>
+<p>Alias for <code>ThreadPool::future_type&lt;T&gt;</code> placed at the namespace level.</p>
+<h3 id="ranges">Ranges<a class="headerlink" href="#ranges" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">It</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">(</span><span class="n">It</span><span class="w"> </span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="n">end</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Range</span><span class="p">(</span><span class="n">It</span><span class="w"> </span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="n">end</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">grain_size</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Range</span><span class="p">(</span><span class="w">      </span><span class="n">Container</span><span class="o">&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">);</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Range</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Container</span><span class="o">&amp;</span><span class="w"> </span><span class="n">container</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+</blockquote>
+<p>A lightweight struct representing an <strong>iterator range</strong>.</p>
+<p>Constructor <strong>(2)</strong> creates a range spanning <code>begin</code> to <code>end</code> and selects grain size automatically, which is <strong>recommended in most cases</strong>.</p>
+<p>Constructor <strong>(3)</strong> allows manual selection of <code>grain_size</code>.</p>
+<p>Constructors <strong>(4)</strong> and <strong>(5)</strong> create a range spanning <code>container.begin()</code> to <code>container.end()</code> for any container that supports standard member types <code>Container::iterator</code> and <code>Container::const_iterator</code>. Grain size is selected automatically.</p>
+<p><strong>Note:</strong> <code>grain_size</code> is a maximum size of subranges, in which the main range gets split up for parallel execution. Splitting up workload into smaller grains can be beneficial for tasks with unpredictable or uneven complexity, but increases the overhead of scheduling &amp; synchronization. By default, the workload is split into <code>parallel::hardware_concurrency() * 4</code> grains.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">ptrdiff_t</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IndexRange</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">(</span><span class="n">Idx</span><span class="w"> </span><span class="n">first</span><span class="p">,</span><span class="w"> </span><span class="n">Idx</span><span class="w"> </span><span class="n">last</span><span class="p">);</span>
+<span class="w">    </span><span class="n">IndexRange</span><span class="p">(</span><span class="n">Idx</span><span class="w"> </span><span class="n">first</span><span class="p">,</span><span class="w"> </span><span class="n">Idx</span><span class="w"> </span><span class="n">last</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">grain_size</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</blockquote>
+<p>A lightweight struct representing an <strong>index range</strong>.</p>
+<p>Constructor <strong>(2)</strong> creates a range spanning <code>first</code> to <code>last</code> and selects grain size automatically, which is <strong>recommended in most cases</strong>.</p>
+<p>Constructor <strong>(3)</strong> allows manual selection of <code>grain_size</code>.</p>
+<p><strong>Note:</strong> Like all standard ranges, index range is <strong>exclusive</strong> and does not include <code>last</code>.</p>
+<h3 id="binary-operations">Binary operations<a class="headerlink" href="#binary-operations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">sum</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">prod</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">min</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">max</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// Transparent specializations</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">sum</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">prod</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">min</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w">  </span><span class="nc">max</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Pre-defined binary operations for parallel reductions.</p>
+<p><strong>Note 1:</strong> All functors will be <code>noexcept</code> if possible.</p>
+<p><strong>Note 2:</strong> "Transparent functors" are <code>void</code> specializations that deduce their parameter and return types from the arguments. This is how function objects should usually be used. See <a href="https://en.cppreference.com/w/cpp/utility/functional#Transparent_function_objects">cppreference</a> for details.</p>
+<h3 id="global-scheduler">Global scheduler<a class="headerlink" href="#global-scheduler" title="Permanent link">&para;</a></h3>
+<p>For user convenience all <code>Scheduler&lt;&gt;</code> and <code>ThreadPool</code> methods are also doubled at the namespace scope, in which case they use a global lazily-initialized <code>Scheduler&lt;&gt;</code> with a <code>ThreadPool</code> backend. See <a href="#examples">examples</a>.</p>
+<h3 id="thread-introspection">Thread introspection<a class="headerlink" href="#thread-introspection" title="Permanent link">&para;</a></h3>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">this_thread</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="w">      </span><span class="kt">void</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">get_pool</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">get_index</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+</blockquote>
+<p>Returns thread index or type-erased pointer to the parent thread pool for the current thread.</p>
+<p>Returns <a href="https://en.cppreference.com/w/cpp/utility/optional/nullopt"><code>std::nullopt</code></a> if current thread does not belong to a thread pool.</p>
+<p><strong>Note 1:</strong> Similar to functions from <a href="https://en.cppreference.com/w/cpp/header/thread.html"><code>std::this_thread</code></a>.</p>
+<p><strong>Note 2:</strong> Can be supported by any custom thread pool, assuming it sets the appropriate variables.</p>
+<blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="nf">hardware_concurrency</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+</code></pre></div>
+</blockquote>
+<p>Same thing as <a href="https://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency.html"><code>std::thread::hardware_concurrency()</code></a>, but instead of returning <code>0</code> when the number of threads can't be determined, it returns <code>4</code> as a fallback.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="detached-tasks">Detached tasks<a class="headerlink" href="#detached-tasks" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/ahaEvnaq7">Run this code</a> ] [ <a href="../examples/module_parallel/detached_tasks.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&lt;some hypothetically very large message&gt;&quot;</span><span class="p">;</span>
+
+<span class="c1">// Log the message asynchronously</span>
+<span class="n">parallel</span><span class="o">::</span><span class="n">detached_task</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="p">(</span><span class="s">&quot;log.txt&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">message</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// ... do some work in the meantime ...</span>
+
+<span class="n">parallel</span><span class="o">::</span><span class="n">wait</span><span class="p">();</span><span class="w"> </span><span class="c1">// wait for tasks to complete</span>
+</code></pre></div>
+<h3 id="awaitable-tasks">Awaitable tasks<a class="headerlink" href="#awaitable-tasks" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/73doqc894">Run this code</a> ] [ <a href="../examples/module_parallel/awaitable_tasks.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="kt">double</span><span class="w"> </span><span class="nf">some_heavy_computation</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// ...</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="c1">// Launch asynchronous computation</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">awaitable_task</span><span class="p">(</span><span class="n">some_heavy_computation</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+
+<span class="c1">// ... do some work in the meantime ...</span>
+
+<span class="c1">// Await the result</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">future</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">);</span>
+</code></pre></div>
+<h3 id="parallel-for-loop">Parallel for loop<a class="headerlink" href="#parallel-for-loop" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/4K8njMGjK">Run this code</a> ] [ <a href="../examples/module_parallel/parallel_for_loop.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="kt">double</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">exp</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">));</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// ...</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vals</span><span class="p">(</span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+
+<span class="c1">// (optional) Select the number of threads </span>
+<span class="n">parallel</span><span class="o">::</span><span class="n">set_thread_count</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+
+<span class="c1">// Apply f() to all elements of the vector</span>
+<span class="n">parallel</span><span class="o">::</span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// Apply f() to indices [0, 100)</span>
+<span class="n">parallel</span><span class="o">::</span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">parallel</span><span class="o">::</span><span class="n">IndexRange</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// Specify computation in blocks instead of element-wise</span>
+<span class="n">parallel</span><span class="o">::</span><span class="n">blocking_loop</span><span class="p">(</span><span class="n">parallel</span><span class="o">::</span><span class="n">IndexRange</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="kt">int</span><span class="w"> </span><span class="n">low</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">high</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">low</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">high</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">});</span>
+</code></pre></div>
+<h3 id="reducing-over-a-binary-operation">Reducing over a binary operation<a class="headerlink" href="#reducing-over-a-binary-operation" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/6KWo6bvPs">Run this code</a> ] [ <a href="../examples/module_parallel/reducing_over_a_binary_operation.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vals</span><span class="p">(</span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="c1">// Reduce container over a binary operation</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">sum</span><span class="o">&lt;&gt;</span><span class="p">());</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">200&#39;000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">);</span>
+
+<span class="c1">// Reduce iterator range over a binary operation</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">subrange_sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">blocking_reduce</span><span class="p">(</span><span class="n">parallel</span><span class="o">::</span><span class="n">Range</span><span class="p">{</span><span class="n">vals</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">vals</span><span class="p">.</span><span class="n">end</span><span class="p">()},</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">sum</span><span class="o">&lt;&gt;</span><span class="p">{});</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">subrange_sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="mi">200&#39;000</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">);</span>
+</code></pre></div>
+<h3 id="using-a-local-thread-pool">Using a local thread pool<a class="headerlink" href="#using-a-local-thread-pool" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/zh3PobGes">Run this code</a> ] [ <a href="../examples/module_parallel/using_a_local_thread_pool.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="n">parallel</span><span class="o">::</span><span class="n">ThreadPool</span><span class="w"> </span><span class="n">pool</span><span class="p">;</span><span class="w"> </span><span class="c1">// uses as many threads as it detects</span>
+
+<span class="n">pool</span><span class="p">.</span><span class="n">detached_task</span><span class="p">([]{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Hello from the task</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+
+<span class="n">pool</span><span class="p">.</span><span class="n">set_thread_count</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// will wait for the tasks, join all threads and release the memory</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>Hello from the task
+</code></pre></div>
+<h3 id="recursive-tasks">Recursive tasks<a class="headerlink" href="#recursive-tasks" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/5P43f5fPh">Run this code</a> ] [ <a href="../examples/module_parallel/recursive_tasks.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="c1">// Deeply recursive illustrative task, not a practical way of computing fibonacci numbers</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fibonacci</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">future_prev_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">awaitable_task</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">fibonacci</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">future_prev_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">awaitable_task</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">fibonacci</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">future_prev_1</span><span class="p">.</span><span class="n">get</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">future_prev_2</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">fibonacci</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">21</span><span class="w"> </span><span class="p">);</span>
+</code></pre></div>
+<h3 id="awaitable-parallel-loop-with-specific-grain-size">Awaitable parallel loop with specific grain size<a class="headerlink" href="#awaitable-parallel-loop-with-specific-grain-size" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/7Msqjn6s9">Run this code</a> ] [ <a href="../examples/module_parallel/awaitable_parallel_loop_with_specific_grain_size.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">(</span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c</span><span class="p">(</span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// Launch the task to compute { c = a + b } in parallel, we know this</span>
+<span class="c1">// workload is very even so we can use coarser grains than by default</span>
+<span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">grain_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200&#39;000</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">get_thread_count</span><span class="p">();</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">awaitable_loop</span><span class="p">(</span><span class="n">parallel</span><span class="o">::</span><span class="n">IndexRange</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">200&#39;000</span><span class="p">,</span><span class="w"> </span><span class="n">grain_size</span><span class="p">},</span>
+<span class="w">    </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// ... do some work in the meantime ...</span>
+
+<span class="c1">// Await the result</span>
+<span class="n">future</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">200&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+</code></pre></div>
+<h3 id="thread-introspection_1">Thread introspection<a class="headerlink" href="#thread-introspection_1" title="Permanent link">&para;</a></h3>
+<p>[ <a href="https://godbolt.org/z/3TEE5q1KG">Run this code</a> ] [ <a href="../examples/module_parallel/thread_introspection.cpp">Open source file</a> ]</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">utl</span><span class="p">;</span>
+
+<span class="c1">// In debugging it is often useful to have some information about the thread whereabouts,</span>
+<span class="c1">// we can detect if current thread belongs to a pool, which pool and at which index</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallel</span><span class="o">::</span><span class="n">awaitable_task</span><span class="p">([]{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;I am a thread [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">parallel</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_index</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span>
+<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; in the pool  [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">parallel</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_pool</span><span class="p">()</span><span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span>
+<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="n">future</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">std_future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">([]{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Am I a pool thread? -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">parallel</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_pool</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">)</span>
+<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="n">std_future</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>I am a thread [0] in the pool [0x5f0c90a781f0]
+Am I a pool thread? -&gt; false
+</code></pre></div>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
+<p>Naive use of <a href="https://en.cppreference.com/w/cpp/thread/async">std::async</a> and <a href="https://en.cppreference.com/w/cpp/thread/thread">std::thread</a> suffers greatly from the overhead of thread creation, this overhead makes small tasks (under a few ms) largely inefficient and introduces a great degree of performance instability. </p>
+<p><a href="https://en.wikipedia.org/wiki/Thread_pool">Thread pools</a> are a classic solution to this problem. There are many existing implementations in C++, most of them tend to use a shared-queue design. This approach is easy to implement and works for simple parallelization, however it doesn't really function for scatter-gather workloads with nested subtasks.</p>
+<p>Something as simple as splitting a task into awaitable subtasks will deadlock the <strong>vast majority</strong> of thread pool implementations found online (even the ones that do implement work-stealing as they tend to work only with detached recursion), which was the initial motivation behind writing this library.</p>
+<h3 id="what-is-work-stealing">What is work-stealing<a class="headerlink" href="#what-is-work-stealing" title="Permanent link">&para;</a></h3>
+<p>Large concurrency frameworks such as <a href="https://en.wikipedia.org/wiki/OpenMP">OpenMP</a> and <a href="https://github.com/uxlfoundation/oneTBB">Intel TBB</a> tend to use work-stealing design where each thread keeps its own queue of tasks and steals work from the backs of other queues when its own queue gets exhausted. Such approach introduces a whole slew of potential benefits:</p>
+<ol>
+<li>We can offload task scheduling to idle threads</li>
+<li>We can reduce lock contention by splitting scheduling over multiple queues</li>
+<li>Pushing/executing local tasks in the Last-In-First-Out (LIFO) order is likely to keep work hot in cache  </li>
+<li>Stealing in the First-In-First-Out (FIFO) order is likely to pull larger tasks (as they will be closer to the recursion root), minimizing contention over small task scheduling</li>
+</ol>
+<p>Recursive workloads in general are also quite difficult to sensibly implement with a single queue which is why work-stealing approach is usually used. All of this makes work-stealing a rather good general case solution as it tends to perform well on most workloads.</p>
+<h2 id="benchmarks">Benchmarks<a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h2>
+<p><code>utl::parallel</code> does not claim to be superior to vendor-optimized concurrency frameworks, what it does is expose a simple threading API with a concise (~<code>600</code> L.O.C.) implementation written entirely in standard C++17. As of now this niche seems to be rather empty as there is almost no stand-alone thread pools supporting recursion.</p>
+<p>Below are a few <a href="https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_parallel/">benchmarks</a> comparing performance of <code>utl::parallel::ThreadPool</code> with <code>std::async</code> and some other thread pools. For comparison we will use <a href="https://github.com/bshoshany/thread-pool">bshoshany/thread-pool</a> and <a href="https://github.com/progschj/ThreadPool">progschj/ThreadPool</a> as those two seem to be the most popular stand-alone thread pool implementations.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Consequent benchmarks were measured on a <code>6</code>-core <code>AMD Ryzen 5 5600H</code> with hyper-threading disabled. Compiled with <code>g++ 11.4.0</code> at <code>-O2</code>. Ideal speedup from parallelization would be <code>600%</code>.</p>
+</div>
+<h4 id="uneven-non-recursive-tasks">Uneven non-recursive tasks<a class="headerlink" href="#uneven-non-recursive-tasks" title="Permanent link">&para;</a></h4>
+<p><strong>Scenario 1: Small tasks.</strong> Submit <code>1000</code> tasks busy-waiting for <code>0</code> to <code>100</code> microseconds randomly. <code>std::async()</code> performs extremely poorly due to the overhead of thread creation overshadowing the actual work. Thread pools perform about the same, results might fluctuate a bit depending on the run.</p>
+<div class="highlight"><pre><span></span><code>| relative |               ms/op |                op/s |    err% |     total | Small non-recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
+|   100.0% |               50.09 |               19.97 |    0.1% |     12.12 | `Serial`
+|   214.0% |               23.40 |               42.73 |    0.8% |     12.11 | `std::async()`
+|   573.3% |                8.74 |              114.47 |    0.4% |     11.84 | `parallel::ThreadPool`
+|   570.2% |                8.78 |              113.84 |    0.9% |     11.81 | `BS::thread_pool`
+|   565.6% |                8.86 |              112.92 |    1.2% |     11.83 | `progschj/ThreadPool`
+</code></pre></div>
+<p><strong>Scenario 2: Large tasks.</strong> Submit <code>1000</code> tasks busy-waiting for <code>1000</code> to <code>3000</code> microseconds randomly. Since workload is large enough to overshadow the overhead of thread creation and scheduling, <code>std::async()</code> more-or-less catches up to the thread pools. This only becomes the case once the average task duration is over a millisecond.</p>
+<div class="highlight"><pre><span></span><code>| relative |               ms/op |                op/s |    err% |     total | Large non-recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
+|   100.0% |            1,999.59 |                0.50 |    0.5% |     21.94 | `Serial`
+|   564.2% |              354.42 |                2.82 |    0.7% |     11.37 | `std::async()`
+|   597.0% |              334.96 |                2.99 |    0.4% |     11.41 | `parallel::ThreadPool`
+|   594.0% |              336.65 |                2.97 |    0.3% |     11.43 | `BS::thread_pool`
+|   593.4% |              336.95 |                2.97 |    0.2% |     11.45 | `progschj/ThreadPool`
+</code></pre></div>
+<h4 id="uneven-recursive-tasks">Uneven recursive tasks<a class="headerlink" href="#uneven-recursive-tasks" title="Permanent link">&para;</a></h4>
+<p><strong>Scenario 1: Shallow recursion.</strong> Submit <code>1000</code> tasks busy-waiting for <code>0</code> to <code>100</code> microseconds randomly and then spawning &amp; awaiting another such task with a <code>70%</code> chance. <code>std::async()</code> gets the job done, but experiences significant slowdown. <code>BS::thread_pool</code> and <code>progschj/ThreadPool</code> <strong>deadlock due to recursion</strong>.</p>
+<div class="highlight"><pre><span></span><code>| relative |               ms/op |                op/s |    err% |     total | Shallow recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:------------------------
+|   100.0% |              167.20 |                5.98 |    0.7% |     12.04 | `Serial`
+|   161.1% |              103.80 |                9.63 |    5.1% |     12.10 | `std::async()`
+|   583.0% |               28.68 |               34.87 |    0.3% |     12.09 | `parallel::ThreadPool`
+</code></pre></div>
+<p><strong>Scenario 2: Deep recursion.</strong> Submit <code>1000</code> tasks busy-waiting for <code>0</code> to <code>100</code> microseconds randomly and then spawning &amp; awaiting another <strong>2</strong> such tasks with a <code>49%</code> chance. This rate means on average tasks recursively expand into <code>50</code> different subtasks.</p>
+<div class="highlight"><pre><span></span><code>| relative |               ms/op |                op/s |    err% |     total | Deep recursive tasks
+|---------:|--------------------:|--------------------:|--------:|----------:|:---------------------
+|   100.0% |              183.88 |                5.44 |    0.6% |     12.29 | `Serial`
+|   154.7% |              118.83 |                8.42 |    6.8% |     11.94 | `std::async()`
+|   565.1% |               32.54 |               30.73 |    1.2% |     11.90 | `parallel::ThreadPool`
+</code></pre></div>
+<h3 id="questions-answers">Questions &amp; answers<a class="headerlink" href="#questions-answers" title="Permanent link">&para;</a></h3>
+<p><strong>Q:</strong> Why use custom future type instead of <code>std::future&lt;&gt;</code>?</p>
+<p><strong>A:</strong> This is necessary for recursive tasks. When <code>wait()</code>'ed from a pool thread instead of blocking right-away it first checks if there any recursive subtasks tasks to do in the meantime. The usual future would deadlock in this case by design, no way around it. Other than that this is a very thin wrapper around a standard <code>std::future&lt;&gt;</code>.</p>
+<p><strong>Q:</strong> Are there any improvement to be made in terms of performance?</p>
+<p><strong>A:</strong> Indeed. "Ideal" work-stealing executor would likely use a global lock-free MPMC queue for external tasks and per-thread Chase-Lev SPMC lock-free queues for task stealing. "Ideal" thread pool would also use a custom implementation of <code>std::function&lt;&gt;</code> (something closer to <code>std::move_only_function&lt;&gt;</code> from C++23). Unfortunately all of those things are highly complex and there are very few clean and correct implementations out there. A proper lock-free MPMC queue implementation with exception correctness alone would be higher in size and complexity than this entire library, the same applies to custom delegates and SPMC queues, which is why they are often pulled in as dependencies. This implementation tries to do the best it can while keeping the thread pool logic simple enough to be copy-pastable into a different project. Additional gains can also be made by getting rid of <code>wait()</code> and making the API a bit more rigid. It is also likely that some locks can be replaced with atomics.</p>
+<p><strong>Q:</strong> Is it possible to deadlock the pool?</p>
+<p><strong>A:</strong> Deadlocks caused by the thread pool design itself shouldn't be possible. Logical deadlocks caused by a cyclical inter-thread dependency are still possible, but this is a user-level bug since no thread pool design could possibly prevent this.</p>
+<p><strong>Q:</strong> How was this library tested?</p>
+<p><strong>A:</strong> It has a wide <a href="https://github.com/DmitriBogdanov/UTL/tree/master/tests/module_parallel">testing suite</a> covering a multitude of use cases that runs in CI on all major platforms. GCC &amp; clang builds run under ASan, TSan (locally) and UBSan. Tests also include some reasonable fuzzing.</p>
+<p><strong>Q:</strong> Why no benchmarks against <a href="https://github.com/hosseinmoein/Leopard">Leopard</a>, <a href="https://github.com/ConorWilliams/Threadpool">riften::ThiefPool</a> and <a href="https://github.com/DeveloperPaul123/thread-pool">dp::thread_pool</a>?</p>
+<p><strong>A:</strong> All of these require <strong>C++20</strong> to build, which is above the required standard for building this repo. <code>riften::ThiefPool</code> also includes several dependencies. Out of these 3 implementations, recursive workload seems to only be supported by <code>Leopard</code> and even that requires some algorithm adjustments on user-side with <code>run_task()</code> needing to be called in the right places to avoid a deadlock.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023–2025 Dmitri Bogdanov
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DmitriBogdanov" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["toc.follow", "content.code.copy", "search.suggest", "content.tooltips"], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="mkdocs/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="mkdocs/modification/header_title.js"></script>
+      
+        <script src="mkdocs/modification/relative_links.js"></script>
+      
+    
+  </body>
+</html>

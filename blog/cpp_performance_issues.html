@@ -1,0 +1,1794 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dmitribogdanov.github.io/UTL/blog/cpp_performance_issues.html">
+      
+      
+        <link rel="prev" href="../guide_reproducing_figures.html">
+      
+      
+        <link rel="next" href="map_macro_reflection.html">
+      
+      
+      <link rel="icon" href="../images/icon_site_logo.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>What separates C++ from being a "perfect" performance-oriented language - UTL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../mkdocs/callouts.css">
+    
+      <link rel="stylesheet" href="../mkdocs/width.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="What separates C++ from being a "perfect" performance-oriented language - UTL" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/blog/cpp_performance_issues.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://dmitribogdanov.github.io/UTL/blog/cpp_performance_issues.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="What separates C++ from being a "perfect" performance-oriented language - UTL" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://dmitribogdanov.github.io/UTL/assets/images/social/blog/cpp_performance_issues.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#what-separates-c-from-being-a-perfect-performance-oriented-language" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="UTL" class="md-header__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UTL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              What separates C++ from being a "perfect" performance-oriented language
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="UTL" class="md-nav__button md-logo" aria-label="UTL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.71 20.29-1.42 1.42a1 1 0 0 1-1.41 0L7 9.85A3.8 3.8 0 0 1 6 10a4 4 0 0 1-3.78-5.3l2.54 2.54.53-.53 1.42-1.42.53-.53L4.7 2.22A4 4 0 0 1 10 6a3.8 3.8 0 0 1-.15 1l11.86 11.88a1 1 0 0 1 0 1.41M2.29 18.88a1 1 0 0 0 0 1.41l1.42 1.42a1 1 0 0 0 1.41 0l5.47-5.46-2.83-2.83M20 2l-4 2v2l-2.17 2.17 2 2L18 8h2l2-4Z"/></svg>
+
+    </a>
+    UTL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DmitriBogdanov/UTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DmitriBogdanov/UTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Modules
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_assertion.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::assertion
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_bit.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::bit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_enum_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::enum_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_integral.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::integral
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_json.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::json
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_log.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::log
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_math.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::math
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_mvl.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::mvl
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_parallel.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::parallel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_predef.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::predef
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_profiler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::profiler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_progressbar.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::progressbar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_random.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::random
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_shell.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::shell
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_sleep.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::sleep
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_stre.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::stre
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_strong_type.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::strong_type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_struct_reflect.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::struct_reflect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_table.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::table
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../module_time.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utl::time
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_selecting_modules.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Selecting modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_fetching_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetching the library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_reserved_names.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reserved names
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_building_project.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building the repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_building_docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_versioning.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Semantic versioning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_reproducing_figures.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reproducing figures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Blog
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Blog
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="cpp_performance_issues.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    What separates C++ from being a "perfect" performance-oriented language
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-destructive-move" class="md-nav__link">
+    <span class="md-ellipsis">
+      No destructive move
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicit-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implicit copy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-constexpr-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      No constexpr priority
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-struct-packing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual struct packing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-way-to-tell-when-a-critical-optimization-has-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      No way to tell when a critical optimization has failed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdunordered_map-pointer-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      std::unordered_map pointer stability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmath-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;cmath&gt; error handling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;random&gt; algorithms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regex-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;regex&gt; performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-standard-128-bit-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      No standard 128-bit types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-bit-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      No bit operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#floating-point-parsing-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Floating point parsing &amp; serialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-based-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stream-based formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-zero-size-member-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      No zero-size member optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-parallel-execution-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      No parallel execution guarantees
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limited-reallocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limited reallocation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pointer-aliasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pointer aliasing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Final notes
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="map_macro_reflection.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Map-macro: Emulating reflection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide_license.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-destructive-move" class="md-nav__link">
+    <span class="md-ellipsis">
+      No destructive move
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicit-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implicit copy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-constexpr-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      No constexpr priority
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-struct-packing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual struct packing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-way-to-tell-when-a-critical-optimization-has-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      No way to tell when a critical optimization has failed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdunordered_map-pointer-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      std::unordered_map pointer stability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmath-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;cmath&gt; error handling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;random&gt; algorithms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regex-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      &lt;regex&gt; performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-standard-128-bit-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      No standard 128-bit types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-bit-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      No bit operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#floating-point-parsing-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Floating point parsing &amp; serialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-based-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stream-based formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-zero-size-member-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      No zero-size member optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-parallel-execution-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      No parallel execution guarantees
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limited-reallocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limited reallocation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pointer-aliasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pointer aliasing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Final notes
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="what-separates-c-from-being-a-perfect-performance-oriented-language">What separates C++ from being a "perfect" performance-oriented language<a class="headerlink" href="#what-separates-c-from-being-a-perfect-performance-oriented-language" title="Permanent link">&para;</a></h1>
+<p><strong>What this is:</strong> A subjective collection of various "performance issues" of C++.</p>
+<p><strong>What constitutes a "performance issue":</strong> Any quirk of the language and its ecosystem that inclines / forces developers to implement things in a suboptimal (in regards to performance) way.</p>
+<p>The "issues" are listed in no particular order and were initially compiled as a personal note to summarize a bunch of curios quirks, however after a bit of revision it seems good enough to make for a rather interesting read.</p>
+<p>Every "issue" comes with an attached cause and a short explanation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This does not intend to be a language critique or necessarily make an argument for the practicality of all listed points. Many of the present points are largely presented as "what if" without concerning their pragmatic importance.</p>
+</div>
+<hr />
+<h2 id="performance-issues">Performance issues<a class="headerlink" href="#performance-issues" title="Permanent link">&para;</a></h2>
+<h3 id="no-destructive-move">No destructive move<a class="headerlink" href="#no-destructive-move" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Language design.</p>
+<p>In C++ any moved-from object is required to stay in some kind of a "valid" moved-from state. This often requires additional logic in the move-constructor and in certain cases can prevent move from being <code>noexcept</code> (which can affect performance of standard containers, mainly <code>std::vector&lt;&gt;</code>). A good overview of the topic can be found in this <a href="https://www.foonathan.net/2017/09/destructive-move/">blogpost</a> by Jonathan Müller.</p>
+<h3 id="implicit-copy">Implicit copy<a class="headerlink" href="#implicit-copy" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Language design.</p>
+<p>C++ is a copy-by-default rather than move-by-default language. This makes it easy to accidentally perform a heavyweight copy, which in some cases can hide behind a very innocuous syntax, such as returning a local variable created by a structured binding from a function:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SomeHeavyClass</span><span class="w"> </span><span class="nf">f</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="p">[</span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compute</span><span class="p">();</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span><span class="w"> </span><span class="c1">// this is a copy, no copy elision takes place</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="no-constexpr-priority">No <code>constexpr</code> priority<a class="headerlink" href="#no-constexpr-priority" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Practical concerns.</p>
+<p>While <code>constexpr</code> functions can be evaluated both at runtime &amp; compile-time, there are no guarantees to which of the options will be chosen unless we manually force the <code>constexpr</code> context:</p>
+<div class="highlight"><pre><span></span><code><span class="k">constexpr</span><span class="w"> </span><span class="n">heavy_function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">heavy_function</span><span class="p">();</span>
+<span class="c1">// &#39;heavy_function()&#39; might be evaluated at runtime unless we force constexpr by assigning it to a constexpr variable first</span>
+</code></pre></div>
+<p>From the idealistic perspective, we always want to pre-compute as much as possible at compile time and having to manually "force" <code>constexpr</code> evaluation puts additional burden on the programmer. From a more pragmatic perspective forcing <code>constexpr</code> evaluation on everything can have a very significant impact on compilation times due to being significantly slower than a runtime evaluation of the same function.</p>
+<h3 id="manual-struct-packing">Manual struct packing<a class="headerlink" href="#manual-struct-packing" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> ABI compatibility, C legacy</p>
+<p>In C++ member variables are guaranteed to be stored in the order of their declaration. This can often waste space due to alignment requirements, especially when working with large classes where "performance-optimal" order and "readability-optimal" order might differ:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Large</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Small</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Large</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">24</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Small</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+</code></pre></div>
+<p>Some languages that prefer static linking leave this ordering to the compiler, in case of C++ the choice was made in favor of compatibility.</p>
+<h3 id="no-way-to-tell-when-a-critical-optimization-has-failed">No way to tell when a critical optimization has failed<a class="headerlink" href="#no-way-to-tell-when-a-critical-optimization-has-failed" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Compiler QoL</p>
+<p>In some scenarios, performance IS correctness. This mainly concerns vectorization, which can fail due to seemingly minor changes and cause a  sudden x2-x4 performance degradation (and degrading, for example, a game from 60 FPS to 15 FPS makes it effectively non-functional).</p>
+<p>Unfortunately this is a very complex issue with no easy solution for the problem, most of the time such matters are handled by making a comprehensive benchmark suite with mandated performance degradation tests. An interesting effort was made by the <a href="https://lucasmeijer.com/posts/cpp_unity/">Unity C# compiler</a> which provides a way to declare data-independence and error should these rules be violated.</p>
+<h3 id="stdunordered_map-pointer-stability"><code>std::unordered_map</code> pointer stability<a class="headerlink" href="#stdunordered_map-pointer-stability" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> API design</p>
+<p>Almost every method of <a href="https://en.cppreference.com/w/cpp/container/unordered_map.html"><code>std::unordered_map</code></a> is significantly slower than it could be due to the requirement of <a href="https://en.cppreference.com/w/cpp/container/unordered_map.html#Notes">pointer stability</a>, which dictates a node-based implementation that does not reallocate any elements.</p>
+<p>Whether pointer stability is worth the performance cost is frequently debated. An excellent overview of existing map implementations and their performance trade-offs can be found on <a href="https://martin.ankerl.com/2022/08/27/hashmap-bench-01/">Martin Ankerl's website</a>.</p>
+<p>As of 2025 it seems that densely stored designs with open addressing &amp; linear probing (such as <a href="https://www.boost.org/doc/libs/1_83_0/libs/unordered/doc/html/unordered.html"><code>boost::unordered_flat_map</code></a> and <a href="https://github.com/martinus/unordered_dense"><code>ankerl::unordered_dense::map</code></a>) are a good general go-to.</p>
+<h3 id="cmath-error-handling"><code>&lt;cmath&gt;</code> error handling<a class="headerlink" href="#cmath-error-handling" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> C legacy</p>
+<p><a href="https://en.cppreference.com/w/cpp/header/cmath.html"><code>&lt;cmath&gt;</code></a> uses a rather questionable error handling strategy which relies on modifying a global <a href="https://en.cppreference.com/w/cpp/error/errno.html"><code>errno</code></a> object. In many cases this global access prevents compiler from being more aggressive with optimizations, with prevented vectorization being the biggest issue in terms of impact. For this reason many compilers have an option to disable <code>errno</code> reporting (such as <code>-fno-math-errno</code> on GCC &amp; clang).</p>
+<p>In addition to that, modifying a global variable prevented <code>&lt;cmath&gt;</code> functions from being <code>constexpr</code> up until C++26, which affects a lot of generic code that could also be compile-time evaluated otherwise.</p>
+<h3 id="random-algorithms"><code>&lt;random&gt;</code> algorithms<a class="headerlink" href="#random-algorithms" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Outdated algorithms</p>
+<p>While the core design of <a href="https://en.cppreference.com/w/cpp/header/random.html"><code>&lt;random&gt;</code></a> is incredibly flexible, its performance suffers from outdated <a href="https://en.wikipedia.org/wiki/Pseudorandom_number_generator">PRNGs</a> and strict algorithmic requirements for distributions. Switching to a more modern set of algorithms can frequently lead to a <strong>2x-6x</strong> speedup with no loss of statistical quality.</p>
+<p>A rather comprehensive overview of this topic can be found in the docs of <a href="../module_random.html">utl::random</a>. </p>
+<h3 id="regex-performance"><code>&lt;regex&gt;</code> performance<a class="headerlink" href="#regex-performance" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> ABI stability</p>
+<p>Standard library <a href="https://en.cppreference.com/w/cpp/header/regex.html"><code>&lt;regex&gt;</code></a> is known for its downright horrific performance caused by a suboptimal implementation back in the day. At the moment standard library regex tends to be <a href="https://github.com/mariomka/regex-benchmark"><strong>dozens</strong></a> or even <a href="https://github.com/HFTrader/regex-performance"><strong>hundreds</strong></a> of times slower than modern regex engines of other languages.</p>
+<p>At the API level there is nothing preventing <code>&lt;regex&gt;</code> from achieving reasonable performance, however it fell victim to the requirement of ABI stability which set in stone its initial implementation, thus preventing any meaningful improvements in the future.</p>
+<h3 id="no-standard-128-bit-types">No standard 128-bit types<a class="headerlink" href="#no-standard-128-bit-types" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Library support</p>
+<p>A lot of bleeding-edge algorithms for <a href="https://github.com/martinus/unordered_dense/blob/main/include/ankerl/unordered_dense.h#L159-L193">hashing</a>, <a href="https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/random.hpp#L119-L179">RNG</a>, <a href="https://github.com/fastfloat/fast_float/blob/main/include/fast_float/bigint.h#L233-L257">serialization</a> and etc. rely on wider type arithmetics which are often natively supported by the architecture (most use cases only need <span class="arithmatex">\(64 \times 64 \rightarrow 128\)</span> bit arithmetic instructions which are common on modern hardware).</p>
+<p>Since every major compiler supports them through extensions (GCC &amp; clang <a href="https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html"><code>__uint128</code></a>, MSVC <a href="https://learn.microsoft.com/en-us/cpp/intrinsics/umul128?view=msvc-170"><code>_umul128()</code></a> and etc.), this is usually worked around with a bunch of compiler-specific <code>#ifdef</code> blocks with an emulated fallback.</p>
+<p>Such algorithms would be significantly easier and less error-prone to implement if <code>uint128_t</code> &amp; <code>int128_t</code> were standardized across compilers. Doing so through <a href="https://en.cppreference.com/w/cpp/header/cstdint.html"><code>&lt;cstdint&gt;</code></a> however might prove challenging due to the concerns of old code compatibility.</p>
+<h3 id="no-bit-operations">No bit operations<a class="headerlink" href="#no-bit-operations" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Library support</p>
+<p><strong>[!] Fixed with:</strong> C++20</p>
+<p>Many performant algorithms tend to be written in terms of bit operations present in practically all modern hardware (such as <code>rotl()</code>, <code>popcount()</code>, <code>bit_width()</code>, <code>countl_zero()</code>, <code>bit_cast()</code> and etc.). Up until C++20 <a href="https://en.cppreference.com/w/cpp/header/bit.html"><code>&lt;bit&gt;</code></a> there was no portable way to call such instructions, they were usually written in terns of branches &amp; regular shifts and hopefully optimized down to the intended asm by a compiler.</p>
+<h3 id="floating-point-parsing-serialization">Floating point parsing &amp; serialization<a class="headerlink" href="#floating-point-parsing-serialization" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Library support</p>
+<p><strong>[!] Fixed with:</strong> C++17</p>
+<p>Quickly &amp; correctly parsing / serializing floating point numbers is a task of significant complexity, which saw major improvements with the advancement of <a href="https://dl.acm.org/ft_gateway.cfm?id=3192369&amp;type=pdf">Ryu</a> / <a href="https://www.cs.tufts.edu/%7Enr/cs257/archive/florian-loitsch/printf.pdf">Grisu</a> / <a href="https://drive.google.com/file/d/1luHhyQF9zKlM8yJ1nebU0OgVYhfC6CBN/view">Schubfach</a> / <a href="https://github.com/jk-jeon/dragonbox/blob/master/other_files/Dragonbox.pdf">Dragonbox</a> family of algorithms (speedup of <a href="https://github.com/fastfloat/fast_float#how-fast-is-it"><strong>several times</strong></a> with better round-trip guarantees).</p>
+<p>Old serialization methods (such as <a href="https://en.cppreference.com/w/cpp/header/ostream.html">streams</a> and <a href="https://en.cppreference.com/w/cpp/io/c/snprintf"><code>std::snprintf()</code></a>) are unable to benefit from such advancements due to their legacy requirements. In C++17 <a href="https://en.cppreference.com/w/cpp/header/charconv.html"><code>&lt;charconv&gt;</code></a> was standardized as a performant low-level way of float serialization which should be more flexible in case of future algorithmic improvements.</p>
+<h3 id="stream-based-formatting">Stream-based formatting<a class="headerlink" href="#stream-based-formatting" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> API design</p>
+<p><strong>[!] Fixed with:</strong> C++20, C++23 (partially due to incomplete adoption)</p>
+<p>The "classic" way to parse / serialize / format values is based around rather heavyweight polymorphic stream objects that 
+conflate formatting, I/O and locale manipulation (which in many cases is largely detrimental).</p>
+<p>This approach is <strong>significantly</strong> outperformed by the design of <a href="https://github.com/fmtlib/fmt"><code>fmtlib</code></a> which was partially standardized in C++20 and C++23.</p>
+<h3 id="no-zero-size-member-optimization">No zero-size member optimization<a class="headerlink" href="#no-zero-size-member-optimization" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Language design</p>
+<p><strong>[!] Fixed with:</strong> C++20 (partially due to ABI stability concerns)</p>
+<p>In C++ all member variables are required to have a valid non-overlapping address. This can pointlessly bloat the object size when working with potentially stateless members (such as allocators, comparators and etc.) whose address is never taken:</p>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">allocator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Comparator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">less</span><span class="o">&lt;&gt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Map</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Allocator</span><span class="w">  </span><span class="n">alloc</span><span class="p">;</span><span class="w"> </span><span class="c1">// will take space even if stateless</span>
+<span class="w">    </span><span class="n">Comparator</span><span class="w"> </span><span class="n">comp</span><span class="p">;</span><span class="w">  </span><span class="c1">//</span>
+
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This inefficiency used to be worked-around through inheritance hacks and empty base class optimization, however now with C++20 we have a proper attribute <a href="https://en.cppreference.com/w/cpp/language/attributes/no_unique_address"><code>[[no_unique_address]]</code></a>  to mark those potentially stateless members. Unfortunately, MSVC still <a href="https://devblogs.microsoft.com/cppblog/msvc-cpp20-and-the-std-cpp20-switch/#c++20-[[no_unique_address]]">ignores it</a> and uses a custom attribute instead.</p>
+<h3 id="no-parallel-execution-guarantees">No parallel execution guarantees<a class="headerlink" href="#no-parallel-execution-guarantees" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Library support</p>
+<p>While C++17 added <a href="https://en.cppreference.com/w/cpp/header/execution.html">parallel execution modes</a> to much of the <a href="https://en.cppreference.com/w/cpp/header/algorithm.html"><code>&lt;algorithm&gt;</code></a>, the standard does not mandate that implementations actually have to respect them. For example, GCC will ignore parallel execution modes unless linked against <a href="https://en.wikipedia.org/wiki/Threading_Building_Blocks">Intel TBB</a>, which goes against the intuitive assumption that parallel algorithms should work out of the box.</p>
+<h3 id="limited-reallocation">Limited reallocation<a class="headerlink" href="#limited-reallocation" title="Permanent link">&para;</a></h3>
+<p><strong>Category:</strong> C legacy, complexity</p>
+<p>Contiguous arrays such as <code>std::vector&lt;&gt;</code> (and other similar classes) should logically be able to grow in-place should the memory allow it, however due to a combination of C <code>realloc()</code> design flaws, <code>std::allocator&lt;&gt;</code> lack of reallocation mechanism and RAII requirements such ability never made it into the standard (or most of the existing libraries for that matter).</p>
+<p>In fact, even further gains could be made if containers had an ability to intrusively ingrate with specific allocators to account for various implementation details, such as, for example <a href="https://github.com/facebook/folly/blob/main/folly/docs/FBVector.md"><code>folly::fbvector</code></a> which accounts for the <a href="https://github.com/jemalloc/jemalloc">jemalloc</a> fixed-size quanta. Providing such mechanisms in a general case however proved to be a task of significant complexity.</p>
+<h3 id="pointer-aliasing">Pointer aliasing<a class="headerlink" href="#pointer-aliasing" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Language design</p>
+<p>In many scenarios potential <a href="https://en.wikipedia.org/wiki/Aliasing_(computing)#Aliased_pointers">pointer aliasing</a> can prevent compiler from being more aggressive with optimization, in C we can use <a href="https://en.cppreference.com/w/c/language/restrict.html"><code>restrict</code></a> to signal a lack of aliasing, in C++ however there is no general solution for the problem.</p>
+<p>Many compilers provide extensions such as GCC <a href="https://gcc.gnu.org/onlinedocs/gcc/Restricted-Pointers.html"><code>__restrict__</code></a>, however those qualifiers are only applicable to raw pointers and cannot, for example, specify that two instances of <a href="https://en.cppreference.com/w/cpp/container/span.html"><code>std::span&lt;&gt;</code></a> are non-aliasing:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">vector_sum</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">res</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">lhs</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">res</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">res</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lhs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="c1">// vectorization would be incorrect in a general case due to the potential aliasing</span>
+<span class="w">    </span><span class="c1">// when &#39;res&#39; / lhs&#39; / &#39;rhs&#39; point to the intersecting chunks of the same array</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For a simple loop like this one many compilers will be able to figure out a special case and use vectorized version when all pointers are proven to be non-aliasing (with a non-vectorized fallback for a general case). In real applications however dependency chains are frequently too complex to be resolved by a compiler, which leads to a significant performance loss relatively to a manually annotated version.</p>
+<hr />
+<h2 id="final-notes">Final notes<a class="headerlink" href="#final-notes" title="Permanent link">&para;</a></h2>
+<p>The list above was initially made as a personal note to summarize a bunch of curios quirks and as such it does not intend to be a critique of language designers &amp; implementers. Every passing standard makes significant strides in resolving &amp; improving a lot of these points and with C++26 bringing <a href="https://en.cppreference.com/w/cpp/numeric/simd.html"><code>std::simd</code></a> and reflection we are likely to see some excellent changes in the ecosystem.</p>
+<p><strong>Publication date:</strong> 2025.08.30</p>
+<p><strong>Last revision:</strong> 2025.09.03</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023–2025 Dmitri Bogdanov
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DmitriBogdanov" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["toc.follow", "content.code.copy", "search.suggest", "content.tooltips"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../mkdocs/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../mkdocs/modification/header_title.js"></script>
+      
+        <script src="../mkdocs/modification/relative_links.js"></script>
+      
+    
+  </body>
+</html>
