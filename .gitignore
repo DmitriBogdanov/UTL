@@ -30,6 +30,7 @@
 # > Content
 !docs/
 !docs/**
+!LICENSE.md
 
 # Code
 # > Library
