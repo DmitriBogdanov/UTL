@@ -112,4 +112,4 @@ While the library itself consists of isolated headers with no embedded dependenc
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](../LICENSE.md) for details.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) for details.
