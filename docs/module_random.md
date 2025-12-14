@@ -1,4 +1,4 @@
-[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_language_cpp_20.svg">](https://en.cppreference.com/w/cpp/17.html)
 [<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
 [<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)

@@ -1,4 +1,4 @@
-[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_language_cpp_20.svg">](https://en.cppreference.com/w/cpp/17.html)
 [<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
 [<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
@@ -73,8 +73,14 @@ Quality goals include:
 
 ## Requirements
 
-* Requires **C++17** support
+* Requires **C++20** support
 * Some headers require a compliant preprocessor flag ([`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor)) when using [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B), such headers specify it in the docs
+
+## LTS versions
+
+| Branch                                                      | Standard  | Version   | Support                                            |
+| ----------------------------------------------------------- | --------- | --------- | -------------------------------------------------- |
+| [std-17](https://github.com/DmitriBogdanov/UTL/tree/std-17) | **C++17** | **9.0.0** | Feature set is frozen, lifetime support for issues |
 
 ## Developer toolchain
 
