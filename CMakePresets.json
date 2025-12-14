@@ -14,7 +14,7 @@
             "hidden": true,
             "binaryDir": "build/",
             "cacheVariables": {
-                "UTL_COMPILE_FEATURES": "cxx_std_17"
+                "UTL_COMPILE_FEATURES": "cxx_std_20"
             }
         },
         {
