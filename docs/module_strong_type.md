@@ -22,7 +22,7 @@ By default, typedefs in `C` and `C++` are **weak**, which means separate typedef
 
 ```cpp
 using offset_type = std::size_t;
-using size_type   = std::size_t;
+using   size_type = std::size_t;
 
 static_assert(std::is_same_v<offset_type, size_type>); // types are the same
 ```
@@ -31,7 +31,7 @@ static_assert(std::is_same_v<offset_type, size_type>); // types are the same
 
 ```cpp
 using offset_type = strong_type::arithmetic<std::size_t, class offset_tag>;
-using size_type   = strong_type::arithmetic<std::size_t, class   size_tag>;
+using   size_type = strong_type::arithmetic<std::size_t, class   size_tag>;
 
 static_assert(!std::is_same_v<offset_type, size_type>); // types are different
 ```
@@ -40,34 +40,34 @@ This is useful for improving type safety. Arithmetic strong types act like thin 
 
 Strong types are often used in physical modeling together with [`<chrono>`](https://en.cppreference.com/w/cpp/chrono.html)-like ratio conversions to ensure dimensional correctness of the expressions. In a more general case they can protect against mixing up conceptually different values (such as IDs, offsets, sizes and etc.) which would otherwise be implicitly convertible to each other.
 
-In addition, strong types are exceedingly useful for wrapping `C` APIs which tend to use regular integers and type-erased pointers for distinctly different values (whereas `C++` would usually use classes and strongly typed `enum class`). This is particularly common for various system handles, which is why this header also provides `strong_type::Unique<>` that can wrap arbitrary handles into RAII semantics with a custom deleter (see [OpenGL example](#wrapping-opengl-shader-handle)).
+In addition, strong types are exceedingly useful for wrapping `C` APIs which tend to use regular integers and type-erased pointers for distinctly different values (whereas `C++` would usually use classes and strongly typed `enum class`). This is particularly common for various system handles, which is why this header also provides `strong_type::unique<>` that can wrap arbitrary handles into RAII semantics with a custom deleter (see [OpenGL example](#wrapping-opengl-shader-handle)).
 
 ## Definitions
 
 ```cpp
 // Function binding
 template <auto function>
-struct Bind {
+struct bind {
     template <class... Args> constexpr auto operator()(Args&&... args) const;
 };
 
 // Strongly typed move-only wrapper around 'T'
 template <class T, class Tag, class Deleter = void>
-class Unique {
+class unique {
     // Member types
     using   value_type = T;
     using     tag_type = Tag;
     using deleter_type = Deleter;
     
     // Move-only semantics
-    constexpr Unique           (const Unique& ) =  delete;
-    constexpr Unique& operator=(const Unique& ) =  delete;
-    constexpr Unique           (      Unique&&);
-    constexpr Unique& operator=(      Unique&&);
+    constexpr unique           (const unique& ) =  delete;
+    constexpr unique& operator=(const unique& ) =  delete;
+    constexpr unique           (      unique&&);
+    constexpr unique& operator=(      unique&&);
     
     // Conversion
-    constexpr Unique           (T&& value) noexcept;
-    constexpr Unique& operator=(T&& value) noexcept;
+    constexpr unique           (T&& value) noexcept;
+    constexpr unique& operator=(T&& value) noexcept;
     
     // Accessing the underlying value
     constexpr const T& get() const noexcept;
@@ -76,14 +76,14 @@ class Unique {
 
 // Strongly typed arithmetic wrapper around 'T'
 template <class T, class Tag>
-struct Arithmetic {
+struct arithmetic {
     // Member types
     using value_type = T;
     using   tag_type = Tag;
 	
     // Conversion
-    constexpr Arithmetic           (T value) noexcept;
-    constexpr Arithmetic& operator=(T value) noexcept;
+    constexpr arithmetic           (T value) noexcept;
+    constexpr arithmetic& operator=(T value) noexcept;
     
     // Accessing the underlying value
     constexpr const T& get() const noexcept;
@@ -106,16 +106,16 @@ struct Arithmetic {
 
 > ```cpp
 > template <auto function>
-> struct Bind {
+> struct bind {
 >     template <class... Args> constexpr auto operator()(Args&&... args) const;
 > };
 > ```
 
-Binds `function` to a stateless class so it can be passed as a template parameter.
+binds `function` to a stateless class so it can be passed as a template parameter.
 
-Useful for passing functions pointers as custom deleters to `std::unique_ptr<>` and `strong_type::Unique<>`.
+Useful for passing functions pointers as custom deleters to `std::unique_ptr<>` and `strong_type::unique<>`.
 
-**Note:** Calling `Bind<function>{}(args...)` is equivalent to calling `function(args...)`.
+**Note:** Calling `bind<function>{}(args...)` is equivalent to calling `function(args...)`.
 
 ### Unique
 
@@ -138,19 +138,19 @@ Member types reflecting the template parameters.
 #### Move-only semantics
 
 > ```cpp
-> constexpr Unique           (const Unique& ) =  delete;
-> constexpr Unique& operator=(const Unique& ) =  delete;
-> constexpr Unique           (      Unique&&);
-> constexpr Unique& operator=(      Unique&&);
+> constexpr unique           (const unique& ) =  delete;
+> constexpr unique& operator=(const unique& ) =  delete;
+> constexpr unique           (      unique&&);
+> constexpr unique& operator=(      unique&&);
 > ```
 
-`Unique<>` is a **move-only** type that behaves similarly to [`std::unique_ptr<>`](https://en.cppreference.com/w/cpp/memory/unique_ptr.html), but can hold an arbitrary internal value.
+`unique<>` is a **move-only** type that behaves similarly to [`std::unique_ptr<>`](https://en.cppreference.com/w/cpp/memory/unique_ptr.html), but can hold an arbitrary internal value.
 
 #### Conversion
 
 > ```cpp
-> constexpr Unique           (T&& value) noexcept;
-> constexpr Unique& operator=(T&& value) noexcept;
+> constexpr unique           (T&& value) noexcept;
+> constexpr unique& operator=(T&& value) noexcept;
 > ```
 
 Constructor / assignment that takes an ownership of the `value`.
@@ -186,8 +186,8 @@ Member types reflecting the template parameters.
 #### Conversion
 
 > ```cpp
-> constexpr Arithmetic           (T value) noexcept;
-> constexpr Arithmetic& operator=(T value) noexcept;
+> constexpr arithmetic           (T value) noexcept;
+> constexpr arithmetic& operator=(T value) noexcept;
 > ```
 
 Constructor / assignment that assigns the underlying `value`.
@@ -207,13 +207,13 @@ Returns a **constant** or **mutable** reference to the underlying value.
 > template <class To> constexpr explicit operator To() const noexcept;
 > ```
 
-Explicitly casting `Arithmetic<T>` is equivalent to performing the cast on its underlying value.
+Explicitly casting `arithmetic<T>` is equivalent to performing the cast on its underlying value.
 
 Implicit casts are intentionally prohibited.
 
 #### Operators
 
-`Arithmetic<T>` supports the same set of binary / unary operators as its underlying `value_type`.
+`arithmetic<T>` supports the same set of binary / unary operators as its underlying `value_type`.
 
 The only exception to this rule is `operator!()` which is intentionally prohibited similarly to implicit casts.
 
@@ -223,16 +223,16 @@ The only exception to this rule is `operator!()` which is intentionally prohibit
 
 ### Wrapping `<cstdio>` file handle
 
-[ [Run this code](https://godbolt.org/z/YGrdsxzjE) ] [ [Open source file](../examples/module_strong_type/wrapping_cstdio_file_handle.cpp) ]
+[ [Run this code](https://godbolt.org/z/YhTrrGr9d) ] [ [Open source file](../examples/module_strong_type/wrapping_cstdio_file_handle.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Create strongly typed wrapper around <cstdio> file handle
 // (aka 'FILE*') with move-only semantics and RAII cleanup
-using FileHandle = strong_type::Unique<std::FILE*, class FileTag, strong_type::Bind<&std::fclose>>;
+using file_handle = strong_type::unique<FILE*, class file_tag, strong_type::bind<&std::fclose>>;
 
-FileHandle file = std::fopen("temp.txt", "w");
+file_handle file = std::fopen("temp.txt", "w");
 
 // upon destruction invokes 'fclose()' on the internal pointer,
 // same principle works for most handles produced by 'C' APIs
@@ -241,9 +241,9 @@ FileHandle file = std::fopen("temp.txt", "w");
 ### Wrapping OpenGL shader handle
 
 > [!Note]
-> [OpenGL](https://en.wikipedia.org/wiki/OpenGL) is a graphics API written in `C`. It uses `unsigned int` IDs as handles to the objects living in a GPU memory (buffers, shaders, pipelines and etc.). This is a perfect example of an API which greatly benefits from the stronger type safety and automatic cleanup of `strong_type::Unique<>`.
+> [OpenGL](https://en.wikipedia.org/wiki/OpenGL) is a graphics API written in `C`. It uses `unsigned int` IDs as handles to the objects living in a GPU memory (buffers, shaders, pipelines and etc.). This is a perfect example of an API which greatly benefits from the stronger type safety and automatic cleanup of `strong_type::unique<>`.
 
-[ [Run this code](https://godbolt.org/z/bfzzE9jzM) ] [ [Open source file](../examples/module_strong_type/wrapping_opengl_shader_handle.cpp) ]
+[ [Run this code](https://godbolt.org/z/18WTPvhq8) ] [ [Open source file](../examples/module_strong_type/wrapping_opengl_shader_handle.cpp) ]
 
 ```cpp
 // Mock of an OpenGL API
@@ -262,9 +262,9 @@ using namespace utl;
 
 // Create strongly typed wrapper around OpenGL shader handle 
 // (aka 'unsigned int') with move-only semantics and RAII cleanup
-using ShaderHandle = strong_type::Unique<GLuint, class ShaderTag, strong_type::Bind<&glDeleteShader>>;
+using shader_handle = strong_type::unique<GLuint, class shader_tag, strong_type::bind<&glDeleteShader>>;
 
-ShaderHandle shader = glCreateShader(GL_VERTEX_SHADER);
+shader_handle shader = glCreateShader(GL_VERTEX_SHADER);
 
 // <real OpenGL would also have some boilerplate here>
 
@@ -274,17 +274,17 @@ glCompileShader(shader.get());
 
 ### Strongly typed integer unit
 
-[ [Run this code](https://godbolt.org/z/94sPcxbGK) ] [ [Open source file](../examples/module_strong_type/strongly_typed_integer_unit.cpp) ]
+[ [Run this code](https://godbolt.org/z/3bro4cqdd) ] [ [Open source file](../examples/module_strong_type/strongly_typed_integer_unit.cpp) ]
 
 ```cpp
-using ByteOffset = utl::strong_type::Arithmetic<int, struct OffsetTag>;
+using offset_type = utl::strong_type::arithmetic<int, struct offset_tag>;
 
-constexpr ByteOffset buffer_start  = 0;
-constexpr ByteOffset buffer_stride = 3;
+constexpr offset_type buffer_start  = 0;
+constexpr offset_type buffer_stride = 3;
 
 // Perform arithmetics
-static_assert(buffer_start + buffer_stride == ByteOffset{3});
-static_assert(           2 * buffer_stride == ByteOffset{6});
+static_assert(buffer_start + buffer_stride == offset_type{3});
+static_assert(           2 * buffer_stride == offset_type{6});
 
 // Extract value
 static_assert(buffer_stride.get() == 3);
@@ -293,12 +293,12 @@ static_assert(buffer_stride.get() == 3);
 static_assert(static_cast<int>(buffer_stride) == 3);
 
 // Compile time protection
-constexpr int        element_count = 70;
-constexpr ByteOffset buffer_end    = buffer_start + element_count * buffer_stride;
+constexpr int         element_count = 70;
+constexpr offset_type buffer_end    = buffer_start + element_count * buffer_stride;
 
-// > constexpr ByteOffset buffer_end = buffer_start + element_count;
-//   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// > constexpr offset_type buffer_end = buffer_start + element_count;
+//   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //   forgot to multiply by stride, will not compile
 
-static_assert(buffer_end == ByteOffset{0 + 3 * 70});
+static_assert(buffer_end == offset_type{0 + 3 * 70});
 ```
