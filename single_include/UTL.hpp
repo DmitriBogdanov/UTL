@@ -13152,9 +13152,9 @@ using impl::count_difference;
 #ifndef utl_strong_type_headerguard
 #define utl_strong_type_headerguard
 
-#define UTL_STRONG_TYPE_VERSION_MAJOR 1
+#define UTL_STRONG_TYPE_VERSION_MAJOR 2
 #define UTL_STRONG_TYPE_VERSION_MINOR 0
-#define UTL_STRONG_TYPE_VERSION_PATCH 3
+#define UTL_STRONG_TYPE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -13193,7 +13193,7 @@ namespace utl::strong_type::impl {
 //       case of 'std::is_invocable<>', without restrictions the trait deduces variadic to be invocable
 //       and falls into the ill-formed function body which is a compile error
 template <auto function>
-struct Bind {
+struct bind {
     template <class... Args, std::enable_if_t<std::is_invocable_v<decltype(function), Args...>, bool> = true>
     constexpr auto operator()(Args&&... args) const noexcept(noexcept(function(std::forward<Args>(args)...))) {
         return function(std::forward<Args>(args)...);
@@ -13214,7 +13214,7 @@ struct Bind {
 // Examples: OpenGL buffer / shader / program handles.
 
 template <class T, class Tag, class Deleter = void>
-class Unique {
+class unique {
     T    value; // potentially default constructible, but not necessarily
     bool active = false;
 
@@ -13234,12 +13234,12 @@ public:
     using deleter_type = Deleter;
 
     // Move-only semantics
-    Unique(const Unique&)            = delete;
-    Unique& operator=(const Unique&) = delete;
+    unique(const unique&)            = delete;
+    unique& operator=(const unique&) = delete;
 
-    constexpr Unique(Unique&& other) noexcept(nothrow_movable) { *this = std::move(other); }
+    constexpr unique(unique&& other) noexcept(nothrow_movable) { *this = std::move(other); }
 
-    constexpr Unique& operator=(Unique&& other) noexcept(nothrow_movable) {
+    constexpr unique& operator=(unique&& other) noexcept(nothrow_movable) {
         std::swap(this->value, other.value);
         std::swap(this->active, other.active);
 
@@ -13247,10 +13247,10 @@ public:
     }
 
     // Conversion
-    constexpr Unique(T&& new_value) noexcept(nothrow_movable) { *this = std::move(new_value); }
+    constexpr unique(T&& new_value) noexcept(nothrow_movable) { *this = std::move(new_value); }
 
-    constexpr Unique& operator=(T&& new_value) noexcept(nothrow_movable) {
-        this->~Unique(); // don't forget to cleanup existing value
+    constexpr unique& operator=(T&& new_value) noexcept(nothrow_movable) {
+        this->~unique(); // don't forget to cleanup existing value
 
         this->value  = std::move(new_value);
         this->active = true;
@@ -13262,7 +13262,7 @@ public:
     constexpr const T& get() const noexcept { return this->value; }
     constexpr T&       get() noexcept { return this->value; }
 
-    ~Unique() {
+    ~unique() {
         if (this->active) {
             // In MSVC without '/permissive-' or '/Zc:referenceBinding' (which is a subset of '/permissive-')
             // 'std::is_invocable_v<Deleter, T&&>' might be evaluated as 'true' even for deleters that should
@@ -13289,10 +13289,10 @@ public:
 // Trivial deleter case requires a separate specialization with some code duplication because
 //    1) Before C++20 only trivial destructors can be 'constexpr'
 //    2) There is no way to conditionally compile a destructor
-// which means using a trivial 'DefaultDestructor<T>' won't work without sacrificing 'constexpr'.
+// which means using a trivial 'default_destructor<T>' won't work without sacrificing 'constexpr'.
 
 template <class T, class Tag>
-class Unique<T, Tag, void> {
+class unique<T, Tag, void> {
     T value;
 
     static_assert(std::is_move_constructible_v<T>, "Type must be move-constructible.");
@@ -13306,16 +13306,16 @@ public:
     using deleter_type = void;
 
     // Move-only semantics
-    Unique(const Unique&)            = delete;
-    Unique& operator=(const Unique&) = delete;
+    unique(const unique&)            = delete;
+    unique& operator=(const unique&) = delete;
 
-    constexpr Unique(Unique&&)            = default;
-    constexpr Unique& operator=(Unique&&) = default;
+    constexpr unique(unique&&)            = default;
+    constexpr unique& operator=(unique&&) = default;
 
     // Conversion
-    constexpr Unique(T&& other) noexcept(nothrow_movable) { *this = std::move(other); }
+    constexpr unique(T&& other) noexcept(nothrow_movable) { *this = std::move(other); }
 
-    constexpr Unique& operator=(T&& other) noexcept(nothrow_movable) {
+    constexpr unique& operator=(T&& other) noexcept(nothrow_movable) {
         this->value = std::move(other);
 
         return *this;
@@ -13400,7 +13400,7 @@ template <class>
 constexpr bool always_false_v = false;
 
 template <class T, class Tag, class = void>
-class Arithmetic {
+class arithmetic {
     static_assert(always_false_v<T>, "'T' must be an arithmetic type (integral or floating-point).");
 };
 
@@ -13415,7 +13415,7 @@ class Arithmetic {
 // Examples: Screen width, screen height, element count, size in bytes.
 
 template <class T, class Tag>
-class Arithmetic<T, Tag, std::enable_if_t<std::is_integral_v<T>>> {
+class arithmetic<T, Tag, std::enable_if_t<std::is_integral_v<T>>> {
     T value = T{};
 
 public:
@@ -13425,69 +13425,69 @@ public:
     using   tag_type = Tag;
     
     // Copyable semantics
-    constexpr Arithmetic           (const Arithmetic& ) = default;
-    constexpr Arithmetic           (      Arithmetic&&) = default;
-    constexpr Arithmetic& operator=(const Arithmetic& ) = default;
-    constexpr Arithmetic& operator=(      Arithmetic&&) = default;
+    constexpr arithmetic           (const arithmetic& ) = default;
+    constexpr arithmetic           (      arithmetic&&) = default;
+    constexpr arithmetic& operator=(const arithmetic& ) = default;
+    constexpr arithmetic& operator=(      arithmetic&&) = default;
     
     // Conversion
-    constexpr Arithmetic           (T new_value) noexcept : value(new_value) {}
-    constexpr Arithmetic& operator=(T new_value) noexcept { this->value = new_value; return *this; }
+    constexpr arithmetic           (T new_value) noexcept : value(new_value) {}
+    constexpr arithmetic& operator=(T new_value) noexcept { this->value = new_value; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
     constexpr       T& get()       noexcept { return this->value; }
     
     // Increment
-    constexpr Arithmetic& operator++(   ) noexcept {                          ++this->value; return *this; }
-    constexpr Arithmetic& operator--(   ) noexcept {                          --this->value; return *this; }
-    constexpr Arithmetic  operator++(int) noexcept { const auto temp = *this; ++this->value; return  temp; }
-    constexpr Arithmetic  operator--(int) noexcept { const auto temp = *this; --this->value; return  temp; }
+    constexpr arithmetic& operator++(   ) noexcept {                          ++this->value; return *this; }
+    constexpr arithmetic& operator--(   ) noexcept {                          --this->value; return *this; }
+    constexpr arithmetic  operator++(int) noexcept { const auto temp = *this; ++this->value; return  temp; }
+    constexpr arithmetic  operator--(int) noexcept { const auto temp = *this; --this->value; return  temp; }
     
     // Unary operators
-    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return      +this->value ; }
-    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return minus(this->value); }
-    [[nodiscard]] constexpr Arithmetic operator~() const noexcept { return      ~this->value ; }
+    [[nodiscard]] constexpr arithmetic operator+() const noexcept { return      +this->value ; }
+    [[nodiscard]] constexpr arithmetic operator-() const noexcept { return minus(this->value); }
+    [[nodiscard]] constexpr arithmetic operator~() const noexcept { return      ~this->value ; }
     
     // Additive & bitwise operators
-    [[nodiscard]] constexpr Arithmetic operator+(Arithmetic other) const noexcept { return this->value + other.value; }
-    [[nodiscard]] constexpr Arithmetic operator-(Arithmetic other) const noexcept { return this->value - other.value; }
-    [[nodiscard]] constexpr Arithmetic operator&(Arithmetic other) const noexcept { return this->value & other.value; }
-    [[nodiscard]] constexpr Arithmetic operator|(Arithmetic other) const noexcept { return this->value | other.value; }
-    [[nodiscard]] constexpr Arithmetic operator^(Arithmetic other) const noexcept { return this->value ^ other.value; }
+    [[nodiscard]] constexpr arithmetic operator+(arithmetic other) const noexcept { return this->value + other.value; }
+    [[nodiscard]] constexpr arithmetic operator-(arithmetic other) const noexcept { return this->value - other.value; }
+    [[nodiscard]] constexpr arithmetic operator&(arithmetic other) const noexcept { return this->value & other.value; }
+    [[nodiscard]] constexpr arithmetic operator|(arithmetic other) const noexcept { return this->value | other.value; }
+    [[nodiscard]] constexpr arithmetic operator^(arithmetic other) const noexcept { return this->value ^ other.value; }
     
     // Multiplicative operators
-    [[nodiscard]] constexpr Arithmetic operator*(T other) const noexcept { return this->value * other; }
-    [[nodiscard]] constexpr Arithmetic operator/(T other) const noexcept { return this->value / other; }
-    [[nodiscard]] constexpr Arithmetic operator%(T other) const noexcept { return this->value % other; }
+    [[nodiscard]] constexpr arithmetic operator*(T other) const noexcept { return this->value * other; }
+    [[nodiscard]] constexpr arithmetic operator/(T other) const noexcept { return this->value / other; }
+    [[nodiscard]] constexpr arithmetic operator%(T other) const noexcept { return this->value % other; }
     
     // Arithmetic & bitwise augmented assignment
-    [[nodiscard]] constexpr Arithmetic& operator+=(Arithmetic other) noexcept { this->value += other.value; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator-=(Arithmetic other) noexcept { this->value -= other.value; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator^=(Arithmetic other) noexcept { this->value ^= other.value; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator|=(Arithmetic other) noexcept { this->value |= other.value; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator&=(Arithmetic other) noexcept { this->value &= other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator+=(arithmetic other) noexcept { this->value += other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator-=(arithmetic other) noexcept { this->value -= other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator^=(arithmetic other) noexcept { this->value ^= other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator|=(arithmetic other) noexcept { this->value |= other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator&=(arithmetic other) noexcept { this->value &= other.value; return *this; }
     
     // Multiplicative augmented assignment
-    [[nodiscard]] constexpr Arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator%=(T other) noexcept { this->value %= other; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator%=(T other) noexcept { this->value %= other; return *this; }
     
     // Comparison
-    [[nodiscard]] constexpr bool operator< (Arithmetic other) const noexcept { return this->value <  other.value; }
-    [[nodiscard]] constexpr bool operator<=(Arithmetic other) const noexcept { return this->value <= other.value; }
-    [[nodiscard]] constexpr bool operator> (Arithmetic other) const noexcept { return this->value >  other.value; }
-    [[nodiscard]] constexpr bool operator>=(Arithmetic other) const noexcept { return this->value >= other.value; }
-    [[nodiscard]] constexpr bool operator==(Arithmetic other) const noexcept { return this->value == other.value; }
-    [[nodiscard]] constexpr bool operator!=(Arithmetic other) const noexcept { return this->value != other.value; }
+    [[nodiscard]] constexpr bool operator< (arithmetic other) const noexcept { return this->value <  other.value; }
+    [[nodiscard]] constexpr bool operator<=(arithmetic other) const noexcept { return this->value <= other.value; }
+    [[nodiscard]] constexpr bool operator> (arithmetic other) const noexcept { return this->value >  other.value; }
+    [[nodiscard]] constexpr bool operator>=(arithmetic other) const noexcept { return this->value >= other.value; }
+    [[nodiscard]] constexpr bool operator==(arithmetic other) const noexcept { return this->value == other.value; }
+    [[nodiscard]] constexpr bool operator!=(arithmetic other) const noexcept { return this->value != other.value; }
     
     // Shift operators
-    [[nodiscard]] constexpr Arithmetic operator<<(std::size_t shift) const noexcept { return lshift(this->value, shift); }
-    [[nodiscard]] constexpr Arithmetic operator>>(std::size_t shift) const noexcept { return rshift(this->value, shift); }
+    [[nodiscard]] constexpr arithmetic operator<<(std::size_t shift) const noexcept { return lshift(this->value, shift); }
+    [[nodiscard]] constexpr arithmetic operator>>(std::size_t shift) const noexcept { return rshift(this->value, shift); }
     
     // Shift augmented assignment
-    [[nodiscard]] constexpr Arithmetic operator<<=(std::size_t shift) noexcept { *this = *this << shift; return *this; }
-    [[nodiscard]] constexpr Arithmetic operator>>=(std::size_t shift) noexcept { *this = *this >> shift; return *this; }
+    [[nodiscard]] constexpr arithmetic operator<<=(std::size_t shift) noexcept { *this = *this << shift; return *this; }
+    [[nodiscard]] constexpr arithmetic operator>>=(std::size_t shift) noexcept { *this = *this >> shift; return *this; }
     
     // Explicit cast 
     template <class To>
@@ -13507,7 +13507,7 @@ public:
 // Examples: Physical width, physical height, velocity.
 
 template <class T, class Tag>
-class Arithmetic<T, Tag, std::enable_if_t<std::is_floating_point_v<T>>> {
+class arithmetic<T, Tag, std::enable_if_t<std::is_floating_point_v<T>>> {
     T value = T{};
 
 public:
@@ -13517,46 +13517,46 @@ public:
     using   tag_type = Tag;
     
     // Copyable semantics
-    constexpr Arithmetic           (const Arithmetic& ) = default;
-    constexpr Arithmetic           (      Arithmetic&&) = default;
-    constexpr Arithmetic& operator=(const Arithmetic& ) = default;
-    constexpr Arithmetic& operator=(      Arithmetic&&) = default;
+    constexpr arithmetic           (const arithmetic& ) = default;
+    constexpr arithmetic           (      arithmetic&&) = default;
+    constexpr arithmetic& operator=(const arithmetic& ) = default;
+    constexpr arithmetic& operator=(      arithmetic&&) = default;
     
     // Conversion
-    constexpr Arithmetic           (T other) noexcept : value(other) {}
-    constexpr Arithmetic& operator=(T other) noexcept { this->value = other; return *this; }
+    constexpr arithmetic           (T other) noexcept : value(other) {}
+    constexpr arithmetic& operator=(T other) noexcept { this->value = other; return *this; }
 
     // Accessing the underlying value
     constexpr const T& get() const noexcept { return this->value; }
     constexpr       T& get()       noexcept { return this->value; }
     
     // Unary operators
-    [[nodiscard]] constexpr Arithmetic operator+() const noexcept { return +this->value; }
-    [[nodiscard]] constexpr Arithmetic operator-() const noexcept { return -this->value; }
+    [[nodiscard]] constexpr arithmetic operator+() const noexcept { return +this->value; }
+    [[nodiscard]] constexpr arithmetic operator-() const noexcept { return -this->value; }
     
     // Additive operators
-    [[nodiscard]] constexpr Arithmetic operator+(Arithmetic other) const noexcept { return this->value + other.value; }
-    [[nodiscard]] constexpr Arithmetic operator-(Arithmetic other) const noexcept { return this->value - other.value; }
+    [[nodiscard]] constexpr arithmetic operator+(arithmetic other) const noexcept { return this->value + other.value; }
+    [[nodiscard]] constexpr arithmetic operator-(arithmetic other) const noexcept { return this->value - other.value; }
     
     // Multiplicative operators
-    [[nodiscard]] constexpr Arithmetic operator*(T other) const noexcept { return this->value * other; }
-    [[nodiscard]] constexpr Arithmetic operator/(T other) const noexcept { return this->value / other; }
+    [[nodiscard]] constexpr arithmetic operator*(T other) const noexcept { return this->value * other; }
+    [[nodiscard]] constexpr arithmetic operator/(T other) const noexcept { return this->value / other; }
     
     // Arithmetic augmented assignment
-    [[nodiscard]] constexpr Arithmetic& operator+=(Arithmetic other) noexcept { this->value += other.value; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator-=(Arithmetic other) noexcept { this->value -= other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator+=(arithmetic other) noexcept { this->value += other.value; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator-=(arithmetic other) noexcept { this->value -= other.value; return *this; }
     
     // Multiplicative augmented assignment
-    [[nodiscard]] constexpr Arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
-    [[nodiscard]] constexpr Arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator*=(T other) noexcept { this->value *= other; return *this; }
+    [[nodiscard]] constexpr arithmetic& operator/=(T other) noexcept { this->value /= other; return *this; }
     
     // Comparison
-    [[nodiscard]] constexpr bool operator< (Arithmetic other) const noexcept { return this->value <  other.value; }
-    [[nodiscard]] constexpr bool operator<=(Arithmetic other) const noexcept { return this->value <= other.value; }
-    [[nodiscard]] constexpr bool operator> (Arithmetic other) const noexcept { return this->value >  other.value; }
-    [[nodiscard]] constexpr bool operator>=(Arithmetic other) const noexcept { return this->value >= other.value; }
-    [[nodiscard]] constexpr bool operator==(Arithmetic other) const noexcept { return this->value == other.value; }
-    [[nodiscard]] constexpr bool operator!=(Arithmetic other) const noexcept { return this->value != other.value; }
+    [[nodiscard]] constexpr bool operator< (arithmetic other) const noexcept { return this->value <  other.value; }
+    [[nodiscard]] constexpr bool operator<=(arithmetic other) const noexcept { return this->value <= other.value; }
+    [[nodiscard]] constexpr bool operator> (arithmetic other) const noexcept { return this->value >  other.value; }
+    [[nodiscard]] constexpr bool operator>=(arithmetic other) const noexcept { return this->value >= other.value; }
+    [[nodiscard]] constexpr bool operator==(arithmetic other) const noexcept { return this->value == other.value; }
+    [[nodiscard]] constexpr bool operator!=(arithmetic other) const noexcept { return this->value != other.value; }
     
     // Explicit cast 
     template <class To>
@@ -13570,13 +13570,13 @@ public:
 
 // Inverted multiplication order
 template <class T, class Tag>
-[[nodiscard]] constexpr Arithmetic<T, Tag> operator*(T lhs, Arithmetic<T, Tag> rhs) noexcept {
+[[nodiscard]] constexpr arithmetic<T, Tag> operator*(T lhs, arithmetic<T, Tag> rhs) noexcept {
     return rhs * lhs;
 }
 
 // Makes type usable with 'std::swap' (see https://en.cppreference.com/w/cpp/named_req/Swappable.html)
 template <class T, class Tag>
-constexpr void swap(Arithmetic<T, Tag> lhs, Arithmetic<T, Tag> rhs) noexcept {
+constexpr void swap(arithmetic<T, Tag> lhs, arithmetic<T, Tag> rhs) noexcept {
     const auto tmp = lhs;
 
     lhs = rhs;
@@ -13589,9 +13589,9 @@ constexpr void swap(Arithmetic<T, Tag> lhs, Arithmetic<T, Tag> rhs) noexcept {
 
 namespace utl::strong_type {
 
-using impl::Bind;
-using impl::Unique;
-using impl::Arithmetic;
+using impl::bind;
+using impl::unique;
+using impl::arithmetic;
 
 } // namespace utl::strong_type
 

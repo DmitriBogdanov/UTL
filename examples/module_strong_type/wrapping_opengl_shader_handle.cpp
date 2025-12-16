@@ -15,9 +15,9 @@ int main() {
     
     // Create strongly typed wrapper around OpenGL shader handle
     // (unsigned int) with move-only semantics and RAII cleanup
-    using ShaderHandle = strong_type::Unique<GLuint, class ShaderTag, strong_type::Bind<&glDeleteShader>>;
+    using shader_handle = strong_type::unique<GLuint, class shader_tag, strong_type::bind<&glDeleteShader>>;
     
-    ShaderHandle shader = glCreateShader(GL_VERTEX_SHADER);
+    shader_handle shader = glCreateShader(GL_VERTEX_SHADER);
     
     // ...
     

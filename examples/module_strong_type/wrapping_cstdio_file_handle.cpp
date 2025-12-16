@@ -13,9 +13,9 @@ int main() {
     
     // Create strongly typed wrapper around <cstdio> file handle
     // (FILE*) with move-only semantics and RAII cleanup
-    using FileHandle = strong_type::Unique<FILE*, class FileTag, strong_type::Bind<&std::fclose>>;
+    using file_handle = strong_type::unique<FILE*, class file_tag, strong_type::bind<&std::fclose>>;
     
-    FileHandle file = std::fopen("temp.txt", "w");
+    file_handle file = std::fopen("temp.txt", "w");
     
     // calls 'fclose()' on internal pointer upon destruction
 }

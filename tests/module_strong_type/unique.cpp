@@ -9,18 +9,18 @@
 // ____________________ IMPLEMENTATION ____________________
 
 // Handle state tracker decoupled from the lifetime of the actual handle so we can test it
-struct State {
+struct handle_state {
     bool initialized = false;
     bool destroyed   = false;
 };
 
 // Handle with init & destroy functions to simulate a system API
-struct AbstractHandle {
-    State* state;
+struct abstract_handle {
+    handle_state* state;
 };
 
-AbstractHandle create_handle(State& state) {
-    AbstractHandle handle{};
+abstract_handle create_handle(handle_state& state) {
+    abstract_handle handle{};
 
     handle.state              = &state;
     handle.state->initialized = true;
@@ -28,23 +28,24 @@ AbstractHandle create_handle(State& state) {
     return handle;
 }
 
-void destroy_handle(AbstractHandle& handle) {
+void destroy_handle(abstract_handle& handle) {
     handle.state->destroyed = true;
     handle.state            = nullptr;
 }
 
 TEST_CASE("Unique / Abstract handle") {
-    using Handle = strong_type::Unique<AbstractHandle, class HandleTag, strong_type::Bind<&destroy_handle>>;
+    using handle = strong_type::unique<abstract_handle, class HandleTag, strong_type::bind<&destroy_handle>>;
 
-    State state;
+    handle_state state;
 
     {
         CHECK(!state.initialized);
 
-        Handle handle = create_handle(state);
+        handle handle = create_handle(state);
         CHECK(state.initialized);
 
         CHECK(!state.destroyed);
     }
+    
     CHECK(state.destroyed);
 }
