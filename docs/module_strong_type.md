@@ -1,4 +1,4 @@
-[<img src ="images/badge_language_cpp_20.svg">](https://en.cppreference.com/w/cpp/17.html)
+[<img src ="images/badge_language_cpp_17.svg">](https://en.cppreference.com/w/cpp/17.html)
 [<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](guide_versioning.md)
 [<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/UTL/)
@@ -21,19 +21,19 @@
 By default, typedefs in `C` and `C++` are **weak**, which means separate typedefs don't count as distinct types:
 
 ```cpp
-using Offset = std::size_t;
-using Size   = std::size_t;
+using offset_type = std::size_t;
+using size_type   = std::size_t;
 
-static_assert(std::is_same_v<Offset, Size>); // types are the same
+static_assert(std::is_same_v<offset_type, size_type>); // types are the same
 ```
 
 **Strong typedefs** can be used to mark types as distinct:
 
 ```cpp
-using Offset = strong_type::Arithmetic<std::size_t, class OffsetTag>;
-using Size   = strong_type::Arithmetic<std::size_t, class   SizeTag>;
+using offset_type = strong_type::arithmetic<std::size_t, class offset_tag>;
+using size_type   = strong_type::arithmetic<std::size_t, class   size_tag>;
 
-static_assert(!std::is_same_v<Offset, Size>); // types are different
+static_assert(!std::is_same_v<offset_type, size_type>); // types are different
 ```
 
 This is useful for improving type safety. Arithmetic strong types act like thin wrappers around the underlying value and support all of the usual operations, but preserve type and disallow unwanted implicit conversions at no runtime cost.
