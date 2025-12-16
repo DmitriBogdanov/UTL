@@ -15,8 +15,8 @@ add_library(utl_lib_single_include INTERFACE)
 target_include_directories(utl_lib_include        INTERFACE "${PROJECT_SOURCE_DIR}/include"       )
 target_include_directories(utl_lib_single_include INTERFACE "${PROJECT_SOURCE_DIR}/single_include")
 
-target_compile_features(utl_lib_include        INTERFACE cxx_std_17)
-target_compile_features(utl_lib_single_include INTERFACE cxx_std_17)
+target_compile_features(utl_lib_include        INTERFACE cxx_std_20)
+target_compile_features(utl_lib_single_include INTERFACE cxx_std_20)
 
 add_library(UTL::include        ALIAS utl_lib_include       )
 add_library(UTL::single_include ALIAS utl_lib_single_include)
@@ -31,8 +31,8 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
     include(CTest)
     enable_testing() # should be called before adding directories with tests
     
-    add_subdirectory("tests")
-    add_subdirectory("examples")
+    add_subdirectory("tests"    )
+    add_subdirectory("examples" )
     add_subdirectory("auxiliary") # generating data & figures for documentation
     
 endif()

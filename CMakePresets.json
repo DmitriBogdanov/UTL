@@ -12,10 +12,7 @@
             "name": "base",
             "description": "Common configuration variables.",
             "hidden": true,
-            "binaryDir": "build/",
-            "cacheVariables": {
-                "UTL_COMPILE_FEATURES": "cxx_std_20"
-            }
+            "binaryDir": "build/"
         },
         {
             "name": "gcc",
