@@ -13,7 +13,7 @@ int main() {
     // workload is very even so we can use coarser grains than by default
     const std::size_t grain_size = 200'000 / parallel::get_thread_count();
     
-    auto future = parallel::awaitable_loop(parallel::IndexRange<std::size_t>{0, 200'000, grain_size},
+    auto future = parallel::awaitable_loop(parallel::index_range<std::size_t>{0, 200'000, grain_size},
         [&](std::size_t i){ c[i] = a[i] + b[i]; }
     );
     

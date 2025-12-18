@@ -208,27 +208,27 @@ int main() {
     bench.title("Small non-recursive tasks");
     benchmark_thread_pool<SerialExecutor            , SmallTask>("Serial"              );
     benchmark_thread_pool<StdAsyncExecutor          , SmallTask>("std::async()"        );
-    benchmark_thread_pool<parallel::ThreadPool      , SmallTask>("parallel::ThreadPool");
+    benchmark_thread_pool<parallel::thread_pool     , SmallTask>("parallel::ThreadPool");
     benchmark_thread_pool<BSThreadPoolExecutor      , SmallTask>("BS::thread_pool"     );
     benchmark_thread_pool<ProgschjThreadPoolExecutor, SmallTask>("progschj/ThreadPool" );
     
     bench.title("Large non-recursive tasks");
     benchmark_thread_pool<SerialExecutor            , LargeTask>("Serial"              );
     benchmark_thread_pool<StdAsyncExecutor          , LargeTask>("std::async()"        );
-    benchmark_thread_pool<parallel::ThreadPool      , LargeTask>("parallel::ThreadPool");
+    benchmark_thread_pool<parallel::thread_pool     , LargeTask>("parallel::ThreadPool");
     benchmark_thread_pool<BSThreadPoolExecutor      , LargeTask>("BS::thread_pool"     );
     benchmark_thread_pool<ProgschjThreadPoolExecutor, LargeTask>("progschj/ThreadPool" );
     
     bench.title("Shallow recursive tasks");
-    benchmark_thread_pool<SerialExecutor      , ShallowRecursiveTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor    , ShallowRecursiveTask>("std::async()"        );
-    benchmark_thread_pool<parallel::ThreadPool, ShallowRecursiveTask>("parallel::ThreadPool");
+    benchmark_thread_pool<SerialExecutor       , ShallowRecursiveTask>("Serial"              );
+    benchmark_thread_pool<StdAsyncExecutor     , ShallowRecursiveTask>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool, ShallowRecursiveTask>("parallel::ThreadPool");
     // others deadlock
     
     bench.title("Deep recursive tasks");
-    benchmark_thread_pool<SerialExecutor      , DeepRecursiveTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor    , DeepRecursiveTask>("std::async()"        );
-    benchmark_thread_pool<parallel::ThreadPool, DeepRecursiveTask>("parallel::ThreadPool");
+    benchmark_thread_pool<SerialExecutor       , DeepRecursiveTask>("Serial"              );
+    benchmark_thread_pool<StdAsyncExecutor     , DeepRecursiveTask>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool, DeepRecursiveTask>("parallel::ThreadPool");
     // others deadlock
     // clang-format on
 }

@@ -5,7 +5,7 @@
 int main() {
     using namespace utl;
     
-    parallel::ThreadPool pool; // uses as many threads as it detects
+    parallel::thread_pool pool; // uses as many threads as it detects
     
     pool.detached_task([]{ std::cout << "Hello from the task\n"; });
     

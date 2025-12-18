@@ -8179,9 +8179,9 @@ return_type operator*(const L& left, const R& right) {
 #ifndef utl_parallel_headerguard
 #define utl_parallel_headerguard
 
-#define UTL_PARALLEL_VERSION_MAJOR 2
-#define UTL_PARALLEL_VERSION_MINOR 1
-#define UTL_PARALLEL_VERSION_PATCH 4
+#define UTL_PARALLEL_VERSION_MAJOR 3
+#define UTL_PARALLEL_VERSION_MINOR 0
+#define UTL_PARALLEL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -8259,11 +8259,11 @@ inline thread_local std::optional<void*>       thread_pool_ptr = std::nullopt;
 // --- Thread pool ---
 // ===================
 
-class ThreadPool;
+class thread_pool;
 
 namespace ws_this_thread { // same this as thread introspection from public API, but more convenient for internal use
-inline thread_local ThreadPool* thread_pool_ptr = nullptr;
-inline thread_local std::size_t worker_index    = std::size_t(-1);
+inline thread_local thread_pool* thread_pool_ptr = nullptr;
+inline thread_local std::size_t  worker_index    = std::size_t(-1);
 }; // namespace ws_this_thread
 
 inline std::size_t splitmix64() noexcept {
@@ -8275,7 +8275,7 @@ inline std::size_t splitmix64() noexcept {
     return static_cast<std::size_t>(result ^ (result >> 31));
 } // very fast & simple PRNG
 
-class ThreadPool {
+class thread_pool {
     using task_type         = std::function<void()>;
     using global_queue_type = std::queue<task_type>;
     using local_queue_type  = std::deque<task_type>;
@@ -8409,9 +8409,9 @@ private:
     }
 
 public:
-    explicit ThreadPool(std::size_t count = std::thread::hardware_concurrency()) { this->spawn_workers(count); }
+    explicit thread_pool(std::size_t count = std::thread::hardware_concurrency()) { this->spawn_workers(count); }
 
-    ~ThreadPool() noexcept {
+    ~thread_pool() noexcept {
         try {
             this->wait();
             this->terminate_workers();
@@ -8423,7 +8423,7 @@ public:
         std::future<T> future;
 
         void fallthrough() const {
-            ThreadPool* pool = ws_this_thread::thread_pool_ptr;
+            thread_pool* pool = ws_this_thread::thread_pool_ptr;
 
             if (!pool) return;
 
@@ -8564,7 +8564,7 @@ public:
 };
 
 template <class T = void>
-using Future = ThreadPool::future_type<T>;
+using future = thread_pool::future_type<T>;
 
 // ==============
 // --- Ranges ---
@@ -8617,57 +8617,61 @@ constexpr std::size_t default_grains_per_thread = 4;
 // -------------
 
 template <class It>
-struct Range {
+struct iterator_range {
     It          begin;
     It          end;
     std::size_t grain_size;
 
-    Range() = delete;
+    iterator_range() = delete;
 
-    constexpr Range(It begin, It end, std::size_t grain_size) : begin(begin), end(end), grain_size(grain_size) {}
+    constexpr iterator_range(It begin, It end, std::size_t grain_size)
+        : begin(begin), end(end), grain_size(grain_size) {}
 
-    Range(It begin, It end)
-        : Range(begin, end, max_size(1, (end - begin) / (hardware_concurrency() * default_grains_per_thread))) {}
+    iterator_range(It begin, It end)
+        : iterator_range(begin, end,
+                         max_size(1, (end - begin) / (hardware_concurrency() * default_grains_per_thread))) {}
 
 
     template <class Container, require<has_const_iter<Container>::value> = true>
-    Range(const Container& container) : Range(container.begin(), container.end()) {}
+    iterator_range(const Container& container) : iterator_range(container.begin(), container.end()) {}
 
     template <class Container, require<has_iter<Container>::value> = true>
-    Range(Container& container) : Range(container.begin(), container.end()) {}
+    iterator_range(Container& container) : iterator_range(container.begin(), container.end()) {}
 }; // requires random-access iterator, but no good way to express that before C++20 concepts
 
 // CTAD for deducing iterator range from a container
 template <class Container>
-Range(const Container& container) -> Range<typename Container::const_iterator>;
+iterator_range(const Container& container) -> iterator_range<typename Container::const_iterator>;
 
 template <class Container>
-Range(Container& container) -> Range<typename Container::iterator>;
+iterator_range(Container& container) -> iterator_range<typename Container::iterator>;
 
 // --- Index range ---
 // -------------------
 
 template <class Idx = std::ptrdiff_t>
-struct IndexRange {
+struct index_range {
     Idx         first;
     Idx         last;
     std::size_t grain_size;
 
-    IndexRange() = delete;
+    index_range() = delete;
 
-    constexpr IndexRange(Idx first, Idx last, std::size_t grain_size)
+    constexpr index_range(Idx first, Idx last, std::size_t grain_size)
         : first(first), last(last), grain_size(grain_size) {}
 
-    IndexRange(Idx first, Idx last)
-        : IndexRange(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {}
+    index_range(Idx first, Idx last)
+        : index_range(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {
+    }
 
     template <class Idx1, class Idx2>
-    constexpr IndexRange(Idx1 first, Idx2 last, std::size_t grain_size)
+    constexpr index_range(Idx1 first, Idx2 last, std::size_t grain_size)
         : first(first), last(last), grain_size(grain_size) {}
 
     template <class Idx1, class Idx2>
-    IndexRange(Idx1 first, Idx2 last)
-        : IndexRange(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {}
+    index_range(Idx1 first, Idx2 last)
+        : index_range(first, last, max_size(1, (last - first) / (hardware_concurrency() * default_grains_per_thread))) {
+    }
 };
 
 // Note: It is common to have a ranges from 'int' to 'std::size_t' (for example 'IndexRange{0, vec.size()}'),
@@ -8688,8 +8692,8 @@ struct IndexRange {
 // 'static_assert()' only supports string literals, cannot use constexpr variable here, assert itself
 // shouldn't be included in the macro as it makes error messages uglier due to macro expansion
 
-template <class Backend = ThreadPool>
-struct Scheduler {
+template <class Backend = thread_pool>
+struct scheduler {
 
     // --- Backend ---
     // ---------------
@@ -8700,7 +8704,7 @@ struct Scheduler {
     using future_type = typename Backend::template future_type<T>;
 
     template <class... Args>
-    explicit Scheduler(Args&&... args) : backend(std::forward<Args>(args)...) {}
+    explicit scheduler(Args&&... args) : backend(std::forward<Args>(args)...) {}
 
     // --- Task API ---
     // ----------------
@@ -8721,14 +8725,14 @@ struct Scheduler {
     // - 'Range' overloads (6) -
 
     template <class It, class F, require_invocable<F, It, It> = true> // blocked loop iteration overload
-    void detached_loop(Range<It> range, F&& f) {
+    void detached_loop(iterator_range<It> range, F&& f) {
         for (It it = range.begin; it < range.end; it += min_size(range.grain_size, range.end - it))
             this->detached_task(f, it, it + min_size(range.grain_size, range.end - it));
         // 'min_size(...)' bit takes care of the unevenly sized tail segment
     }
 
     template <class It, class F, require_invocable<F, It> = true> // single loop iteration overload
-    void detached_loop(Range<It> range, F&& f) {
+    void detached_loop(iterator_range<It> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](It low, It high) { // combine individual index
             for (It it = low; it < high; ++it) f(it);                    // calls into blocks and forward
         }; // into a blocked loop iteration overload
@@ -8736,7 +8740,7 @@ struct Scheduler {
     }
 
     template <class It, class F, require_invocable<F, It, It> = true>
-    void blocking_loop(Range<It> range, F&& f) {
+    void blocking_loop(iterator_range<It> range, F&& f) {
         std::vector<future_type<>> futures;
 
         for (It it = range.begin; it < range.end; it += min_size(range.grain_size, range.end - it))
@@ -8746,7 +8750,7 @@ struct Scheduler {
     }
 
     template <class It, class F, require_invocable<F, It> = true>
-    void blocking_loop(Range<It> range, F&& f) {
+    void blocking_loop(iterator_range<It> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](It low, It high) {
             for (It it = low; it < high; ++it) f(it);
         };
@@ -8754,7 +8758,7 @@ struct Scheduler {
     }
 
     template <class It, class F, require_invocable<F, It, It> = true>
-    future_type<> awaitable_loop(Range<It> range, F&& f) {
+    future_type<> awaitable_loop(iterator_range<It> range, F&& f) {
         static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
 
         auto submit_loop = [this, range, f = std::forward<F>(f)] { this->blocking_loop(range, f); };
@@ -8766,7 +8770,7 @@ struct Scheduler {
     }
 
     template <class It, class F, require_invocable<F, It> = true>
-    future_type<> awaitable_loop(Range<It> range, F&& f) {
+    future_type<> awaitable_loop(iterator_range<It> range, F&& f) {
         static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
 
         auto iterate_block = [f = std::forward<F>(f)](It low, It high) {
@@ -8778,13 +8782,13 @@ struct Scheduler {
     // - 'IndexRange' overloads (6) -
 
     template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
-    void detached_loop(IndexRange<Idx> range, F&& f) {
+    void detached_loop(index_range<Idx> range, F&& f) {
         for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
             this->detached_task(f, i, static_cast<Idx>(min_size(i + range.grain_size, range.last)));
     }
 
     template <class Idx, class F, require_invocable<F, Idx> = true>
-    void detached_loop(IndexRange<Idx> range, F&& f) {
+    void detached_loop(index_range<Idx> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
             for (Idx i = low; i < high; ++i) f(i);
         };
@@ -8792,7 +8796,7 @@ struct Scheduler {
     }
 
     template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
-    void blocking_loop(IndexRange<Idx> range, F&& f) {
+    void blocking_loop(index_range<Idx> range, F&& f) {
         std::vector<future_type<>> futures;
 
         for (Idx i = range.first; i < range.last; i += static_cast<Idx>(range.grain_size))
@@ -8803,7 +8807,7 @@ struct Scheduler {
     }
 
     template <class Idx, class F, require_invocable<F, Idx> = true>
-    void blocking_loop(IndexRange<Idx> range, F&& f) {
+    void blocking_loop(index_range<Idx> range, F&& f) {
         auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
             for (Idx i = low; i < high; ++i) f(i);
         };
@@ -8811,7 +8815,7 @@ struct Scheduler {
     }
 
     template <class Idx, class F, require_invocable<F, Idx, Idx> = true>
-    future_type<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+    future_type<> awaitable_loop(index_range<Idx> range, F&& f) {
         static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
 
         auto submit_loop = [this, range, f = std::forward<F>(f)] { this->blocking_loop(range, f); };
@@ -8819,7 +8823,7 @@ struct Scheduler {
     }
 
     template <class Idx, class F, require_invocable<F, Idx> = true>
-    future_type<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+    future_type<> awaitable_loop(index_range<Idx> range, F&& f) {
         static_assert(is_recursive_v<future_type<>>, utl_parallel_assert_message);
 
         auto iterate_block = [f = std::forward<F>(f)](Idx low, Idx high) {
@@ -8832,17 +8836,18 @@ struct Scheduler {
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true> // without SFINAE reqs
     void detached_loop(Container&& container, F&& f) {                                         // such overloads would
-        this->detached_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));    // always get picked
+        this->detached_loop(iterator_range{std::forward<Container>(container)},
+                            std::forward<F>(f)); // always get picked
     } // over the others
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
     void blocking_loop(Container&& container, F&& f) {
-        this->blocking_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));
+        this->blocking_loop(iterator_range{std::forward<Container>(container)}, std::forward<F>(f));
     }
 
     template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
     future_type<> awaitable_loop(Container&& container, F&& f) {
-        return this->awaitable_loop(Range{std::forward<Container>(container)}, std::forward<F>(f));
+        return this->awaitable_loop(iterator_range{std::forward<Container>(container)}, std::forward<F>(f));
     }
 
     // --- Parallel-reduce API ---
@@ -8851,13 +8856,13 @@ struct Scheduler {
     // - 'Range' overloads (2) -
 
     template <class It, class Op, class R = typename It::value_type>
-    R blocking_reduce(Range<It> range, Op&& op) {
+    R blocking_reduce(iterator_range<It> range, Op&& op) {
         if (range.begin == range.end) throw std::runtime_error("Reduction over an empty range is undefined");
 
         R          result = *range.begin;
         std::mutex result_mutex;
 
-        this->blocking_loop(Range<It>{range.begin + 1, range.end}, [&](It low, It high) {
+        this->blocking_loop(iterator_range<It>{range.begin + 1, range.end}, [&](It low, It high) {
             R partial_result = *low;
             for (auto it = low + 1; it != high; ++it) partial_result = op(partial_result, *it);
 
@@ -8869,7 +8874,7 @@ struct Scheduler {
     }
 
     template <class It, class Op, class R = typename It::value_type>
-    future_type<R> awaitable_reduce(Range<It> range, Op&& op) {
+    future_type<R> awaitable_reduce(iterator_range<It> range, Op&& op) {
         auto submit_reduce = [this, range, op = std::forward<Op>(op)] { return this->blocking_reduce(range, op); };
         return this->awaitable_task(std::move(submit_reduce));
     }
@@ -8878,12 +8883,12 @@ struct Scheduler {
 
     template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
     R blocking_reduce(Container&& container, Op&& op) {
-        return this->blocking_reduce(Range{std::forward<Container>(container)}, std::forward<Op>(op));
+        return this->blocking_reduce(iterator_range{std::forward<Container>(container)}, std::forward<Op>(op));
     }
 
     template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
     future_type<R> awaitable_reduce(Container&& container, Op&& op) {
-        return this->awaitable_reduce(Range{std::forward<Container>(container)}, std::forward<Op>(op));
+        return this->awaitable_reduce(iterator_range{std::forward<Container>(container)}, std::forward<Op>(op));
     }
 };
 
@@ -8954,7 +8959,7 @@ struct max<void> {
 // A convenient copy of the threadpool & scheduler API hooked up to a global lazily-initialized thread pool
 
 inline auto& global_scheduler() {
-    static Scheduler scheduler;
+    static scheduler scheduler;
     return scheduler;
 }
 
@@ -8983,39 +8988,39 @@ void detached_task(F&& f, Args&&... args) {
 }
 
 template <class F, class... Args, class R = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>
-Future<R> awaitable_task(F&& f, Args&&... args) {
+future<R> awaitable_task(F&& f, Args&&... args) {
     return global_scheduler().awaitable_task(std::forward<F>(f), std::forward<Args>(args)...);
 }
 
 // - Parallel-for API -
 
 template <class It, class F>
-void detached_loop(Range<It> range, F&& f) {
+void detached_loop(iterator_range<It> range, F&& f) {
     global_scheduler().detached_loop(range, std::forward<F>(f));
 }
 
 template <class It, class F>
-void blocking_loop(Range<It> range, F&& f) {
+void blocking_loop(iterator_range<It> range, F&& f) {
     global_scheduler().blocking_loop(range, std::forward<F>(f));
 }
 
 template <class It, class F>
-auto awaitable_loop(Range<It> range, F&& f) {
+auto awaitable_loop(iterator_range<It> range, F&& f) {
     return global_scheduler().awaitable_loop(range, std::forward<F>(f));
 }
 
 template <class Idx, class F>
-void detached_loop(IndexRange<Idx> range, F&& f) {
+void detached_loop(index_range<Idx> range, F&& f) {
     global_scheduler().detached_loop(range, std::forward<F>(f));
 }
 
 template <class Idx, class F>
-void blocking_loop(IndexRange<Idx> range, F&& f) {
+void blocking_loop(index_range<Idx> range, F&& f) {
     global_scheduler().blocking_loop(range, std::forward<F>(f));
 }
 
 template <class Idx, class F>
-Future<> awaitable_loop(IndexRange<Idx> range, F&& f) {
+future<> awaitable_loop(index_range<Idx> range, F&& f) {
     return global_scheduler().awaitable_loop(range, std::forward<F>(f));
 }
 
@@ -9030,17 +9035,17 @@ void blocking_loop(Container&& container, F&& f) {
 }
 
 template <class Container, class F, require_has_some_iter<std::decay_t<Container>> = true>
-Future<> awaitable_loop(Container&& container, F&& f) {
+future<> awaitable_loop(Container&& container, F&& f) {
     return global_scheduler().awaitable_loop(std::forward<Container>(container), std::forward<F>(f));
 }
 
 template <class It, class Op, class R = typename It::value_type>
-R blocking_reduce(Range<It> range, Op&& op) {
+R blocking_reduce(iterator_range<It> range, Op&& op) {
     return global_scheduler().blocking_reduce(range, std::forward<Op>(op));
 }
 
 template <class It, class Op, class R = typename It::value_type>
-Future<R> awaitable_reduce(Range<It> range, Op&& op) {
+future<R> awaitable_reduce(iterator_range<It> range, Op&& op) {
     return global_scheduler().awaitable_reduce(range, std::forward<Op>(op));
 }
 
@@ -9050,7 +9055,7 @@ R blocking_reduce(Container&& container, Op&& op) {
 }
 
 template <class Container, class Op, class R = typename std::decay_t<Container>::value_type>
-Future<R> awaitable_reduce(Container&& container, Op&& op) {
+future<R> awaitable_reduce(Container&& container, Op&& op) {
     return global_scheduler().awaitable_reduce(std::forward<Container>(container), std::forward<Op>(op));
 }
 
@@ -9060,12 +9065,12 @@ Future<R> awaitable_reduce(Container&& container, Op&& op) {
 
 namespace utl::parallel {
 
-using impl::Scheduler;
-using impl::ThreadPool;
-using impl::Future;
+using impl::scheduler;
+using impl::thread_pool;
+using impl::future;
 
-using impl::Range;
-using impl::IndexRange;
+using impl::iterator_range;
+using impl::index_range;
 
 using impl::sum;
 using impl::prod;

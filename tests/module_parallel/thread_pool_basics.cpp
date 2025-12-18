@@ -14,7 +14,7 @@ constexpr std::size_t repeats = 10;
 
 TEST_CASE("Threadpool basics / Construct and resize") {
     repeat(repeats, [] {
-        parallel::ThreadPool pool;
+        parallel::thread_pool pool;
 
         println("Resizing to 3");
         pool.set_thread_count(3);
@@ -36,7 +36,7 @@ TEST_CASE("Threadpool basics / Construct and resize") {
 
 TEST_CASE("Threadpool basics / Awaitable task with arguments") {
     repeat(repeats, [] {
-        parallel::ThreadPool pool(4);
+        parallel::thread_pool pool(4);
 
         const auto compute = [](int x) { return x + 32; };
         auto       future  = pool.awaitable_task(compute, 10);
@@ -48,7 +48,7 @@ TEST_CASE("Threadpool basics / Awaitable task with arguments") {
 
 TEST_CASE("Threadpool basics / Detached tasks with no arguments") {
     repeat(repeats, [] {
-        parallel::ThreadPool pool(3);
+        parallel::thread_pool pool(3);
 
         std::vector<std::size_t> vec(20);
         for (std::size_t i = 0; i < vec.size(); ++i) pool.detached_task([i, &vec] { vec[i] = i * i; });
@@ -67,7 +67,7 @@ TEST_CASE("Threadpool basics / Recursive awaitable tasks") {
             return prev_1 + prev_2;
         };
 
-        parallel::ThreadPool pool(3);
+        parallel::thread_pool pool(3);
 
         std::function<int(int)> fibonacci_async = [&](int n) {
             println("Fibonacci at ", n);

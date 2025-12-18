@@ -21,7 +21,7 @@ TEST_CASE("Fuzzing / Detached task loss") {
     std::uniform_int_distribution<std::size_t> vector_size_dist{1, 2237};
 
     repeat(repeats, [&] {
-        parallel::ThreadPool pool(thread_count_dist(gen));
+        parallel::thread_pool pool(thread_count_dist(gen));
 
         std::vector<std::size_t> vec(vector_size_dist(gen));
         for (std::size_t i = 0; i < vec.size(); ++i) pool.detached_task([i, &vec] { vec[i] = i * i; });
@@ -40,8 +40,8 @@ TEST_CASE("Fuzzing / Thread pool creation") {
     std::uniform_int_distribution<std::size_t> thread_count_dist{0, 127};
 
     repeat(repeats, [&] {
-        const std::size_t    init_size = thread_count_dist(gen);
-        parallel::ThreadPool pool(init_size);
+        const std::size_t     init_size = thread_count_dist(gen);
+        parallel::thread_pool pool(init_size);
         REQUIRE(pool.get_thread_count() == init_size);
 
         const std::size_t size_1 = thread_count_dist(gen);
@@ -68,7 +68,7 @@ TEST_CASE("Fuzzing / Modifying thread pool from multiple threads") {
     using namespace std::chrono_literals;
 
     repeat(repeats, [&] {
-        parallel::ThreadPool pool(4);
+        parallel::thread_pool pool(4);
 
         std::atomic<std::size_t> tasks_completed = 0;
 

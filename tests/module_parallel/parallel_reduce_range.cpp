@@ -18,10 +18,10 @@ constexpr std::size_t N       = 37; // prime number to make things never evenly 
 
 // Note: Large values of 'N' might cause product to overflow
 
-// --- 'Range' blocking reduce for different binary ops (4) ---
-// ------------------------------------------------------------
+// --- 'iterator_range' blocking reduce for different binary ops (4) ---
+// ---------------------------------------------------------------------
 
-TEST_CASE("Parallel-reduce (Range) / Blocking sum") {
+TEST_CASE("Parallel-reduce (iterator_range) / Blocking sum") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -30,14 +30,14 @@ TEST_CASE("Parallel-reduce (Range) / Blocking sum") {
         for (std::size_t i = 1; i < N; ++i) res_serial += vec[i];
 
         parallel::set_thread_count(threads);
-        std::int64_t res_parallel = parallel::blocking_reduce(parallel::Range{vec}, parallel::sum<>{});
+        std::int64_t res_parallel = parallel::blocking_reduce(parallel::iterator_range{vec}, parallel::sum<>{});
         parallel::set_thread_count(0);
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Blocking prod") {
+TEST_CASE("Parallel-reduce (iterator_range) / Blocking prod") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -46,14 +46,14 @@ TEST_CASE("Parallel-reduce (Range) / Blocking prod") {
         for (std::size_t i = 1; i < N; ++i) res_serial *= vec[i];
 
         parallel::set_thread_count(threads);
-        std::int64_t res_parallel = parallel::blocking_reduce(parallel::Range{vec}, parallel::prod<>{});
+        std::int64_t res_parallel = parallel::blocking_reduce(parallel::iterator_range{vec}, parallel::prod<>{});
         parallel::set_thread_count(0);
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Blocking min") {
+TEST_CASE("Parallel-reduce (iterator_range) / Blocking min") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -62,14 +62,14 @@ TEST_CASE("Parallel-reduce (Range) / Blocking min") {
         for (std::size_t i = 1; i < N; ++i) res_serial = std::min(res_serial, vec[i]);
 
         parallel::set_thread_count(threads);
-        std::int64_t res_parallel = parallel::blocking_reduce(parallel::Range{vec}, parallel::min<>{});
+        std::int64_t res_parallel = parallel::blocking_reduce(parallel::iterator_range{vec}, parallel::min<>{});
         parallel::set_thread_count(0);
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Blocking max") {
+TEST_CASE("Parallel-reduce (iterator_range) / Blocking max") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -78,17 +78,17 @@ TEST_CASE("Parallel-reduce (Range) / Blocking max") {
         for (std::size_t i = 1; i < N; ++i) res_serial = std::max(res_serial, vec[i]);
 
         parallel::set_thread_count(threads);
-        std::int64_t res_parallel = parallel::blocking_reduce(parallel::Range{vec}, parallel::max<>{});
+        std::int64_t res_parallel = parallel::blocking_reduce(parallel::iterator_range{vec}, parallel::max<>{});
         parallel::set_thread_count(0);
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-// --- 'Range' awaitable reduce for different binary ops (4) ---
-// -------------------------------------------------------------
+// --- 'iterator_range' awaitable reduce for different binary ops (4) ---
+// ----------------------------------------------------------------------
 
-TEST_CASE("Parallel-reduce (Range) / Awaitable sum") {
+TEST_CASE("Parallel-reduce (iterator_range) / Awaitable sum") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -97,14 +97,14 @@ TEST_CASE("Parallel-reduce (Range) / Awaitable sum") {
         for (std::size_t i = 1; i < N; ++i) res_serial += vec[i];
 
         parallel::set_thread_count(threads);
-        auto future       = parallel::awaitable_reduce(parallel::Range{vec}, parallel::sum<>{});
+        auto future       = parallel::awaitable_reduce(parallel::iterator_range{vec}, parallel::sum<>{});
         auto res_parallel = future.get();
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Awaitable prod") {
+TEST_CASE("Parallel-reduce (iterator_range) / Awaitable prod") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -113,14 +113,14 @@ TEST_CASE("Parallel-reduce (Range) / Awaitable prod") {
         for (std::size_t i = 1; i < N; ++i) res_serial *= vec[i];
 
         parallel::set_thread_count(threads);
-        auto future       = parallel::awaitable_reduce(parallel::Range{vec}, parallel::prod<>{});
+        auto future       = parallel::awaitable_reduce(parallel::iterator_range{vec}, parallel::prod<>{});
         auto res_parallel = future.get();
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Awaitable min") {
+TEST_CASE("Parallel-reduce (iterator_range) / Awaitable min") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -129,14 +129,14 @@ TEST_CASE("Parallel-reduce (Range) / Awaitable min") {
         for (std::size_t i = 1; i < N; ++i) res_serial = std::min(res_serial, vec[i]);
 
         parallel::set_thread_count(threads);
-        auto future       = parallel::awaitable_reduce(parallel::Range{vec}, parallel::min<>{});
+        auto future       = parallel::awaitable_reduce(parallel::iterator_range{vec}, parallel::min<>{});
         auto res_parallel = future.get();
 
         REQUIRE(res_parallel == res_serial);
     });
 }
 
-TEST_CASE("Parallel-reduce (Range) / Awaitable max") {
+TEST_CASE("Parallel-reduce (iterator_range) / Awaitable max") {
     repeat(repeats, [] {
         std::vector<std::int64_t> vec(N, 0);
         for (std::size_t i = 0; i < N; ++i) vec[i] = i;
@@ -145,7 +145,7 @@ TEST_CASE("Parallel-reduce (Range) / Awaitable max") {
         for (std::size_t i = 1; i < N; ++i) res_serial = std::max(res_serial, vec[i]);
 
         parallel::set_thread_count(threads);
-        auto future       = parallel::awaitable_reduce(parallel::Range{vec}, parallel::max<>{});
+        auto future       = parallel::awaitable_reduce(parallel::iterator_range{vec}, parallel::max<>{});
         auto res_parallel = future.get();
 
         REQUIRE(res_parallel == res_serial);

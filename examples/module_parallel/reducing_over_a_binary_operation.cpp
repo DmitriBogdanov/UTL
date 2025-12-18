@@ -13,7 +13,10 @@ int main() {
     assert( sum == 200'000 * 2 );
     
     // Reduce iterator range over a binary operation
-    const double subrange_sum = parallel::blocking_reduce(parallel::Range{vals.begin() + 100, vals.end()}, parallel::sum<>{});
+    const double subrange_sum = parallel::blocking_reduce(
+        parallel::iterator_range{vals.begin() + 100, vals.end()},
+        parallel::sum<>{}
+    );
     
     assert( subrange_sum == (200'000 - 100) * 2 );
 }

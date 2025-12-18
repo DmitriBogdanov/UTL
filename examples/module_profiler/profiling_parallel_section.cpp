@@ -14,7 +14,7 @@ int main() {
     parallel::set_thread_count(3);
     
     UTL_PROFILER("Multi-threaded loop")
-    parallel::blocking_loop(parallel::IndexRange{0, 30}, [](int low, int high){
+    parallel::blocking_loop(parallel::index_range{0, 30}, [](int low, int high){
         UTL_PROFILER("Worker thread loop")
         for (int i = low; i < high; ++i) std::this_thread::sleep_for(10ms);
     });

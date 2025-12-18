@@ -16,15 +16,15 @@ constexpr std::size_t threads = 7;    // weird number of threads
 constexpr std::size_t N       = 1367; // prime number to make things never evenly divisible
 constexpr int         x       = 17;   // test value
 
-// --- 'IndexRange' overloads (6) ---
-// ----------------------------------
+// --- 'index_range' overloads (6) ---
+// -----------------------------------
 
-TEST_CASE("Parallel-for (IndexRange) / Detached block loop") {
+TEST_CASE("Parallel-for (index_range) / Detached block loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        parallel::detached_loop(parallel::IndexRange{0, vec.size()}, [&](auto low, auto high) {
+        parallel::detached_loop(parallel::index_range{0, vec.size()}, [&](auto low, auto high) {
             for (auto i = low; i < high; ++i) vec[i] = x;
         });
         parallel::set_thread_count(0);
@@ -33,24 +33,24 @@ TEST_CASE("Parallel-for (IndexRange) / Detached block loop") {
     });
 }
 
-TEST_CASE("Parallel-for (IndexRange) / Detached iteration loop") {
+TEST_CASE("Parallel-for (index_range) / Detached iteration loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        parallel::detached_loop(parallel::IndexRange{0, vec.size()}, [&](auto i) { vec[i] = x; });
+        parallel::detached_loop(parallel::index_range{0, vec.size()}, [&](auto i) { vec[i] = x; });
         parallel::set_thread_count(0);
 
         for (const auto& e : vec) REQUIRE(e == x);
     });
 }
 
-TEST_CASE("Parallel-for (IndexRange) / Blocking block loop") {
+TEST_CASE("Parallel-for (index_range) / Blocking block loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        parallel::blocking_loop(parallel::IndexRange{0, vec.size()}, [&](auto low, auto high) {
+        parallel::blocking_loop(parallel::index_range{0, vec.size()}, [&](auto low, auto high) {
             for (auto i = low; i < high; ++i) vec[i] = x;
         });
 
@@ -58,23 +58,23 @@ TEST_CASE("Parallel-for (IndexRange) / Blocking block loop") {
     });
 }
 
-TEST_CASE("Parallel-for (IndexRange) / Blocking iteration loop") {
+TEST_CASE("Parallel-for (index_range) / Blocking iteration loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        parallel::blocking_loop(parallel::IndexRange{0, vec.size()}, [&](auto i) { vec[i] = x; });
+        parallel::blocking_loop(parallel::index_range{0, vec.size()}, [&](auto i) { vec[i] = x; });
 
         for (const auto& e : vec) REQUIRE(e == x);
     });
 }
 
-TEST_CASE("Parallel-for (IndexRange) / Awaitable block loop") {
+TEST_CASE("Parallel-for (index_range) / Awaitable block loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        auto future = parallel::awaitable_loop(parallel::IndexRange{0, vec.size()}, [&](auto low, auto high) {
+        auto future = parallel::awaitable_loop(parallel::index_range{0, vec.size()}, [&](auto low, auto high) {
             for (auto i = low; i < high; ++i) vec[i] = x;
         });
         future.wait();
@@ -83,12 +83,12 @@ TEST_CASE("Parallel-for (IndexRange) / Awaitable block loop") {
     });
 }
 
-TEST_CASE("Parallel-for (IndexRange) / Awaitable iteration loop") {
+TEST_CASE("Parallel-for (index_range) / Awaitable iteration loop") {
     repeat(repeats, [] {
         std::vector<int> vec(N, 0);
 
         parallel::set_thread_count(threads);
-        auto future = parallel::awaitable_loop(parallel::IndexRange{0, vec.size()}, [&](auto i) { vec[i] = x; });
+        auto future = parallel::awaitable_loop(parallel::index_range{0, vec.size()}, [&](auto i) { vec[i] = x; });
         future.wait();
 
         for (const auto& e : vec) REQUIRE(e == x);

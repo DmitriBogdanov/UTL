@@ -209,7 +209,7 @@ Output:
 > [!Note]
 > In this example we will use [utl::parallel](module_parallel.md) to represent a parallel section concisely.
 
-[ [Run this code](https://godbolt.org/z/3fexeW638) ] [ [Open source file](../examples/module_profiler/profiling_parallel_section.cpp) ]
+[ [Run this code](https://godbolt.org/z/1EPKWjvre) ] [ [Open source file](../examples/module_profiler/profiling_parallel_section.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -223,7 +223,7 @@ for (int i = 0; i < 30; ++i) std::this_thread::sleep_for(10ms);
 parallel::set_thread_count(3);
 
 UTL_PROFILER("Multi-threaded loop")
-parallel::blocking_loop(parallel::IndexRange{0, 30}, [](int low, int high){
+parallel::blocking_loop(parallel::index_range{0, 30}, [](int low, int high){
     UTL_PROFILER("Worker thread loop")
     for (int i = low; i < high; ++i) std::this_thread::sleep_for(10ms);
 });

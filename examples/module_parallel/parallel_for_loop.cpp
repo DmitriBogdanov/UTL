@@ -16,10 +16,10 @@ int main() {
     parallel::blocking_loop(vals, [&](auto it) { *it = f(*it); });
     
     // Apply f() to indices [0, 100)
-    parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int i) { vals[i] = f(vals[i]); });
+    parallel::blocking_loop(parallel::index_range{0, 100}, [&](int i) { vals[i] = f(vals[i]); });
     
     // Specify computation in blocks instead of element-wise
-    parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int low, int high) {
+    parallel::blocking_loop(parallel::index_range{0, 100}, [&](int low, int high) {
         for (int i = low; i < high; ++i) vals[i] = f(vals[i]);
     });
 }
