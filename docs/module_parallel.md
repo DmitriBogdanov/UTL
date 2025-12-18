@@ -413,7 +413,7 @@ assert( result == 42 );
 
 ### Parallel for loop
 
-[ [Run this code](https://godbolt.org/z/4K8njMGjK) ] [ [Open source file](../examples/module_parallel/parallel_for_loop.cpp) ]
+[ [Run this code](https://godbolt.org/z/Ksef76one) ] [ [Open source file](../examples/module_parallel/parallel_for_loop.cpp) ]
 
 ```cpp
 double f(double x) { return std::exp(std::sin(x)); }
@@ -441,7 +441,7 @@ parallel::blocking_loop(parallel::index_range{0, 100}, [&](int low, int high) {
 
 ### Reducing over a binary operation
 
-[ [Run this code](https://godbolt.org/z/6KWo6bvPs) ] [ [Open source file](../examples/module_parallel/reducing_over_a_binary_operation.cpp) ]
+[ [Run this code](https://godbolt.org/z/4sKWvb1WG) ] [ [Open source file](../examples/module_parallel/reducing_over_a_binary_operation.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -464,7 +464,7 @@ assert( subrange_sum == (200'000 - 100) * 2 );
 
 ### Using a local thread pool
 
-[ [Run this code](https://godbolt.org/z/zh3PobGes) ] [ [Open source file](../examples/module_parallel/using_a_local_thread_pool.cpp) ]
+[ [Run this code](https://godbolt.org/z/8WGndxYWW) ] [ [Open source file](../examples/module_parallel/using_a_local_thread_pool.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -504,7 +504,7 @@ assert( fibonacci(8) == 21 );
 
 ### Awaitable parallel loop with specific grain size
 
-[ [Run this code](https://godbolt.org/z/7Msqjn6s9) ] [ [Open source file](../examples/module_parallel/awaitable_parallel_loop_with_specific_grain_size.cpp) ]
+[ [Run this code](https://godbolt.org/z/Geq4qfhdd) ] [ [Open source file](../examples/module_parallel/awaitable_parallel_loop_with_specific_grain_size.cpp) ]
 
 ```cpp
 using namespace utl;
