@@ -15,9 +15,9 @@ void open_file(bit::flags<io_mode> flags) {
 }
 
 int main() { 
-    std::cout << "Opening file with OUT:       \n";
+    std::cout << "Opening file with 'out':       \n";
     open_file(io_mode::out);
     
-    std::cout << "Opening file with OUT | APP: \n";
+    std::cout << "Opening file with 'out' | 'app': \n";
     open_file(bit::flags{io_mode::out, io_mode::app});
 }

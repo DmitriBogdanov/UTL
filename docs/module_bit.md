@@ -52,20 +52,20 @@ template <class T> constexpr std::size_t popcount(T value) noexcept;
 
 // Enum Bitflags
 template<class E>
-struct Flags {
-    constexpr Flags(                      E       flag) noexcept;
-    constexpr Flags(std::initializer_list<E> flag_list) noexcept;
+struct flags {
+    constexpr flags(                      E       flag) noexcept;
+    constexpr flags(std::initializer_list<E> flag_list) noexcept;
     
     constexpr operator bool() const noexcept;
     constexpr        E  get() const noexcept;
     
     constexpr bool contains(E      flag) const noexcept;
-    constexpr bool contains(Flags other) const noexcept;
+    constexpr bool contains(flags other) const noexcept;
     
-    constexpr Flags&    add(E      flag) noexcept;
-    constexpr Flags&    add(Flags other) noexcept;
-    constexpr Flags& remove(E      flag) noexcept;
-    constexpr Flags& remove(Flags other) noexcept;
+    constexpr flags&    add(E      flag) noexcept;
+    constexpr flags&    add(flags other) noexcept;
+    constexpr flags& remove(E      flag) noexcept;
+    constexpr flags& remove(flags other) noexcept;
     
     // + bit-wise   operators
     // + comparison operators
@@ -145,8 +145,8 @@ Returns the number of set bits in an integer.
 ### Enum bitflags
 
 > ```cpp
-> constexpr Flags::Flags(                       E      flag) noexcept;
-> constexpr Flags::Flags(std::initializer_list<E> flag_list) noexcept;
+> constexpr flags::flags(                       E      flag) noexcept;
+> constexpr flags::flags(std::initializer_list<E> flag_list) noexcept;
 > ```
 
 Constructs bitflag object from one or several enum values.
@@ -164,17 +164,17 @@ Converts to `false` if underlying bitflag value is `0`, otherwise `true`.
 Returns the underlying `enum class` value.
 
 > ```cpp
-> constexpr bool Flags::contains(E      flag) const noexcept;
-> constexpr bool Flags::contains(Flags other) const noexcept;
+> constexpr bool flags::contains(E      flag) const noexcept;
+> constexpr bool flags::contains(flags other) const noexcept;
 > ```
 
 Returns whether bitflag object contains a specific flag(s).
 
 > ```cpp
-> constexpr Flags&    add(E      flag) noexcept;
-> constexpr Flags&    add(Flags other) noexcept;
-> constexpr Flags& remove(E      flag) noexcept;
-> constexpr Flags& remove(Flags other) noexcept;
+> constexpr flags&    add(E      flag) noexcept;
+> constexpr flags&    add(flags other) noexcept;
+> constexpr flags& remove(E      flag) noexcept;
+> constexpr flags& remove(flags other) noexcept;
 > ```
 
 Adds / removes flag(s) from a bitflag object.
@@ -182,24 +182,24 @@ Adds / removes flag(s) from a bitflag object.
 Several adds / removes can be chained in a single statement.
 
 > ```cpp
-> constexpr Flags operator~() const noexcept;
+> constexpr flags operator~() const noexcept;
 > 
-> constexpr Flags operator|(Flags other) const noexcept;
-> constexpr Flags operator&(Flags other) const noexcept;
+> constexpr flags operator|(flags other) const noexcept;
+> constexpr flags operator&(flags other) const noexcept;
 > 
-> constexpr Flags& operator|=(Flags other) noexcept;
-> constexpr Flags& operator&=(Flags other) noexcept;
+> constexpr flags& operator|=(flags other) noexcept;
+> constexpr flags& operator&=(flags other) noexcept;
 > ```
 
 Bitwise operators used for classic bitflag semantics.
 
 > ```cpp
-> constexpr bool operator==(Flags other) noexcept;
-> constexpr bool operator!=(Flags other) noexcept;
-> constexpr bool operator<=(Flags other) noexcept;
-> constexpr bool operator>=(Flags other) noexcept;
-> constexpr bool operator< (Flags other) noexcept;
-> constexpr bool operator> (Flags other) noexcept;
+> constexpr bool operator==(flags other) noexcept;
+> constexpr bool operator!=(flags other) noexcept;
+> constexpr bool operator<=(flags other) noexcept;
+> constexpr bool operator>=(flags other) noexcept;
+> constexpr bool operator< (flags other) noexcept;
+> constexpr bool operator> (flags other) noexcept;
 > ```
 
 Comparison operators, effectively same as comparing the underlying value.
@@ -227,9 +227,9 @@ static_assert(bit::get(x, 6) == 0);
 static_assert(bit::get(x, 7) == 0);
 
 // Modify bits
-static_assert(bit::set(  x, 2) == 23); // 23 ~ 00010111
+static_assert(bit::set  (x, 2) == 23); // 23 ~ 00010111
 static_assert(bit::clear(x, 0) == 18); // 18 ~ 00010010
-static_assert(bit::flip( x, 1) == 17); // 17 ~ 00010001
+static_assert(bit::flip (x, 1) == 17); // 17 ~ 00010001
 ```
 
 ### General usage
@@ -242,8 +242,8 @@ using namespace utl;
 constexpr std::uint8_t x = 19; // 19 ~ 00010011
 
 // Group bit operations
-static_assert(bit::rotl(  x, 6) == 196); // 196 ~ 11000100
-static_assert(bit::rotr(  x, 1) == 137); // 137 ~ 10001001
+static_assert(bit::rotl  (x, 6) == 196); // 196 ~ 11000100
+static_assert(bit::rotr  (x, 1) == 137); // 137 ~ 10001001
 static_assert(bit::lshift(x, 6) == 192); // 192 ~ 11000000
 static_assert(bit::rshift(x, 1) ==   9); //   9 ~ 00001001
 
@@ -257,57 +257,60 @@ static_assert(bit::size_of<std::uint64_t> == 64);
 
 ### Using enum bitflags
 
-[ [Run this code](https://godbolt.org/z/7GqojMWjW) ] [ [Open source file](../examples/module_bit/using_enum_bitflags.cpp) ]
+[ [Run this code](https://godbolt.org/z/fdsTrv1Go) ] [ [Open source file](../examples/module_bit/using_enum_bitflags.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Bitflag-suitable enum class
-enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
+enum class io_mode { in = 1 << 0, out = 1 << 1, app = 1 << 2 };
 
 // Function taking enum flags
-void open_file(bit::Flags<IOMode> flags) {
-    if (flags.contains(IOMode::IN) ) std::cout << "  > File opened for reading   \n";
-    if (flags.contains(IOMode::OUT)) std::cout << "  > File opened for writing   \n";
-    if (flags.contains(IOMode::APP)) std::cout << "  > File opened for appending \n";
+void open_file(bit::flags<io_mode> flags) {
+    if (flags.contains(io_mode::in )) std::cout << "  > File opened for reading   \n";
+    if (flags.contains(io_mode::out)) std::cout << "  > File opened for writing   \n";
+    if (flags.contains(io_mode::app)) std::cout << "  > File opened for appending \n";
 }
 
 // ...
 
-std::cout << "Opening file with OUT:       \n";
-open_file(IOMode::OUT);
+std::cout << "Opening file with 'out':       \n";
+open_file(io_mode::out);
 
-std::cout << "Opening file with OUT | APP: \n";
-open_file(bit::Flags{IOMode::OUT, IOMode::APP});
+std::cout << "Opening file with 'out' | 'app': \n";
+open_file(bit::flags{io_mode::out, io_mode::app});
 ```
 
 Output:
 ```
-Opening file with OUT:
+Opening file with 'out':
   > File opened for writing
-Opening file with OUT | APP:
+Opening file with 'out' | 'app':
   > File opened for writing
   > File opened for appending
 ```
 
 ### Additional bitflag examples
 
-[ [Run this code](https://godbolt.org/z/8zbqPo4va) ] [ [Open source file](../examples/module_bit/additional_bitflag_examples.cpp) ]
+[ [Run this code](https://godbolt.org/z/7e951KTW5) ] [ [Open source file](../examples/module_bit/additional_bitflag_examples.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Bitflag-suitable enum class
-enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
+enum class io_mode { in = 1 << 0, out = 1 << 1, app = 1 << 2 };
 
-// Simple yet flexible API, same thing can be accomplished
-// both with classic bit-wise semantics and with built-in methods.
-// Underneath it's just a strongly typed integer so there is no performance impact
-constexpr auto flags_1 = bit::Flags{IOMode::OUT, IOMode::APP};
-constexpr auto flags_2 = bit::Flags(IOMode::OUT) | bit::Flags(IOMode::APP);
-constexpr auto flags_3 = bit::Flags(IOMode::OUT) | IOMode::APP;
-constexpr auto flags_4 = bit::Flags(IOMode::OUT).add(IOMode::APP);
-constexpr auto flags_5 = bit::Flags<IOMode>{}.add(IOMode::OUT).add(IOMode::APP);
+// Construct from multiple flags
+constexpr auto flags_1 = bit::flags{io_mode::out, io_mode::app};
 
-static_assert(flags_1 == flags_2 && flags_2 == flags_3 && flags_3 == flags_4 && flags_4 == flags_5);
+// Combine flag sets
+constexpr auto flags_2 = bit::flags(io_mode::out) | bit::flags(io_mode::app);
+
+// Combine with individual flags
+constexpr auto flags_3 = bit::flags(io_mode::out) | io_mode::app;
+
+// Combine by chaining '.add()'
+constexpr auto flags_4 = bit::flags<io_mode>{}.add(io_mode::out).add(io_mode::app);
+
+static_assert(flags_1 == flags_2 && flags_2 == flags_3 && flags_3 == flags_4);
 ```
