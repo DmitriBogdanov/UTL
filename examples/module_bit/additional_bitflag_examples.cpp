@@ -3,18 +3,21 @@
 using namespace utl;
 
 // Bitflag-suitable enum class
-enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
+enum class io_mode { in = 1 << 0, out = 1 << 1, app = 1 << 2 };
 
 int main() { 
     
-    // Simple yet flexible API, same thing can be accomplished
-    // both with classic bit-wise semantics and with built-in methods.
-    // Underneath it's just a strongly typed integer so there is no performance impact
-    constexpr auto flags_1 = bit::Flags{IOMode::OUT, IOMode::APP};
-    constexpr auto flags_2 = bit::Flags(IOMode::OUT) | bit::Flags(IOMode::APP);
-    constexpr auto flags_3 = bit::Flags(IOMode::OUT) | IOMode::APP;
-    constexpr auto flags_4 = bit::Flags(IOMode::OUT).add(IOMode::APP);
-    constexpr auto flags_5 = bit::Flags<IOMode>{}.add(IOMode::OUT).add(IOMode::APP);
+    // Construct from multiple flags
+    constexpr auto flags_1 = bit::flags{io_mode::out, io_mode::app};
     
-    static_assert(flags_1 == flags_2 && flags_2 == flags_3 && flags_3 == flags_4 && flags_4 == flags_5);
+    // Combine flag sets
+    constexpr auto flags_2 = bit::flags(io_mode::out) | bit::flags(io_mode::app);
+    
+    // Combine with individual flags
+    constexpr auto flags_3 = bit::flags(io_mode::out) | io_mode::app;
+    
+    // Combine by chaining '.add()'
+    constexpr auto flags_4 = bit::flags<io_mode>{}.add(io_mode::out).add(io_mode::app);
+    
+    static_assert(flags_1 == flags_2 && flags_2 == flags_3 && flags_3 == flags_4);
 }

@@ -13,9 +13,9 @@
 #ifndef utl_bit_headerguard
 #define utl_bit_headerguard
 
-#define UTL_BIT_VERSION_MAJOR 1
+#define UTL_BIT_VERSION_MAJOR 2
 #define UTL_BIT_VERSION_MINOR 0
-#define UTL_BIT_VERSION_PATCH 2
+#define UTL_BIT_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -217,43 +217,43 @@ template <class T, require_integral<T> = true>
 
 // Thin wrapper around an enum that gives it bitflag semantics
 template <class E, require_enum<E> = true>
-class Flags {
+class flags {
     std::underlying_type_t<E> data{};
 
-    constexpr Flags(std::underlying_type_t<E> value) noexcept : data(value) {}
+    constexpr flags(std::underlying_type_t<E> value) noexcept : data(value) {}
 
 public:
     // clang-format off
-    constexpr Flags(E flag) noexcept : data(to_underlying(flag)) {}
-    constexpr Flags(std::initializer_list<E> flag_list) noexcept { for (auto flag : flag_list) this->add(flag); }
+    constexpr flags(E flag) noexcept : data(to_underlying(flag)) {}
+    constexpr flags(std::initializer_list<E> flag_list) noexcept { for (auto flag : flag_list) this->add(flag); }
     
     constexpr operator bool() const noexcept { return to_bool(this->data); }
     
     [[nodiscard]] constexpr E get() const noexcept { return static_cast<E>(this->data); }
 
     [[nodiscard]] constexpr bool contains(E      flag) const noexcept { return to_bool(this->data & to_underlying(flag)); }
-    [[nodiscard]] constexpr bool contains(Flags other) const noexcept { return to_bool(this->data & other.data         ); }
+    [[nodiscard]] constexpr bool contains(flags other) const noexcept { return to_bool(this->data & other.data         ); }
 
-    constexpr Flags& add(E      flag) noexcept { this->data |= to_underlying(flag); return *this; }
-    constexpr Flags& add(Flags other) noexcept { this->data |= other.data;          return *this; }
+    constexpr flags& add(E      flag) noexcept { this->data |= to_underlying(flag); return *this; }
+    constexpr flags& add(flags other) noexcept { this->data |= other.data;          return *this; }
 
-    constexpr Flags& remove(E      flag) noexcept { this->data &= ~to_underlying(flag); return *this; }
-    constexpr Flags& remove(Flags other) noexcept { this->data &= ~other.data;          return *this; }
+    constexpr flags& remove(E      flag) noexcept { this->data &= ~to_underlying(flag); return *this; }
+    constexpr flags& remove(flags other) noexcept { this->data &= ~other.data;          return *this; }
 
-    [[nodiscard]] constexpr Flags operator~() const noexcept { return Flags{~this->data}; };
+    [[nodiscard]] constexpr flags operator~() const noexcept { return flags{~this->data}; };
     
-    [[nodiscard]] constexpr Flags operator|(Flags other) const noexcept { return Flags{this->data | other.data}; }
-    [[nodiscard]] constexpr Flags operator&(Flags other) const noexcept { return Flags{this->data & other.data}; }
+    [[nodiscard]] constexpr flags operator|(flags other) const noexcept { return flags{this->data | other.data}; }
+    [[nodiscard]] constexpr flags operator&(flags other) const noexcept { return flags{this->data & other.data}; }
     
-    constexpr Flags& operator|=(Flags other) noexcept { this->data |= other.data; return *this; }
-    constexpr Flags& operator&=(Flags other) noexcept { this->data &= other.data; return *this; }
+    constexpr flags& operator|=(flags other) noexcept { this->data |= other.data; return *this; }
+    constexpr flags& operator&=(flags other) noexcept { this->data &= other.data; return *this; }
     
-    [[nodiscard]] constexpr bool operator==(Flags other) noexcept { return this->data == other.data; }
-    [[nodiscard]] constexpr bool operator!=(Flags other) noexcept { return this->data != other.data; }
-    [[nodiscard]] constexpr bool operator<=(Flags other) noexcept { return this->data <= other.data; }
-    [[nodiscard]] constexpr bool operator>=(Flags other) noexcept { return this->data >= other.data; }
-    [[nodiscard]] constexpr bool operator< (Flags other) noexcept { return this->data <  other.data; }
-    [[nodiscard]] constexpr bool operator> (Flags other) noexcept { return this->data >  other.data; }
+    [[nodiscard]] constexpr bool operator==(flags other) noexcept { return this->data == other.data; }
+    [[nodiscard]] constexpr bool operator!=(flags other) noexcept { return this->data != other.data; }
+    [[nodiscard]] constexpr bool operator<=(flags other) noexcept { return this->data <= other.data; }
+    [[nodiscard]] constexpr bool operator>=(flags other) noexcept { return this->data >= other.data; }
+    [[nodiscard]] constexpr bool operator< (flags other) noexcept { return this->data <  other.data; }
+    [[nodiscard]] constexpr bool operator> (flags other) noexcept { return this->data >  other.data; }
     // clang-format on
 };
 
@@ -279,7 +279,7 @@ using impl::size_of;
 using impl::width;
 using impl::popcount;
 
-using impl::Flags;
+using impl::flags;
 
 } // namespace utl::bit
 

@@ -5,19 +5,19 @@
 using namespace utl;
 
 // Bitflag-suitable enum class
-enum class IOMode { IN = 1 << 0, OUT = 1 << 1, APP = 1 << 2 };
+enum class io_mode { in = 1 << 0, out = 1 << 1, app = 1 << 2 };
 
 // Function taking enum flags
-void open_file(bit::Flags<IOMode> flags) {
-    if (flags.contains(IOMode::IN) ) std::cout << "  > File opened for reading   \n";
-    if (flags.contains(IOMode::OUT)) std::cout << "  > File opened for writing   \n";
-    if (flags.contains(IOMode::APP)) std::cout << "  > File opened for appending \n";
+void open_file(bit::flags<io_mode> flags) {
+    if (flags.contains(io_mode::in )) std::cout << "  > File opened for reading   \n";
+    if (flags.contains(io_mode::out)) std::cout << "  > File opened for writing   \n";
+    if (flags.contains(io_mode::app)) std::cout << "  > File opened for appending \n";
 }
 
 int main() { 
     std::cout << "Opening file with OUT:       \n";
-    open_file(IOMode::OUT);
+    open_file(io_mode::out);
     
     std::cout << "Opening file with OUT | APP: \n";
-    open_file(bit::Flags{IOMode::OUT, IOMode::APP});
+    open_file(bit::flags{io_mode::out, io_mode::app});
 }
