@@ -34,8 +34,8 @@ It implements classic building blocks of concurrent algorithms such as tasks, pa
 
 ```cpp
 // Scheduler
-template <class Backend = ThreadPool>
-struct Scheduler {
+template <class Backend = thread_pool>
+struct scheduler {
     // Backend
     Backend backend; // underlying thread pool
     
@@ -43,37 +43,37 @@ struct Scheduler {
     using future_type = typename Backend::future_type<T>;
     
     template <class... Args>
-    explicit Scheduler(Args&&... args);
+    explicit scheduler(Args&&... args);
     
     // Task API
     template <class F, class... Args>           void  detached_task(F&& f, Args&&... args);
     template <class F, class... Args> future_type<R> awaitable_task(F&& f, Args&&... args);
     
     // Parallel-for API
-    template <class It, class F>          void  detached_loop(Range<It> range, F&& f);
-    template <class It, class F>          void  blocking_loop(Range<It> range, F&& f);
-    template <class It, class F> future_type<> awaitable_loop(Range<It> range, F&& f);
+    template <class It, class F>          void  detached_loop(iterator_range<It> range, F&& f);
+    template <class It, class F>          void  blocking_loop(iterator_range<It> range, F&& f);
+    template <class It, class F> future_type<> awaitable_loop(iterator_range<It> range, F&& f);
     
-    template <class Idx, class F>          void  detached_loop(IndexRange<Idx> range, F&& f);
-    template <class Idx, class F>          void  blocking_loop(IndexRange<Idx> range, F&& f);
-    template <class Idx, class F> future_type<> awaitable_loop(IndexRange<Idx> range, F&& f);
+    template <class Idx, class F>          void  detached_loop(index_range<Idx> range, F&& f);
+    template <class Idx, class F>          void  blocking_loop(index_range<Idx> range, F&& f);
+    template <class Idx, class F> future_type<> awaitable_loop(index_range<Idx> range, F&& f);
     
     template <class Container, class F>          void  detached_loop(Container&& container, F&& f);
     template <class Container, class F>          void  blocking_loop(Container&& container, F&& f);
     template <class Container, class F> future_type<> awaitable_loop(Container&& container, F&& f);
     
     // Parallel-reduce API
-    template <class It, class Op>             R   blocking_reduce(Range<It> range, Op&& op);
-    template <class It, class Op> future_type<R> awaitable_reduce(Range<It> range, Op&& op);
+    template <class It, class Op>             R   blocking_reduce(iterator_range<It> range, Op&& op);
+    template <class It, class Op> future_type<R> awaitable_reduce(iterator_range<It> range, Op&& op);
     
     template <class Container, class Op>             R   blocking_reduce(Container&& container, Op&& op);
     template <class Container, class Op> future_type<R> awaitable_reduce(Container&& container, Op&& op);
 };
 
 // Thread pool
-struct ThreadPool {
+struct thread_pool {
     // Initialization
-    explicit ThreadPool(std::size_t count = hardware_concurrency());
+    explicit thread_pool(std::size_t count = hardware_concurrency());
      
     // Threading
     void        set_thread_count(std::size_t count = hardware_concurrency());
@@ -90,24 +90,24 @@ struct ThreadPool {
 };
 
 template <class T = void>
-using Future = ThreadPool::future_type<T>;
+using future = thread_pool::future_type<T>;
 
 // Ranges
 template <class It>
-struct Range {
-    Range() = delete;
-    Range(It begin, It end);
-    Range(It begin, It end, std::size_t grain_size);
+struct iterator_range {
+    iterator_range() = delete;
+    iterator_range(It begin, It end);
+    iterator_range(It begin, It end, std::size_t grain_size);
     
-    template <class Container> Range(      Container& container);
-    template <class Container> Range(const Container& container);
+    template <class Container> iterator_range(      Container& container);
+    template <class Container> iterator_range(const Container& container);
 };
 
 template <class Idx = std::ptrdiff_t>
-struct IndexRange {
-    IndexRange() = delete;
-    IndexRange(Idx first, Idx last);
-    IndexRange(Idx first, Idx last, std::size_t grain_size);
+struct index_range {
+    index_range() = delete;
+    index_range(Idx first, Idx last);
+    index_range(Idx first, Idx last, std::size_t grain_size);
 }
 
 // Binary operations
@@ -117,8 +117,8 @@ template <class T = void> struct  min { constexpr T operator()(const T& lhs, con
 template <class T = void> struct  max { constexpr T operator()(const T& lhs, const T& rhs) const; }
 
 // Global scheduler
-/* 'Scheduler'  API, but placed directly into the namespace */
-/* 'ThreadPool' API, but placed directly into the namespace */
+/* 'scheduler'   API, but placed directly into the namespace */
+/* 'thread_pool' API, but placed directly into the namespace */
 /* This will use global lazily-initialized thread pool      */
 
 // Thread introspection
@@ -131,7 +131,7 @@ std::size_t hardware_concurrency() noexcept;
 ```
 
 > [!Important]
-> There is no tight coupling between the `Scheduler<>` and the `ThreadPool`, other implementations may be used assuming they provide the 2 methods for submitting tasks.
+> There is no tight coupling between the `scheduler<>` and the `thread_pool`, other implementations may be used assuming they provide the 2 methods for submitting tasks.
 
 ## Methods
 
@@ -156,9 +156,9 @@ Launches asynchronous task to execute callable `f` with arguments `args...` and 
 #### Parallel-for API
 
 > ```cpp
-> template <class It, class F>          void  detached_loop(Range<It> range, F&& f);
-> template <class It, class F>          void  blocking_loop(Range<It> range, F&& f);
-> template <class It, class F> future_type<> awaitable_loop(Range<It> range, F&& f);
+> template <class It, class F>          void  detached_loop(iterator_range<It> range, F&& f);
+> template <class It, class F>          void  blocking_loop(iterator_range<It> range, F&& f);
+> template <class It, class F> future_type<> awaitable_loop(iterator_range<It> range, F&& f);
 > ```
 
 Detached / blocking / awaitable parallel-for loop over an **iterator range**.
@@ -174,9 +174,9 @@ Loop body `f` can be defined in two ways:
 **Note 2:** `It` is assumed to be a [random access iterator](https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator).
 
 > ```cpp
-> template <class Idx, class F>          void  detached_loop(IndexRange<Idx> range, F&& f);
-> template <class Idx, class F>          void  blocking_loop(IndexRange<Idx> range, F&& f);
-> template <class Idx, class F> future_type<> awaitable_loop(IndexRange<Idx> range, F&& f);
+> template <class Idx, class F>          void  detached_loop(index_range<Idx> range, F&& f);
+> template <class Idx, class F>          void  blocking_loop(index_range<Idx> range, F&& f);
+> template <class Idx, class F> future_type<> awaitable_loop(index_range<Idx> range, F&& f);
 > ```
 
 Detached / blocking / awaitable parallel-for loop over an **index range**.
@@ -196,8 +196,8 @@ Like in the usual case, loop body `f` can be defined both for a single iteration
 #### Parallel-reduce API
 
 > ```cpp
-> template <class It, class Op>             R   blocking_reduce(Range<It> range, Op&& op);
-> template <class It, class Op> future_type<R> awaitable_reduce(Range<It> range, Op&& op);
+> template <class It, class Op>             R   blocking_reduce(iterator_range<It> range, Op&& op);
+> template <class It, class Op> future_type<R> awaitable_reduce(iterator_range<It> range, Op&& op);
 > ```
 
 Detached / blocking / awaitable parallel reduction over a binary operator `op` over an **iterator range**.
@@ -218,7 +218,7 @@ Detached / blocking / awaitable parallel reduction over a binary operator `op` o
 #### Initialization
 
 > ```cpp
-> explicit ThreadPool(std::size_t count = hardware_concurrency());
+> explicit thread_pool(std::size_t count = hardware_concurrency());
 > ```
 
 Creates thread pool with `count` threads.
@@ -273,22 +273,22 @@ This future allows the usage of recursive awaitable tasks. When waited with `get
 
 > ```cpp
 > template <class T = void>
-> using Future = ThreadPool::future_type<T>;
+> using future = thread_pool::future_type<T>;
 > ```
 
-Alias for `ThreadPool::future_type<T>` placed at the namespace level.
+Alias for `thread_pool::future_type<T>` placed at the namespace level.
 
 ### Ranges
 
 > ```cpp
 > template <class It>
-> struct Range {
->     Range() = delete;
->     Range(It begin, It end);
->     Range(It begin, It end, std::size_t grain_size);
+> struct iterator_range {
+>     iterator_range() = delete;
+>     iterator_range(It begin, It end);
+>     iterator_range(It begin, It end, std::size_t grain_size);
 > 
->     template <class Container> Range(      Container& container);
->     template <class Container> Range(const Container& container);
+>     template <class Container> iterator_range(      Container& container);
+>     template <class Container> iterator_range(const Container& container);
 > };
 > ```
 
@@ -304,10 +304,10 @@ Constructors **(4)** and **(5)** create a range spanning `container.begin()` to 
 
 > ```cpp
 > template <class Idx = std::ptrdiff_t>
-> struct IndexRange {
->     IndexRange() = delete;
->     IndexRange(Idx first, Idx last);
->     IndexRange(Idx first, Idx last, std::size_t grain_size);
+> struct index_range {
+>     index_range() = delete;
+>     index_range(Idx first, Idx last);
+>     index_range(Idx first, Idx last, std::size_t grain_size);
 > }
 > ```
 
@@ -342,7 +342,7 @@ Pre-defined binary operations for parallel reductions.
 
 ### Global scheduler
 
-For user convenience all `Scheduler<>` and `ThreadPool` methods are also doubled at the namespace scope, in which case they use a global lazily-initialized `Scheduler<>` with a `ThreadPool` backend. See [examples](#examples).
+For user convenience all `scheduler<>` and `thread_pool` methods are also doubled at the namespace scope, in which case they use a global lazily-initialized `scheduler<>` with a `thread_pool` backend. See [examples](#examples).
 
 ### Thread introspection
 
@@ -431,10 +431,10 @@ parallel::set_thread_count(8);
 parallel::blocking_loop(vals, [&](auto it) { *it = f(*it); });
 
 // Apply f() to indices [0, 100)
-parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int i) { vals[i] = f(vals[i]); });
+parallel::blocking_loop(parallel::index_range{0, 100}, [&](int i) { vals[i] = f(vals[i]); });
 
 // Specify computation in blocks instead of element-wise
-parallel::blocking_loop(parallel::IndexRange{0, 100}, [&](int low, int high) {
+parallel::blocking_loop(parallel::index_range{0, 100}, [&](int low, int high) {
     for (int i = low; i < high; ++i) vals[i] = f(vals[i]);
 });
 ```
@@ -454,7 +454,10 @@ const double sum = parallel::blocking_reduce(vals, parallel::sum<>());
 assert( sum == 200'000 * 2 );
 
 // Reduce iterator range over a binary operation
-const double subrange_sum = parallel::blocking_reduce(parallel::Range{vals.begin() + 100, vals.end()}, parallel::sum<>{});
+const double subrange_sum = parallel::blocking_reduce(
+    parallel::iterator_range{vals.begin() + 100, vals.end()},
+    parallel::sum<>{}
+);
 
 assert( subrange_sum == (200'000 - 100) * 2 );
 ```
@@ -466,7 +469,7 @@ assert( subrange_sum == (200'000 - 100) * 2 );
 ```cpp
 using namespace utl;
 
-parallel::ThreadPool pool; // uses as many threads as it detects
+parallel::thread_pool pool; // uses as many threads as it detects
 
 pool.detached_task([]{ std::cout << "Hello from the task\n"; });
 
@@ -514,7 +517,7 @@ std::vector<int> c(200'000,  0);
 // workload is very even so we can use coarser grains than by default
 const std::size_t grain_size = 200'000 / parallel::get_thread_count();
 
-auto future = parallel::awaitable_loop(parallel::IndexRange<std::size_t>{0, 200'000, grain_size},
+auto future = parallel::awaitable_loop(parallel::index_range<std::size_t>{0, 200'000, grain_size},
     [&](std::size_t i){ c[i] = a[i] + b[i]; }
 );
 
@@ -581,7 +584,7 @@ Recursive workloads in general are also quite difficult to sensibly implement wi
 
  `utl::parallel` does not claim to be superior to vendor-optimized concurrency frameworks, what it does is expose a simple threading API with a concise (~`600` L.O.C.) implementation written entirely in standard C++17. As of now this niche seems to be rather empty as there is almost no stand-alone thread pools supporting recursion.
 
-Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_parallel/) comparing performance of `utl::parallel::ThreadPool` with `std::async` and some other thread pools. For comparison we will use [bshoshany/thread-pool](https://github.com/bshoshany/thread-pool) and [progschj/ThreadPool](https://github.com/progschj/ThreadPool) as those two seem to be the most popular stand-alone thread pool implementations.
+Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/benchmarks/module_parallel/) comparing performance of `utl::parallel::thread_pool` with `std::async` and some other thread pools. For comparison we will use [bshoshany/thread-pool](https://github.com/bshoshany/thread-pool) and [progschj/ThreadPool](https://github.com/progschj/ThreadPool) as those two seem to be the most popular stand-alone thread pool implementations.
 
 > [!Important]
 > Consequent benchmarks were measured on a `6`-core `AMD Ryzen 5 5600H` with hyper-threading disabled. Compiled with `g++ 11.4.0` at `-O2`. Ideal speedup from parallelization would be `600%`.
@@ -595,7 +598,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
 |   100.0% |               50.09 |               19.97 |    0.1% |     12.12 | `Serial`
 |   214.0% |               23.40 |               42.73 |    0.8% |     12.11 | `std::async()`
-|   573.3% |                8.74 |              114.47 |    0.4% |     11.84 | `parallel::ThreadPool`
+|   573.3% |                8.74 |              114.47 |    0.4% |     11.84 | `parallel::thread_pool`
 |   570.2% |                8.78 |              113.84 |    0.9% |     11.81 | `BS::thread_pool`
 |   565.6% |                8.86 |              112.92 |    1.2% |     11.83 | `progschj/ThreadPool`
 ```
@@ -607,7 +610,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |---------:|--------------------:|--------------------:|--------:|----------:|:--------------------------
 |   100.0% |            1,999.59 |                0.50 |    0.5% |     21.94 | `Serial`
 |   564.2% |              354.42 |                2.82 |    0.7% |     11.37 | `std::async()`
-|   597.0% |              334.96 |                2.99 |    0.4% |     11.41 | `parallel::ThreadPool`
+|   597.0% |              334.96 |                2.99 |    0.4% |     11.41 | `parallel::thread_pool`
 |   594.0% |              336.65 |                2.97 |    0.3% |     11.43 | `BS::thread_pool`
 |   593.4% |              336.95 |                2.97 |    0.2% |     11.45 | `progschj/ThreadPool`
 ```
@@ -621,7 +624,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |---------:|--------------------:|--------------------:|--------:|----------:|:------------------------
 |   100.0% |              167.20 |                5.98 |    0.7% |     12.04 | `Serial`
 |   161.1% |              103.80 |                9.63 |    5.1% |     12.10 | `std::async()`
-|   583.0% |               28.68 |               34.87 |    0.3% |     12.09 | `parallel::ThreadPool`
+|   583.0% |               28.68 |               34.87 |    0.3% |     12.09 | `parallel::thread_pool`
 ```
 
 **Scenario 2: Deep recursion.** Submit `1000` tasks busy-waiting for `0` to `100` microseconds randomly and then spawning & awaiting another **2** such tasks with a `49%` chance. This rate means on average tasks recursively expand into `50` different subtasks.
@@ -631,7 +634,7 @@ Below are a few [benchmarks](https://github.com/DmitriBogdanov/UTL/tree/master/b
 |---------:|--------------------:|--------------------:|--------:|----------:|:---------------------
 |   100.0% |              183.88 |                5.44 |    0.6% |     12.29 | `Serial`
 |   154.7% |              118.83 |                8.42 |    6.8% |     11.94 | `std::async()`
-|   565.1% |               32.54 |               30.73 |    1.2% |     11.90 | `parallel::ThreadPool`
+|   565.1% |               32.54 |               30.73 |    1.2% |     11.90 | `parallel::thread_pool`
 ```
 
 ### Questions & answers
