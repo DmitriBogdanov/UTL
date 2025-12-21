@@ -5,10 +5,12 @@
 int main() {
     using namespace utl;
     
-    time::Timer   timer;
+    time::timer   timer;
     std::uint64_t count = 0;
     
-    timer.start(time::sec(1));
+    timer.start(time::sec{1});
+    
     while (!timer.finished()) ++count;
-    std::cout << "Counted to " << count << " while looping for " << time::to_string(timer.length()) << '\n';
+    
+    std::cout << "Counted to " << count << " while looping for " << timer.elapsed_string() << '\n';
 }

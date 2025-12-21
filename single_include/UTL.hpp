@@ -14740,9 +14740,9 @@ using impl::CSV;
 #ifndef utl_time_headerguard
 #define utl_time_headerguard
 
-#define UTL_TIME_VERSION_MAJOR 1
+#define UTL_TIME_VERSION_MAJOR 2
 #define UTL_TIME_VERSION_MINOR 0
-#define UTL_TIME_VERSION_PATCH 3
+#define UTL_TIME_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -14775,7 +14775,7 @@ namespace utl::time::impl {
 // --- <chrono> utils ---
 // ======================
 
-struct SplitDuration {
+struct split_duration {
     std::chrono::hours        hours;
     std::chrono::minutes      min;
     std::chrono::seconds      sec;
@@ -14789,14 +14789,14 @@ struct SplitDuration {
                                           decltype(ms)::rep, decltype(us)::rep, decltype(ns)::rep>;
     // standard doesn't specify common representation type, usually it's 'std::int64_t'
 
-    std::array<common_rep, SplitDuration::size> count() {
+    std::array<common_rep, split_duration::size> count() {
         return {this->hours.count(), this->min.count(), this->sec.count(),
                 this->ms.count(),    this->us.count(),  this->ns.count()};
     }
 };
 
 template <class Rep, class Period>
-[[nodiscard]] constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> val) {
+[[nodiscard]] constexpr split_duration unit_split(std::chrono::duration<Rep, Period> val) {
     // for some reason 'duration_cast<>()' is not 'noexcept'
     const auto hours = std::chrono::duration_cast<std::chrono::hours>(val);
     const auto min   = std::chrono::duration_cast<std::chrono::minutes>(val - hours);
@@ -14822,8 +14822,8 @@ template <class Rep, class Period>
 
     if (relevant_units == 0) return ""; // early escape for a pathological case
 
-    const std::array<SplitDuration::common_rep, SplitDuration::size> counts = unit_split(value).count();
-    const std::array<const char*, SplitDuration::size>               names  = {"hours", "min", "sec", "ms", "us", "ns"};
+    const std::array<split_duration::common_rep, split_duration::size> counts = unit_split(value).count();
+    const std::array<const char*, split_duration::size> names = {"hours", "min", "sec", "ms", "us", "ns"};
 
     for (std::size_t unit = 0; unit < counts.size(); ++unit) {
         if (counts[unit]) {
@@ -14876,16 +14876,16 @@ using hours = float_duration<std::chrono::hours>;
 // =================
 
 template <class Clock = std::chrono::steady_clock>
-struct Stopwatch {
+struct stopwatch {
     using clock      = Clock;
     using time_point = typename clock::time_point;
     using duration   = typename clock::duration;
 
-    Stopwatch() { this->start(); }
+    stopwatch() { this->start(); }
 
-    void start() { this->_start = clock::now(); }
+    void start() { this->measurement_start = clock::now(); }
 
-    [[nodiscard]] duration elapsed() const { return clock::now() - this->_start; }
+    [[nodiscard]] duration elapsed() const { return clock::now() - this->measurement_start; }
 
     [[nodiscard]] ns    elapsed_ns() const { return this->elapsed(); }
     [[nodiscard]] us    elapsed_us() const { return this->elapsed(); }
@@ -14900,7 +14900,7 @@ struct Stopwatch {
     }
 
 private:
-    time_point _start;
+    time_point measurement_start;
 };
 
 // =============
@@ -14908,27 +14908,27 @@ private:
 // =============
 
 template <class Clock = std::chrono::steady_clock>
-struct Timer {
+struct timer {
     using clock      = Clock;
     using time_point = typename clock::time_point;
     using duration   = typename clock::duration;
 
-    Timer() = default;
+    timer() = default;
 
     template <class Rep, class Period>
-    explicit Timer(std::chrono::duration<Rep, Period> length) {
+    explicit timer(std::chrono::duration<Rep, Period> length) {
         this->start(length);
     }
 
     template <class Rep, class Period>
     void start(std::chrono::duration<Rep, Period> length) {
-        this->_start  = clock::now();
-        this->_length = std::chrono::duration_cast<duration>(length);
+        this->measurement_start  = clock::now();
+        this->measurement_length = std::chrono::duration_cast<duration>(length);
     }
 
-    void stop() noexcept { *this = Timer{}; }
+    void stop() noexcept { *this = timer{}; }
 
-    [[nodiscard]] duration elapsed() const { return clock::now() - this->_start; }
+    [[nodiscard]] duration elapsed() const { return clock::now() - this->measurement_start; }
 
     [[nodiscard]] ns    elapsed_ns() const { return this->elapsed(); }
     [[nodiscard]] us    elapsed_us() const { return this->elapsed(); }
@@ -14942,13 +14942,13 @@ struct Timer {
         return to_string(this->elapsed(), relevant_units);
     }
 
-    [[nodiscard]] bool     finished() const { return this->elapsed() >= this->_length; }
-    [[nodiscard]] bool     running() const noexcept { return this->_length != duration{}; }
-    [[nodiscard]] duration length() const noexcept { return this->_length; }
+    [[nodiscard]] bool     finished() const { return this->elapsed() >= this->measurement_length; }
+    [[nodiscard]] bool     running() const noexcept { return this->measurement_length != duration{}; }
+    [[nodiscard]] duration length() const noexcept { return this->measurement_length; }
 
 private:
-    time_point _start{};
-    duration   _length{};
+    time_point measurement_start{};
+    duration   measurement_length{};
 };
 
 // ======================
@@ -15011,7 +15011,7 @@ inline std::tm to_localtime(const std::time_t& time) {
 
 namespace utl::time {
 
-using impl::SplitDuration;
+using impl::split_duration;
 
 using impl::unit_split;
 using impl::to_string;
@@ -15025,8 +15025,8 @@ using impl::sec;
 using impl::min;
 using impl::hours;
 
-using impl::Stopwatch;
-using impl::Timer;
+using impl::stopwatch;
+using impl::timer;
 
 using impl::to_localtime;
 using impl::datetime_string;

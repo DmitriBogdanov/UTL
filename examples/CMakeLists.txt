@@ -104,7 +104,7 @@ utl_add_example( cxx_std_17 "module_table/floating_point_formatting"            
 utl_add_example( cxx_std_17 "module_table/latex_table"                                           )
 utl_add_example( cxx_std_17 "module_table/markdown_table"                                        )
 utl_add_example( cxx_std_17 "module_table/mathematica_table"                                     )
-utl_add_example( cxx_std_17 "module_time/accumulate_time"                                        )
 utl_add_example( cxx_std_17 "module_time/get_elapsed_time"                                       )
 utl_add_example( cxx_std_17 "module_time/get_local_date_and_time"                                )
 utl_add_example( cxx_std_17 "module_time/set_timers"                                             )
+utl_add_example( cxx_std_17 "module_time/split_time_units"                                       )
