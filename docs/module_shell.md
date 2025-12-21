@@ -27,16 +27,16 @@ It is mainly useful for invoking scripts and other executables in a portable (bu
 
 ```cpp
 // Temporary files
-struct TemporaryHandle {
-    TemporaryHandle()                       = delete;
-    TemporaryHandle(const TemporaryHandle&) = delete;
-    TemporaryHandle(TemporaryHandle&&)      = default;
+struct temporary_handle {
+    temporary_handle()                        = delete;
+    temporary_handle(const temporary_handle&) = delete;
+    temporary_handle(temporary_handle&&)      = default;
     
     // Construction
-    static TemporaryHandle    create(std::filesystem::path filepath);
-    static TemporaryHandle    create(                              );
-    static TemporaryHandle overwrite(std::filesystem::path filepath);
-    static TemporaryHandle overwrite(                              );
+    static temporary_handle    create(std::filesystem::path filepath);
+    static temporary_handle    create(                              );
+    static temporary_handle overwrite(std::filesystem::path filepath);
+    static temporary_handle overwrite(                              );
     
     // Getters
     std::ifstream ifstream(std::ios::openmode mode = std::ios::in ) const;
@@ -47,13 +47,13 @@ struct TemporaryHandle {
 };
 
 // Shell commands
-struct CommandResult {
+struct command_result {
     int         status;
     std::string out;
     std::string err;
 };
 
-CommandResult run_command(std::string_view command);
+command_result run_command(std::string_view command);
 ```
 
 ## Methods
@@ -61,16 +61,16 @@ CommandResult run_command(std::string_view command);
 ### Temporary files
 
 > ```cpp
-> TemporaryHandle()                       = delete;
-> TemporaryHandle(const TemporaryHandle&) = delete;
-> TemporaryHandle(TemporaryHandle&&)      = default;
+> temporary_handle()                        = delete;
+> temporary_handle(const temporary_handle&) = delete;
+> temporary_handle(temporary_handle&&)      = default;
 > ```
 
-`TemporaryHandle` "owns" the file lifetime and has move-only semantics. 
+`temporary_handle` "owns" the file lifetime and has move-only semantics. 
 
 > ```cpp
-> static TemporaryHandle    create(std::filesystem::path filepath); // (1)
-> static TemporaryHandle    create(                              ); // (2)
+> static temporary_handle    create(std::filesystem::path filepath); // (1)
+> static temporary_handle    create(                              ); // (2)
 > ```
 
 Overload **(1)** generates temporary file with a given `filepath`.
@@ -80,8 +80,8 @@ Overload **(2)** generates file with a unique name inside the system temporary d
 Does not overwrite existing files in case of a name collision, throws `std::runtime_error` if new file would replace an existing one.
 
 > ```cpp
-> static TemporaryHandle overwrite(std::filesystem::path filepath); // (1)
-> static TemporaryHandle overwrite(                              ); // (2)
+> static temporary_handle overwrite(std::filesystem::path filepath); // (1)
+> static temporary_handle overwrite(                              ); // (2)
 > ```
 
 Overload **(1)** generates temporary file with a given `filepath`.
@@ -109,13 +109,13 @@ Returns `std::filesystem::path` / `std::string` associated with the temporary fi
 ### Shell commands
 
 > ```cpp
-> struct CommandResult {
+> struct command_result {
 >     int         status;
 >     std::string out;
 >     std::string err;
 > };
 >
-> CommandResult run_command(std::string_view command);
+> command_result run_command(std::string_view command);
 > ```
 
 Runs command using a default system shell (`cmd` for Windows, `bash` for Linux, `zsh` for MacOS and some Linux distros).
@@ -131,7 +131,7 @@ Return `status`, `stdout` and `stderr` (see [standard streams](https://en.wikipe
 [ [Run this code](https://godbolt.org/z/4e6voz4q7) ] [ [Open source file](../examples/module_shell/working_with_temporary_files.cpp) ]
 
 ```cpp
-const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
+const auto handle = utl::shell::temporary_handle::overwrite("temporary.txt");
 
 // Write to temporary file
 handle.ofstream() << "TEXT";

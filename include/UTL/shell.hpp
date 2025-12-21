@@ -13,9 +13,9 @@
 #ifndef utl_shell_headerguard
 #define utl_shell_headerguard
 
-#define UTL_SHELL_VERSION_MAJOR 1
+#define UTL_SHELL_VERSION_MAJOR 2
 #define UTL_SHELL_VERSION_MINOR 0
-#define UTL_SHELL_VERSION_PATCH 4
+#define UTL_SHELL_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -114,7 +114,7 @@ private:
     }
 
 public:
-    temporary_handle()                       = delete;
+    temporary_handle()                        = delete;
     temporary_handle(const temporary_handle&) = delete;
     temporary_handle(temporary_handle&&)      = default;
 
