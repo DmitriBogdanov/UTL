@@ -3,7 +3,7 @@
 #include <cassert>
 
 int main() {
-    const auto handle = utl::shell::TemporaryHandle::overwrite("temporary.txt");
+    const auto handle = utl::shell::temporary_handle::overwrite("temporary.txt");
     
     // Write to temporary file
     handle.ofstream() << "TEXT";

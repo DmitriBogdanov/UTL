@@ -100,13 +100,13 @@ inline std::string random_ascii_string(std::size_t length = 20) {
 //    2. Before C++23 there is no portable way to open file in exclusive mode,
 //       which means we will have possible filesystem race regardless of API
 //
-struct TemporaryHandle {
+struct temporary_handle {
 private:
     std::filesystem::path filepath;
     std::string           string;
     // makes sense to cache the path string, considering that it is immutable and frequently needed
 
-    explicit TemporaryHandle(std::filesystem::path&& filepath)
+    explicit temporary_handle(std::filesystem::path&& filepath)
         : filepath(std::move(filepath)), string(this->filepath.string()) {
 
         if (!std::ofstream(this->path())) // creates the file
@@ -114,20 +114,20 @@ private:
     }
 
 public:
-    TemporaryHandle()                       = delete;
-    TemporaryHandle(const TemporaryHandle&) = delete;
-    TemporaryHandle(TemporaryHandle&&)      = default;
+    temporary_handle()                       = delete;
+    temporary_handle(const temporary_handle&) = delete;
+    temporary_handle(temporary_handle&&)      = default;
 
     // --- Construction ---
     // --------------------
 
-    static TemporaryHandle create(std::filesystem::path path) {
+    static temporary_handle create(std::filesystem::path path) {
         if (std::filesystem::exists(path))
             throw std::runtime_error("TemporaryHandle::create(): File {" + path.string() + "} already exists.");
-        return TemporaryHandle(std::move(path));
+        return temporary_handle(std::move(path));
     }
 
-    static TemporaryHandle create() {
+    static temporary_handle create() {
         const std::filesystem::path directory = std::filesystem::temp_directory_path();
 
         const auto random_path = [&] { return directory / std::filesystem::path(random_ascii_string()); };
@@ -141,17 +141,17 @@ public:
 
             if (std::filesystem::exists(path)) continue;
 
-            return TemporaryHandle(std::move(path));
+            return temporary_handle(std::move(path));
         }
 
         throw std::runtime_error("TemporaryHandle::create(): Could not create a unique filename.");
     }
 
-    static TemporaryHandle overwrite(std::filesystem::path path) { return TemporaryHandle(std::move(path)); }
+    static temporary_handle overwrite(std::filesystem::path path) { return temporary_handle(std::move(path)); }
 
-    static TemporaryHandle overwrite() {
+    static temporary_handle overwrite() {
         auto random_path = std::filesystem::temp_directory_path() / std::filesystem::path(random_ascii_string());
-        return TemporaryHandle(std::move(random_path));
+        return temporary_handle(std::move(random_path));
     }
 
     // --- Utils ---
@@ -175,7 +175,7 @@ public:
     // --- Creation ---
     // ----------------
 
-    ~TemporaryHandle() {
+    ~temporary_handle() {
         if (!this->filepath.empty()) std::filesystem::remove(this->filepath);
     }
 };
@@ -197,7 +197,7 @@ public:
     return chars;
 }
 
-struct CommandResult {
+struct command_result {
     int         status; // aka error code
     std::string out;
     std::string err;
@@ -215,9 +215,9 @@ struct CommandResult {
 // but it doesn't seem there is a portable way to do better (aka going
 // back to previous note about platform-specific APIs)
 //
-inline CommandResult run_command(std::string_view command) {
-    const auto stdout_handle = TemporaryHandle::create();
-    const auto stderr_handle = TemporaryHandle::create();
+inline command_result run_command(std::string_view command) {
+    const auto stdout_handle = temporary_handle::create();
+    const auto stderr_handle = temporary_handle::create();
 
     constexpr std::string_view stdout_pipe_prefix = " >";
     constexpr std::string_view stderr_pipe_prefix = " 2>";
@@ -259,9 +259,9 @@ namespace utl::shell {
 
 using impl::random_ascii_string;
 
-using impl::TemporaryHandle;
+using impl::temporary_handle;
 
-using impl::CommandResult;
+using impl::command_result;
 using impl::run_command;
 
 } // namespace utl::shell
