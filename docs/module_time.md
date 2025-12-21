@@ -33,7 +33,7 @@ Feature summary:
 
 ```cpp
 // Unit split
-struct SplitDuration {
+struct split_duration {
     std::chrono::hours        hours;
     std::chrono::minutes      min;
     std::chrono::seconds      sec;
@@ -43,7 +43,7 @@ struct SplitDuration {
 };
 
 template <class Rep, class Period>
-constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
+constexpr split_duration unit_split(std::chrono::duration<Rep, Period> value);
 
 template <class Rep, class Period>
 std::string to_string(std::chrono::duration<Rep, Period> value, std::size_t relevant_units = 3);
@@ -60,12 +60,12 @@ using hours = float_duration<std::chrono::hours       >;
 
 // Stopwatch
 template <class Clock = std::chrono::steady_clock>
-struct Stopwatch {
+struct stopwatch {
     using clock      = Clock;
     using time_point = typename clock::time_point;
     using duration   = typename clock::duration;
     
-    Stopwatch();
+    stopwatch();
     void start();
     
     duration    elapsed()        const;
@@ -81,15 +81,15 @@ struct Stopwatch {
 
 // Timer
 template <class Clock = std::chrono::steady_clock>
-struct Timer {
+struct timer {
     using clock      = Clock;
     using time_point = typename clock::time_point;
     using duration   = typename clock::duration;
     
-    Timer();
+    timer();
     
     template <class Rep, class Period>
-    explicit Timer(std::chrono::duration<Rep, Period> length);
+    explicit timer(std::chrono::duration<Rep, Period> length);
     
     template <class Rep, class Period>
     void start(std::chrono::duration<Rep, Period> length);
@@ -122,7 +122,7 @@ std::string datetime_string(const char* format = "%Y-%m-%d %H:%M:%S");
 ### Unit split
 
 > ```cpp
-> struct SplitDuration {
+> struct split_duration {
 >     std::chrono::hours        hours;
 >     std::chrono::minutes      min;
 >     std::chrono::seconds      sec;
@@ -136,7 +136,7 @@ POD struct representing duration split into individual units.
 
 > ```cpp
 > template <class Rep, class Period>
-> constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> value);
+> constexpr split_duration unit_split(std::chrono::duration<Rep, Period> value);
 >    ```
 
 Splits given duration into distinct units.
@@ -185,7 +185,7 @@ Typedefs for floating-point-represented time units.
 ### Stopwatch
 
 > ```cpp
-> Stopwatch();
+> stopwatch();
 > void start();
 > ```
 
@@ -195,7 +195,7 @@ Starts the time measurement.
 > duration    elapsed()        const;
 > ```
 
-Returns time elapsed since last `start()` (or `Stopwatch` construction) as a `Clock::duration`.
+Returns time elapsed since last `start()` (or `stopwatch` construction) as a `Clock::duration`.
 
 > ```cpp
 > ns          elapsed_ns()     const;
@@ -206,26 +206,26 @@ Returns time elapsed since last `start()` (or `Stopwatch` construction) as a `Cl
 > hours       elapsed_hours()  const;
 > ```
 
-Returns time elapsed since last `start()` (or `Stopwatch` construction) as a floating-point duration.
+Returns time elapsed since last `start()` (or `stopwatch` construction) as a floating-point duration.
 
 > ```cpp
 > std::string elapsed_string() const;
 > ```
 
-Returns time elapsed since last `start()` (or `Stopwatch` construction) as a formatted `std::string`.
+Returns time elapsed since last `start()` (or `stopwatch` construction) as a formatted `std::string`.
 
 **Note:** See [`time::to_string()`](#unit-split) for an example of output string format.
 
 ### Timer
 
 > ```cpp
-> Timer();
+> timer();
 > ```
 
 Creates timer with a default state. Does not start time measurement.
 
 > ```cpp
-> template <class Rep, class Period> explicit Timer(std::chrono::duration<Rep, Period> length);
+> template <class Rep, class Period> explicit timer(std::chrono::duration<Rep, Period> length);
 > template <class Rep, class Period> void     start(std::chrono::duration<Rep, Period> length);
 > ```
 
@@ -305,6 +305,31 @@ Thread-safe just like the previous function.
 
 ## Examples
 
+### Split time units
+
+[ [Run this code](https://godbolt.org/z/48dsP9qsq) ] [ [Open source file](../examples/module_time/split_time_units.cpp) ]
+
+```cpp
+using namespace utl;
+
+constexpr auto duration = std::chrono::nanoseconds{ 1'700'400'300 };
+constexpr auto split    = time::unit_split(duration);
+
+static_assert( split.hours.count() ==   0 );
+static_assert( split.min  .count() ==   0 );
+static_assert( split.sec  .count() ==   1 );
+static_assert( split.ms   .count() == 700 );
+static_assert( split.us   .count() == 400 );
+static_assert( split.ns   .count() == 300 );
+
+std::cout << time::to_string(duration) << '\n';
+```
+
+Output:
+```
+1 sec 700 ms 400 us
+```
+
 ### Get elapsed time
 
 [ [Run this code](https://godbolt.org/z/o5nMvdMa9) ] [ [Open source file](../examples/module_time/get_elapsed_time.cpp) ]
@@ -315,47 +340,20 @@ using namespace utl;
 const auto some_work = []{ std::this_thread::sleep_for(time::sec(1.7)); };
 
 // Elapsed time as string
-time::Stopwatch watch;
+time::stopwatch watch;
 some_work();
-std::cout << time::to_string(watch.elapsed()) << '\n';
+std::cout << watch.elapsed_string() << '\n';
 
 // Elapsed time as double
 watch.start();
 some_work();
-std::cout << watch.elapsed_ms().count()       << '\n';
+std::cout << watch.elapsed_ms().count() << '\n';
 ```
 
 Output:
 ```
 1 sec 700 ms 67 us
 1700.48
-```
-
-### Accumulate time
-
-[ [Run this code](https://godbolt.org/z/48dsP9qsq) ] [ [Open source file](../examples/module_time/accumulate_time.cpp) ]
-
-```cpp
-using namespace utl;
-
-const auto some_work = [] { std::this_thread::sleep_for(time::sec(0.05)); };
-
-// Accumulate time on 'some_work()' in a loop
-time::Stopwatch watch;
-time::ms        total{};
-
-for (std::size_t i = 0; i < 20; ++i) {
-    watch.start();
-    some_work();
-    total += watch.elapsed();
-}
-
-std::cout << time::to_string(total, 2) << '\n';
-```
-
-Output:
-```
-1 sec 4 ms
 ```
 
 ### Set timers
@@ -365,12 +363,14 @@ Output:
 ```cpp
 using namespace utl;
 
-time::Timer   timer;
+time::timer   timer;
 std::uint64_t count = 0;
 
-timer.start(time::sec(1));
+timer.start(time::sec{1});
+
 while (!timer.finished()) ++count;
-std::cout << "Counted to " << count << " while looping for " << time::to_string(timer.length()) << '\n';
+
+std::cout << "Counted to " << count << " while looping for " << timer.elapsed_string() << '\n';
 ```
 
 Output:
@@ -388,7 +388,7 @@ using namespace utl;
 std::cout
     << "Current date:     " << time::datetime_string("%y-%m-%d") << '\n'
     << "Current time:     " << time::datetime_string("%H:%M:%S") << '\n'
-    << "Current datetime: " << time::datetime_string()           << '\n';
+    << "Current datetime: " << time::datetime_string(          ) << '\n';
 ```
 
 Output:
@@ -423,7 +423,7 @@ const double  ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end - st
 **`utl::time`:**
 
 ```cpp
-const time::Stopwatch watch;
+const time::stopwatch watch;
 std::this_thread::sleep_for(time::sec(1.7));  // wait 1.7 sec
 const double ms = watch.elapsed_ms().count();
 ```
