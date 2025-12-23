@@ -8,20 +8,20 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-const auto format_number = [](double x) { return table::Number{x, std::chars_format::scientific, 5}; };
+const auto format_number = [](double x) { return table::numeric{x, std::chars_format::scientific, 5}; };
 
 TEST_CASE("Formats / ASCII") {
 
-    table::ASCII tb(6);
+    table::ascii table(6);
 
-    tb.hline();
-    tb.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
-    tb.hline();
-    tb.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
-    tb.hline();
+    table.hline();
+    table.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
+    table.hline();
+    table.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
+    table.hline();
 
-    const std::string result = tb.format();
+    const std::string result = table.format();
 
     const std::string reference = R"(|--------|----------|------|--------|-------------|------------|)"
                                   "\n"
@@ -41,12 +41,12 @@ TEST_CASE("Formats / ASCII") {
 
 TEST_CASE("Formats / Markdown") {
 
-    table::Markdown tb({"Task", "Priority", "Time", "Weight", "Coef", "Completion"});
+    table::markdown table({"Task", "Priority", "Time", "Weight", "Coef", "Completion"});
 
-    tb.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
+    table.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
 
-    const std::string result = tb.format();
+    const std::string result = table.format();
 
     const std::string reference = R"(| Task   | Priority | Time | Weight | Coef        | Completion |)"
                                   "\n"
@@ -62,17 +62,17 @@ TEST_CASE("Formats / Markdown") {
 
 TEST_CASE("Formats / LaTeX") {
 
-    table::LaTeX tb(6);
+    table::latex table(6);
 
-    tb.hline();
-    tb.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
-    tb.hline();
-    tb.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(10000), false);
-    tb.hline();
+    table.hline();
+    table.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
+    table.hline();
+    table.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(10000), false);
+    table.hline();
 
-    const std::string result = tb.format();
+    const std::string result = table.format();
 
     const std::string reference = R"(\begin{tabular}{|c|c|c|c|c|c|})"
                                   "\n"
@@ -98,17 +98,17 @@ TEST_CASE("Formats / LaTeX") {
 
 TEST_CASE("Formats / Mathematica") {
 
-    table::Mathematica tb(6);
+    table::mathematica table(6);
 
-    tb.hline();
-    tb.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
-    tb.hline();
-    tb.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(10000), false);
-    tb.hline();
+    table.hline();
+    table.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
+    table.hline();
+    table.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(10000), false);
+    table.hline();
 
-    const std::string result = tb.format();
+    const std::string result = table.format();
 
     const std::string reference = R"(Grid[{)"
                                   "\n"
@@ -128,13 +128,13 @@ TEST_CASE("Formats / Mathematica") {
 
 TEST_CASE("Formats / Mathematica") {
 
-    table::CSV tb(6);
+    table::csv table(6);
 
-    tb.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
-    tb.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
-    tb.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
+    table.cell("Task", "Priority", "Time", "Weight", "Coef", "Completion");
+    table.cell("Work 1", 10, 1.35, 0.237f, format_number(1.137), true);
+    table.cell("Work 2", 20, 2.45, 0.145f, format_number(4.654), false);
 
-    const std::string result = tb.format();
+    const std::string result = table.format();
 
     const std::string reference = R"("Task","Priority","Time","Weight","Coef","Completion")"
                                   "\n"

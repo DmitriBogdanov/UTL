@@ -3,15 +3,15 @@
 #include <iostream>
 
 int main() {
-    utl::table::Markdown tb({"Method", "Error", "Converged"});
+    utl::table::markdown table({"Method", "Error", "Converged"});
     
     // 1 call to 'cell()' doesn't necessarily have to fill the entire row at once
-    tb.cell("Jacobi");
-    tb.cell(3.475e-4);
-    tb.cell(false);
+    table.cell("Jacobi");
+    table.cell(3.475e-4);
+    table.cell(false);
     
-    tb.cell("Seidel");
-    tb.cell(6.732e-6, true);
+    table.cell("Seidel");
+    table.cell(6.732e-6, true);
     
-    std::cout << tb.format();
+    std::cout << table.format();
 }

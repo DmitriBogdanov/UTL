@@ -13,9 +13,9 @@
 #ifndef utl_table_headerguard
 #define utl_table_headerguard
 
-#define UTL_TABLE_VERSION_MAJOR 1
+#define UTL_TABLE_VERSION_MAJOR 2
 #define UTL_TABLE_VERSION_MINOR 0
-#define UTL_TABLE_VERSION_PATCH 2
+#define UTL_TABLE_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -145,13 +145,13 @@ template <class T>
 
 // Thin wrapper around the floating point value used by tables to apply format-specific stringification
 template <class T, require_float<T> = true>
-struct Number {
+struct numeric {
     T                 value;
     std::chars_format format;
     int               precision;
 
-    constexpr explicit Number(T value, std::chars_format format = std::chars_format::general,
-                              int precision = 3) noexcept
+    constexpr explicit numeric(T value, std::chars_format format = std::chars_format::general,
+                               int precision = 3) noexcept
         : value(value), format(format), precision(precision) {}
 };
 
@@ -163,7 +163,7 @@ struct Number {
 // Note 3: 'to_chars()' can only fail due to a small buffer, no need to check errors release
 
 template <class T, require_float<T> = true>
-inline std::string to_chars_number(Number<T> number) {
+inline std::string to_chars_number(numeric<T> number) {
     std::array<char, 30> buffer;
 
     const std::to_chars_result res =
@@ -276,7 +276,7 @@ inline void aligned_append(std::string& dst, const std::string& src, std::size_t
 
 // Every format does its own thing, but they all need rows/cols/widths/etc.
 // to do the alignment, makes sense to group all this stuff into a struct
-struct Extents {
+struct extents {
     std::size_t              rows;
     std::size_t              cols;
     std::vector<std::size_t> widths;        // useful for alignment
@@ -299,7 +299,7 @@ struct Extents {
 // This is a pretty efficient way of packing the data (relative to the alternatives)
 // that allows us to write table operations in a generic, yet concise manner.
 
-class Matrix {
+class tabular {
     std::size_t rows = 0;
     std::size_t cols = 0;
 
@@ -309,8 +309,8 @@ class Matrix {
 public:
     // Matrix has a fixed number of cols and a growing number of rows,
     // constructed either using a number of cols or the first row data
-    explicit Matrix(std::size_t cols) noexcept : cols(cols) { assert(this->cols > 0); }
-    explicit Matrix(std::vector<std::string> title) : rows(1), cols(title.size()) {
+    explicit tabular(std::size_t cols) noexcept : cols(cols) { assert(this->cols > 0); }
+    explicit tabular(std::vector<std::string> title) : rows(1), cols(title.size()) {
         assert(this->cols > 0);
 
         this->hlines.push_back(false);
@@ -343,7 +343,7 @@ public:
     // Normalizing matrix to a rectangular form
     // (fills possibly "unfinished" data with empty cells to make the matrix rectangular)
     // (returns self-reference to allow operation chaining)
-    Matrix& normalize() {
+    tabular& normalize() {
         this->cells.resize(this->rows * this->cols);
         return *this;
     }
@@ -358,7 +358,7 @@ public:
     }
 
     // Extent counting
-    [[nodiscard]] Extents get_extents() const {
+    [[nodiscard]] extents get_extents() const {
         // Individual column widths
         std::vector<std::size_t> widths(this->cols, 0);
 
@@ -390,14 +390,14 @@ public:
 
 // ASCII tables are usually printed to terminal or a file,
 
-class ASCII {
-    Matrix matrix;
+class ascii {
+    tabular matrix;
 
 public:
-    explicit ASCII(std::size_t cols) : matrix(cols) {}
+    explicit ascii(std::size_t cols) : matrix(cols) {}
 
     template <class T, require_float<T> = true>
-    void cell(Number<T> value) {
+    void cell(numeric<T> value) {
         this->matrix.add_cell(to_chars_number(value));
     }
 
@@ -475,16 +475,16 @@ public:
 // any specific restrictions on strings allowed in a cell (for example, some markdown flavors might
 // want to export HTML cells, while other would consider such syntax to be invalid).
 
-class Markdown {
-    Matrix matrix;
+class markdown {
+    tabular matrix;
 
 public:
     // Every markdown table has precisely one title row, making it a constructor argument (rather than a
     // '.title()' method) ensures this fact at the API level and saves us from a bunch of pointless checks
-    explicit Markdown(std::vector<std::string> title) : matrix(std::move(title)) {}
+    explicit markdown(std::vector<std::string> title) : matrix(std::move(title)) {}
 
     template <class T, require_float<T> = true>
-    void cell(Number<T> value) {
+    void cell(numeric<T> value) {
         this->matrix.add_cell(to_chars_number(value));
     }
 
@@ -559,14 +559,14 @@ public:
 // LaTeX is a little cumbersome to generate since we need to rewrite numbers in scientific form as formulas.
 // Strings intentionally don't escape any special chars to allow users to write LaTeX expressions in string cells.
 
-class LaTeX {
-    Matrix matrix;
+class latex {
+    tabular matrix;
 
 public:
-    explicit LaTeX(std::size_t cols) : matrix(cols) {}
+    explicit latex(std::size_t cols) : matrix(cols) {}
 
     template <class T, require_float<T> = true>
-    void cell(Number<T> value) {
+    void cell(numeric<T> value) {
         this->matrix.add_cell(latex_wrap(latex_reformat(to_chars_number(value))));
     }
 
@@ -644,14 +644,14 @@ public:
 // to print numerical params when visualizing numeric results. Wolfram strings seem to support newlines and most
 // control characters out of the box, quotes can be escaped with '\"'.
 
-class Mathematica {
-    Matrix matrix;
+class mathematica {
+    tabular matrix;
 
 public:
-    explicit Mathematica(std::size_t cols) : matrix(cols) {}
+    explicit mathematica(std::size_t cols) : matrix(cols) {}
 
     template <class T, require_float<T> = true>
-    void cell(Number<T> value) {
+    void cell(numeric<T> value) {
         this->matrix.add_cell(mathematica_reformat(to_chars_number(value)));
     }
 
@@ -747,14 +747,14 @@ public:
 //    This section documents the format that seems to be followed by most implementations."
 // This implementation complies with requirements posed by RFC.
 
-class CSV {
-    Matrix matrix;
+class csv {
+    tabular matrix;
 
 public:
-    explicit CSV(std::size_t cols) : matrix(cols) {}
+    explicit csv(std::size_t cols) : matrix(cols) {}
 
     template <class T, require_float<T> = true>
-    void cell(Number<T> value) {
+    void cell(numeric<T> value) {
         this->matrix.add_cell(to_chars_number(value));
     }
 
@@ -814,13 +814,13 @@ public:
 
 namespace utl::table {
 
-using impl::Number;
+using impl::numeric;
 
-using impl::ASCII;
-using impl::Markdown;
-using impl::LaTeX;
-using impl::Mathematica;
-using impl::CSV;
+using impl::ascii;
+using impl::markdown;
+using impl::latex;
+using impl::mathematica;
+using impl::csv;
 
 } // namespace utl::table
 
