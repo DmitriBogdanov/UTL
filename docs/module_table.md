@@ -44,8 +44,8 @@ Below is a quick usage showcase:
 
 ```cpp
 // Table formats
-struct ASCII {
-    explicit ASCII(std::size_t cols);
+struct ascii {
+    explicit ascii(std::size_t cols);
     
     template <class... T>
     void cell(T&&... args);
@@ -55,8 +55,8 @@ struct ASCII {
     std::string format() const;
 };
 
-struct Markdown {
-    explicit Markdown(std::vector<std::string> title);
+struct markdown {
+    explicit markdown(std::vector<std::string> title);
     
     template <class... T>
     void cell(T&&... args);
@@ -64,19 +64,8 @@ struct Markdown {
     std::string format();
 };
 
-struct LaTeX {
-    explicit LaTeX(std::size_t cols);
-    
-    template <class... T>
-    void cell(T&&... args);
-    
-    void hline();
-    
-    std::string format();
-};
-
-struct Mathematica {
-    explicit Mathematica(std::size_t cols);
+struct latex {
+    explicit latex(std::size_t cols);
     
     template <class... T>
     void cell(T&&... args);
@@ -86,8 +75,19 @@ struct Mathematica {
     std::string format();
 };
 
-struct CSV {
-    explicit CSV(std::size_t cols) : matrix(cols);
+struct mathematica {
+    explicit mathematica(std::size_t cols);
+    
+    template <class... T>
+    void cell(T&&... args);
+    
+    void hline();
+    
+    std::string format();
+};
+
+struct csv {
+    explicit csv(std::size_t cols) : matrix(cols);
     
     template <class... T>
     void cell(T&&... args);
@@ -97,8 +97,8 @@ struct CSV {
 
 // Number formatting
 template <class T>
-struct Number {
-    constexpr explicit Number(
+struct numeric {
+    constexpr explicit numeric(
         T                 value,
         std::chars_format format    = std::chars_format::general,
         int               precision = 3
@@ -111,7 +111,7 @@ struct Number {
 ### Table formats: ASCII
 
 > ```cpp
-> explicit ASCII(std::size_t cols);
+> explicit ascii(std::size_t cols);
 > ```
 
 Constructs **ASCII** table with `cols` columns.
@@ -144,7 +144,7 @@ Formats table into a string.
 ### Table formats: Markdown
 
 > ```cpp
-> explicit Markdown(std::vector<std::string> title);
+> explicit markdown(std::vector<std::string> title);
 > ```
 
 Constructs **Markdown** table with given `title`. This results in `title.size()` columns.
@@ -169,7 +169,7 @@ Formats table into a string.
 ### Table formats: LaTeX
 
 > ```cpp
-> explicit LaTeX(std::size_t cols);
+> explicit latex(std::size_t cols);
 > ```
 
 Constructs **LaTeX** table with `cols` columns.
@@ -202,7 +202,7 @@ Formats table into a string.
 ### Table formats: Mathematica
 
 > ```cpp
-> explicit Mathematica(std::size_t cols);
+> explicit mathematica(std::size_t cols);
 > ```
 
 Constructs **Mathematica** table with `cols` columns.
@@ -235,7 +235,7 @@ Formats table into a string.
 ### Table formats: CSV
 
 > ```cpp
-> explicit CSV(std::size_t cols);
+> explicit csv(std::size_t cols);
 > ```
 
 Constructs **CSV** table with `cols` columns.
@@ -267,8 +267,8 @@ Formats table into a string.
 
 > ```cpp
 > template <class T>
-> struct Number {
->     constexpr explicit Number(
+> struct numeric {
+>     constexpr explicit numeric(
 >         T                 value,
 >         std::chars_format format    = std::chars_format::general,
 >         int               precision = 3
@@ -285,16 +285,16 @@ A thin wrapper around the floating-point `value` used to specify its format. See
 [ [Run this code](https://godbolt.org/z/WG48hPnq4) ] [ [Open source file](../examples/module_table/ascii_table.cpp) ]
 
 ```cpp
-utl::table::ASCII tb(4);
+utl::table::ascii table(4);
 
-tb.hline();
-tb.cell("Task", "Time", "Error", "Done");
-tb.hline();
-tb.cell("Work 1", 1.35, 3.7e-5, true );
-tb.cell("Work 2", 1.35, 2.5e-8, false);
-tb.hline();
+table.hline();
+table.cell("Task", "Time", "Error", "Done");
+table.hline();
+table.cell("Work 1", 1.35, 3.7e-5, true );
+table.cell("Work 2", 1.35, 2.5e-8, false);
+table.hline();
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -313,12 +313,12 @@ Output:
 [ [Run this code](https://godbolt.org/z/3TGb9b4c3) ] [ [Open source file](../examples/module_table/markdown_table.cpp) ]
 
 ```cpp
-utl::table::Markdown tb({"Task", "Time", "Error", "Done"});
+utl::table::markdown table({"Task", "Time", "Error", "Done"});
 
-tb.cell("Work 1", 1.35, 3.7e-5, true );
-tb.cell("Work 2", 1.35, 2.5e-8, false);
+table.cell("Work 1", 1.35, 3.7e-5, true );
+table.cell("Work 2", 1.35, 2.5e-8, false);
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -335,16 +335,16 @@ Output:
 [ [Run this code](https://godbolt.org/z/8cje1dKh1) ] [ [Open source file](../examples/module_table/latex_table.cpp) ]
 
 ```cpp
-utl::table::LaTeX tb(4);
+utl::table::latex table(4);
 
-tb.hline();
-tb.cell("Task", "Time", "Error", "Done");
-tb.hline();
-tb.cell("Work 1", 1.35, 3.7e-5, true );
-tb.cell("Work 2", 1.35, 2.5e-8, false);
-tb.hline();
+table.hline();
+table.cell("Task", "Time", "Error", "Done");
+table.hline();
+table.cell("Work 1", 1.35, 3.7e-5, true );
+table.cell("Work 2", 1.35, 2.5e-8, false);
+table.hline();
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -365,16 +365,16 @@ Output:
 [ [Run this code](https://godbolt.org/z/3dKsK1G9G) ] [ [Open source file](../examples/module_table/mathematica_table.cpp) ]
 
 ```cpp
-utl::table::Mathematica tb(4);
+utl::table::mathematica table(4);
 
-tb.hline();
-tb.cell("Task", "Time", "Error", "Done");
-tb.hline();
-tb.cell("Work 1", 1.35, 3.7e-5, true );
-tb.cell("Work 2", 1.35, 2.5e-8, false);
-tb.hline();
+table.hline();
+table.cell("Task", "Time", "Error", "Done");
+table.hline();
+table.cell("Work 1", 1.35, 3.7e-5, true );
+table.cell("Work 2", 1.35, 2.5e-8, false);
+table.hline();
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -392,13 +392,13 @@ Grid[{
 [ [Run this code](https://godbolt.org/z/rEhxozzMY) ] [ [Open source file](../examples/module_table/csv_table.cpp) ]
 
 ```cpp
-utl::table::CSV tb(4);
+utl::table::csv table(4);
 
-tb.cell("Task", "Time", "Error", "Done");
-tb.cell("Work 1", 1.35, 3.7e-5, true );
-tb.cell("Work 2", 1.35, 2.5e-8, false);
+table.cell("Task", "Time", "Error", "Done");
+table.cell("Work 1", 1.35, 3.7e-5, true );
+table.cell("Work 2", 1.35, 2.5e-8, false);
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -416,14 +416,14 @@ Output:
 ```cpp
 using namespace utl;
 
-const auto format_number = [](double x) { return table::Number{x, std::chars_format::scientific, 1}; };
+const auto format_number = [](double x) { return table::numeric{x, std::chars_format::scientific, 1}; };
 
-table::Markdown tb({"Method", "Error"});
+table::markdown table({"Method", "Error"});
 
-tb.cell("Jacobi", format_number(3.475e-4));
-tb.cell("Seidel", format_number(6.732e-6));
+table.cell("Jacobi", format_number(3.475e-4));
+table.cell("Seidel", format_number(6.732e-6));
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
@@ -440,17 +440,17 @@ Output:
 [ [Run this code](https://godbolt.org/z/hP617d11W) ] [ [Open source file](../examples/module_table/building_tables_cell_by_cell.cpp) ] 
 
 ```cpp
-utl::table::Markdown tb({"Method", "Error", "Converged"});
+utl::table::markdown table({"Method", "Error", "Converged"});
 
 // 1 call to 'cell()' doesn't necessarily have to fill the entire row at once
-tb.cell("Jacobi");
-tb.cell(3.475e-4);
-tb.cell(false);
+table.cell("Jacobi");
+table.cell(3.475e-4);
+table.cell(false);
 
-tb.cell("Seidel");
-tb.cell(6.732e-6, true);
+table.cell("Seidel");
+table.cell(6.732e-6, true);
 
-std::cout << tb.format();
+std::cout << table.format();
 ```
 
 Output:
