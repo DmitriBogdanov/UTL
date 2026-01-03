@@ -1,4 +1,4 @@
-#include "include/UTL/struct_reflect.hpp"
+#include "include/UTL/describe_struct.hpp"
 
 #include <string>
 #include <iostream>
@@ -10,10 +10,10 @@ int main() {
     std::tuple<const char*, double> tuple_2{ "ipsum", 3 };
     
     // Print tuple
-    struct_reflect::tuple_for_each(tuple_1, [&](auto&& x){ std::cout << x << '\n'; });
+    describe_struct::tuple_for_each(tuple_1, [&](auto&& x){ std::cout << x << '\n'; });
     
     // Print tuple sum
-    struct_reflect::tuple_for_each(tuple_1, tuple_2, [&](auto&& x, auto&& y){ std::cout << x + y << '\n'; });
+    describe_struct::tuple_for_each(tuple_1, tuple_2, [&](auto&& x, auto&& y){ std::cout << x + y << '\n'; });
     
     // notice that tuples don't have to be homogenous,
     // what matters is that binary function can be called on all corresponding pairs
