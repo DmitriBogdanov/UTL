@@ -12497,7 +12497,7 @@ using impl::choose;
 
 #define UTL_REFLECT_STRUCT_VERSION_MAJOR 1
 #define UTL_REFLECT_STRUCT_VERSION_MINOR 0
-#define UTL_REFLECT_STRUCT_VERSION_PATCH 0
+#define UTL_REFLECT_STRUCT_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -12809,7 +12809,7 @@ constexpr std::string_view type_name = [] {
 
     constexpr std::size_t      space_last  = qualified.find_last_of(' ');
     constexpr std::size_t      space_found = qualified.find_last_of(' ') == std::string_view::npos;
-    constexpr std::string_view normalized  = space_found ? qualified : qualified.substr(space_last);
+    constexpr std::string_view normalized  = space_found ? qualified : qualified.substr(space_last + 1);
     // qualified type name without compiler-specific prefixes
 
     return normalized;
