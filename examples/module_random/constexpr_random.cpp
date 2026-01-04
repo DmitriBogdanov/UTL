@@ -6,9 +6,9 @@ using namespace utl;
 
 template <std::size_t size>
 constexpr auto random_integers(std::uint64_t seed, int min, int max) {
-    std::array<int, size>          res{};
-    random::UniformIntDistribution dist{min, max};
-    random::PRNG                   gen(seed);
+    std::array<int, size>            res{};
+    random::uniform_int_distribution dist{min, max};
+    random::default_generator        gen{seed};
     
     for (auto &e : res) e = dist(gen);
     return res;

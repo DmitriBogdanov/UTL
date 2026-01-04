@@ -43,13 +43,13 @@ TEST_CASE_TEMPLATE("Uniform real range", T, //
                    double,                  //
                    float                    //
 ) {
-    random::generators::SplitMix64 gen;
+    random::generators::splitmix_64 gen;
 
     constexpr std::size_t sample = 120; // large samples are slower
 
     // Check that values never escape [min, max] range
     test_in_every_real_range<T>([&](T min, T max) {
-        const random::UniformRealDistribution dist{min, max};
+        const random::uniform_real_distribution dist{min, max};
         for (std::size_t i = 0; i < sample; ++i) {
             const auto value = dist(gen);
             FAST_CHECK(min <= value);

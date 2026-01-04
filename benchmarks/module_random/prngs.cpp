@@ -19,10 +19,10 @@
 // --- C-style RNG wrapped into C++ PRNG API ---
 // =============================================
 
-struct RandWrapper {
+struct rand_wrapper {
     using result_type = int;
 
-    RandWrapper(unsigned int seed) { std::srand(seed); };
+    rand_wrapper(unsigned int seed) { std::srand(seed); };
 
     static constexpr result_type min() noexcept { return 0; }
     static constexpr result_type max() noexcept { return RAND_MAX; }
@@ -66,26 +66,26 @@ int main() {
     // clang-format off
     bench.title("PRNG invocation");
     
-    BENCHMARK_PRNG(std::minstd_rand0               ); // same results as minstd_rand
-    BENCHMARK_PRNG(std::minstd_rand                );
-    BENCHMARK_PRNG(RandWrapper                     );
-    BENCHMARK_PRNG(std::mt19937                    );
-    BENCHMARK_PRNG(std::mt19937_64                 );
-    // BENCHMARK_PRNG(std::ranlux24_base              ); // VERY slow, ~5%, not worth running
-    // BENCHMARK_PRNG(std::ranlux48_base              ); // VERY slow, ~5%, not worth running
-    BENCHMARK_PRNG(std::ranlux24                   );
-    BENCHMARK_PRNG(std::ranlux48                   );
-    BENCHMARK_PRNG(std::knuth_b                    );
+    BENCHMARK_PRNG(std::minstd_rand0                 ); // same results as minstd_rand
+    BENCHMARK_PRNG(std::minstd_rand                  );
+    BENCHMARK_PRNG(rand_wrapper                      );
+    BENCHMARK_PRNG(std::mt19937                      );
+    BENCHMARK_PRNG(std::mt19937_64                   );
+    // BENCHMARK_PRNG(std::ranlux24_base                ); // VERY slow, ~5%, not worth running
+    // BENCHMARK_PRNG(std::ranlux48_base                ); // VERY slow, ~5%, not worth running
+    BENCHMARK_PRNG(std::ranlux24                     );
+    BENCHMARK_PRNG(std::ranlux48                     );
+    BENCHMARK_PRNG(std::knuth_b                      );
     
-    BENCHMARK_PRNG(random::generators::RomuMono16  );
-    BENCHMARK_PRNG(random::generators::RomuTrio32  );
-    BENCHMARK_PRNG(random::generators::SplitMix32  );
-    BENCHMARK_PRNG(random::generators::Xoshiro128PP);
-    BENCHMARK_PRNG(random::generators::RomuDuoJr64 );
-    BENCHMARK_PRNG(random::generators::SplitMix64  );
-    BENCHMARK_PRNG(random::generators::Xoshiro256PP);
-    BENCHMARK_PRNG(random::generators::ChaCha8     );
-    BENCHMARK_PRNG(random::generators::ChaCha12    );
-    BENCHMARK_PRNG(random::generators::ChaCha20    );
+    BENCHMARK_PRNG(random::generators::romu_mono_16  );
+    BENCHMARK_PRNG(random::generators::romu_trio_32  );
+    BENCHMARK_PRNG(random::generators::splitmix_32   );
+    BENCHMARK_PRNG(random::generators::xoshiro_128   );
+    BENCHMARK_PRNG(random::generators::romu_duo_jr_64);
+    BENCHMARK_PRNG(random::generators::splitmix_64   );
+    BENCHMARK_PRNG(random::generators::xoshiro_256   );
+    BENCHMARK_PRNG(random::generators::chacha_8      );
+    BENCHMARK_PRNG(random::generators::chacha_12     );
+    BENCHMARK_PRNG(random::generators::chacha_20     );
     // clang-format on
 }

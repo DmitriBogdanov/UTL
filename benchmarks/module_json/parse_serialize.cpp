@@ -36,9 +36,8 @@ void generate_test_data() {
 
         // Add some escapes at random
         if (!str.empty() && random::uniform_double() < 0.1) {
-            const auto max_pos = static_cast<random::Uint>(str.size() - 1);
-            str.at(random::uniform_uint(0, max_pos)) =
-                random::choose({'"', '\\', '/', '\b', '\f', '\n', '\r', '\t'});
+            const auto max_pos                       = static_cast<random::uint>(str.size() - 1);
+            str.at(random::uniform_uint(0, max_pos)) = random::choose({'"', '\\', '/', '\b', '\f', '\n', '\r', '\t'});
         }
     }
 

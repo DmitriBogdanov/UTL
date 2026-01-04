@@ -22,7 +22,7 @@ TEST_CASE_TEMPLATE("Uniform int coverage / Different types", T, //
                    std::uint32_t,                               //
                    std::uint64_t                                //
 ) {
-    random::generators::SplitMix32 gen;
+    random::generators::splitmix_32 gen;
 
     constexpr auto min   = T(0);
     constexpr auto max   = T(17);
@@ -30,7 +30,7 @@ TEST_CASE_TEMPLATE("Uniform int coverage / Different types", T, //
 
     std::array<bool, count> visited_values{};
 
-    const random::UniformIntDistribution dist{min, max};
+    const random::uniform_int_distribution dist{min, max};
 
     for (std::size_t cursor = 0; cursor < visited_values.size();) {
         visited_values[dist(gen)] = true;
@@ -40,13 +40,13 @@ TEST_CASE_TEMPLATE("Uniform int coverage / Different types", T, //
 
 TEST_CASE_TEMPLATE("Uniform int coverage / Different PRNGs", Gen, //
                    std::minstd_rand0,                             //
-                   random::generators::RomuMono16,                //
-                   random::generators::RomuTrio32,                //
-                   random::generators::SplitMix32,                //
-                   random::generators::Xoshiro128PP,              //
-                   random::generators::RomuDuoJr64,               //
-                   random::generators::SplitMix64,                //
-                   random::generators::Xoshiro256PP               //
+                   random::generators::romu_mono_16,              //
+                   random::generators::romu_trio_32,              //
+                   random::generators::splitmix_32,               //
+                   random::generators::xoshiro_128,               //
+                   random::generators::romu_duo_jr_64,            //
+                   random::generators::splitmix_64,               //
+                   random::generators::xoshiro_256                //
 ) {
     Gen gen;
 
@@ -56,7 +56,7 @@ TEST_CASE_TEMPLATE("Uniform int coverage / Different PRNGs", Gen, //
 
     std::array<bool, count> visited_values{};
 
-    const random::UniformIntDistribution dist{min, max};
+    const random::uniform_int_distribution dist{min, max};
 
     for (std::size_t cursor = 0; cursor < visited_values.size();) {
         visited_values[dist(gen)] = true;

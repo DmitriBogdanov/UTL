@@ -56,13 +56,13 @@ TEST_CASE_TEMPLATE("Uniform int range", T, //
                    std::uint32_t,          //
                    std::uint64_t           //
 ) {
-    random::generators::SplitMix32 gen;
+    random::generators::splitmix_32 gen;
 
     constexpr std::size_t sample = 120; // large samples are slower
 
     // Check that values never escape [min, max] range
     test_in_every_int_range<T>([&](T min, T max) {
-        const random::UniformIntDistribution dist{min, max};
+        const random::uniform_int_distribution dist{min, max};
         for (std::size_t i = 0; i < sample; ++i) {
             const auto value = dist(gen);
             FAST_CHECK(min <= value);

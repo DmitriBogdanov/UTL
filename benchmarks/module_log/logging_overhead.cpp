@@ -26,16 +26,16 @@ void benchmark_logging_overhead_raw() {
     // Benchmark logging overhead with no decorators, just the message
 
     // Prepare data generation
-    random::generators::RomuDuoJr64 gen;
+    random::generators::romu_duo_jr_64 gen;
 
-    random::UniformIntDistribution  int_dist{-12345, 12345};
-    random::UniformRealDistribution float_dist{-1e6, 1e6};
+    random::uniform_int_distribution  int_dist{-12345, 12345};
+    random::uniform_real_distribution float_dist{-1e6, 1e6};
 
     // Random strings are pulled from cache to reduce overhead
     std::vector<std::string> cache(500);
 
-    random::UniformIntDistribution<char>        char_dist{'a', 'z'};
-    random::UniformIntDistribution<std::size_t> size_dist{2, 25};
+    random::uniform_int_distribution<char>        char_dist{'a', 'z'};
+    random::uniform_int_distribution<std::size_t> size_dist{2, 25};
 
     for (auto& str : cache) {
         str.resize(size_dist(gen));
@@ -43,7 +43,7 @@ void benchmark_logging_overhead_raw() {
     }
 
     const auto random_string = [&] {
-        random::UniformIntDistribution<std::size_t> pos_dist{0, cache.size() - 1};
+        random::uniform_int_distribution<std::size_t> pos_dist{0, cache.size() - 1};
         return cache[pos_dist(gen)];
     };
 

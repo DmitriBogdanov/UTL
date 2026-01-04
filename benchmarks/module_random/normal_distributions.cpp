@@ -52,24 +52,24 @@ int main() {
     bench.timeUnit(1ms, "ms").minEpochIterations(5).warmup(10).relative(true); // global options
 
     // clang-format off
-    bench.title("64-bit float distribution | SplitMix64");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(        std::normal_distribution<double>, random::generators::SplitMix64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(      random::NormalDistribution<double>, random::generators::SplitMix64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::ApproxNormalDistribution<double>, random::generators::SplitMix64);
+    bench.title("64-bit float distribution | splitmix_64");
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(          std::normal_distribution<double>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(       random::normal_distribution<double>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::approx_normal_distribution<double>, random::generators::splitmix_64);
     
-    bench.title("64-bit float distribution | SplitMix32");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(        std::normal_distribution<double>, random::generators::SplitMix32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(      random::NormalDistribution<double>, random::generators::SplitMix32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::ApproxNormalDistribution<double>, random::generators::SplitMix64);
+    bench.title("64-bit float distribution | splitmix_32");
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(          std::normal_distribution<double>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(       random::normal_distribution<double>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::approx_normal_distribution<double>, random::generators::splitmix_64);
     
-    bench.title("32-bit float distribution | SplitMix64");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(        std::normal_distribution< float>, random::generators::SplitMix64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(      random::NormalDistribution< float>, random::generators::SplitMix64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::ApproxNormalDistribution< float>, random::generators::SplitMix64);
+    bench.title("32-bit float distribution | splitmix_64");
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(          std::normal_distribution< float>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(       random::normal_distribution< float>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::approx_normal_distribution< float>, random::generators::splitmix_64);
     
-    bench.title("32-bit float distribution | SplitMix32");
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(        std::normal_distribution< float>, random::generators::SplitMix32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(      random::NormalDistribution< float>, random::generators::SplitMix32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::ApproxNormalDistribution< float>, random::generators::SplitMix32);
+    bench.title("32-bit float distribution | splitmix_32");
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(          std::normal_distribution< float>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(       random::normal_distribution< float>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(random::approx_normal_distribution< float>, random::generators::splitmix_32);
     // clang-format on
 }

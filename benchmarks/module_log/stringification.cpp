@@ -23,8 +23,8 @@ constexpr int repeats = 30'000;
 
 void benchmark_stringification_int() {
 
-    random::generators::RomuDuoJr64 gen; // fast PRNG to minimize data generation overhead
-    random::UniformIntDistribution  dist{-1234, 1234};
+    random::generators::romu_duo_jr_64 gen; // fast PRNG to minimize data generation overhead
+    random::uniform_int_distribution   dist{-1234, 1234};
 
     bench.title("Stringifying bulk 'int' data");
 
@@ -69,8 +69,8 @@ void benchmark_stringification_int() {
 
 void benchmark_stringification_float() {
 
-    random::generators::RomuDuoJr64 gen; // fast PRNG to minimize data generation overhead
-    random::UniformRealDistribution dist{-1e6, 1e6};
+    random::generators::romu_duo_jr_64 gen; // fast PRNG to minimize data generation overhead
+    random::uniform_real_distribution  dist{-1e6, 1e6};
 
     bench.title("Stringifying bulk 'double' data");
 
@@ -108,8 +108,8 @@ void benchmark_stringification_float() {
 
 void benchmark_stringification_bool() {
 
-    random::generators::RomuDuoJr64 gen; // fast PRNG to minimize data generation overhead
-    random::UniformIntDistribution  dist{0U, 1U};
+    random::generators::romu_duo_jr_64 gen; // fast PRNG to minimize data generation overhead
+    random::uniform_int_distribution   dist{0U, 1U};
 
     bench.title("Stringifying bulk 'bool' data");
 
@@ -136,14 +136,14 @@ void benchmark_stringification_bool() {
 
 void benchmark_stringification_vector_of_strings() {
 
-    random::generators::RomuDuoJr64 gen; // fast PRNG to minimize data generation overhead
+    random::generators::romu_duo_jr_64 gen; // fast PRNG to minimize data generation overhead
 
     // Generate a "cache" of random vectors of strings so we can minimize the overhead of getting random data
     std::vector<std::vector<std::string>> cache(500);
 
-    random::UniformIntDistribution<char>        char_dist{'a', 'z'};
-    random::UniformIntDistribution<std::size_t> vec_size_dist{4, 16};
-    random::UniformIntDistribution<std::size_t> str_size_dist{2, 25};
+    random::uniform_int_distribution<char>        char_dist{'a', 'z'};
+    random::uniform_int_distribution<std::size_t> vec_size_dist{4, 16};
+    random::uniform_int_distribution<std::size_t> str_size_dist{2, 25};
 
     for (auto& vec : cache) {
         vec.resize(vec_size_dist(gen));
@@ -154,7 +154,7 @@ void benchmark_stringification_vector_of_strings() {
     }
 
     const auto random_vector_of_strings = [&] {
-        random::UniformIntDistribution<std::size_t> pos_dist{0, cache.size() - 1};
+        random::uniform_int_distribution<std::size_t> pos_dist{0, cache.size() - 1};
         return cache[pos_dist(gen)];
     };
 
@@ -194,10 +194,10 @@ void benchmark_stringification_error_message() {
     // In this benchmark we want to format as simple error message and return it as
     // an 'std::string', stringstream will have to be temporary for that purpose
 
-    random::generators::RomuDuoJr64 gen; // fast PRNG to minimize data generation overhead
+    random::generators::romu_duo_jr_64 gen; // fast PRNG to minimize data generation overhead
 
-    random::UniformIntDistribution char_dist{'1', '9'};
-    random::UniformIntDistribution int_dist{-12345, 12345};
+    random::uniform_int_distribution char_dist{'1', '9'};
+    random::uniform_int_distribution int_dist{-12345, 12345};
 
     bench.title("Format an error message").timeUnit(1ns, "ns").minEpochIterations(1000).warmup(10).relative(true);
 
