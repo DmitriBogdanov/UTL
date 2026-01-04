@@ -12497,7 +12497,7 @@ using impl::choose;
 
 #define UTL_REFLECT_STRUCT_VERSION_MAJOR 1
 #define UTL_REFLECT_STRUCT_VERSION_MINOR 0
-#define UTL_REFLECT_STRUCT_VERSION_PATCH 3
+#define UTL_REFLECT_STRUCT_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
@@ -12518,8 +12518,6 @@ using impl::choose;
 
 // ____________________ IMPLEMENTATION ____________________
 
-
-
 namespace utl::reflect_struct::impl {
 
 // =========================
@@ -12528,7 +12526,7 @@ namespace utl::reflect_struct::impl {
 
 // Since C++17 aggregate classes can have other aggregates as a base, this case is rare in practice
 // and it makes reflection difficult due to base classes affecting semantics for aggregate initialization.
-// To make ensure strictness, we constrain all templates to only accept non-derived aggregates.
+// To ensure strictness, we constrain all templates to only accept non-derived aggregates.
 
 template <class Struct>
     requires std::is_class_v<Struct>
@@ -12692,7 +12690,7 @@ template <std::size_t N, reflectable T>
 // string that contains a textual representation of the template parameter.
 //
 // Note that template parameters MUST be named even if we don't use them, otherwise
-// some compilers (e.g. clang) might decide to omit them from string representation.
+// some compilers (i.e. clang) might decide to omit them from string representation.
 
 template <auto arg>
 [[nodiscard]] consteval std::string_view mangled_value_name() noexcept {
@@ -12728,15 +12726,28 @@ template <std::size_t N, reflectable Struct>
 // =============================
 
 // 'extern' variable is the secret sauce that allows us to extract field names from a struct.
-// If we wrap class into 'extern' variable and generate mangled name of its member pointer
-// we will get a string which contains corresponding field name, for example, on clang:
+// If we wrap class into an 'extern' variable and generate mangled name of its member pointer
+// we will get a string which contains corresponding field name. Below are example strings for
+// all major compilers with 'utl::reflect_struct::impl::' namespace removed to reduce verbosity:
 //
-//    'mangled_value_name< get_ptr<N>(external<CLASSNAME>) >()'
-//        => "std::string_view mangled_value_name() [arg = pointer_wrapper<nth_member_type>{&external.FIELDNAME}]"
+// GCC =>
+//    "consteval std::string_view mangled_value_name() [with auto arg = pointer_wrapper<int>{
+//     (& external<CLASS>.FIELD)}; std::string_view = std::basic_string_view<char>]"
+//                       ^         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                  prefix         suffix
+// clang =>
+//   "std::string_view mangled_value_name() [arg = pointer_wrapper<nth_member_type>{&external.FIELD}]"
+//                                                                                           ^     ^^
+//                                                                                      prefix     suffix
+// MSVC =>
+//   "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl mangled_value_name
+//    <struct pointer_wrapper<int>{const int*:&external<struct CLASS>->FIELD}>(void) noexcept"
+//                                                                    ^     ^^^^^^^^^^^^^^^^^
+//                                                               prefix     suffix   
 //
-// To parse this implementation-defined string in a cross-platform way without hard-coding the prefixes,
-// we can simply produce an 'example' string based on some known struct and deduce implementation-defined
-// offsets and prefixes on it.
+// To parse this implementation-defined string in a (reasonably) cross-platform way without hard-coding 
+// the prefixes, we can generate an example string for some known struct upon compilation and use it 
+// to deduce implementation-defined prefixes / suffixes relative to the known 'FIELD'.
 
 template <class T>
 extern const T external{};
@@ -12782,18 +12793,26 @@ template <std::size_t N, reflectable T>
 // --- Type name extraction ---
 // ============================
 
-// Same idea as in field name extraction, but simpler. For example, on clang:
+// Same idea as in field name extraction, but simpler. Below are example strings for all
+// major compilers with 'utl::reflect_struct::impl::' namespace removed to reduce verbosity:
 //
-//    'mangled_type_name< TYPE >()'
-//       => "std::string_view mangled_type_name() [Arg = TYPE]"
-//                                                offset ^   ^ terminator
-//
-// On other compilers 'suffix' tends to be quite a bit more verbose, clang has the nicest strings.
+// GCC =>
+//   "consteval std::string_view mangled_type_name() [with Arg = TYPE; std::string_view = std::basic_string_view<char>]"
+//                                                               ^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                                                          offset   suffix
+// clang =>
+//    "std::string_view mangled_type_name() [Arg = TYPE]"
+//                                                 ^   ^
+//                                            offset   suffix
+// MSVC =>
+//    "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl mangled_type_name<TYPE>(void) noexcept"
+//                                                                                                 ^   ^^^^^^^^^^^^^^^^
+//                                                                                            offset   suffix
 //
 // Without additional filters we extract a qualified type name e.g. "somelib::someclass::sometype<int>",
 // if somebody wants to access unqualified name they can easily filter it based on ':' and '<' offsets.
 //
-// Strictly speaking we aren't even restricted to reflectable aggregates, the technique work for all types.
+// Strictly speaking we aren't even restricted to reflectable aggregates, the technique should work for all types.
 
 struct compiler_specifics_type {
     constexpr static std::string_view example = mangled_type_name<int>();
@@ -12811,9 +12830,10 @@ constexpr std::string_view type_name = [] {
     constexpr std::string_view qualified = mangled.substr(begin, end - begin);
     // qualified type name (e.g. 'lib::someclass:sometype'), on MSVC it may also be prefixed by "struct" / "class"
 
-    constexpr std::size_t      space_last  = qualified.find_last_of(' ');
-    constexpr std::size_t      space_found = qualified.find_last_of(' ') == std::string_view::npos;
-    constexpr std::string_view normalized  = space_found ? qualified : qualified.substr(space_last + 1);
+    constexpr std::size_t space_last  = qualified.find_last_of(' ');
+    constexpr bool        space_found = space_last == std::string_view::npos;
+
+    constexpr std::string_view normalized = space_found ? qualified : qualified.substr(space_last + 1);
     // qualified type name without compiler-specific prefixes
 
     return normalized;
@@ -12863,11 +12883,9 @@ template <reflectable T>
 // ==================
 
 // Lowest-level algorithm we can implement is an indexed invoke,
-// other algorithms can usually be trivially implemented in its terms.
+// most other algorithms can be trivially implemented in its terms.
 //
-// Note the usage of 'std::conjunction' to implement constraints on a parameter pack.
-//
-// Propagating 'noexcept' guarantees also requires a bit of attention.
+// Note the usage of 'std::conjunction' to require constraints on a parameter pack.
 
 // clang-format off
 
