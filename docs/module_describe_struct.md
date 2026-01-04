@@ -10,13 +10,18 @@
 [<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/macos.yml)
 [<img src ="images/badge_workflow_freebsd.svg">](https://github.com/DmitriBogdanov/UTL/actions/workflows/freebsd.yml)
 
-# utl::struct_reflect
+# utl::describe_struct
 
 [<- to README.md](..)
 
 [<- to implementation.hpp](../include/UTL/struct_reflect.hpp)
 
-**utl::struct_reflect** is a lean `struct` reflection library based around the [map-macro](https://github.com/swansontec/map-macro).
+**utl::describe_reflect** is a lean `struct` reflection library based around the [map-macro](https://github.com/swansontec/map-macro).
+
+It uses **C++17** techniques similar to [Boost.Descibe](https://github.com/boostorg/describe), but exposed in a minimal stand-alone form.
+
+> [!Tip]
+> [utl::reflect_struct]() is a **C++20** counterpart of this library, it provides the same API, but without macros and only for aggregate types.
 
 > [!Important]
 > When compiling with [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B) use [`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor) to enable standard-compliant preprocessor. Default MSVC preprocessor is notoriously non-compliant due to legacy reasons and might not handle macro expansion properly.
@@ -24,37 +29,24 @@
 ## Definitions
 
 ```cpp
-// Macros
-#define UTL_STRUCT_REFLECT(struct_name, ...)
+// Macro
+#define UTL_DESCRIBE_STRUCT(name, ...)
 
-// Reflection
-template <class S> constexpr std::string_view type_name;
-template <class S> constexpr std::size_t      size;
+// General reflection
+template <class T> constexpr std::string_view name;
+template <class T> constexpr std::size_t      size;
 
-template <class S> constexpr std::array<std::string_view, size<E>> names;
-template <class S> constexpr auto field_view(S&& value) noexcept;
-template <class S> constexpr auto entry_view(S&& value) noexcept;
+// Member reflection
+template <std::size_t N, class T> constexpr auto label(T&& structure = T{}) noexcept;
+template <std::size_t N, class T> constexpr auto value(T&& structure      ) noexcept;
 
-template <std::size_t I, class S> constexpr auto get(S&& value) noexcept;
+// Tuple API
+template <class T> auto label_view(T&& structure = T{}) noexcept; // array of labels
+template <class T> auto value_view(T&& structure      ) noexcept; // tuple of values
+template <class T> auto entry_view(T&& structure      ) noexcept; // tuple of label-value pairs
 
-template <class S, class Func>
-constexpr void for_each(S&& value, Func&& func);
-
-template <class S1, class S2, class Func>
-constexpr void for_each(S1&& value_1, S2&& value_2, Func&& func);
-
-template <class S, class Pred>
-constexpr bool true_for_all(const S& value, Pred&& pred);
-
-template <class S1, class S2, class Pred>
-constexpr bool true_for_all(const S1& value_1, const S2& value_2, Pred&& pred);
-
-// Other utils
-template <class T, class Func>
-void tuple_for_each(T&& tuple, Func&& func);
-
-template <class T1, class T2, class Func>
-void tuple_for_each(T1&& tuple_1, T2&& tuple_2, Func&& func);
+// Algorithms
+template <class T, class F> void for_indices(F&& f); // f = f(i)
 ```
 
 ## Methods
@@ -180,144 +172,106 @@ Applies binary function `func` to all elements of the tuple pair `tuple_1`, `tup
 
 ## Examples
 
-### Basic reflection
+### Basics
 
 [ [Run this code](https://godbolt.org/z/e5qq7eb11) ] [ [Open source file](../examples/module_struct_reflect/basic_reflection.cpp) ]
 
 ```cpp
-// Define struct & reflection
-struct Quaternion { double r, i, j, k; }; // could be any struct with a lot of fields
-
-UTL_STRUCT_REFLECT(Quaternion, r, i, j, k);
-
-// Test basic reflection
 using namespace utl;
 
-static_assert( struct_reflect::type_name<Quaternion> == "Quaternion" );
+// Define structure
+struct vector { double x, y, z; }; UTL_DESCRIBE_STRUCT(vector, x, y, z);
 
-static_assert( struct_reflect::size<Quaternion> == 4 );
+// General reflection
+static_assert( describe_struct::name<vector> == "vector" );
+static_assert( describe_struct::size<vector> == 3        );
 
-static_assert( struct_reflect::names<Quaternion>[0] == "r" );
-static_assert( struct_reflect::names<Quaternion>[1] == "i" );
-static_assert( struct_reflect::names<Quaternion>[2] == "j" );
-static_assert( struct_reflect::names<Quaternion>[3] == "k" );
+// Member reflection
+constexpr vector vec = { 1., 2., 3. };
 
-constexpr Quaternion q = { 5., 6., 7., 8. };
+static_assert( describe_struct::label<0>(vec) == "x" );
+static_assert( describe_struct::label<1>(vec) == "y" );
+static_assert( describe_struct::label<2>(vec) == "z" );
 
-static_assert( struct_reflect::get<0>(q) == 5. );
-static_assert( struct_reflect::get<1>(q) == 6. );
-static_assert( struct_reflect::get<2>(q) == 7. );
-static_assert( struct_reflect::get<3>(q) == 8. );
+static_assert( describe_struct::value<0>(vec) ==  1. );
+static_assert( describe_struct::value<1>(vec) ==  2. );
+static_assert( describe_struct::value<2>(vec) ==  3. );
 ```
 
-### Field & entry views
+### Tuple API
 
 [ [Run this code](https://godbolt.org/z/oz1zPY95f) ] [ [Open source file](../examples/module_struct_reflect/field_and_entry_views.cpp) ]
 
 ```cpp
-// Define struct & reflection
-struct Quaternion { double r, i, j, k; }; // could be any struct with a lot of fields
-
-UTL_STRUCT_REFLECT(Quaternion, r, i, j, k);
-
-// Test field & entry views
 using namespace utl;
 
-constexpr Quaternion q = { 5., 6., 7., 8. };
+// Define structure
+struct vector { double x, y, z; }; UTL_DESCRIBE_STRUCT(vector, x, y, z);
 
-static_assert( struct_reflect::field_view(q) == std::tuple{ 5., 6., 7., 8. } );
+constexpr vector vec = { 1., 2., 3. };
 
-static_assert( std::get<0>(struct_reflect::entry_view(q)).first  == "r" );
-static_assert( std::get<0>(struct_reflect::entry_view(q)).second == 5.  );
-static_assert( std::get<1>(struct_reflect::entry_view(q)).first  == "i" );
-static_assert( std::get<1>(struct_reflect::entry_view(q)).second == 6.  );
-static_assert( std::get<2>(struct_reflect::entry_view(q)).first  == "j" );
-static_assert( std::get<2>(struct_reflect::entry_view(q)).second == 7.  );
-static_assert( std::get<3>(struct_reflect::entry_view(q)).first  == "k" );
-static_assert( std::get<3>(struct_reflect::entry_view(q)).second == 8.  );
+// Access it like a tuple
+static_assert( std::get<0>(describe_struct::label_view(vec)) == "x" );
+static_assert( std::get<1>(describe_struct::label_view(vec)) == "y" );
+static_assert( std::get<2>(describe_struct::label_view(vec)) == "z" );
+
+static_assert( std::get<0>(describe_struct::value_view(vec)) ==  1. );
+static_assert( std::get<1>(describe_struct::value_view(vec)) ==  2. );
+static_assert( std::get<2>(describe_struct::value_view(vec)) ==  3. );
+
+using namespace std::string_view_literals;
+
+static_assert( std::get<0>(describe_struct::entry_view(vec)) ==  std::pair{ "x"sv, 1. } );
+static_assert( std::get<1>(describe_struct::entry_view(vec)) ==  std::pair{ "y"sv, 2. } );
+static_assert( std::get<2>(describe_struct::entry_view(vec)) ==  std::pair{ "z"sv, 3. } );
 ```
 
-### Using reflection to define binary operations
+### Serialization
 
 [ [Run this code](https://godbolt.org/z/aWMeKx1sx) ] [ [Open source file](../examples/module_struct_reflect/using_reflection_to_define_binary_operations.cpp) ]
 
 ```cpp
-// Define struct & reflection
-struct Quaternion { double r, i, j, k; }; // could be any struct with a lot of fields
+using namespace utl;
 
-UTL_STRUCT_REFLECT(Quaternion, r, i, j, k);
+// Define structure
+struct vector { double x, y, z; }; UTL_DESCRIBE_STRUCT(vector, x, y, z);
 
-// Define binary operation (member-wise addition)
-constexpr Quaternion operator+(const Quaternion& lhs, const Quaternion &rhs) noexcept {
-    Quaternion res = lhs;
-    utl::struct_reflect::for_each(res, rhs, [&](auto& l, const auto& r){ l += r; });
-    return res;
-}
+constexpr vector vec = { 0.5, 1.5, 2.5 };
 
-// Define binary operation with predicates (member-wise equality)
-constexpr bool operator==(const Quaternion& lhs, const Quaternion &rhs) noexcept {
-    return utl::struct_reflect::true_for_all(lhs, rhs, [&](const auto& l, const auto& r){ return l == r; });
-}
-
-// Test operations
-static_assert( Quaternion{1, 2, 3, 4} + Quaternion{5, 6, 7, 8} == Quaternion{6, 8, 10, 12} );
+// Serialize members
+describe_struct::for_each(vec, [] (auto i) {
+   std::cout << "[" << i << "]: " << describe_struct::label<i>(vec) << " -> " << describe_struct::value<i>(vec);
+});
 ```
 
-### Iterating over a generic tuple
+Output:
+
+```
+[0]: x -> 0.5
+[1]: y -> 1.5
+[2]: z -> 2.5
+```
+
+### Member-wise operator
 
 [ [Run this code](https://godbolt.org/z/o8noxx6P6) ] [ [Open source file](../examples/module_struct_reflect/iterating_over_a_generic_tuple.cpp) ]
 
 ```cpp
 using namespace utl;
 
-std::tuple<std::string, int   > tuple_1{ "lorem", 2 };
-std::tuple<const char*, double> tuple_2{ "ipsum", 3 };
+// Define structure
+struct quaternion { double i, j, k, r; }; UTL_DESCRIBE_STRUCT(quaternion, i, j, k, r);
 
-// Print tuple
-struct_reflect::tuple_for_each(tuple_1, [&](auto&& x){ std::cout << x << '\n'; });
+// Member-wise 'operator+'
+constexpr quaternion operator+(quaternion lhs, quaternion rhs) noexcept {
+    quaternion res;
 
-// Print tuple sum
-struct_reflect::tuple_for_each(tuple_1, tuple_2, [&](auto&& x, auto&& y){ std::cout << x + y << '\n'; });
+    describe_struct::for_each(res, [] (auto i) {
+        describe_struct::value<i>(res) = describe_struct::value<i>(lhs) + describe_struct::value<i>(rhs);
+    });
 
-// notice that tuples don't have to be homogenous,
-// what matters is that binary function can be called on all corresponding pairs
-```
+    return res;
+}
 
-Output:
-
-```
-lorem
-2
-loremipsum
-5
-```
-
-### Debug printing with `utl::log`
-
-[ [Run this code](https://godbolt.org/z/h3h8f3KWW) ] [ [Open source file](../examples/module_struct_reflect/debug_printing_with_utl_log.cpp) ]
-
-```cpp
-// Define struct & reflection
-struct Quaternion { double r, i, j, k; }; // could be any struct with a lot of fields
-
-UTL_STRUCT_REFLECT(Quaternion, r, i, j, k);
-
-// ...
-
-// Print struct
-using namespace utl;
-
-constexpr Quaternion q = { 0.5, 1.5, 2.5, 3.5 };
-
-log::println("q = ", struct_reflect::entry_view(q));
-
-// Note: there is no tight coupling between the modules, 
-//       'utl::log' just knows how to expand tuples,
-//       other loggers that do this will also work
-```
-
-Output:
-
-```
-q = < < r, 0.5 >, < i, 1.5 >, < j, 2.5 >, < k, 3.5 > >
+static_assert( quaternion{1, 2, 3, 4} + quaternion{4, 3, 2, 1} == quaternion{5, 5, 5, 5} );
 ```
