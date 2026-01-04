@@ -12804,7 +12804,15 @@ constexpr std::string_view type_name = [] {
     constexpr std::size_t begin = compiler_specifics_type::offset;
     constexpr std::size_t end   = mangled.find(compiler_specifics_type::suffix);
 
-    return mangled.substr(begin, end - begin);
+    constexpr std::string_view qualified = mangled.substr(begin, end - begin);
+    // qualified type name (e.g. 'lib::someclass:sometype'), on MSVC it may also be prefixed by "struct" / "class"
+
+    constexpr std::size_t      space_last  = qualified.find_last_of(' ');
+    constexpr std::size_t      space_found = qualified.find_last_of(' ') == std::string_view::npos;
+    constexpr std::string_view normalized  = space_found ? qualified : qualified.substr(space_last);
+    // qualified type name without compiler-specific prefixes
+
+    return normalized;
 }();
 
 // Wrap for public API
