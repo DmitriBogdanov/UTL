@@ -43,7 +43,7 @@ Quality goals include:
 | [**utl::assertion**](module_assertion.md)             | **C++17** | Assert macro with more diagnostic info                       |
 | [**utl::bit**](module_bit.md)                         | **C++17** | Bit-twiddling, enum bitflags                                 |
 | [**utl::describe_enum**](module_describe_enum.md)     | **C++17** | Annotation-based enum reflection                             |
-| [**utl::describe_struct**](module_describe_struct.md) | **C++17** | Annotation-based structure reflection                        |
+| [**utl::describe_struct**](module_describe_struct.md) | **C++17** | Annotation-based struct reflection                           |
 | [**utl::integral**](module_integral.md)               | **C++17** | Saturated math, safe integer casts, literals, rounding and etc. |
 | [**utl::json**](module_json.md)                       | **C++17** | JSON parsing, serializing & reflection                       |
 | [**utl::log**](module_log.md)                         | **C++17** | Logging library                                              |
@@ -55,13 +55,13 @@ Quality goals include:
 | [**utl::progressbar**](module_progressbar.md)         | **C++17** | Progress bars for CLI apps                                   |
 | [**utl::random**](module_random.md)                   | **C++17** | PRNGs & random number generation                             |
 | [**utl::reflect_enum**](module_reflect_enum.md)       | **C++20** | Enum reflection                                              |
-| [**utl::reflect_struct**](module_reflect_struct.md)   | **C++20** | Structure reflection                                         |
+| [**utl::reflect_struct**](module_reflect_struct.md)   | **C++20** | Struct reflection                                            |
 | [**utl::shell**](module_shell.md)                     | **C++17** | Shell commands and temporary files                           |
 | [**utl::sleep**](module_sleep.md)                     | **C++17** | Precise sleep implementations                                |
 | [**utl::stre**](module_stre.md)                       | **C++17** | Efficient implementations of common string utils             |
 | [**utl::strong_type**](module_strong_type.md)         | **C++17** | Strong typedefs & RAII wrappers                              |
 | [**utl::table**](module_table.md)                     | **C++17** | Export ASCII, Markdown, LaTeX, Mathematica and CSV tables    |
-| [**utl::time**](module_time.md)                       | **C++17** | Floating-point time, timers, stopwatches, datetime           |
+| [**utl::time**](module_time.md)                       | **C++17** | Floating-point time, timers, stopwatches and datetime        |
 
 ## See also
 

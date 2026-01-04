@@ -12,26 +12,28 @@
 nav:
   - "Home": README.md
   - "Modules":
-    - "utl::assertion"      : module_assertion.md
-    - "utl::bit"            : module_bit.md
-    - "utl::enum_reflect"   : module_enum_reflect.md
-    - "utl::integral"       : module_integral.md
-    - "utl::json"           : module_json.md
-    - "utl::log"            : module_log.md
-    - "utl::math"           : module_math.md
-    - "utl::mvl"            : module_mvl.md
-    - "utl::parallel"       : module_parallel.md
-    - "utl::predef"         : module_predef.md
-    - "utl::profiler"       : module_profiler.md
-    - "utl::progressbar"    : module_progressbar.md
-    - "utl::random"         : module_random.md
-    - "utl::shell"          : module_shell.md
-    - "utl::sleep"          : module_sleep.md
-    - "utl::stre"           : module_stre.md
-    - "utl::strong_type"    : module_strong_type.md
-    - "utl::struct_reflect" : module_struct_reflect.md
-    - "utl::table"          : module_table.md
-    - "utl::time"           : module_time.md
+    - "utl::assertion"       : module_assertion.md
+    - "utl::bit"             : module_bit.md
+    - "utl::describe_enum"   : module_describe_enum.md
+    - "utl::describe_struct" : module_describe_struct.md
+    - "utl::integral"        : module_integral.md
+    - "utl::json"            : module_json.md
+    - "utl::log"             : module_log.md
+    - "utl::math"            : module_math.md
+    - "utl::mvl"             : module_mvl.md
+    - "utl::parallel"        : module_parallel.md
+    - "utl::predef"          : module_predef.md
+    - "utl::profiler"        : module_profiler.md
+    - "utl::progressbar"     : module_progressbar.md
+    - "utl::random"          : module_random.md
+    - "utl::reflect_enum"    : module_reflect_enum.md
+    - "utl::reflect_struct"  : module_reflect_struct.md
+    - "utl::shell"           : module_shell.md
+    - "utl::sleep"           : module_sleep.md
+    - "utl::stre"            : module_stre.md
+    - "utl::strong_type"     : module_strong_type.md
+    - "utl::table"           : module_table.md
+    - "utl::time"            : module_time.md
   - "Guides":
     - "Selecting modules"      : guide_selecting_modules.md
     - "Fetching the library"   : guide_fetching_library.md
@@ -45,7 +47,7 @@ nav:
     - "Map-macro: Emulating reflection"                                           : blog/map_macro_reflection.md
   - "License": guide_license.md
 
-# Note: We use 'guide_license.md' instead of the usual 'LICENSE.md' to work around the GitHub license
-#       detection quirks. The system requires license to be placed in root, while the website needs a
-#       copy in 'docs/'. If 'LICENSE.md' is located in both places GitHub tends to randomly get confused
-#       and show two identical licenses on the website.
+# Note: We use 'guide_license.md' instead of the usual 'LICENSE.md' to work around the GitHub 
+#       license detection quirks. The system requires license to be placed in root, while the 
+#       website needs a copy in 'docs/'. If 'LICENSE.md' is located in both places GitHub tends
+#       to randomly get confused and show two identical licenses when viewing the repo.

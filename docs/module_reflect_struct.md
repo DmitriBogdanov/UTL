@@ -16,9 +16,11 @@
 
 [<- to implementation.hpp](../include/UTL/reflect_struct.hpp)
 
-**utl::reflect_struct** is a lean reflection library for non-derived aggregate structures.
+**utl::reflect_struct** is a lean library for reflecting non-derived aggregate structures.
 
 It uses **C++20** techniques similar to [Glaze](https://github.com/stephenberry/glaze), [reflect-cpp](https://github.com/getml/reflect-cpp) and [Boost.PFR](https://github.com/boostorg/pfr), but exposed in a minimal stand-alone form.
+
+The goal is to have a clean well-documented implementation that is easy to analyze and integrate with existing projects.
 
 ## Definitions
 
@@ -79,7 +81,7 @@ Evaluates to a number of member variables in the struct `T` .
 > template <std::size_t N, class T> constexpr auto label(T&& structure = T{}) noexcept;
 > ```
 
-Evaluates to the `std::string_view` label of the Nth member variable of `T`.
+Evaluates to the [`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view.html) label of the Nth member variable of `T`.
 
 Providing specific `structure` is not necessary, but can be done to deduce the template.
 
@@ -89,11 +91,27 @@ Providing specific `structure` is not necessary, but can be done to deduce the t
 
 Returns a perfectly-forwarded reference to the Nth member variable of `structure`.
 
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `value<0>` return type |
+| ----------------------------------------------- | -------------------------------------- | ---------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `const int&`           |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `int&`                 |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `int&&`                |
+
 > ```cpp
 > template <std::size_t N, class T> constexpr auto entry(T&& structure) noexcept;
 > ```
 
-Returns `std::pair` with label and a perfectly-forwarded reference to the Nth member variable of `structure`.
+Returns [`std::pair`](https://en.cppreference.com/w/cpp/utility/pair.html) with label and a perfectly-forwarded reference to the Nth member variable of `structure`.
+
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `entry<0>` return type                    |
+| ----------------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std::pair<std::string_view, const int&>` |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std::pair<std::string_view, int&>`       |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std::pair<std::string_view, int&&>`      |
 
 ### Tuple API
 
@@ -101,13 +119,21 @@ Returns `std::pair` with label and a perfectly-forwarded reference to the Nth me
 > template <class T> auto label_view(T&& structure = T{}) noexcept; // array of labels
 > ```
 
-Returns an `std::array` of `std::string_view` labels corresponding to member variables of `structure`.
+Returns an [`std::array`](https://en.cppreference.com/w/cpp/container/array.html) of [`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view.html) labels corresponding to member variables of `structure`.
 
 > ```cpp
 > template <class T> auto value_view(T&& structure) noexcept; // tuple of values
 > ```
 
 Returns a tuple of perfectly-forwarded references to the member variables of `structure`.
+
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `value_view` return type |
+| ----------------------------------------------- | -------------------------------------- | ------------------------ |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std:tuple<const int&>`  |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std:tuple<int&>`        |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std:tuple<int&&>`       |
 
 > ```cpp
 > template <class T> auto entry_view(T&& structure) noexcept; // tuple of label-value pairs
@@ -117,15 +143,25 @@ Returns a tuple of label-value pairs corresponding to member variables of `struc
 
 Similarly to `value_view()`, value references are propagated with perfect forwarding.
 
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `entry_view` return type                             |
+| ----------------------------------------------- | -------------------------------------- | ---------------------------------------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std:tuple<std::pair<std::string_view, const int&>>` |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std:tuple<std::pair<std::string_view, int&>>`       |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std:tuple<std::pair<std::string_view, int&&>>`      |
+
 ### Algorithms
 
 > ```cpp
 > template <class T, class F> void for_indices(F&& f); // f = f(i)
 > ```
 
-Invokes `f(std::integral_constant<std::size_t, i>)` for indices `0` to `size<T> - 1`.
+Invokes [`f(std::integral_constant<std::size_t, i>)`](https://en.cppreference.com/w/cpp/types/integral_constant.html) for indices `0` to `size<T> - 1`.
 
 If none of the `f` invocations are throwing, this function will be marked `noexcept`.
+
+In practice this is usually used with a template lambda.
 
 ## Examples
 

@@ -14,14 +14,16 @@
 
 [<- to README.md](..)
 
-[<- to implementation.hpp](../include/UTL/struct_reflect.hpp)
+[<- to implementation.hpp](../include/UTL/describe_struct.hpp)
 
-**utl::describe_reflect** is a lean `struct` reflection library based around the [map-macro](https://github.com/swansontec/map-macro).
+**utl::describe_struct** is a lean class reflection library based around the [map-macro](https://github.com/swansontec/map-macro) annotations.
 
-It uses **C++17** techniques similar to [Boost.Descibe](https://github.com/boostorg/describe), but exposed in a minimal stand-alone form.
+It uses **C++17** techniques similar to [Boost.Describe](https://github.com/boostorg/describe), but exposed in a minimal stand-alone form.
+
+The goal is to have a clean well-documented implementation that is easy to analyze and integrate with existing projects.
 
 > [!Tip]
-> [utl::reflect_struct]() is a **C++20** counterpart of this library, it provides the same API, but without macros and only for aggregate types.
+> See [utl::reflect_struct](module_reflect_struct.md) for a **C++20** counterpart of this library, it provides the exact same API, but without requiring macro annotations.
 
 > [!Important]
 > When compiling with [MSVC](https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B) use [`/Zc:preprocessor`](https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor) to enable standard-compliant preprocessor. Default MSVC preprocessor is notoriously non-compliant due to legacy reasons and might not handle macro expansion properly.
@@ -29,7 +31,7 @@ It uses **C++17** techniques similar to [Boost.Descibe](https://github.com/boost
 ## Definitions
 
 ```cpp
-// Macro
+// Macro annotation
 #define UTL_DESCRIBE_STRUCT(name, ...)
 
 // General reflection
@@ -39,6 +41,7 @@ template <class T> constexpr std::size_t      size;
 // Member reflection
 template <std::size_t N, class T> constexpr auto label(T&& structure = T{}) noexcept;
 template <std::size_t N, class T> constexpr auto value(T&& structure      ) noexcept;
+template <std::size_t N, class T> constexpr auto entry(T&& structure      ) noexcept;
 
 // Tuple API
 template <class T> auto label_view(T&& structure = T{}) noexcept; // array of labels
@@ -51,130 +54,121 @@ template <class T, class F> void for_indices(F&& f); // f = f(i)
 
 ## Methods
 
-### Macros
+### Macro annotation
 
 > ```cpp
-> #define UTL_STRUCT_REFLECT(struct_name, ...)
+> #define UTL_DESCRIBE_STRUCT(name, ...)
 > ```
 
-Registers reflection for the `struct` / `class` type `struct_name` with member variables `...`.
+Registers reflection for the `struct` / `class` type `name` with member variables `...`.
 
-### Reflection
+### General reflection
 
 > ```cpp
-> template <class S> constexpr std::string_view type_name;
+> template <class T> constexpr std::string_view name;
 > ```
 
-Evaluates to a stringified name of struct `S`.
+Evaluates to a stringified name of the struct `T`.
 
 > ```cpp
-> template <class S> constexpr std::size_t size;
+> template <class T> constexpr std::size_t size;
 > ```
 
-Evaluates to a number of fields in the struct `S` .
+Evaluates to a number of member variables in the struct `T` .
+
+### Member reflection
 
 > ```cpp
-> template <class S> constexpr std::array<std::string_view, size<E>> names;
+> template <std::size_t N, class T> constexpr auto label(T&& structure = T{}) noexcept;
 > ```
 
-Evaluates to an array of stringified field names corresponding to struct `S`.
+Evaluates to the [`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view.html) label of the Nth member variable of `T`.
+
+Providing specific `structure` is not necessary, but can be done to deduce the template.
 
 > ```cpp
-> template <class S> constexpr auto field_view(S&& value) noexcept;
+> template <std::size_t N, class T> constexpr auto value(T&& structure) noexcept;
 > ```
 
-Returns a tuple with perfectly-forwarded references corresponding to the fields of `value`.
+Returns a perfectly-forwarded reference to the Nth member variable of `structure`.
 
-Below is an **example table** for the reflection of `struct Struct { int x; };`:
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
 
-| Value category                              | Forwarded reference                   | `field_view` return type |
-| ------------------------------------------- | ------------------------------------- | ------------------------ |
-| `value` is a const reference to a struct    | `S&&` corresponds to `const Struct&`  | `std:tuple<const int&>`  |
-| `value` is an l-value reference to a struct | `S&&` corresponds to `Struct&`        | `std:tuple<int&>`        |
-| `value` is an r-value reference to a struct | `S&&` corresponds to `Struct&&`       | `std:tuple<int&&>`       |
-
-> [!Tip]
-> This effectively means that `field_view` allows struct members to be accessed exactly as one would expect when working with struct members directly, except using a tuple API. See the [examples](#field--entry-views).
+| Value category                                  | Forwarded reference                    | `value<0>` return type |
+| ----------------------------------------------- | -------------------------------------- | ---------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `const int&`           |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `int&`                 |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `int&&`                |
 
 > ```cpp
-> template <class S> constexpr auto entry_view(S&& value) noexcept;
+> template <std::size_t N, class T> constexpr auto entry(T&& structure) noexcept;
 > ```
 
-Returns a tuple with pairs of names and perfectly-forwarded references corresponding to the fields of `value`.
+Returns [`std::pair`](https://en.cppreference.com/w/cpp/utility/pair.html) with label and a perfectly-forwarded reference to the Nth member variable of `structure`.
 
-Reference forwarding logic is exactly the same as it is in `field_view()`. Below is an **example table** for the reflection of `struct Struct { int x; };`:
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
 
-| Value category                              | Forwarded reference                   | `entry_view()` return type                           |
-| ------------------------------------------- | ------------------------------------- | ---------------------------------------------------- |
-| `value` is a const reference to a struct    | `S&&` corresponds to `const Struct&`  | `std:tuple<std::pair<std::string_view, const int&>>` |
-| `value` is an l-value reference to a struct | `S&&` corresponds to `Struct&`        | `std:tuple<std::pair<std::string_view, int&>>`       |
-| `value` is an r-value reference to a struct | `S&&` corresponds to `Struct&&`       | `std:tuple<std::pair<std::string_view, int&&>>`      |
+| Value category                                  | Forwarded reference                    | `entry<0>` return type                    |
+| ----------------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std::pair<std::string_view, const int&>` |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std::pair<std::string_view, int&>`       |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std::pair<std::string_view, int&&>`      |
+
+### Tuple API
 
 > ```cpp
-> template <std::size_t I, class S> constexpr auto get(S&& value) noexcept;
+> template <class T> auto label_view(T&& structure = T{}) noexcept; // array of labels
 > ```
 
-Returns perfectly-forwarded reference to the field number `I` in `value`.
+Returns an [`std::array`](https://en.cppreference.com/w/cpp/container/array.html) of [`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view.html) labels corresponding to member variables of `structure`.
 
 > ```cpp
-> template <class S, class Func>
-> constexpr void for_each(S&& value, Func&& func);
+> template <class T> auto value_view(T&& structure) noexcept; // tuple of values
 > ```
 
-Applies function `func` to all fields of the struct `value`.
+Returns a tuple of perfectly-forwarded references to the member variables of `structure`.
 
-**Note:** `func` must be callable for all field types, either through overloads or templating.
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `value_view` return type |
+| ----------------------------------------------- | -------------------------------------- | ------------------------ |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std:tuple<const int&>`  |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std:tuple<int&>`        |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std:tuple<int&&>`       |
 
 > ```cpp
-> template <class S1, class S2, class Func>
-> constexpr void for_each(S1&& value_1, S2&& value_2, Func&& func);
+> template <class T> auto entry_view(T&& structure) noexcept; // tuple of label-value pairs
 > ```
 
-Applies function `func` to all fields of a struct pair `value_1`, `value_2`.
+Returns a tuple of label-value pairs corresponding to member variables of `structure`.
 
-**Note:** This is useful for defining binary functions over custom types, see the [examples](#using-reflection-to-define-binary-operations).
+Similarly to `value_view()`, value references are propagated with perfect forwarding.
+
+Below is an **example table** for the reflection of `struct mystruct { int x; };`:
+
+| Value category                                  | Forwarded reference                    | `entry_view` return type                             |
+| ----------------------------------------------- | -------------------------------------- | ---------------------------------------------------- |
+| `structure` is a const reference to a struct    | `T&&` corresponds to `const mystruct&` | `std:tuple<std::pair<std::string_view, const int&>>` |
+| `structure` is an l-value reference to a struct | `T&&` corresponds to `mystruct&`       | `std:tuple<std::pair<std::string_view, int&>>`       |
+| `structure` is an r-value reference to a struct | `T&&` corresponds to `mystruct&&`      | `std:tuple<std::pair<std::string_view, int&&>>`      |
+
+### Algorithms
 
 > ```cpp
-> template <class S, class Pred>
-> constexpr bool true_for_all(const S& value, Pred&& pred);
+> template <class T, class F> void for_indices(F&& f); // f = f(i)
 > ```
 
-Returns whether unary predicate `pred` is satisfied for all fields of the `value`.
+Invokes [`f(std::integral_constant<std::size_t, i>)`](https://en.cppreference.com/w/cpp/types/integral_constant.html) for indices `0` to `size<T> - 1`.
 
-**Note:** Predicate checks cannot be efficiently implemented in terms of `for_each()` due to potential short-circuiting of logical AND. Use this function instead.
+If none of the `f` invocations are throwing, this function will be marked `noexcept`.
 
-> ```cpp
-> template <class S1, class S2, class Pred>
-> constexpr bool true_for_all(const S1& value_1, const S2& value_2, Pred&& pred);
-> ```
-
-Returns whether binary predicate `pred` is satisfied for all fields of a struct pair `value_1`, `value_2`.
-
-### Other utils
-
-> ```cpp
-> template <class T, class Func>
-> constexpr void tuple_for_each(T&& tuple, Func&& func)
-> ```
-
-Applies unary function `func` to all elements of the tuple `tuple`.
-
-**Note:** This is not a part reflection, the function is provided for convenience when working with tuples in general.
-
-> ```cpp
-> template <class T1, class T2, class Func>
-> constexpr void tuple_for_each(T1&& tuple_1, T2&& tuple_2, Func&& func)
-> ```
-
-Applies binary function `func` to all elements of the tuple pair `tuple_1`, `tuple_2`.
-
-**Note:** This is not a part reflection, the function is provided for convenience when working with tuples in general.
+In practice this is usually used with a template lambda.
 
 ## Examples
 
 ### Basics
 
-[ [Run this code](https://godbolt.org/z/e5qq7eb11) ] [ [Open source file](../examples/module_struct_reflect/basic_reflection.cpp) ]
+[ [Run this code](https://godbolt.org/z/e5qq7eb11) ] [ [Open source file](../examples/module_describe_struct/basics.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -196,11 +190,19 @@ static_assert( describe_struct::label<2>(vec) == "z" );
 static_assert( describe_struct::value<0>(vec) ==  1. );
 static_assert( describe_struct::value<1>(vec) ==  2. );
 static_assert( describe_struct::value<2>(vec) ==  3. );
+
+static_assert( describe_struct::entry<0>(vec).first  == "x" );
+static_assert( describe_struct::entry<1>(vec).first  == "y" );
+static_assert( describe_struct::entry<2>(vec).first  == "z" );
+
+static_assert( describe_struct::entry<0>(vec).second ==  1. );
+static_assert( describe_struct::entry<1>(vec).second ==  2. );
+static_assert( describe_struct::entry<2>(vec).second ==  3. );
 ```
 
 ### Tuple API
 
-[ [Run this code](https://godbolt.org/z/oz1zPY95f) ] [ [Open source file](../examples/module_struct_reflect/field_and_entry_views.cpp) ]
+[ [Run this code](https://godbolt.org/z/oz1zPY95f) ] [ [Open source file](../examples/module_describe_struct/tuple_api.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -219,16 +221,18 @@ static_assert( std::get<0>(describe_struct::value_view(vec)) ==  1. );
 static_assert( std::get<1>(describe_struct::value_view(vec)) ==  2. );
 static_assert( std::get<2>(describe_struct::value_view(vec)) ==  3. );
 
-using namespace std::string_view_literals;
+static_assert( std::get<0>(describe_struct::entry_view(vec)).first  == "x" );
+static_assert( std::get<1>(describe_struct::entry_view(vec)).first  == "y" );
+static_assert( std::get<2>(describe_struct::entry_view(vec)).first  == "z" );
 
-static_assert( std::get<0>(describe_struct::entry_view(vec)) ==  std::pair{ "x"sv, 1. } );
-static_assert( std::get<1>(describe_struct::entry_view(vec)) ==  std::pair{ "y"sv, 2. } );
-static_assert( std::get<2>(describe_struct::entry_view(vec)) ==  std::pair{ "z"sv, 3. } );
+static_assert( std::get<0>(describe_struct::entry_view(vec)).second ==  1. );
+static_assert( std::get<1>(describe_struct::entry_view(vec)).second ==  2. );
+static_assert( std::get<2>(describe_struct::entry_view(vec)).second ==  3. );
 ```
 
 ### Serialization
 
-[ [Run this code](https://godbolt.org/z/aWMeKx1sx) ] [ [Open source file](../examples/module_struct_reflect/using_reflection_to_define_binary_operations.cpp) ]
+[ [Run this code](https://godbolt.org/z/aWMeKx1sx) ] [ [Open source file](../examples/module_describe_struct/serialization.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -252,9 +256,9 @@ Output:
 [2]: z -> 2.5
 ```
 
-### Member-wise operator
+### Operators
 
-[ [Run this code](https://godbolt.org/z/o8noxx6P6) ] [ [Open source file](../examples/module_struct_reflect/iterating_over_a_generic_tuple.cpp) ]
+[ [Run this code](https://godbolt.org/z/o8noxx6P6) ] [ [Open source file](../examples/module_describe_struct/operators.cpp) ]
 
 ```cpp
 using namespace utl;
