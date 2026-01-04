@@ -247,7 +247,7 @@ std::string escape(            char ch );
 std::string escape(std::string_view str);
 ```
 
-Escapes all control & non-printable characters in `ch` / `str` using standard C++ notation. See the [corresponding example](#example).
+Escapes all control & non-printable characters in `ch` / `str` using standard C++ notation. See the [corresponding example](#escaping).
 
 Useful for viewing string contents and serialization without special characters getting in the way.
 

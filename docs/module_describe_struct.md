@@ -244,7 +244,10 @@ constexpr vector vec = { 0.5, 1.5, 2.5 };
 
 // Serialize members
 describe_struct::for_each(vec, [] (auto i) {
-   std::cout << "[" << i << "]: " << describe_struct::label<i>(vec) << " -> " << describe_struct::value<i>(vec);
+    std::cout
+        << "[" << i << "]: "
+        << describe_struct::label<i>(vec) << " -> " << describe_struct::value<i>(vec)
+        << "\n";
 });
 ```
 

@@ -13,7 +13,10 @@ int main() {
     
     // Serialize members
     describe_struct::for_indices<vector>([&] (auto i) {
-        std::cout << "[" << i << "]: " << describe_struct::label<i>(vec) << " -> " << describe_struct::value<i>(vec) << "\n";
+        std::cout
+            << "[" << i << "]: "
+            << describe_struct::label<i>(vec) << " -> " << describe_struct::value<i>(vec)
+            << "\n";
     });
     
 }

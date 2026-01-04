@@ -15,7 +15,7 @@
 
 #define UTL_STRE_VERSION_MAJOR 2
 #define UTL_STRE_VERSION_MINOR 0
-#define UTL_STRE_VERSION_PATCH 0
+#define UTL_STRE_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -31,8 +31,8 @@
 // String utils. Nothing fancy, basic stuff, however there is a lot of really bad implementations
 // posted online, which is why I'd rather put an effort to get them right once and be done with it.
 //
-// Functions that can reuse the storage of an 'r-value' argument take 'std::string' by value,
-// otherwise we taking 'std::string_view' is the most sensible way.
+// Functions that can reuse the storage of an 'r-value' argument take 'std::string'
+// by value, otherwise taking 'std::string_view' is the most sensible way.
 
 // ____________________ IMPLEMENTATION ____________________
 

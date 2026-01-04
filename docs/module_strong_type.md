@@ -111,7 +111,7 @@ struct arithmetic {
 > };
 > ```
 
-binds `function` to a stateless class so it can be passed as a template parameter.
+Binds `function` to a stateless class so it can be passed as a template parameter.
 
 Useful for passing functions pointers as custom deleters to `std::unique_ptr<>` and `strong_type::unique<>`.
 
