@@ -15,7 +15,7 @@
 
 #define UTL_REFLECT_STRUCT_VERSION_MAJOR 1
 #define UTL_REFLECT_STRUCT_VERSION_MINOR 0
-#define UTL_REFLECT_STRUCT_VERSION_PATCH 2
+#define UTL_REFLECT_STRUCT_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -29,14 +29,14 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// NOTE: DOCS
+// This is a clean & minimal implementation of C++20 aggregate reflection.
+// Similar technique can be found in Glaze, reflect-cpp and Boost.PFR,
+// which makes a strong case for its robustness despite technically
+// relying on the format of implementation-specific strings.
 
 // ____________________ IMPLEMENTATION ____________________
 
-// Reference struct, needs to be in a global namespace
-struct utl_struct_marker {
-    int utl_field_marker;
-};
+
 
 namespace utl::reflect_struct::impl {
 
@@ -57,7 +57,7 @@ struct base_convertible {
 };
 
 template <class T>
-concept pure_aggregate = std::is_aggregate_v<T> && !requires { T{base_convertible<T>{}}; };
+concept non_derived_aggregate = std::is_aggregate_v<T> && !requires { T{base_convertible<T>{}}; };
 
 // =====================
 // --- Count members ---
@@ -74,7 +74,7 @@ struct arbitrary_convertible {
     operator T() const noexcept;
 };
 
-template <pure_aggregate Struct, std::same_as<arbitrary_convertible>... Args>
+template <non_derived_aggregate Struct, std::same_as<arbitrary_convertible>... Args>
 constexpr std::size_t count_members = [] {
     if constexpr (requires { Struct{Args{}..., arbitrary_convertible{}}; }) {
         return count_members<Struct, Args..., arbitrary_convertible>;
@@ -86,7 +86,7 @@ constexpr std::size_t count_members = [] {
 // Wrap for public API
 
 template <class T>
-    requires pure_aggregate<std::remove_cvref_t<T>>
+    requires non_derived_aggregate<std::remove_cvref_t<T>>
 constexpr std::size_t size = count_members<std::remove_cvref_t<T>>;
 
 // ================
@@ -103,7 +103,7 @@ constexpr std::size_t size = count_members<std::remove_cvref_t<T>>;
 constexpr std::size_t member_limit = 20;
 
 template <class T>
-concept reflectable = pure_aggregate<std::remove_cvref_t<T>> && size<T> <= member_limit;
+concept reflectable = non_derived_aggregate<std::remove_cvref_t<T>> && size<T> <= member_limit;
 
 template <reflectable T>
 [[nodiscard]] constexpr decltype(auto) to_tie(T&& structure) {
@@ -264,11 +264,15 @@ consteval std::string_view mangled_field_name() noexcept {
     return mangled_value_name<get_ptr<N>(external<T>)>();
 }
 
+struct example_struct {
+    int example_field;
+};
+
 struct compiler_specifics_field {
-    constexpr static std::string_view example = mangled_field_name<0, utl_struct_marker>();
-    constexpr static std::size_t      offset  = example.find("utl_field_marker");
+    constexpr static std::string_view example = mangled_field_name<0, example_struct>();
+    constexpr static std::size_t      offset  = example.find("example_field");
     constexpr static char             prefix  = example.at(offset - 1);
-    constexpr static std::string_view suffix  = example.substr(offset + literal_size("utl_field_marker"));
+    constexpr static std::string_view suffix  = example.substr(offset + literal_size("example_field"));
 };
 
 template <std::size_t N, reflectable Structure>
