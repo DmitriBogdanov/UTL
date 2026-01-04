@@ -732,33 +732,32 @@ using impl::flags;
 
 #define UTL_DESCRIBE_STRUCT_VERSION_MAJOR 2
 #define UTL_DESCRIBE_STRUCT_VERSION_MINOR 0
-#define UTL_DESCRIBE_STRUCT_VERSION_PATCH 0
+#define UTL_DESCRIBE_STRUCT_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
-#include <array>       // IWYU pragma: keep (used in a macro) | array<>
-#include <cstddef>     // size_t
+#include <array>       // IWYU pragma: keep (used in a macro) | array<>, size_t
 #include <string_view> // IWYU pragma: keep (used in a macro) | string_view
-#include <tuple>       // tuple<>, tuple_size<>, apply<>(), get<>()
-#include <type_traits> // add_lvalue_reference_t<>, add_const_t<>, remove_reference_t<>, decay_t<>
+#include <tuple>       // tuple<>, tuple_size<>, get<>(), make_tuple()
+#include <type_traits> // remove_cvref<>
 #include <utility>     // forward<>(), pair<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
 // Reflection mechanism is based entirely around the map macro and a single struct with partial specialization for the
-// reflected enum. Map macro itself is quire non-trivial, but completely standard, a good explanation of how it works
+// reflected enum. Map macro itself is quite non-trivial, but completely standard, a good explanation of how it works
 // can be found here: https://github.com/swansontec/map-macro.
 //
 // Once we have a map macro all reflection is a matter of simply mapping __VA_ARGS__ into various
-// arrays and tuples, which allows us to work with structures in a generic tuple-like way.
+// arrays and tuples, which allows us to work with structures in a generic tuple-like manner.
 //
-// Partial specialization allows for a pretty concise implementation and provides nice error messages due to
-// static_assert on incorrect template arguments.
+// Partial specialization allows for a pretty concise implementation and provides
+// nice error messages due to 'static_assert' on incorrect template arguments.
 //
 // An alternative frequently used way to do struct reflection is through generated code with structured binding
 // & hundreds of overloads. This has a benefit of producing nicer error messages on 'for_each()' however before
 // C++20 the resulting implementation is exceedingly verbose and doesn't provide a way to get field name info.
-// For macro-free C++20 reflection see 'utl::reflect_struct'.
+// For a macro-free C++20 reflection see 'utl::reflect_struct'.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -768,51 +767,51 @@ namespace utl::describe_struct::impl {
 // --- Map macro ---
 // =================
 
-#define utl_dcst_eval_0(...) __VA_ARGS__
-#define utl_dcst_eval_1(...) utl_dcst_eval_0(utl_dcst_eval_0(utl_dcst_eval_0(__VA_ARGS__)))
-#define utl_dcst_eval_2(...) utl_dcst_eval_1(utl_dcst_eval_1(utl_dcst_eval_1(__VA_ARGS__)))
-#define utl_dcst_eval_3(...) utl_dcst_eval_2(utl_dcst_eval_2(utl_dcst_eval_2(__VA_ARGS__)))
-#define utl_dcst_eval_4(...) utl_dcst_eval_3(utl_dcst_eval_3(utl_dcst_eval_3(__VA_ARGS__)))
-#define utl_dcst_eval(...) utl_dcst_eval_4(utl_dcst_eval_4(utl_dcst_eval_4(__VA_ARGS__)))
+#define utl_dscs_eval_0(...) __VA_ARGS__
+#define utl_dscs_eval_1(...) utl_dscs_eval_0(utl_dscs_eval_0(utl_dscs_eval_0(__VA_ARGS__)))
+#define utl_dscs_eval_2(...) utl_dscs_eval_1(utl_dscs_eval_1(utl_dscs_eval_1(__VA_ARGS__)))
+#define utl_dscs_eval_3(...) utl_dscs_eval_2(utl_dscs_eval_2(utl_dscs_eval_2(__VA_ARGS__)))
+#define utl_dscs_eval_4(...) utl_dscs_eval_3(utl_dscs_eval_3(utl_dscs_eval_3(__VA_ARGS__)))
+#define utl_dscs_eval(...) utl_dscs_eval_4(utl_dscs_eval_4(utl_dscs_eval_4(__VA_ARGS__)))
 
-#define utl_dcst_map_end(...)
-#define utl_dcst_map_out
-#define utl_dcst_map_comma ,
+#define utl_dscs_map_end(...)
+#define utl_dscs_map_out
+#define utl_dscs_map_comma ,
 
-#define utl_dcst_map_get_end_2() 0, utl_dcst_map_end
-#define utl_dcst_map_get_end_1(...) utl_dcst_map_get_end_2
-#define utl_dcst_map_get_end(...) utl_dcst_map_get_end_1
-#define utl_dcst_map_next_0(test, next, ...) next utl_dcst_map_out
-#define utl_dcst_map_next_1(test, next) utl_dcst_map_next_0(test, next, 0)
-#define utl_dcst_map_next(test, next) utl_dcst_map_next_1(utl_dcst_map_get_end test, next)
+#define utl_dscs_map_get_end_2() 0, utl_dscs_map_end
+#define utl_dscs_map_get_end_1(...) utl_dscs_map_get_end_2
+#define utl_dscs_map_get_end(...) utl_dscs_map_get_end_1
+#define utl_dscs_map_next_0(test, next, ...) next utl_dscs_map_out
+#define utl_dscs_map_next_1(test, next) utl_dscs_map_next_0(test, next, 0)
+#define utl_dscs_map_next(test, next) utl_dscs_map_next_1(utl_dscs_map_get_end test, next)
 
-#define utl_dcst_map_0(f, x, peek, ...) f(x) utl_dcst_map_next(peek, utl_dcst_map_1)(f, peek, __VA_ARGS__)
-#define utl_dcst_map_1(f, x, peek, ...) f(x) utl_dcst_map_next(peek, utl_dcst_map_0)(f, peek, __VA_ARGS__)
+#define utl_dscs_map_0(f, x, peek, ...) f(x) utl_dscs_map_next(peek, utl_dscs_map_1)(f, peek, __VA_ARGS__)
+#define utl_dscs_map_1(f, x, peek, ...) f(x) utl_dscs_map_next(peek, utl_dscs_map_0)(f, peek, __VA_ARGS__)
 
-#define utl_dcst_map_list_next_1(test, next) utl_dcst_map_next_0(test, utl_dcst_map_comma next, 0)
-#define utl_dcst_map_list_next(test, next) utl_dcst_map_list_next_1(utl_dcst_map_get_end test, next)
+#define utl_dscs_map_list_next_1(test, next) utl_dscs_map_next_0(test, utl_dscs_map_comma next, 0)
+#define utl_dscs_map_list_next(test, next) utl_dscs_map_list_next_1(utl_dscs_map_get_end test, next)
 
-#define utl_dcst_map_list_0(f, x, peek, ...)                                                                           \
-    f(x) utl_dcst_map_list_next(peek, utl_dcst_map_list_1)(f, peek, __VA_ARGS__)
-#define utl_dcst_map_list_1(f, x, peek, ...)                                                                           \
-    f(x) utl_dcst_map_list_next(peek, utl_dcst_map_list_0)(f, peek, __VA_ARGS__)
+#define utl_dscs_map_list_0(f, x, peek, ...)                                                                           \
+    f(x) utl_dscs_map_list_next(peek, utl_dscs_map_list_1)(f, peek, __VA_ARGS__)
+#define utl_dscs_map_list_1(f, x, peek, ...)                                                                           \
+    f(x) utl_dscs_map_list_next(peek, utl_dscs_map_list_0)(f, peek, __VA_ARGS__)
 
 // Applies the function macro 'f' to all '__VA_ARGS__'
-#define utl_dcst_map(f, ...) utl_dcst_eval(utl_dcst_map_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
+#define utl_dscs_map(f, ...) utl_dscs_eval(utl_dscs_map_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
 
 // Applies the function macro 'f' to to all '__VA_ARGS__' and inserts commas between the results
-#define utl_dcst_map_list(f, ...) utl_dcst_eval(utl_dcst_map_list_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
+#define utl_dscs_map_list(f, ...) utl_dscs_eval(utl_dscs_map_list_1(f, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
 
-// Note: 'dcst' is short for 'describe_struct'
+// Note: 'dscs' is short for 'describe_struct'
 
 // ============================
 // --- Reflection mechanism ---
 // ============================
 
-template <class T1, class T2>
-constexpr std::pair<T1, T2&&> make_entry(T1&& a, T2&& b) noexcept {
-    return std::pair<T1, T2&&>(std::forward<T1>(a), std::forward<T2>(b));
-    // helper function used to create < name, reference-to-field > entries
+// Helper function to create 'pair<name, reference-to-member>' entries, similar to 'std::forward_as_tuple()'
+template <class T>
+constexpr std::pair<std::string_view, T&&> forward_as_entry(std::string_view label, T&& value) noexcept {
+    return std::pair<std::string_view, T&&>(label, std::forward<T>(value));
 }
 
 template <class>
@@ -826,147 +825,108 @@ struct meta {
 };
 
 // Helper macros for codegen
-#define utl_dcst_make_name(arg_) std::string_view(#arg_)
-#define utl_dcst_fwd_value(arg_) std::forward<S>(val).arg_
-#define utl_dcst_fwd_entry(arg_) make_entry(std::string_view(#arg_), std::forward<S>(val).arg_)
-
-#define utl_dcst_call_unary_func(arg_) func(std::forward<S>(val).arg_);
-#define utl_dcst_call_binary_func(arg_) func(std::forward<S1>(val_1).arg_, std::forward<S2>(val_2).arg_);
-#define utl_dcst_and_unary_predicate(arg_) &&func(val.arg_)
-#define utl_dcst_and_binary_predicate(arg_) &&func(val_1.arg_, val_2.arg_)
+#define utl_dscs_make_name(arg_) std::string_view(#arg_)
+#define utl_dscs_fwd_value(arg_) std::forward<T>(val).arg_
+#define utl_dscs_fwd_entry(arg_) forward_as_entry(std::string_view(#arg_), std::forward<T>(val).arg_)
 
 #define UTL_DESCRIBE_STRUCT(struct_name_, ...)                                                                         \
     template <>                                                                                                        \
     struct utl::describe_struct::impl::meta<struct_name_> {                                                            \
         constexpr static std::string_view type_name = #struct_name_;                                                   \
                                                                                                                        \
-        constexpr static auto names = std::array{utl_dcst_map_list(utl_dcst_make_name, __VA_ARGS__)};                  \
+        constexpr static auto names = std::array{utl_dscs_map_list(utl_dscs_make_name, __VA_ARGS__)};                  \
                                                                                                                        \
-        template <class S>                                                                                             \
-        constexpr static auto field_view(S&& val) noexcept {                                                           \
-            return std::forward_as_tuple(utl_dcst_map_list(utl_dcst_fwd_value, __VA_ARGS__));                          \
+        template <class T>                                                                                             \
+        constexpr static auto value_view(T&& val) noexcept {                                                           \
+            return std::forward_as_tuple(utl_dscs_map_list(utl_dscs_fwd_value, __VA_ARGS__));                          \
         }                                                                                                              \
                                                                                                                        \
-        template <class S>                                                                                             \
-        constexpr static auto entry_view(S&& val) noexcept {                                                           \
-            return std::make_tuple(utl_dcst_map_list(utl_dcst_fwd_entry, __VA_ARGS__));                                \
-        }                                                                                                              \
-                                                                                                                       \
-        template <class S, class Func>                                                                                 \
-        constexpr static void for_each(S&& val, Func&& func) {                                                         \
-            utl_dcst_map(utl_dcst_call_unary_func, __VA_ARGS__)                                                        \
-        }                                                                                                              \
-                                                                                                                       \
-        template <class S1, class S2, class Func>                                                                      \
-        constexpr static void for_each(S1&& val_1, S2&& val_2, Func&& func) {                                          \
-            utl_dcst_map(utl_dcst_call_binary_func, __VA_ARGS__)                                                       \
-        }                                                                                                              \
-                                                                                                                       \
-        template <class S, class Func>                                                                                 \
-        constexpr static bool true_for_all(const S& val, Func&& func) {                                                \
-            return true utl_dcst_map(utl_dcst_and_unary_predicate, __VA_ARGS__);                                       \
-        }                                                                                                              \
-                                                                                                                       \
-        template <class S1, class S2, class Func>                                                                      \
-        constexpr static bool true_for_all(const S1& val_1, const S2& val_2, Func&& func) {                            \
-            return true utl_dcst_map(utl_dcst_and_binary_predicate, __VA_ARGS__);                                      \
+        template <class T>                                                                                             \
+        constexpr static auto entry_view(T&& val) noexcept {                                                           \
+            return std::make_tuple(utl_dscs_map_list(utl_dscs_fwd_entry, __VA_ARGS__));                                \
         }                                                                                                              \
     }
 
-// Note: 'true' in front of a generated predicate chain handles the redundant '&&' at the beginning
+// =================
+// --- Tuple API ---
+// =================
 
-// ======================
-// --- Reflection API ---
-// ======================
+template <class T>
+using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>; //  backport from C++20
 
-template <class S>
-constexpr auto type_name = meta<S>::type_name;
-
-template <class S>
-constexpr auto names = meta<S>::names;
-
-template <class S>
-constexpr auto field_view(S&& value) noexcept {
-    using struct_type = typename std::decay_t<S>;
-    return meta<struct_type>::field_view(std::forward<S>(value));
+template <class T>
+[[nodiscard]] constexpr auto label_view(T&& = T{}) noexcept {
+    return meta<remove_cvref_t<T>>::names;
 }
 
-template <class S>
-constexpr auto entry_view(S&& value) noexcept {
-    using struct_type = typename std::decay_t<S>;
-    return meta<struct_type>::entry_view(std::forward<S>(value));
+template <class T>
+[[nodiscard]] constexpr auto value_view(T&& structure) noexcept {
+    return meta<remove_cvref_t<T>>::value_view(std::forward<T>(structure));
 }
 
-template <class S>
-constexpr auto size = std::tuple_size_v<decltype(names<S>)>;
-
-template <std::size_t I, class S>
-constexpr auto get(S&& value) noexcept {
-    return std::get<I>(field_view(std::forward<S>(value)));
+template <class T>
+[[nodiscard]] constexpr auto entry_view(T&& structure) noexcept {
+    return meta<remove_cvref_t<T>>::entry_view(std::forward<T>(structure));
 }
 
-template <class S, class Func>
-constexpr void for_each(S&& value, Func&& func) {
-    using struct_type = typename std::decay_t<S>;
-    meta<struct_type>::for_each(std::forward<S>(value), std::forward<Func>(func));
+// ==========================
+// --- General reflection ---
+// ==========================
+
+template <class T>
+constexpr std::string_view name = meta<T>::type_name;
+
+template <class T>
+constexpr std::size_t size = std::tuple_size_v<decltype(meta<T>::names)>;
+
+// =========================
+// --- Member reflection ---
+// =========================
+
+template <std::size_t N, class T>
+[[nodiscard]] constexpr auto label(T&& = T{}) noexcept {
+    return std::get<N>(label_view<T>());
 }
 
-template <class S1, class S2, class Func>
-constexpr void for_each(S1&& value_1, S2&& value_2, Func&& func) {
-    using struct_type_1 = typename std::decay_t<S1>;
-    using struct_type_2 = typename std::decay_t<S2>;
-    static_assert(std::is_same_v<struct_type_1, struct_type_2>,
-                  "Called 'describe_struct::for_each(s1, s2, func)' with incompatible argument types.");
-    meta<struct_type_1>::for_each(std::forward<S1>(value_1), std::forward<S2>(value_2), std::forward<Func>(func));
+template <std::size_t N, class T>
+[[nodiscard]] constexpr decltype(auto) value(T&& structure) noexcept {
+    return std::get<N>(value_view(std::forward<T>(structure)));
 }
 
-// Predicate checks cannot be efficiently implemented in terms of 'for_each()'
-// we use a separate implementation with short-circuiting
-template <class S, class Func>
-constexpr bool true_for_all(const S& value, Func&& func) {
-    using struct_type = typename std::decay_t<S>;
-    return meta<struct_type>::true_for_all(value, std::forward<Func>(func));
+template <std::size_t N, class T>
+[[nodiscard]] constexpr auto entry(T&& structure) noexcept {
+    return std::get<N>(entry_view(std::forward<T>(structure)));
 }
 
-template <class S1, class S2, class Func>
-constexpr bool true_for_all(const S1& value_1, const S2& value_2, Func&& func) {
-    using struct_type_1 = typename std::decay_t<S1>;
-    using struct_type_2 = typename std::decay_t<S2>;
-    static_assert(std::is_same_v<struct_type_1, struct_type_2>,
-                  "Called 'describe_struct::for_each(s1, s2, func)' with incompatible argument types.");
-    return meta<struct_type_1>::true_for_all(value_1, value_2, std::forward<Func>(func));
+// ==================
+// --- Algorithms ---
+// ==================
+
+// clang-format off
+
+template <std::size_t value>
+using index_constant = std::integral_constant<std::size_t, value>;
+
+template <std::size_t... indices, class F>
+constexpr void for_sequence(std::index_sequence<indices...>, F&& f)
+    noexcept(noexcept((f(index_constant<indices>{}), ...)))
+{
+    static_assert(
+        std::conjunction_v<std::is_invocable<F, index_constant<indices>>...>,
+        "for_sequence() requires function to be invocable for every integral_constant<> in range"
+    );
+    
+    (f(index_constant<indices>{}), ...); // ideally we would use 'std::invoke()' but it's not constexpr before C++20
 }
 
-// --- Misc utils ---
-// ------------------
-
-// Struct reflection provides its own 'for_each()' with no tuple magic, this function is useful
-// in case user want to operate on tuples rather than structs using similar API, sort of a "bonus utility"
-// that simply doesn't have any better module to be a part of
-template <class T, class Func>
-constexpr void tuple_for_each(T&& tuple, Func&& func) {
-    std::apply([&func](auto&&... args) { (func(std::forward<decltype(args)>(args)), ...); }, std::forward<T>(tuple));
+template <class T, class F>
+constexpr void for_indices(F&& f)
+    noexcept(noexcept(for_sequence(std::make_index_sequence<size<T>>{}, std::forward<F>(f))))
+{
+    for_sequence(std::make_index_sequence<size<T>>{}, std::forward<F>(f));
 }
 
-// For a pair of tuple 'std::apply' trick doesn't cut it, gotta do the standard thing
-// with recursion over the index sequence. This looks a little horrible, but no too much
-template <class T1, class T2, class Func, std::size_t... Idx>
-constexpr void tuple_for_each_impl(T1&& tuple_1, T2&& tuple_2, Func&& func, std::index_sequence<Idx...>) {
-    (func(std::get<Idx>(std::forward<T1>(tuple_1)), std::get<Idx>(std::forward<T2>(tuple_2))), ...);
-    // fold expression '( f(args), ... )' invokes 'f(args)' for all indices in the index sequence
-}
-
-template <class T1, class T2, class Func>
-constexpr void tuple_for_each(T1&& tuple_1, T2&& tuple_2, Func&& func) {
-    constexpr std::size_t tuple_size_1 = std::tuple_size_v<std::decay_t<T1>>;
-    constexpr std::size_t tuple_size_2 = std::tuple_size_v<std::decay_t<T2>>;
-
-    static_assert(tuple_size_1 == tuple_size_2,
-                  "Called 'describe_struct::tuple_for_each(t1, t2, func)' with incompatible tuple sizes.");
-
-    tuple_for_each_impl(std::forward<T1>(tuple_1), std::forward<T2>(tuple_2), std::forward<Func>(func),
-                        std::make_index_sequence<tuple_size_1>{});
-}
+// clang-format on
 
 } // namespace utl::describe_struct::impl
 
@@ -976,19 +936,18 @@ namespace utl::describe_struct {
 
 // macro -> UTL_DESCRIBE_STRUCT
 
-using impl::type_name;
 using impl::size;
+using impl::name;
 
-using impl::names;
-using impl::field_view;
+using impl::label;
+using impl::value;
+using impl::entry;
+
+using impl::label_view;
+using impl::value_view;
 using impl::entry_view;
 
-using impl::get;
-
-using impl::for_each;
-using impl::true_for_all;
-
-using impl::tuple_for_each;
+using impl::for_indices;
 
 } // namespace utl::describe_struct
 
