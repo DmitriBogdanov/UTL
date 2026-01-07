@@ -1,13 +1,12 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <random>
 
 const std::filesystem::path directory = "temp/spectral_test/";
 
 // Extremely low quality PRNG that fails a spectral test in 3D
 // (aka generates discernible patterns when generating { RANDU(), RANDU(), RANDU() } triplets)
-class RANDU {
+class randu {
 public:
     using result_type = std::uint32_t;
 
@@ -18,7 +17,7 @@ private:
     constexpr static result_type mod    = result_type(1) << 31;
 
 public:
-    constexpr explicit RANDU(result_type seed = 0) noexcept { this->seed(seed); }
+    constexpr explicit randu(result_type seed = 0) noexcept { this->seed(seed); }
 
     [[nodiscard]] static constexpr result_type min() noexcept { return 1; }
     [[nodiscard]] static constexpr result_type max() noexcept { return mod - 1; }
@@ -55,5 +54,5 @@ void generate_points_in_cube(const std::filesystem::path& output_path) {
 int main() {
     std::filesystem::create_directories(directory); // ensures directory existence
 
-    generate_points_in_cube<RANDU>(directory / "randu.csv");
+    generate_points_in_cube<randu>(directory / "randu.csv");
 }

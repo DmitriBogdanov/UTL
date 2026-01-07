@@ -10890,30 +10890,30 @@ using impl::Ruler;
 #define utl_random_headerguard
 
 #define UTL_RANDOM_VERSION_MAJOR 3
-#define UTL_RANDOM_VERSION_MINOR 0
-#define UTL_RANDOM_VERSION_PATCH 0
+#define UTL_RANDOM_VERSION_MINOR 1
+#define UTL_RANDOM_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
-#include <array>            // array<>
-#include <cassert>          // assert()
-#include <chrono>           // high_resolution_clock
-#include <cstdint>          // uint8_t, uint16_t, uint32_t, uint64_t
-#include <initializer_list> // initializer_list<>
-#include <limits>           // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
-#include <mutex>            // mutex, lock_guard<>
-#include <random>           // random_device, uniform_..._distribution<>, generate_canonical<>, seed_seq<>
-#include <thread>           // thread::id, this_thread::get_id()
-#include <type_traits>      // enable_if_t<>, is_integral<>, is_unsigned<>, is_floating_point<>
-#include <utility>          // declval<>()
-#include <vector>           // vector<>, hash<>
+#include <array>       // array<>
+#include <cassert>     // assert()
+#include <chrono>      // steady_clock
+#include <cstdint>     // uint8_t, uint16_t, uint32_t, uint64_t
+#include <iterator>    // advance()
+#include <limits>      // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()
+#include <mutex>       // mutex, lock_guard<>
+#include <random>      // random_device, uniform_..._distribution<>, generate_canonical<>, seed_seq<>
+#include <thread>      // thread::id, this_thread::get_id()
+#include <type_traits> // enable_if_t<>, is_integral<>, is_unsigned<>, is_floating_point<>
+#include <utility>     // declval<>()
+#include <vector>      // vector<>, hash<>, initializer_list<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Several <random> compatible PRNGs, slightly improved re-implementations of uniform distributions,
+// Several <random> compatible PRNGs, slightly improved re-implementations of distributions,
 // "better" entropy sources and several convenience wrappers for rng.
 //
-// Everything implemented here should be portable assuming reasonable assumptions (like existence of
+// Everything implemented here should be portable assuming reasonable assumptions (like the existence of
 // uint32_t, uint64_t, 8-bit bytes, 32-bit floats, 64-bit doubles and etc.) which hold for most platforms.
 //
 // Optional macros:
@@ -11726,7 +11726,7 @@ inline std::seed_seq entropy_seq() {
     seed_rd = splitmix();
 
     // Time in nanoseconds (on some platforms microseconds)
-    const auto seed_time = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    const auto seed_time = std::chrono::steady_clock::now().time_since_epoch().count();
 
     // Heap address (tends to be random each run on most platforms)
     std::vector<std::uint32_t> dummy_vec(1, seed_rd);
@@ -12178,17 +12178,16 @@ public:
 
 template <class T, require_uint<T> = true>
 [[nodiscard]] constexpr int popcount(T x) noexcept {
-    constexpr auto bitmask_1 = static_cast<T>(0x5555555555555555UL);
-    constexpr auto bitmask_2 = static_cast<T>(0x3333333333333333UL);
-    constexpr auto bitmask_3 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
-
+    constexpr auto bitmask_02 = static_cast<T>(0x5555555555555555UL);
+    constexpr auto bitmask_04 = static_cast<T>(0x3333333333333333UL);
+    constexpr auto bitmask_08 = static_cast<T>(0x0F0F0F0F0F0F0F0FUL);
     constexpr auto bitmask_16 = static_cast<T>(0x00FF00FF00FF00FFUL);
     constexpr auto bitmask_32 = static_cast<T>(0x0000FFFF0000FFFFUL);
     constexpr auto bitmask_64 = static_cast<T>(0x00000000FFFFFFFFUL);
 
-    x = (x & bitmask_1) + ((x >> 1) & bitmask_1);
-    x = (x & bitmask_2) + ((x >> 2) & bitmask_2);
-    x = (x & bitmask_3) + ((x >> 4) & bitmask_3);
+    x = (x & bitmask_02) + ((x >> 1) & bitmask_02);
+    x = (x & bitmask_04) + ((x >> 2) & bitmask_04);
+    x = (x & bitmask_08) + ((x >> 4) & bitmask_08);
 
     if constexpr (sizeof(T) > 1) x = (x & bitmask_16) + ((x >> 8) & bitmask_16);
     if constexpr (sizeof(T) > 2) x = (x & bitmask_32) + ((x >> 16) & bitmask_32);
@@ -12239,9 +12238,9 @@ constexpr T approx_standard_normal(Gen& gen) noexcept {
     } else if constexpr (sizeof(generated_type) == 4) {
         return approx_standard_normal_from_u32_pair<T>(gen(), gen());
     } else {
-        static_assert(always_false_v<T>, "ApproxNormalDistribution<> only supports bit-uniform 32/64-bit PRNGs.");
+        static_assert(always_false_v<T>, "approx_normal_distribution<> only supports bit-uniform 32/64-bit PRNGs.");
         // we could use a slower fallback for esoteric PRNGs, but I think it's better to explicitly state when "fast
-        // approximate" is not available, esoteric PRNGs are already handled by a regular NormalDistribution
+        // approximate" is not available, esoteric PRNGs are already handled by a regular 'normal_distribution<>'
     }
 }
 
@@ -12362,14 +12361,19 @@ T normal() {
 }
 
 // Choose random element from a list
-template <class T>
-T choose(std::initializer_list<T> list) {
-    return list.begin()[uniform<std::size_t>(0, list.size() - 1)];
+template <class Range>
+auto choose(const Range& range) {
+    auto iterator = range.begin();
+    auto distance = uniform<std::size_t>(0, range.size() - 1);
+
+    std::advance(iterator, distance);
+
+    return *iterator;
 }
 
-template <class Container>
-auto choose(const Container& list) {
-    return list.at(uniform<std::size_t>(0, list.size() - 1));
+template <class T>
+T choose(std::initializer_list<T> range) {
+    return choose<std::initializer_list<T>>(range);
 }
 
 // --- Typed shortcuts ---

@@ -32,7 +32,7 @@ axes_1.legend()
 axes_1.hist(data_precise, bins=100, density=True, histtype='step', label='Empirical PDF')
 axes_1.legend()
 
-axes_1.set_title('NormalDistribution<>')
+axes_1.set_title('normal_distribution<>')
 
 # - Approximate normal distribution -
 
@@ -42,6 +42,6 @@ axes_2.legend()
 axes_2.hist(data_approx, bins=100, density=True, histtype='step', label='Empirical PDF')
 axes_2.legend()
 
-axes_2.set_title('ApproxNormalDistribution<>')
+axes_2.set_title('approx_normal_distribution<>')
 
 figure.savefig(directory + 'random_approx_distributions.svg')
