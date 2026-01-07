@@ -16,15 +16,17 @@
 
 [<- to implementation.hpp](../include/UTL/progressbar.hpp)
 
-**utl::progressbar** header adds configurable progress bars for CLI apps.
+**utl::progressbar** implements simple progress bars for CLI apps.
 
 Below is basic showcase:
 
 ```
-// progressbar::Percentage with default style
+// progressbar::percentage
+
 [############..................] 42.67% (remaining: 8 sec)
 
-// progressbar::Ruler with default style
+// progressbar::ruler
+
 0    10   20   30   40   50   60   70   80   90   100%
 |----|----|----|----|----|----|----|----|----|----|
 #######################
@@ -33,9 +35,9 @@ Below is basic showcase:
 ## Definitions
 
 ```cpp
-// 'Percentage' progress bar
-struct Percentage {
-public:
+// Percentage progress bar
+struct percentage {
+
     // - Style configuration -
     struct Style {
         char        fill            = '#';
@@ -54,16 +56,17 @@ public:
     double      update_rate = 2.5e-3;
     
     // - Methods -
-    Percentage();
+    percentage();
     void set_progress(double value);
     void finish();
     
     void update_style();
+    
 };
 
-// 'Ruler' progress bar
-class Ruler {
-public:
+// Ruler progress bar
+struct ruler {
+    
     // - Style configuration -
     struct Style {
         char fill            = '#';
@@ -76,20 +79,20 @@ public:
     bool show_bar   = true;
     
     // - Methods -
-    Ruler();
+    ruler();
     void set_progress(double percentage);
     void finish();
     
     void update_style();
+    
 };
 ```
 
 ## Methods
 
-### `Percentage` progress bar
+### Percentage progress bar
 
 > [!Note]
->
 > This is a general progress bar suitable for most applications. It should be a default option unless environment is extremely limited.
 
 > ```cpp
@@ -130,9 +133,9 @@ Style parameters that can be adjusted:
 **Note:** Progress bar style doesn't update until the next redraw. Immediate redraw can be triggered using `update_style()`.
 
 > ```cpp
-> Percentage();
-> void Percentage::set_progress(double value);
-> void Percentage::finish();
+> percentage();
+> void percentage::set_progress(double value);
+> void percentage::finish();
 > ```
 
 Start, update & finish progress bar display. Progress is a `value` in `[0, 1]` range, corresponding to a portion of total workload.
@@ -143,10 +146,9 @@ Start, update & finish progress bar display. Progress is a `value` in `[0, 1]` r
 
 Redraws progress bar to update its style configuration immediately.
 
-### `Ruler` progress bar
+### Ruler progress bar
 
 > [!Note]
->
 > This is a very minimalistic progress bar, it should be used for terminals that do not support `\r`.
 
 > ```cpp
@@ -176,9 +178,9 @@ Style parameters that can be adjusted:
 **Note:** Disabling `show_bar` makes little practical sense, considering it makes progress bar not display any progress, but it is still provided for the sake of API uniformity.
 
 > ```cpp
-> Ruler();
-> void Ruler::set_progress(double percentage);
-> void Ruler::finish();
+> ruler();
+> void ruler::set_progress(double percentage);
+> void ruler::finish();
 > ```
 
 Start, update & finish progress bar display. Progress is a `value` in `[0, 1]` range, corresponding to a portion of total workload.
@@ -199,14 +201,16 @@ Redraws progress bar to update its style configuration immediately.
 using namespace utl;
 using namespace std::chrono_literals;
 
-const int  iterations = 1500;
-const auto some_work  = [] { std::this_thread::sleep_for(10ms); };
+const int  work_size = 50;
+const auto work_unit = [] { std::this_thread::sleep_for(10ms); };
 
-progressbar::Percentage bar;
-for (int i = 0; i < iterations; ++i) {
-    some_work();
-    bar.set_progress((i + 1.) / iterations);
+progressbar::percentage bar;
+
+for (int i = 0; i < work_size; ++i) {
+    work_unit();
+    bar.set_progress((i + 1.) / work_size);
 }
+
 bar.finish();
 ```
 
@@ -223,10 +227,10 @@ Output (at some point in time):
 using namespace utl;
 using namespace std::chrono_literals;
 
-const int  iterations = 1500;
-const auto some_work  = [] { std::this_thread::sleep_for(10ms); };
+const int  work_size = 50;
+const auto work_unit = [] { std::this_thread::sleep_for(10ms); };
 
-progressbar::Percentage bar;
+progressbar::percentage bar;
 
 bar.show_bar              = false;
 bar.style.estimate_prefix = "complete, remaining time: ";
@@ -234,10 +238,11 @@ bar.style.estimate_suffix = "";
 
 bar.update_style();
 
-for (int i = 0; i < iterations; ++i) {
-    some_work();
-    bar.set_progress((i + 1.) / iterations);
+for (int i = 0; i < work_size; ++i) {
+    work_unit();
+    bar.set_progress((i + 1.) / work_size);
 }
+
 bar.finish();
 ```
 

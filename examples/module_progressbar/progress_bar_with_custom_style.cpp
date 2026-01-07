@@ -6,10 +6,10 @@ int main() {
     using namespace utl;
     using namespace std::chrono_literals;
     
-    const int  iterations = 50;
-    const auto some_work  = [] { std::this_thread::sleep_for(10ms); };
+    const int  work_size = 50;
+    const auto work_unit = [] { std::this_thread::sleep_for(10ms); };
     
-    progressbar::Percentage bar;
+    progressbar::percentage bar;
     
     bar.show_bar              = false;
     bar.style.estimate_prefix = "complete, remaining time: ";
@@ -17,9 +17,10 @@ int main() {
     
     bar.update_style();
     
-    for (int i = 0; i < iterations; ++i) {
-        some_work();
-        bar.set_progress((i + 1.) / iterations);
+    for (int i = 0; i < work_size; ++i) {
+        work_unit();
+        bar.set_progress((i + 1.) / work_size);
     }
+    
     bar.finish();
 }

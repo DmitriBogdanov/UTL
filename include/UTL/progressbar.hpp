@@ -13,17 +13,16 @@
 #ifndef utl_progressbar_headerguard
 #define utl_progressbar_headerguard
 
-#define UTL_PROGRESSBAR_VERSION_MAJOR 1
+#define UTL_PROGRESSBAR_VERSION_MAJOR 3
 #define UTL_PROGRESSBAR_VERSION_MINOR 0
-#define UTL_PROGRESSBAR_VERSION_PATCH 1
+#define UTL_PROGRESSBAR_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
 #include <algorithm>   // max(), clamp()
-#include <array>       // array
+#include <array>       // array<>, size_t
 #include <charconv>    // to_chars
 #include <chrono>      // chrono::steady_clock, chrono::time_point<>, chrono::duration_cast<>
-#include <cstddef>     // size_t
 #include <iostream>    // cout
 #include <iterator>    // ostream_iterator<>
 #include <string>      // string
@@ -43,7 +42,7 @@ namespace utl::progressbar::impl {
 
 // Proper progress bar, uses '\r' to render new state in the same spot.
 // Allocates when formatting things for the first time, after that storage gets reused.
-class Percentage {
+class percentage {
 public:
     // - Public parameters -
     struct Style {
@@ -63,7 +62,7 @@ public:
     double      update_rate = 2.5e-3; // every quarter of a % feels like a good default
 
     // - Public API -
-    Percentage() : start_time_point(clock::now()) {
+    percentage() : start_time_point(clock::now()) {
         std::cout << '\n';
         this->draw();
         std::cout.flush();
@@ -190,10 +189,10 @@ private:
 
 // Minimalistic progress bar, used when terminal doesn't support '\r' (they exist).
 // Does not allocate.
-class Ruler {
+class ruler {
     constexpr static std::string_view ticks      = "0    10   20   30   40   50   60   70   80   90   100%";
-    constexpr static std::string_view ruler      = "|----|----|----|----|----|----|----|----|----|----|";
-    constexpr static std::size_t      bar_length = ruler.size();
+    constexpr static std::string_view hline      = "|----|----|----|----|----|----|----|----|----|----|";
+    constexpr static std::size_t      bar_length = hline.size();
 
 public:
     // - Public parameters -
@@ -208,11 +207,11 @@ public:
     bool show_bar   = true; // useless, but might as well have it for uniformity
 
     // - Public API -
-    Ruler() {
+    ruler() {
         std::cout << '\n';
         this->draw_ticks();
         std::cout << '\n';
-        this->draw_ruler();
+        this->draw_hline();
         std::cout << '\n';
         std::cout.flush();
     }
@@ -248,12 +247,12 @@ private:
         std::cout << this->ticks;
     }
 
-    void draw_ruler() {
+    void draw_hline() {
         if (!this->show_ruler) return;
 
-        std::array<char, ruler.size()> buffer;
-        for (std::size_t i = 0; i < ruler.size(); ++i)
-            buffer[i] = (this->ruler[i] == '|') ? this->style.ruler_delimiter : this->style.ruler_line;
+        std::array<char, hline.size()> buffer;
+        for (std::size_t i = 0; i < hline.size(); ++i)
+            buffer[i] = (this->hline[i] == '|') ? this->style.ruler_delimiter : this->style.ruler_line;
         // formats ruler without allocating
 
         std::cout.write(buffer.data(), buffer.size());
@@ -276,8 +275,8 @@ private:
 
 namespace utl::progressbar {
 
-using impl::Percentage;
-using impl::Ruler;
+using impl::percentage;
+using impl::ruler;
 
 } // namespace utl::progressbar
 
