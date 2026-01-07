@@ -54,35 +54,35 @@ These pseudorandom number generators (aka [PRNGs](https://en.wikipedia.org/wiki/
 ```cpp
 // PRNG implementations
 namespace generators {
-    class GeneratorAPI {
+    class generator_example {
         using result_type;
         
         static constexpr result_type min() noexcept;
         static constexpr result_type max() noexcept;
         
-        constexpr GeneratorAPI(result_type seed) noexcept;
-        constexpr void    seed(result_type seed) noexcept;
+        constexpr generator_example(result_type seed) noexcept;
+        constexpr void         seed(result_type seed) noexcept;
         
-        template<class SeedSeq> GeneratorAPI(SeedSeq& seq);
-        template<class SeedSeq> void    seed(SeedSeq& seq);
+        template<class SeedSeq> generator_example(SeedSeq&& seq);
+        template<class SeedSeq> void         seed(SeedSeq&& seq);
         
         constexpr result_type operator()() noexcept;
     };
     
     // 16-bit PRNGs
-    class RomuMono16   { /* Generator API */ };
+    class romu_mono_16   { /* Generator API */ };
     // 32-bit PRNGs
-    class RomuTrio32   { /* Generator API */ };
-    class SplitMix32   { /* Generator API */ };
-    class Xoshiro128PP { /* Generator API */ };
+    class romu_trio_32   { /* Generator API */ };
+    class splitmix_32    { /* Generator API */ };
+    class xoshiro_128    { /* Generator API */ };
     // 64-bit PRNGs
-    class RomuDuoJr64  { /* Generator API */ };
-    class SplitMix64   { /* Generator API */ };
-    class Xoshiro256PP { /* Generator API */ };
+    class romu_duo_jr_64 { /* Generator API */ };
+    class splitmix_64    { /* Generator API */ };
+    class xoshiro_256    { /* Generator API */ };
     // CSPRNGs
-    class ChaCha8      { /* Generator API */ };
-    class ChaCha12     { /* Generator API */ };
-    class ChaCha20     { /* Generator API */ };
+    class chacha_8       { /* Generator API */ };
+    class chacha_12      { /* Generator API */ };
+    class chacha_20      { /* Generator API */ };
 }
 
 // Entropy
@@ -91,21 +91,21 @@ std::uint32_t entropy();
 
 // Distributions
 template <class T>
-struct UniformIntDistribution   { /* same API as std::uniform_int_distribution<T>  */ };
+struct uniform_int_distribution   { /* same API as std::uniform_int_distribution<T>  */ };
 template <class T>
-struct UniformRealDistribution  { /* same API as std::uniform_real_distribution<T> */ };
+struct uniform_real_distribution  { /* same API as std::uniform_real_distribution<T> */ };
 template <class T>
-struct NormalDistribution       { /* same API as std::normal_distribution<T>       */ };
+struct normal_distribution        { /* same API as std::normal_distribution<T>       */ };
 template <class T>
-struct ApproxNormalDistribution { /* same API as std::normal_distribution<T>       */ };
+struct approx_normal_distribution { /* same API as std::normal_distribution<T>       */ };
 
 template <class T, class Gen>
 constexpr T generate_canonical(Gen& gen) noexcept(noexcept(gen()));
 
 // Default PRNG
-using PRNG = generators::Xoshiro256PP;
+using default_generator = generators::xoshiro_256;
 
-PRNG& thread_local_prng();
+default_generator& thread_local_prng();
 
 // Convenient random (generic)
 template <class Dist> auto variate(Dist&& dist); // any distribution
@@ -119,10 +119,10 @@ template <class T> T normal(T mean, T stddev); // float N(mean, stddev)
 template <class T> T normal(                ); // float N(0, 1)
 
 // Convenient random (shortcuts for standard types)
-using Uint = unsigned int;
+using uint = unsigned int;
 
 int    uniform_int   (   int min,    int max); // U[min, max]
-Uint   uniform_uint  (  Uint min,   Uint max); // U[min, max]
+uint   uniform_uint  (  uint min,   uint max); // U[min, max]
 bool   uniform_bool  (                      ); // U[0, 1]
 float  uniform_float ( float min,  float max); // U[min, max)
 double uniform_double(double min, double max); // U[min, max)
@@ -135,8 +135,7 @@ float  normal_float (                          ); // N(0, 1)
 double normal_double(                          ); // N(0, 1)
 
 // Convenient random (other)
-template <class T>            T choose(std::initializer_list<T> list);
-template <class Container> auto choose(const Container&         list);
+template <class Range> auto choose(const Range& range);
 ```
 
 ## Methods
@@ -144,38 +143,38 @@ template <class Container> auto choose(const Container&         list);
 ### Random bit generators
 
 > ```cpp
-> class GeneratorAPI {
+> class generator_example {
 >     using result_type;
 > 
 >     static constexpr result_type min() noexcept;
 >     static constexpr result_type max() noexcept;
 > 
->     constexpr GeneratorAPI(result_type seed) noexcept;
->     constexpr void    seed(result_type seed) noexcept;
+>     constexpr generator_example(result_type seed) noexcept;
+>     constexpr void         seed(result_type seed) noexcept;
 > 
->     template<class SeedSeq> GeneratorAPI(SeedSeq& seq);
->     template<class SeedSeq> void    seed(SeedSeq& seq);
+>     template<class SeedSeq> generator_example(SeedSeq&& seq);
+>     template<class SeedSeq> void         seed(SeedSeq&& seq);
 > 
 >     constexpr result_type operator()() noexcept;
 > };
 > 
 > // 16-bit PRNGs
-> class RomuMono16   { /* Generator API */ };
+> class romu_mono_16   { /* Generator API */ };
 > // 32-bit PRNGs
-> class RomuTrio32   { /* Generator API */ };
-> class SplitMix32   { /* Generator API */ };
-> class Xoshiro128PP { /* Generator API */ };
+> class romu_trio_32   { /* Generator API */ };
+> class splitmix_32    { /* Generator API */ };
+> class xoshiro_128    { /* Generator API */ };
 > // 64-bit PRNGs
-> class RomuDuoJr64  { /* Generator API */ };
-> class SplitMix64   { /* Generator API */ };
-> class Xoshiro256PP { /* Generator API */ };
+> class romu_duo_jr_64 { /* Generator API */ };
+> class splitmix_64    { /* Generator API */ };
+> class xoshiro_256    { /* Generator API */ };
 > // CSPRNGs
-> class ChaCha8      { /* Generator API */ };
-> class ChaCha12     { /* Generator API */ };
-> class ChaCha20     { /* Generator API */ };
+> class chacha_8       { /* Generator API */ };
+> class chacha_12      { /* Generator API */ };
+> class chacha_20      { /* Generator API */ };
 > ```
 
-All of these generators satisfy [uniform random bit generator generator requirements](https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator) and [std::uniform_random_bit_generator](https://en.cppreference.com/w/cpp/numeric/random/uniform_random_bit_generator) concept, which makes them drop-in replacements for standard generators such as `std::mt19937`.
+All of these generators satisfy [uniform random bit generator generator requirements](https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator) and [std::uniform_random_bit_generator](https://en.cppreference.com/w/cpp/numeric/random/uniform_random_bit_generator) concept, which makes them drop-in replacements for standard generators such as [`std::mt19937`](https://en.cppreference.com/w/cpp/numeric/random/mersenne_twister_engine.html).
 
 Unlike standard generators these can also be used in `constexpr` functions.
 
@@ -188,13 +187,13 @@ Unlike standard generators these can also be used in `constexpr` functions.
 > std::uint32_t entropy();
 > ```
 
-These functions serve a role of a "slightly better and more convenient [std::random_device](https://en.cppreference.com/w/cpp/numeric/random/random_device)".
+These functions serve a role of a "slightly better and more convenient [`std::random_device`](https://en.cppreference.com/w/cpp/numeric/random/random_device)".
 
-`std::random_device` has a critical deficiency in it's design — in case its implementation doesn't provide a proper source of entropy, it is free to fallback onto a regular PRNGs that don't change from run to run. The method [std::random_device::entropy()](https://en.cppreference.com/w/cpp/numeric/random/random_device/entropy) which should be able to detect that information is notoriously unreliable and returns different things on every platform.
+`std::random_device` has a critical deficiency in it's design — in case its implementation doesn't provide a proper source of entropy, it is free to fallback onto a regular PRNG that does not change from run to run. The method [`std::random_device::entropy()`](https://en.cppreference.com/w/cpp/numeric/random/random_device/entropy) which should be able to detect that information is notoriously unreliable and returns different things on every platform.
 
-`entropy()` samples several sources of entropy (including the `std::random_device` itself) and is (almost) guaranteed to change from run to run even if it can't provide a proper hardware-sourced entropy that would be suitable for cryptography. It can be used as a drop-in replacement to `std::random_device{}()` calls.
+`entropy()` samples several sources of entropy (including the `std::random_device` itself) and is (almost) guaranteed to change from run to run even if it can't provide proper hardware-sourced entropy that would be suitable for cryptography. It can be used as a drop-in replacement to `std::random_device{}()` calls.
 
-`entropy_seq()` generates a full [std::seed_seq](https://en.cppreference.com/w/cpp/numeric/random/seed_seq) instead of a single number, it is mainly useful for seeding generators with a large state.
+`entropy_seq()` generates a full [`std::seed_seq`](https://en.cppreference.com/w/cpp/numeric/random/seed_seq) instead of a single number, it is mainly useful for seeding generators with a large state.
 
 **Note:** Entropy functions are thread-safe.
 
@@ -204,7 +203,7 @@ These functions serve a role of a "slightly better and more convenient [std::ran
 
 > ```cpp
 > template <class T>
-> struct UniformIntDistribution {
+> struct uniform_int_distribution {
 >     /* ... */
 > };
 > ```
@@ -216,13 +215,13 @@ Uniform integer distribution class that provides a 1-to-1 copy of [`std::uniform
 - `std::uint8_t`, `std::int8_t` and `char`, `std::char8_t`, `std::char16_t`, `std::char32_t` specializations are properly supported
 - Distribution sequence is platform-independent
 
-**Note:** This is a close reimplementation of `std::uniform_int_distribution` for [GCC libstdc++](https://github.com/gcc-mirror/gcc) with some additional considerations, it provides similar performance and in some cases may even produce the same sequence.
+**Note:** This is a close reimplementation of `std::uniform_int_distribution` from [libstdc++](https://github.com/gcc-mirror/gcc) with some additional considerations, it provides similar performance and in some cases may even produce the same sequence.
 
 #### Uniform real distribution
 
 > ```cpp
 > template <class T>
-> struct UniformRealDistribution {
+> struct uniform_real_distribution {
 >     /* ... */
 > };
 > ```
@@ -245,13 +244,13 @@ Uniform floating-point distribution class that provides a 1-to-1 copy of [`std::
 
 Generates a random floating point number in range $[0, 1)$ similarly to [`std::generate_canonical<>()`](https://en.cppreference.com/w/cpp/numeric/random/generate_canonical).
 
-Always generates `std::numeric_limits<T>::digits` bits of randomness, which is enough to fill the mantissa. See `UniformRealDistribution` for notes on implementation improvements.
+Always generates `std::numeric_limits<T>::digits` bits of randomness, which is enough to fill the mantissa. See `uniform_real_distribution` for notes on implementation improvements.
 
 #### Normal distribution
 
 > ```cpp
 > template <class T>
-> struct NormalDistribution {
+> struct normal_distribution {
 >     /* ... */
 > };
 > ```
@@ -268,7 +267,7 @@ Normal floating-point distribution class that provides a 1-to-1 copy of [`std::n
 
 > ```cpp
 > template <class T>
-> struct ApproxNormalDistribution {
+> struct approx_normal_distribution {
 >     /* ... */
 > };
 > ```
@@ -285,13 +284,13 @@ Normal floating-point distribution class that provides a 1-to-1 copy of [`std::n
 ### Default PRNG
 
 > ```cpp
-> using PRNG = generators::Xoshiro256PP;
+> using default_generator = generators::xoshiro_256;
 > ```
 
 Typedef for a default PRNG. Good choice for most applications.
 
 > ```cpp
-> PRNG& thread_local_prng();
+> default_generator& thread_local_prng();
 > ```
 
 Thread-local PRNG automatically seeded with entropy.
@@ -299,7 +298,7 @@ Thread-local PRNG automatically seeded with entropy.
 ### Convenient random
 
 > [!Note]
-> This is a `rand()`-like API for various distributions. Uses thread-local PRNG lazily seeded with entropy.
+> This is a `rand()`-like API for various distributions. It uses thread-local PRNG lazily seeded with entropy.
 
 ### Generic
 
@@ -318,7 +317,7 @@ Effectively equivalent to `dist(thread_local_prng())`.
 
 Returns random integer `T` in a $[min, max]$ range.
 
-When `T` is a `bool`, function doesn't require any arguments.
+When `T` is a `bool`, this function doesn't require any arguments.
 
 > ```cpp
 > template <class T> T uniform(T min, T max); // float   U[min, max)
@@ -327,22 +326,22 @@ When `T` is a `bool`, function doesn't require any arguments.
 
 Returns random floating point `T` in a $[min, max)$ range.
 
-When no arguments are passed uses $[0, 1)$ range. 
+When no arguments are passed $[0, 1)$ range is assumed. 
 
 > ```cpp
 > template <class T> T normal(T mean, T stddev); // float N(mean, stddev)
 > template <class T> T normal(                ); // float N(0, 1)
 > ```
 
-Returns random normally distributed `T` with `mean` and `stddev`.
+Returns random normally distributed `T` with given `mean` and `stddev`.
 
-When no arguments are passed uses standard mean and deviation.
+When no arguments are passed standard mean and deviation are assumed.
 
 ### Shortcuts for standard types
 
 > ```cpp
 > int    uniform_int   (   int min,    int max); // U[min, max]
-> Uint   uniform_uint  (  Uint min,   Uint max); // U[min, max]
+> uint   uniform_uint  (  uint min,   uint max); // U[min, max]
 > bool   uniform_bool  (                      ); // U[0, 1]
 > ```
 
@@ -379,91 +378,91 @@ Generic template requires `Container::at()` and `Container::size()` to exist.
 
 ## Examples
 
-### Getting random values
+### Generating random values
 
-[ [Run this code](https://godbolt.org/z/rfvhEre1P) ] [ [Open source file](../examples/module_random/getting_random_values.cpp) ]
+[ [Run this code](https://godbolt.org/z/rfvhEre1P) ] [ [Open source file](../examples/module_random/generating_random_values.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Generic functions
-std::cout
-    << "integer U[-5, 5] -> " << random::uniform(-5, 5)    << "\n"
-    << "boolean U[0, 1]  -> " << random::uniform<bool>()   << "\n"
-    << "float   U[1, 2)  -> " << random::uniform(1.f, 2.f) << "\n"
-    << "float   U[0, 1)  -> " << random::uniform<float>()  << "\n";
+std::cout << "integer U[3, 7] -> " << random::uniform(  3,   7) << "\n";
+std::cout << "float   U[1, 2) -> " << random::uniform(1.f, 2.f) << "\n";
+
+std::cout << "boolean U[0, 1] -> " << random::uniform< bool>() << "\n";
+std::cout << "float   U[0, 1) -> " << random::uniform<float>() << "\n";
 
 // Standard shortcuts
-std::cout
-    << "U[0, 1] -> " << random::uniform_bool()  << "\n"
-    << "N(0, 1) -> " << random::normal_double() << "\n";
+std::cout << "float   U[0, 1] -> " << random::uniform_float() << "\n";
+std::cout << "double  N(0, 1) -> " << random::normal_double() << "\n";
 
-// Other distributions
-std::cout
-    << "Exp(4) -> " << random::variate(std::exponential_distribution{4.f})  << "\n";
+// Arbitrary distributions
+std::cout << "float   Exp(4)  -> " << random::variate(std::exponential_distribution{4.f}) << "\n";
 ```
 
 Output:
 ```
-integer U[-5, 5] -> 4
-boolean U[0, 1]  -> 1
-float   U[1, 2)  -> 1.57933
-float   U[0, 1)  -> 0.787372
+integer U[3, 7] -> 4
+float   U[1, 2) -> 1.57933
 
-U[0, 1] -> 0
-N(0, 1) -> -0.391094
+boolean U[0, 1] -> 1
+float   U[0, 1) -> 0.787372
 
-Exp(4) -> 0.384687
+float   U[0, 1] -> 0.483142
+double  N(0, 1) -> -0.391094
+
+float   Exp(4)  -> 0.384687
 ```
 
-### Using custom PRNGs with &lt;random&gt;
+### Using custom generators with &lt;random&gt;
 
-[ [Run this code](https://godbolt.org/z/bYesn8hfn) ] [ [Open source file](../examples/module_random/using_custom_prngs_with_random.cpp) ]
+[ [Run this code](https://godbolt.org/z/bYesn8hfn) ] [ [Open source file](../examples/module_random/using_custom_generators_with_random.cpp) ]
 
 ```cpp
 using namespace utl;
 
-random::generators::SplitMix64 gen{random::entropy()};
-std::chi_squared_distribution distr{2.}; // Chi-squared distribution with N = 2
+random::generators::splitmix_64 gen { random::entropy() }; // any random:: generator
+std::chi_squared_distribution   dist{ 2.0               }; // any standard distribution
 
-std::cout << "Random value from distribution -> " << distr(gen) << "\n";
+std::cout << "Chi-squared(2) -> " << dist(gen) << "\n";
 ```
 
 Output:
 ```
-Random value from distribution -> 4.80049
+Chi-squared(2) -> 4.80049
 ```
 
-### Constexpr random
+### Compile-time random
 
-[ [Run this code](https://godbolt.org/z/vTzWMd9dc) ] [ [Open source file](../examples/module_random/constexpr_random.cpp) ]
+[ [Run this code](https://godbolt.org/z/vTzWMd9dc) ] [ [Open source file](../examples/module_random/compile_time_random.cpp) ]
 
 ```cpp
 using namespace utl;
 
 template <std::size_t size>
 constexpr auto random_integers(std::uint64_t seed, int min, int max) {
-    std::array<int, size>          res{};
-    random::UniformIntDistribution dist{min, max};
-    random::PRNG                   gen(seed);
+    std::array<int, size>            res {          };
+    random::uniform_int_distribution dist{ min, max };
+    random::default_generator        gen { seed     };
     
-    for (auto &e : res) e = dist(gen);
+    for (auto &element : res) element = dist(gen);
+    
     return res;
 }
 
 // ...
 
-constexpr auto random_array = random_integers<6>(0, -10, 10);
+constexpr auto random_array = random_integers<6>(13, -8, 8);
 
-log::println(random_array); // using another module for convenience
+static_assert( random_array[0] == -8 );
+static_assert( random_array[1] == -7 );
+static_assert( random_array[2] ==  1 );
+static_assert( random_array[3] ==  8 );
+static_assert( random_array[4] == -3 );
 
 // compile-time random like this can be used to automatically build
-// lookup tables and generate seemingly random patterns
-```
-
-Output:
-```
-{ -4, -2, -3, -10, 0, -10 }
+// lookup tables and generate seemingly random patterns, generated
+// sequence is platform-independent so we can test statically it
 ```
 
 ## Improving entropy with x86/x64 intrinsics
@@ -478,7 +477,7 @@ Output:
 This achieves two things:
 
 - `entropy()` and `entropy_seq()` will now use CPU-counter intrinsics as an additional source of relatively high-quality entropy
-- MSVC will now use a more efficient implementation of 64-bit `UniformIntDistribution`
+- MSVC will now use a more efficient implementation of 64-bit `uniform_int_distribution`
 
 ## Notes on random number generation
 
@@ -494,18 +493,18 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 
 | Generator          | Performance | Memory                         | Result type     | Quality | Period                 | Motivation                    |
 | ------------------ | ----------- | ------------------------------ | --------------- | ------- | ---------------------- | ----------------------------- |
-| `RomuMono16`       | ~500%       | 4 bytes                        | `std::uint16_t` | ★★☆☆☆   | $\approx 2^{32}$       | Fastest 16-bit PRNG **⁽¹⁾**   |
-| `RomuTrio32`       | ~470%       | 12 bytes                       | `std::uint32_t` | ★★☆☆☆   | **Chaotic** **⁽²⁾**    | Fastest 32-bit PRNG           |
-| `SplitMix32`       | ~540%       | 4 bytes                        | `std::uint32_t` | ★★★☆☆   | $2^{32}$               | Smallest state 32-bit PRNG    |
-| `Xoshiro128PP`     | ~375%       | 16 bytes                       | `std::uint32_t` | ★★★★☆   | $2^{128} − 1$          | Best all purpose 32-bit PRNG  |
-| `RomuDuoJr64`      | ~600%       | 16 bytes                       | `std::uint64_t` | ★★☆☆☆   | **Chaotic**            | Fastest 64-bit PRNG           |
-| `SplitMix64`       | ~540%       | 8 bytes                        | `std::uint64_t` | ★★★★☆   | $2^{64}$               | Smallest state 64-bit PRNG    |
-| `Xoshiro256PP`     | ~385%       | 32 bytes                       | `std::uint64_t` | ★★★★☆   | $2^{256} − 1$          | Best all purpose 64-bit PRNG  |
-| `ChaCha8` **⁽³⁾**  | ~125%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
-| `ChaCha12`         | ~105%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
-| `ChaCha20`         | ~70%        | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `romu_mono_16`       | ~500%       | 4 bytes                        | `std::uint16_t` | ★★☆☆☆   | $\approx 2^{32}$       | Fastest 16-bit PRNG **⁽¹⁾**   |
+| `romu_trio_32`       | ~470%       | 12 bytes                       | `std::uint32_t` | ★★☆☆☆   | **Chaotic** **⁽²⁾**    | Fastest 32-bit PRNG           |
+| `splitmix_32`       | ~540%       | 4 bytes                        | `std::uint32_t` | ★★★☆☆   | $2^{32}$               | Smallest state 32-bit PRNG    |
+| `xoshiro_128`     | ~375%       | 16 bytes                       | `std::uint32_t` | ★★★★☆   | $2^{128} − 1$          | Best all purpose 32-bit PRNG  |
+| `romu_duo_jr_64`      | ~600%       | 16 bytes                       | `std::uint64_t` | ★★☆☆☆   | **Chaotic**            | Fastest 64-bit PRNG           |
+| `splitmix_64`       | ~540%       | 8 bytes                        | `std::uint64_t` | ★★★★☆   | $2^{64}$               | Smallest state 64-bit PRNG    |
+| `xoshiro_256`     | ~385%       | 32 bytes                       | `std::uint64_t` | ★★★★☆   | $2^{256} − 1$          | Best all purpose 64-bit PRNG  |
+| `chacha_8` **⁽³⁾**  | ~125%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `chacha_12`         | ~105%       | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
+| `chacha_20`         | ~70%        | 120 bytes                      | `std::uint32_t` | ★★★★★   | $2^{128}$              | Cryptographically secure PRNG |
 | `std::minstd_rand` | 100%        | 8 bytes                        | `std::uint64_t` | ★☆☆☆☆   | $2^{31} − 1$           |                               |
-| `rand()`           | ~80%        | **Platform-dependent** **⁽⁴⁾** | `int`           | ★☆☆☆☆   | **Platform-dependent** |                               |
+| `rand()`           | ~80%        | **Inconsistent** **⁽⁴⁾** | `int`           | ★☆☆☆☆   | **Inconsistent** |                               |
 | `std::mt19937`     | ~105%       | 5000 bytes                     | `std::uint32_t` | ★★★☆☆   | $2^{19937} − 1$        |                               |
 | `std::knuth_b`     | ~55%        | 2064 bytes                     | `std::uint64_t` | ★★☆☆☆   | $2^{31} − 1$           |                               |
 | `std::ranlux48`    | ~4%         | 120 bytes                      | `std::uint64_t` | ★★★★☆   | $\approx 2^{576}$      |                               |
@@ -523,7 +522,7 @@ Thankfully, `<random>` design is quite flexible and fully abstracts the concept 
 > **(2)** Non-linear PRNGs also known as "chaotic PRNGs" have a cycle length that is different for each seed. This introduces a theoretical possibility of encountering short cycles, but opens up several avenues for optimization.
 
 > [!Note]
-> **(3)** The difference between `ChaCha8`, `ChaCha12` and `ChaCha20` is the number of stream cypher rounds — 8, 12 and 20 correspondingly. More rounds make the state more difficult to discover, but have a negative effect on performance. As of now (year 2025) `ChaCha12` seems like a reasonable default since it provides 5 rounds of security margin over the best known attack.
+> **(3)** The difference between `chacha_8`, `chacha_12` and `chacha_20` is the number of stream cypher rounds — 8, 12 and 20 correspondingly. More rounds make the state more difficult to discover, but have a negative effect on performance. As of now (year 2026) `chacha_12` seems like a reasonable default since it provides 5 rounds of security margin over the best known attack.
 
 > [!Note]
 > **(4)** `C` function [rand()](https://en.cppreference.com/w/c/numeric/random/rand) is implementation-defined, on most existing implementations it uses an old [LCG](https://en.wikipedia.org/wiki/Linear_congruential_generator) engine similar to `std::minstd_rand`. It is generally an extremely low-quality way of generating random and faces a host of additional issues on platforms with low `RAND_MAX`, which includes Windows where `RAND_MAX` is equal `32767` (less than **2 bytes** of information, an almost ridiculous value, really). **GCC**, which is used in this benchmark, implements `rand()` using [linear feedback shift register](http://en.wikipedia.org/wiki/Linear_feedback_shift_register), which is less likely to encounter the most blatant of issues, but is still ultimately an inferior approach.
@@ -646,14 +645,14 @@ Such approach however is beyond cumbersome and is rarely used in practice, which
 
 #### Entropy
 
-Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy in the standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, CPU ticks, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
+Unfortunately the is no "nice" and portable way of getting proper cryptographic entropy in the standard library. Main issues were already mentioned in the section documenting [`random::entropy_seq()`](#entropy), the best we can do without using system API is to sample everything we can (`std::random_device`, time in nanoseconds, address space, CPU ticks, thread id, some other PRNG and etc.) and use seeding sequence to mash it all together into a single state.
 
-The result of such approach is generally satisfactory, however oftentimes not sufficient for proper cryptographic security.
+Assuming a good seeding sequence implementation the result of this approach is good enough for the majority of use cases as [demonstrated by M.E. O'Neil](https://www.pcg-random.org/posts/simple-portable-cpp-seed-entropy.html). Speaking strictly, however, we simply cannot guarantee cryptographic security without appropriate hardware support.
 
 #### Distribution approximations
 
-Most non-uniform distributions transform their inputs with slow non-linear functions like `std::sqrt()`, `std::log()`, `std::exp()` and etc. In many practical cases (gamedev, fuzzing, rendering) we don't need distributions to be particularly precise, this warrants usage of approximations which can completely avoid non-linear functions and get "close enough" results in a fraction of time.
+Most non-uniform distributions transform their inputs with slow non-linear functions like `std::sqrt()`, `std::log()`, `std::exp()` and etc. In many practical cases (gamedev, fuzzing, rendering) we don't really need distributions to be particularly precise, this warrants usage of approximations which can completely avoid non-linear functions and get "close enough" results in a fraction of time.
 
-Below is an example of an empirical [PDF](https://en.wikipedia.org/wiki/Probability_density_function) produced by a regular `NormalDistribution<>` and an  `ApproxNormalDistribution<>` which is about **3–4 times faster** to compute.
+Below is an example of an empirical [PDF](https://en.wikipedia.org/wiki/Probability_density_function) produced by a regular `normal_distribution<>` and an  `approx_normal_distribution<>` which is about **3–4 times faster** to compute.
 
 [<img src ="images/random_approx_distributions.svg">](guide_reproducing_figures.md)
