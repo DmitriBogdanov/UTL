@@ -109,7 +109,7 @@ template <class Enum> constexpr auto entries = meta<Enum>::entries;
 > [!Note]
 > A more performant option for large enums would be to build a static map in addition to arrays and use it to perform `O(1)` lookup during string conversion, however that falls under "implementation details". Using a map also makes it more difficult to provide functions as `constexpr`.
 
-A "clean" implementation including all of this and some other convenient functions is provided by **utl::enum_reflect** header which can be found [here](../module_enum_reflect.md).
+A "clean" implementation including all of this and some other convenient functions is provided by **utl::enum_reflect** header which can be found [here](../module_describe_enum.md).
 
 ## `struct` reflection
 
@@ -211,7 +211,7 @@ constexpr auto get(Struct&& value) noexcept {
 
 An there it is, we have all the basic building blocks of a proper reflection!
 
-A "clean" implementation including all of this and some other convenient functions is provided by **utl::struct_reflect** header which can be found [here](../module_struct_reflect.md).
+A "clean" implementation including all of this and some other convenient functions is provided by **utl::struct_reflect** header which can be found [here](../module_describe_struct.md).
 
 ## Some examples
 
@@ -367,10 +367,10 @@ Some other libraries implement reflection using template metadata fields, inheri
 | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------- |
 | [magic_enum](https://github.com/Neargye/magic_enum)                                                    | C++17 feature-rich enum reflection                                            | "Pretty function" parsing |
 | [static_enum](https://github.com/KonanM/static_enum)                                                   | C++17 minimalistic enum reflection                                            | "Pretty function" parsing |
-| [utl::enum_reflect](../module_enum_reflect.md)                                                         | C++17 minimalistic enum reflection                                            | Map-macro                 |
+| [utl::enum_reflect](../module_describe_enum.md)                                                         | C++17 minimalistic enum reflection                                            | Map-macro                 |
 | [visit_struct](https://github.com/cbeck88/visit_struct)                                                | C++11 minimalistic structure reflection                                       | Map-macro                 |
 | [selfaware](https://github.com/jckarter/selfaware)                                                     | C++11 minimalistic structure reflection                                       | Macros & template meta    |
-| [utl::struct_reflect](../module_struct_reflect.md)                                                     | C++17 minimalistic structure reflection                                       | Map-macro                 |
+| [utl::struct_reflect](../module_describe_struct.md)                                                     | C++17 minimalistic structure reflection                                       | Map-macro                 |
 | [Glaze](https://github.com/stephenberry/glaze)                                                         | C++23 serialization library that also includes reflection                     | "Pretty function" parsing |
 | [reflectcpp](https://github.com/getml/reflect-cpp)                                                     | C++20 serialization library that also includes reflection                     | "Pretty function" parsing |
 | [Boost.Hana](https://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/index.html)                      | C++14 metaprogramming library that also includes reflection                   | Macros & template meta    |
