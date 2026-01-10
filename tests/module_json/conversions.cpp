@@ -16,7 +16,7 @@
 // ____________________ IMPLEMENTATION ____________________
 
 TEST_CASE_TEMPLATE("Conversions / To-JSON-array", T, //
-                   json::Array,                      //
+                   json::array,                      //
                    std::vector<int>,                 //
                    std::list<int>,                   //
                    std::initializer_list<int>,       //
@@ -24,7 +24,7 @@ TEST_CASE_TEMPLATE("Conversions / To-JSON-array", T, //
                    std::forward_list<int>,           //
                    std::set<int>                     //
 ) {
-    json::Node json;
+    json::node json;
     json["array"] = T{1, 2, 3};
 
     const auto& arr = json.at("array").get_array(); // will throw if node is not an array
@@ -36,7 +36,7 @@ TEST_CASE_TEMPLATE("Conversions / To-JSON-array", T, //
 }
 
 TEST_CASE("Conversions /  To-JSON-array (multidimensional case)") {
-    json::Node json;
+    json::node json;
     json["array_1D"] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     json["array_2D"] = {
         {1, 2, 3},
@@ -48,17 +48,17 @@ TEST_CASE("Conversions /  To-JSON-array (multidimensional case)") {
         {{5, 6}, {7, 8, 9}}
     };
 
-    CHECK(json.at("array_1D").to_string(json::Format::MINIMIZED) == "[1,2,3,4,5,6,7,8,9]");
-    CHECK(json.at("array_2D").to_string(json::Format::MINIMIZED) == "[[1,2,3],[4,5,6],[7,8,9]]");
-    CHECK(json.at("array_3D").to_string(json::Format::MINIMIZED) == "[[[1,2],[3,4]],[[5,6],[7,8,9]]]");
+    CHECK(json.at("array_1D").to_string(json::format::minimized) == "[1,2,3,4,5,6,7,8,9]");
+    CHECK(json.at("array_2D").to_string(json::format::minimized) == "[[1,2,3],[4,5,6],[7,8,9]]");
+    CHECK(json.at("array_3D").to_string(json::format::minimized) == "[[[1,2],[3,4]],[[5,6],[7,8,9]]]");
 }
 
 TEST_CASE_TEMPLATE("Conversions /  To-JSON-object", T,  //
-                   json::Object,                        //
+                   json::object,                        //
                    std::map<std::string, int>,          //
                    std::unordered_map<std::string, int> //
 ) {
-    json::Node json;
+    json::node json;
     json["object"] = T{
         {"key_1", 1},
         {"key_2", 2}
@@ -72,23 +72,23 @@ TEST_CASE_TEMPLATE("Conversions /  To-JSON-object", T,  //
 }
 
 TEST_CASE_TEMPLATE("Conversions /  To-JSON-string", T, //
-                   json::String,                       //
+                   json::string,                       //
                    std::string,                        //
                    std::string_view                    //
 ) {
-    json::Node json;
+    json::node json;
     json["string"] = T{"lorem ipsum"};
     CHECK(json.at("string").get_string() == "lorem ipsum");
 }
 
 TEST_CASE("Conversions / To-JSON-string (literal case)") {
-    json::Node json;
+    json::node json;
     json["string"] = "lorem ipsum";
     CHECK(json.at("string").get_string() == "lorem ipsum");
 }
 
 TEST_CASE_TEMPLATE("Conversions / To-JSON-number", T, //
-                   json::Number,                      //
+                   json::number,                      //
                    float,                             //
                    double,                            //
                    int,                               //
@@ -96,25 +96,25 @@ TEST_CASE_TEMPLATE("Conversions / To-JSON-number", T, //
                    long double,                       //
                    char                               //
 ) {
-    json::Node json;
+    json::node json;
     json["number"] = T(2);
     CHECK(json.at("number").get_number() == 2);
 }
 
 TEST_CASE_TEMPLATE("Conversions / To-JSON-bool", T, //
-                   json::Bool,                      //
+                   json::boolean,                   //
                    bool                             //
 ) {
-    json::Node json;
+    json::node json;
     json["bool"] = T(true);
     CHECK(json.at("bool").get_bool() == true);
 }
 
 TEST_CASE_TEMPLATE("Conversions / To-JSON-null", T, //
-                   json::Null                       //
+                   json::null                       //
 ) {
-    json::Node json;
+    json::node json;
     json["null"] = T();
-    CHECK(json.at("null").get_null() == json::Null());
+    CHECK(json.at("null").get_null() == json::null{});
     // nothing else converts to 'Null' so the only thing we really test is that 'Null == Null' works
 }

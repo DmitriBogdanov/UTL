@@ -1857,7 +1857,7 @@ using bool_type_impl   = bool;
 struct null_type_impl {
     [[nodiscard]] bool operator==(const null_type_impl&) const noexcept {
         return true;
-    } // so we can check 'Null == Null'
+    } // so we can check 'null == null'
 };
 
 // Note:
@@ -1963,15 +1963,15 @@ utl_json_type_trait_conjunction(
 // --- Node class ---
 // ==================
 
-enum class Format : std::uint8_t { PRETTY, MINIMIZED };
+enum class format : std::uint8_t { pretty, minimized };
 
-class Node;
-inline void serialize_json_to_buffer(std::string& chars, const Node& node, Format format);
+class node;
+inline void serialize_json_to_buffer(std::string& chars, const node& json, format fmt);
 
-class Node {
+class node {
 public:
-    using object_type = object_type_impl<Node>;
-    using array_type  = array_type_impl<Node>;
+    using object_type = object_type_impl<node>;
+    using array_type  = array_type_impl<node>;
     using string_type = string_type_impl;
     using number_type = number_type_impl;
     using bool_type   = bool_type_impl;
@@ -2036,17 +2036,17 @@ public:
     // -- Object methods ---
     // ---------------------
 
-    Node& operator[](std::string_view key) {
+    node& operator[](std::string_view key) {
         // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
         // support heterogeneous lookup, we have to reimplement them manually
         if (this->is_null()) this->data = object_type{}; // 'null' converts to objects automatically
         auto& object = this->get_object();
         auto  it     = object.find(key);
-        if (it == object.end()) it = object.emplace(key, Node{}).first;
+        if (it == object.end()) it = object.emplace(key, node{}).first;
         return it->second;
     }
 
-    [[nodiscard]] const Node& operator[](std::string_view key) const {
+    [[nodiscard]] const node& operator[](std::string_view key) const {
         // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
         // support heterogeneous lookup, we have to reimplement them manually
         const auto& object = this->get_object();
@@ -2056,7 +2056,7 @@ public:
         return it->second;
     }
 
-    [[nodiscard]] Node& at(std::string_view key) {
+    [[nodiscard]] node& at(std::string_view key) {
         // Non-const 'operator[]' inserts non-existent keys, '.at()' should throw instead
         auto&      object = this->get_object();
         const auto it     = object.find(key);
@@ -2065,7 +2065,7 @@ public:
         return it->second;
     }
 
-    [[nodiscard]] const Node& at(std::string_view key) const { return this->operator[](key); }
+    [[nodiscard]] const node& at(std::string_view key) const { return this->operator[](key); }
 
     [[nodiscard]] bool contains(std::string_view key) const {
         const auto& object = this->get_object();
@@ -2085,35 +2085,35 @@ public:
     // -- Array methods ---
     // --------------------
 
-    [[nodiscard]] Node& operator[](std::size_t pos) { return this->get_array()[pos]; }
+    [[nodiscard]] node& operator[](std::size_t pos) { return this->get_array()[pos]; }
 
-    [[nodiscard]] const Node& operator[](std::size_t pos) const { return this->get_array()[pos]; }
+    [[nodiscard]] const node& operator[](std::size_t pos) const { return this->get_array()[pos]; }
 
-    [[nodiscard]] Node& at(std::size_t pos) { return this->get_array().at(pos); }
+    [[nodiscard]] node& at(std::size_t pos) { return this->get_array().at(pos); }
 
-    [[nodiscard]] const Node& at(std::size_t pos) const { return this->get_array().at(pos); }
+    [[nodiscard]] const node& at(std::size_t pos) const { return this->get_array().at(pos); }
 
-    void push_back(const Node& node) {
+    void push_back(const node& json) {
         if (this->is_null()) this->data = array_type{}; // 'null' converts to arrays automatically
-        this->get_array().push_back(node);
+        this->get_array().push_back(json);
     }
 
-    void push_back(Node&& node) {
+    void push_back(node&& json) {
         if (this->is_null()) this->data = array_type{}; // 'null' converts to arrays automatically
-        this->get_array().push_back(node);
+        this->get_array().push_back(json);
     }
 
     // -- Assignment --
     // ----------------
 
     // Converting assignment
-    template <class T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, Node> &&
+    template <class T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, node> &&
                                             !std::is_same_v<std::decay_t<T>, object_type> &&
                                             !std::is_same_v<std::decay_t<T>, array_type> &&
                                             !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>,
                                         bool> = true>
-    Node& operator=(const T& value) {
-        // Don't take types that decay to Node/object/array/string to prevent
+    node& operator=(const T& value) {
+        // Don't take types that decay to node/object/array/string to prevent
         // shadowing native copy/move assignment for those types
 
         // Several "type-like' characteristics can be true at the same time,
@@ -2146,29 +2146,29 @@ public:
     }
 
     // "native" copy/move semantics for types that support it
-    Node& operator=(const object_type& value) {
+    node& operator=(const object_type& value) {
         this->data = value;
         return *this;
     }
-    Node& operator=(object_type&& value) {
+    node& operator=(object_type&& value) {
         this->data = std::move(value);
         return *this;
     }
 
-    Node& operator=(const array_type& value) {
+    node& operator=(const array_type& value) {
         this->data = value;
         return *this;
     }
-    Node& operator=(array_type&& value) {
+    node& operator=(array_type&& value) {
         this->data = std::move(value);
         return *this;
     }
 
-    Node& operator=(const string_type& value) {
+    node& operator=(const string_type& value) {
         this->data = value;
         return *this;
     }
-    Node& operator=(string_type&& value) {
+    node& operator=(string_type&& value) {
         this->data = std::move(value);
         return *this;
     }
@@ -2176,10 +2176,10 @@ public:
     // Support for 'std::initializer_list' type deduction,
     // (otherwise the call is ambiguous)
     template <class T>
-    Node& operator=(std::initializer_list<T> ilist) {
+    node& operator=(std::initializer_list<T> ilist) {
         // We can't just do 'return *this = array_type(value);' because compiler doesn't realize it can
-        // convert 'std::initializer_list<T>' to 'std::vector<Node>' for all 'T' convertible to 'Node',
-        // we have to invoke 'Node()' constructor explicitly (here it happens in 'emplace_back()')
+        // convert 'std::initializer_list<T>' to 'std::vector<node>' for all 'T' convertible to 'node',
+        // we have to invoke 'node()' constructor explicitly (here it happens in 'emplace_back()')
         array_type array_value;
         array_value.reserve(ilist.size());
         for (const auto& e : ilist) array_value.emplace_back(e);
@@ -2188,7 +2188,7 @@ public:
     }
 
     template <class T>
-    Node& operator=(std::initializer_list<std::initializer_list<T>> ilist) {
+    node& operator=(std::initializer_list<std::initializer_list<T>> ilist) {
         // Support for 2D brace initialization
         array_type array_value;
         array_value.reserve(ilist.size());
@@ -2202,7 +2202,7 @@ public:
     }
 
     template <class T>
-    Node& operator=(std::initializer_list<std::initializer_list<std::initializer_list<T>>> ilist) {
+    node& operator=(std::initializer_list<std::initializer_list<std::initializer_list<T>>> ilist) {
         // Support for 3D brace initialization
         // it's dumb, but it works
         array_type array_value;
@@ -2222,51 +2222,51 @@ public:
     // -- Constructors --
     // ------------------
 
-    Node& operator=(const Node&) = default;
-    Node& operator=(Node&&)      = default;
+    node& operator=(const node&) = default;
+    node& operator=(node&&)      = default;
 
-    Node()            = default;
-    Node(const Node&) = default;
-    Node(Node&&)      = default;
+    node()            = default;
+    node(const node&) = default;
+    node(node&&)      = default;
     // Note:
     // We suffer a lot if 'object_type' move-constructor is not marked 'noexcept', if that's the case
-    // 'Node' move-constructor doesn't get 'noexcept' either which means `std::vector<Node>` will copy
+    // 'node' move-constructor doesn't get 'noexcept' either which means `std::vector<node>` will copy
     // nodes instead of moving when it grows. 'std::map' is NOT required to be noexcept by the standard
     // but it is marked as such in both 'libc++' and 'libstdc++', 'VS' stdlib lacks behind in that regard.
     // See noexcept status summary here: http://howardhinnant.github.io/container_summary.html
 
     // Converting ctor
-    template <class T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, Node> &&
+    template <class T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, node> &&
                                             !std::is_same_v<std::decay_t<T>, object_type> &&
                                             !std::is_same_v<std::decay_t<T>, array_type> &&
                                             !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>,
                                         bool> = true>
-    Node(const T& value) {
+    node(const T& value) {
         *this = value;
     }
 
-    Node(const object_type& value) { this->data = value; }
-    Node(object_type&& value) { this->data = std::move(value); }
-    Node(const array_type& value) { this->data = value; }
-    Node(array_type&& value) { this->data = std::move(value); }
-    Node(std::string_view value) { this->data = string_type(value); }
-    Node(const string_type& value) { this->data = value; }
-    Node(string_type&& value) { this->data = std::move(value); }
-    Node(number_type value) { this->data = value; }
-    Node(bool_type value) { this->data = value; }
-    Node(null_type value) { this->data = value; }
+    node(const object_type& value) { this->data = value; }
+    node(object_type&& value) { this->data = std::move(value); }
+    node(const array_type& value) { this->data = value; }
+    node(array_type&& value) { this->data = std::move(value); }
+    node(std::string_view value) { this->data = string_type(value); }
+    node(const string_type& value) { this->data = value; }
+    node(string_type&& value) { this->data = std::move(value); }
+    node(number_type value) { this->data = value; }
+    node(bool_type value) { this->data = value; }
+    node(null_type value) { this->data = value; }
 
     // --- JSON Serializing public API ---
     // -----------------------------------
 
-    [[nodiscard]] std::string to_string(Format format = Format::PRETTY) const {
+    [[nodiscard]] std::string to_string(format fmt = format::pretty) const {
         std::string buffer;
-        serialize_json_to_buffer(buffer, *this, format);
+        serialize_json_to_buffer(buffer, *this, fmt);
         return buffer;
     }
 
-    void to_file(const std::string& filepath, Format format = Format::PRETTY) const {
-        const auto chars = this->to_string(format);
+    void to_file(const std::string& filepath, format fmt = format::pretty) const {
+        const auto chars = this->to_string(fmt);
 
         const std::filesystem::path path = filepath;
         if (path.has_parent_path() && !std::filesystem::exists(path.parent_path()))
@@ -2279,7 +2279,7 @@ public:
         // on my benchmarks) they can always use 'std::ofstream' and 'to_string()' to export manually
 
         std::ofstream(filepath).write(chars.data(), chars.size());
-        // maybe a little faster than doing 'std::ofstream(filepath) << node.to_string(format)'
+        // maybe a little faster than doing 'std::ofstream(filepath) << chars'
     }
 
     // --- Reflection ---
@@ -2303,12 +2303,12 @@ public:
 };
 
 // Public typedefs
-using Object = Node::object_type;
-using Array  = Node::array_type;
-using String = Node::string_type;
-using Number = Node::number_type;
-using Bool   = Node::bool_type;
-using Null   = Node::null_type;
+using object  = node::object_type;
+using array   = node::array_type;
+using string  = node::string_type;
+using number  = node::number_type;
+using boolean = node::bool_type;
+using null    = node::null_type;
 
 // =====================
 // --- Lookup Tables ---
@@ -2427,7 +2427,7 @@ inline std::from_chars_result available_from_chars_impl(const char* first, const
     return {cursor, error};
 }
 #else
-inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, Number& value) {
+inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, number& value) {
     return std::from_chars(first, last, value);
 }
 #endif
@@ -2440,7 +2440,7 @@ constexpr unsigned int default_recursion_limit = 100;
 // this recursion limit applies only to parsing from text, conversions from
 // structs & containers are a separate thing and don't really need it as much
 
-struct Parser {
+struct parser_state {
     const std::string& chars;
     unsigned int       recursion_limit;
     unsigned int       recursion_depth = 0;
@@ -2450,8 +2450,9 @@ struct Parser {
 
     // dynamic allocation errors can be handled with regular exceptions through std::bad_alloc
 
-    Parser() = delete;
-    Parser(const std::string& chars, unsigned int& recursion_limit) : chars(chars), recursion_limit(recursion_limit) {}
+    parser_state() = delete;
+    parser_state(const std::string& chars, unsigned int& recursion_limit)
+        : chars(chars), recursion_limit(recursion_limit) {}
 
     std::size_t skip_nonsignificant_whitespace(std::size_t cursor) {
         using namespace std::string_literals;
@@ -2466,7 +2467,7 @@ struct Parser {
                                  pretty_error(cursor, this->chars));
     }
 
-    std::pair<std::size_t, Node> parse_node(std::size_t cursor) {
+    std::pair<std::size_t, node> parse_node(std::size_t cursor) {
         using namespace std::string_literals;
 
         // Node selector assumes it is starting at a significant symbol
@@ -2497,7 +2498,7 @@ struct Parser {
         // Note: using a lookup table instead of an 'if' chain doesn't seem to offer any performance benefits here
     }
 
-    std::size_t parse_object_pair(std::size_t cursor, Object& parent) {
+    std::size_t parse_object_pair(std::size_t cursor, object& parent) {
         using namespace std::string_literals;
 
         // Object pair parser assumes it is starting at a '"'
@@ -2522,7 +2523,7 @@ struct Parser {
                                      ". If stated depth wasn't caused by an invalid input, "s +
                                      "recursion limit can be increased in the parser."s);
 
-        Node value;
+        node value;
         std::tie(cursor, value) = this->parse_node(cursor);
 
         --this->recursion_depth;
@@ -2563,13 +2564,13 @@ struct Parser {
         return cursor;
     }
 
-    std::pair<std::size_t, Object> parse_object(std::size_t cursor) {
+    std::pair<std::size_t, object> parse_object(std::size_t cursor) {
         using namespace std::string_literals;
 
         ++cursor; // move past the opening brace '{'
 
         // Empty object that will accumulate child nodes as we parse them
-        Object object_value;
+        object object_value;
 
         // Handle 1st pair
         cursor = this->skip_nonsignificant_whitespace(cursor);
@@ -2616,7 +2617,7 @@ struct Parser {
                                  pretty_error(cursor, this->chars));
     }
 
-    std::size_t parse_array_element(std::size_t cursor, Array& parent) {
+    std::size_t parse_array_element(std::size_t cursor, array& parent) {
         using namespace std::string_literals;
 
         // Array element parser assumes it is starting at the first symbol of some JSON node
@@ -2628,7 +2629,7 @@ struct Parser {
                                      ". If stated depth wasn't caused by an invalid input, "s +
                                      "recursion limit can be increased with json::set_recursion_limit()."s);
 
-        Node value;
+        node value;
         std::tie(cursor, value) = this->parse_node(cursor);
 
         --this->recursion_depth;
@@ -2638,13 +2639,13 @@ struct Parser {
         return cursor;
     }
 
-    std::pair<std::size_t, Array> parse_array(std::size_t cursor) {
+    std::pair<std::size_t, array> parse_array(std::size_t cursor) {
         using namespace std::string_literals;
 
         ++cursor; // move past the opening bracket '['
 
         // Empty array that will accumulate child nodes as we parse them
-        Array array_value;
+        array array_value;
 
         // Handle 1st pair
         cursor = this->skip_nonsignificant_whitespace(cursor);
@@ -2769,7 +2770,7 @@ struct Parser {
         }
     }
 
-    std::pair<std::size_t, String> parse_string(std::size_t cursor) {
+    std::pair<std::size_t, string> parse_string(std::size_t cursor) {
         using namespace std::string_literals;
 
         // Empty string that will accumulate characters as we parse them
@@ -2840,10 +2841,10 @@ struct Parser {
                                  pretty_error(cursor, this->chars));
     }
 
-    std::pair<std::size_t, Number> parse_number(std::size_t cursor) {
+    std::pair<std::size_t, number> parse_number(std::size_t cursor) {
         using namespace std::string_literals;
 
-        Number number_value;
+        number number_value;
 
         const auto [numer_end_ptr, error_code] = available_from_chars_impl(
             this->chars.data() + cursor, this->chars.data() + this->chars.size(), number_value);
@@ -2867,7 +2868,7 @@ struct Parser {
         return {numer_end_ptr - this->chars.data(), number_value};
     }
 
-    std::pair<std::size_t, Bool> parse_true(std::size_t cursor) {
+    std::pair<std::size_t, boolean> parse_true(std::size_t cursor) {
         using namespace std::string_literals;
         constexpr std::size_t token_length = 4;
 
@@ -2885,10 +2886,10 @@ struct Parser {
             throw std::runtime_error("JSON bool node could not parse {true} at pos "s + std::to_string(cursor) + "."s +
                                      pretty_error(cursor, this->chars));
 
-        return {cursor + token_length, Bool(true)};
+        return {cursor + token_length, boolean(true)};
     }
 
-    std::pair<std::size_t, Bool> parse_false(std::size_t cursor) {
+    std::pair<std::size_t, boolean> parse_false(std::size_t cursor) {
         using namespace std::string_literals;
         constexpr std::size_t token_length = 5;
 
@@ -2907,10 +2908,10 @@ struct Parser {
             throw std::runtime_error("JSON bool node could not parse {false} at pos "s + std::to_string(cursor) + "."s +
                                      pretty_error(cursor, this->chars));
 
-        return {cursor + token_length, Bool(false)};
+        return {cursor + token_length, boolean(false)};
     }
 
-    std::pair<std::size_t, Null> parse_null(std::size_t cursor) {
+    std::pair<std::size_t, null> parse_null(std::size_t cursor) {
         using namespace std::string_literals;
         constexpr std::size_t token_length = 4;
 
@@ -2928,7 +2929,7 @@ struct Parser {
             throw std::runtime_error("JSON null node could not parse {null} at pos "s + std::to_string(cursor) + "."s +
                                      pretty_error(cursor, this->chars));
 
-        return {cursor + token_length, Null()};
+        return {cursor + token_length, null()};
     }
 };
 
@@ -2938,7 +2939,7 @@ struct Parser {
 // ==============================
 
 template <bool prettify>
-inline void serialize_json_recursion(const Node& node, std::string& chars, unsigned int indent_level = 0,
+inline void serialize_json_recursion(const node& json, std::string& chars, unsigned int indent_level = 0,
                                      bool skip_first_indent = false) {
     using namespace std::string_literals;
     constexpr std::size_t indent_level_size = 4;
@@ -2946,12 +2947,12 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
 
     // First indent should be skipped when printing after a key, for example:
     //    > {
-    //    >     "object": {              <- first indent skipped (Object)
-    //    >         "something": null    <- first indent skipped (Null)
+    //    >     "object": {              <- first indent skipped (object)
+    //    >         "something": null    <- first indent skipped (null)
     //    >     },
-    //    >     "array": [               <- first indent skipped (Array)
-    //    >          1,                  <- first indent NOT skipped (Number)
-    //    >          2                   <- first indent NOT skipped (Number)
+    //    >     "array": [               <- first indent skipped (array)
+    //    >          1,                  <- first indent NOT skipped (number)
+    //    >          2                   <- first indent NOT skipped (number)
     //    >     ]
     //    > }
 
@@ -2974,8 +2975,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         if (!skip_first_indent) chars.append(indent_size, ' ');
 
     // JSON Object
-    if (node.is_object()) {
-        const auto& object_value = node.get_object();
+    if (json.is_object()) {
+        const auto& object_value = json.get_object();
 
         // Skip all logic for empty objects
         if (object_value.empty()) {
@@ -3009,8 +3010,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '}';
     }
     // JSON Array
-    else if (node.is_array()) {
-        const auto& array_value = node.get_array();
+    else if (json.is_array()) {
+        const auto& array_value = json.get_array();
 
         // Skip all logic for empty arrays
         if (array_value.empty()) {
@@ -3037,8 +3038,8 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += ']';
     }
     // String
-    else if (node.is_string()) {
-        const auto& string_value = node.get_string();
+    else if (json.is_string()) {
+        const auto& string_value = json.get_string();
 
         chars += '"';
 
@@ -3063,12 +3064,12 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         chars += '"';
     }
     // Number
-    else if (node.is_number()) {
-        const auto& number_value = node.get_number();
+    else if (json.is_number()) {
+        const auto& number_value = json.get_number();
 
-        constexpr int max_exponent = std::numeric_limits<Number>::max_exponent10;
+        constexpr int max_exponent = std::numeric_limits<number>::max_exponent10;
         constexpr int max_digits =
-            4 + std::numeric_limits<Number>::max_digits10 + std::max(2, log10_ceil(max_exponent));
+            4 + std::numeric_limits<number>::max_digits10 + std::max(2, log10_ceil(max_exponent));
         // should be the smallest buffer size to account for all possible 'std::to_chars()' outputs,
         // see [https://stackoverflow.com/questions/68472720/stdto-chars-minimal-floating-point-buffer-size]
 
@@ -3095,30 +3096,30 @@ inline void serialize_json_recursion(const Node& node, std::string& chars, unsig
         }
     }
     // Bool
-    else if (node.is_bool()) {
-        const auto& bool_value = node.get_bool();
+    else if (json.is_bool()) {
+        const auto& bool_value = json.get_bool();
         chars += (bool_value ? "true" : "false");
     }
     // Null
-    else if (node.is_null()) {
+    else if (json.is_null()) {
         chars += "null";
     }
 }
 
-inline void serialize_json_to_buffer(std::string& chars, const Node& node, Format format) {
-    if (format == Format::PRETTY) serialize_json_recursion<true>(node, chars);
-    else serialize_json_recursion<false>(node, chars);
+inline void serialize_json_to_buffer(std::string& chars, const node& json, format fmt) {
+    if (fmt == format::pretty) serialize_json_recursion<true>(json, chars);
+    else serialize_json_recursion<false>(json, chars);
 }
 
 // ========================
 // --- JSON parsing API ---
 // ========================
 
-[[nodiscard]] inline Node from_string(const std::string& chars,
+[[nodiscard]] inline node from_string(const std::string& chars,
                                       unsigned int       recursion_limit = default_recursion_limit) {
-    Parser            parser(chars, recursion_limit);
+    parser_state      parser(chars, recursion_limit);
     const std::size_t json_start = parser.skip_nonsignificant_whitespace(0); // skip leading whitespace
-    auto [end_cursor, node]      = parser.parse_node(json_start); // starts parsing recursively from the root node
+    auto [end_cursor, json]      = parser.parse_node(json_start); // starts parsing recursively from the root node
 
     // Check for invalid trailing symbols
     using namespace std::string_literals;
@@ -3128,19 +3129,19 @@ inline void serialize_json_to_buffer(std::string& chars, const Node& node, Forma
             throw std::runtime_error("Invalid trailing symbols encountered after the root JSON node at pos "s +
                                      std::to_string(cursor) + "."s + pretty_error(cursor, chars));
 
-    return std::move(node); // implicit tuple blocks copy elision, we have to move() manually
+    return std::move(json); // implicit tuple blocks copy elision, we have to move() manually
 
     // Note: Some code analyzers detect 'return std::move(node)' as a performance issue, it is
     //       not, NOT having 'std::move()' on the other hand is very much a performance issue
 }
-[[nodiscard]] inline Node from_file(const std::string& filepath,
+[[nodiscard]] inline node from_file(const std::string& filepath,
                                     unsigned int       recursion_limit = default_recursion_limit) {
     const std::string chars = read_file_to_string(filepath);
     return from_string(chars, recursion_limit);
 }
 
 namespace literals {
-[[nodiscard]] inline Node operator""_utl_json(const char* c_str, std::size_t c_str_size) {
+[[nodiscard]] inline node operator""_utl_json(const char* c_str, std::size_t c_str_size) {
     return from_string(std::string(c_str, c_str_size));
 }
 } // namespace literals
@@ -3158,7 +3159,7 @@ constexpr bool is_reflected_struct = false;
 // and call 'to_struct()' / 'from_struct()' recursively whenever necessary
 
 template <class T>
-[[nodiscard]] utl::json::impl::Node from_struct(const T&) {
+[[nodiscard]] utl::json::impl::node from_struct(const T&) {
     static_assert(always_false_v<T>,
                   "Provided type doesn't have a defined JSON reflection. Use 'UTL_JSON_REFLECT' macro to define one.");
     // compile-time protection against calling 'from_struct()' on types that don't have reflection,
@@ -3169,28 +3170,28 @@ template <class T>
 }
 
 template <class T>
-void assign_value_to_node(Node& node, const T& value) {
-    if constexpr (is_json_convertible_v<T>) node = value;
+void assign_value_to_node(node& json, const T& value) {
+    if constexpr (is_json_convertible_v<T>) json = value;
     // it is critical that the trait above performs DEEP check for JSON convertibility and not a shallow one,
     // we want to detect things like 'std::vector<int>' as convertible, but not things like 'std::vector<MyStruct>',
     // these should expand over their element type / mapped type further until either they either reach
     // the reflected 'MyStruct' or end up on a dead end, which means an impossible conversion
-    else if constexpr (is_reflected_struct<T>) node = from_struct(value);
+    else if constexpr (is_reflected_struct<T>) json = from_struct(value);
     else if constexpr (is_object_like_v<T>) {
-        node = Object{};
+        json = object{};
         for (const auto& [key, val] : value) {
-            Node single_node;
+            node single_node;
             assign_value_to_node(single_node, val);
-            node.get_object().emplace(key, std::move(single_node));
+            json.get_object().emplace(key, std::move(single_node));
         }
     } else if constexpr (is_array_like_v<T>) {
-        node = Array{};
+        json = array{};
         for (const auto& elem : value) {
-            Node single_node;
+            node single_node;
             assign_value_to_node(single_node, elem);
-            node.get_array().emplace_back(std::move(single_node));
+            json.get_array().emplace_back(std::move(single_node));
         }
-    } else static_assert(always_false_v<T>, "Could not resolve recursive conversion from 'T' to 'json::Node'.");
+    } else static_assert(always_false_v<T>, "Could not resolve recursive conversion from 'T' to 'json::node'.");
 }
 
 #define utl_json_from_struct_assign(fieldname_) assign_value_to_node(json[#fieldname_], val.fieldname_);
@@ -3201,31 +3202,31 @@ void assign_value_to_node(Node& node, const T& value) {
 // Assigning JSON node to a value for arbitrary type is a bit of an "incorrect" problem,
 // since we can't possibly know the API of the type we're assigning stuff to.
 // Object-like and array-like types need special handling that expands their nodes recursively,
-// we can't directly assign 'std::vector<Node>' to 'std::vector<double>' like we would with simpler types.
+// we can't directly assign 'std::vector<node>' to 'std::vector<double>' like we would with simpler types.
 template <class T>
-void assign_node_to_value_recursively(T& value, const Node& node) {
-    if constexpr (is_string_like_v<T>) value = node.get_string();
+void assign_node_to_value_recursively(T& value, const node& json) {
+    if constexpr (is_string_like_v<T>) value = json.get_string();
     else if constexpr (is_object_like_v<T>) {
-        const auto object = node.get_object();
+        const auto object = json.get_object();
         for (const auto& [key, val] : object) assign_node_to_value_recursively(value[key], val);
     } else if constexpr (is_array_like_v<T>) {
-        const auto array = node.get_array();
+        const auto array = json.get_array();
         value.resize(array.size());
         for (std::size_t i = 0; i < array.size(); ++i) assign_node_to_value_recursively(value[i], array[i]);
-    } else if constexpr (is_bool_like_v<T>) value = node.get_bool();
-    else if constexpr (is_null_like_v<T>) value = node.get_null();
-    else if constexpr (is_numeric_like_v<T>) value = static_cast<T>(node.get_number());
-    else if constexpr (is_reflected_struct<T>) value = node.to_struct<T>();
+    } else if constexpr (is_bool_like_v<T>) value = json.get_bool();
+    else if constexpr (is_null_like_v<T>) value = json.get_null();
+    else if constexpr (is_numeric_like_v<T>) value = static_cast<T>(json.get_number());
+    else if constexpr (is_reflected_struct<T>) value = json.to_struct<T>();
     else static_assert(always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
 }
 
 // Not sure how to generically handle array-like types with compile-time known size,
 // so we're just going to make a special case for 'std::array'
 template <class T, std::size_t N>
-void assign_node_to_value_recursively(std::array<T, N>& value, const Node& node) {
+void assign_node_to_value_recursively(std::array<T, N>& value, const node& json) {
     using namespace std::string_literals;
 
-    const auto array = node.get_array();
+    const auto array = json.get_array();
 
     if (array.size() != value.size())
         throw std::runtime_error("JSON to structure serializer encountered non-mathing std::array size of "s +
@@ -3249,15 +3250,15 @@ void assign_node_to_value_recursively(std::array<T, N>& value, const Node& node)
     constexpr bool utl::json::impl::is_reflected_struct<struct_name_> = true;                                          \
                                                                                                                        \
     template <>                                                                                                        \
-    inline utl::json::impl::Node utl::json::impl::from_struct<struct_name_>(const struct_name_& val) {                 \
-        utl::json::impl::Node json;                                                                                    \
+    inline utl::json::impl::node utl::json::impl::from_struct<struct_name_>(const struct_name_& val) {                 \
+        utl::json::impl::node json;                                                                                    \
         /* map 'json["<FIELDNAME>"] = val.<FIELDNAME>;' */                                                             \
         utl_json_map(utl_json_from_struct_assign, __VA_ARGS__);                                                        \
         return json;                                                                                                   \
     }                                                                                                                  \
                                                                                                                        \
     template <>                                                                                                        \
-    inline auto utl::json::impl::Node::to_struct<struct_name_>() const -> struct_name_ {                               \
+    inline auto utl::json::impl::node::to_struct<struct_name_>() const -> struct_name_ {                               \
         struct_name_ val;                                                                                              \
         /* map 'val.<FIELDNAME> = this->at("<FIELDNAME>").get<decltype(val.<FIELDNAME>)>();' */                        \
         utl_json_map(utl_json_to_struct_assign, __VA_ARGS__);                                                          \
@@ -3273,16 +3274,16 @@ void assign_node_to_value_recursively(std::array<T, N>& value, const Node& node)
 
 namespace utl::json {
 
-using impl::Format;
+using impl::format;
 
-using impl::Node;
+using impl::node;
 
-using impl::Object;
-using impl::Array;
-using impl::String;
-using impl::Number;
-using impl::Bool;
-using impl::Null;
+using impl::object;
+using impl::array;
+using impl::string;
+using impl::number;
+using impl::boolean;
+using impl::null;
 
 using impl::from_string;
 using impl::from_file;
@@ -10630,7 +10631,7 @@ namespace utl::progressbar::impl {
 class percentage {
 public:
     // - Public parameters -
-    struct Style {
+    struct {
         char        fill            = '#';
         char        empty           = '.';
         char        left            = '[';
@@ -10781,7 +10782,7 @@ class ruler {
 
 public:
     // - Public parameters -
-    struct Style {
+    struct {
         char fill            = '#';
         char ruler_line      = '-';
         char ruler_delimiter = '|';

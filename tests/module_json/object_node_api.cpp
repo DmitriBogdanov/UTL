@@ -18,7 +18,7 @@ TEST_CASE("Object node API / Basics") {
     )");
 
     CHECK_THROWS(json.at("non_existent_key"));
-    
+
     CHECK(json.contains("string"));
     CHECK(json.at("string").get_string() == "lorem ipsum");
     CHECK(json.value_or("number", -5.) == 17.);
@@ -26,15 +26,15 @@ TEST_CASE("Object node API / Basics") {
 }
 
 TEST_CASE_TEMPLATE("Object node API / Only 'Null' converts automatically converts to 'Object'", T, //
-                   json::Object,                                                                   //
-                   json::Array,                                                                    //
-                   json::String,                                                                   //
-                   json::Number,                                                                   //
-                   json::Bool,                                                                     //
-                   json::Null                                                                      //
+                   json::object,                                                                   //
+                   json::array,                                                                    //
+                   json::string,                                                                   //
+                   json::number,                                                                   //
+                   json::boolean,                                                                  //
+                   json::null                                                                      //
 ) {
-    json::Node json = T();
-    
+    json::node json = T();
+
     const auto insert_value_at_key = [&]() { json["key"] = "value"; };
 
     // Only 'Null' converts to 'Object' implicitly after 'operator[]'

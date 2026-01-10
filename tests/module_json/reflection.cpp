@@ -15,21 +15,21 @@
 // =========================
 
 // Set up reusable "flat struct" with all the JSON datatypes that we can reuse for other tests
-struct SimpleConfig {
+struct simple_config {
     std::unordered_map<std::string, int> object;
     std::vector<int>                     array;
     std::string                          string;
     double                               number;
     bool                                 boolean;
-    json::Null                           null;
+    json::null                           null;
 
-    bool operator==(const SimpleConfig& other) const {
+    bool operator==(const simple_config& other) const {
         return (this->object == other.object) && (this->array == other.array) && (this->string == other.string) &&
                (this->number == other.number) && (this->boolean == other.boolean) && (this->null == other.null);
     } // in C++20 we could just 'default' it for the same effect
 };
 
-void check_json_against_struct(const json::Node& json, const SimpleConfig& cfg) {
+void check_json_against_struct(const json::node& json, const simple_config& cfg) {
     CHECK(json.get_object().size() == 6);
     CHECK(json.at("object").get_object().size() == cfg.object.size());
     CHECK(json.at("object").at("key_1").get_number() == cfg.object.at("key_1"));
@@ -44,16 +44,16 @@ void check_json_against_struct(const json::Node& json, const SimpleConfig& cfg) 
     CHECK(json.at("null").get_null() == cfg.null);
 }
 
-const SimpleConfig test_simple_cfg = {
+const simple_config test_simple_cfg = {
     {{"key_1", 1}, {"key_2", 2}}, //
     {4, 5, 6}, //
     "lorem ipsum", //
     0.5, //
     true, //
-    json::Null{}  //
+    json::null{}  //
 };
 
-UTL_JSON_REFLECT(SimpleConfig, object, array, string, number, boolean, null);
+UTL_JSON_REFLECT(simple_config, object, array, string, number, boolean, null);
 
 TEST_CASE("Reflection / Flat struct") {
     const auto cfg = test_simple_cfg;
@@ -63,7 +63,7 @@ TEST_CASE("Reflection / Flat struct") {
     check_json_against_struct(reflected_json, cfg);
 
     // Test 'JSON -> struct' reflection
-    const auto reflected_cfg = reflected_json.to_struct<SimpleConfig>();
+    const auto reflected_cfg = reflected_json.to_struct<simple_config>();
     CHECK(reflected_cfg == cfg);
 }
 
@@ -71,24 +71,24 @@ TEST_CASE("Reflection / Flat struct") {
 // --- Nested struct reflection ---
 // ================================
 
-struct NestedConfig {
-    SimpleConfig substruct;
-    bool         flag;
+struct nested_config {
+    simple_config substruct;
+    bool          flag;
 
-    bool operator==(const NestedConfig& other) const {
+    bool operator==(const nested_config& other) const {
         return (this->substruct == other.substruct) && (this->flag == other.flag);
     }
 };
 
-void check_json_against_struct(const json::Node& json, const NestedConfig& cfg) {
+void check_json_against_struct(const json::node& json, const nested_config& cfg) {
     CHECK(json.get_object().size() == 2);
     check_json_against_struct(json.at("substruct"), cfg.substruct);
     CHECK(json.at("flag").get_bool() == cfg.flag);
 }
 
-const NestedConfig test_nested_cfg = {test_simple_cfg, false};
+const nested_config test_nested_cfg = {test_simple_cfg, false};
 
-UTL_JSON_REFLECT(NestedConfig, substruct, flag);
+UTL_JSON_REFLECT(nested_config, substruct, flag);
 
 TEST_CASE("Reflection / Nested reflected structs") {
     const auto cfg = test_nested_cfg;
@@ -98,7 +98,7 @@ TEST_CASE("Reflection / Nested reflected structs") {
     check_json_against_struct(reflected_json, cfg);
 
     // Test 'JSON -> struct' reflection
-    const auto reflected_cfg = reflected_json.to_struct<NestedConfig>();
+    const auto reflected_cfg = reflected_json.to_struct<nested_config>();
     CHECK(reflected_cfg == cfg);
 }
 
@@ -106,18 +106,18 @@ TEST_CASE("Reflection / Nested reflected structs") {
 // --- Nested containers of reflected structs reflection ---
 // =========================================================
 
-struct NestedContainerConfig {
-    std::map<std::string, std::vector<SimpleConfig>> map_of_subconfig_arrays;
+struct nested_container_config {
+    std::map<std::string, std::vector<simple_config>> map_of_subconfig_arrays;
 
-    std::vector<std::vector<std::vector<SimpleConfig>>> subconfig_tensor;
+    std::vector<std::vector<std::vector<simple_config>>> subconfig_tensor;
 
-    bool operator==(const NestedContainerConfig& other) const {
+    bool operator==(const nested_container_config& other) const {
         return (this->map_of_subconfig_arrays == other.map_of_subconfig_arrays) &&
                (this->subconfig_tensor == other.subconfig_tensor);
     }
 };
 
-void check_json_against_struct(const json::Node& json, const NestedContainerConfig& cfg) {
+void check_json_against_struct(const json::node& json, const nested_container_config& cfg) {
     CHECK(json.get_object().size() == 2);
 
     const auto& object = json.at("map_of_subconfig_arrays").get_object();
@@ -147,13 +147,13 @@ void check_json_against_struct(const json::Node& json, const NestedContainerConf
     }
 }
 
-const NestedContainerConfig test_nested_container_cfg = {
+const nested_container_config test_nested_container_cfg = {
     {{"subconfig_1", {test_simple_cfg, test_simple_cfg}},
      {"subconfig_2", {test_simple_cfg, test_simple_cfg, test_simple_cfg}}},
     {{{test_simple_cfg, test_simple_cfg}}}
 };
 
-UTL_JSON_REFLECT(NestedContainerConfig, map_of_subconfig_arrays, subconfig_tensor);
+UTL_JSON_REFLECT(nested_container_config, map_of_subconfig_arrays, subconfig_tensor);
 
 TEST_CASE("Reflection / Nested containers of reflected structs") {
     const auto cfg = test_nested_container_cfg;
@@ -163,7 +163,7 @@ TEST_CASE("Reflection / Nested containers of reflected structs") {
     check_json_against_struct(reflected_json, cfg);
 
     // Test 'JSON -> struct' reflection
-    const auto reflected_cfg = reflected_json.to_struct<NestedContainerConfig>();
+    const auto reflected_cfg = reflected_json.to_struct<nested_container_config>();
     CHECK(reflected_cfg == cfg);
 }
 // if map-of-arrays of structs and 3D tensor of reflected structs are properly reflected in

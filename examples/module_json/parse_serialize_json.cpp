@@ -6,7 +6,7 @@ int main() {
     using namespace utl;
     
     // Serialize JSON
-    json::Node config;
+    json::node config;
     
     config["auxiliary_info"]       = true;
     config["date"]                 = "2024.04.02";

@@ -5,7 +5,7 @@
 int main() {
     using namespace utl;
     
-    json::Node json;
+    json::node json;
     
     json["string"]           = "lorem ipsum";
     json["array"]            = { 1, 2, 3 }; 
@@ -20,5 +20,5 @@ int main() {
         << "\n\n"
         << "--- Minimized JSON ---"
         << "\n\n"
-        << json.to_string(json::Format::MINIMIZED);
+        << json.to_string(json::format::minimized);
 }

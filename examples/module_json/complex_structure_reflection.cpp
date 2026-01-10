@@ -3,21 +3,21 @@
 #include <iostream>
 
 // Set up some complex nested structs
-struct Point {
+struct point {
     double x, y, z;
 };
 
-struct Task {
+struct task {
     std::string input_path;
     std::string output_path;
     double      time_limit;
 };
 
-struct TaskList {
-    std::map<std::string, Task> map_of_tasks;
+struct workload {
+    std::map<std::string, task> map_of_tasks;
     // this is fine
     
-    std::vector<std::vector<Point>> matrix_of_points;
+    std::vector<std::vector<point>> matrix_of_points;
     // this is also fine
     
     // std::vector<std::vector<std::vector<std::map<std::string, Point>>>> tensor_of_maps_of_points;
@@ -27,14 +27,14 @@ struct TaskList {
     // ... and so will be this
 };
 
-UTL_JSON_REFLECT(Point, x, y, z);
-UTL_JSON_REFLECT(Task, input_path, output_path, time_limit);
-UTL_JSON_REFLECT(TaskList, map_of_tasks, matrix_of_points);
+UTL_JSON_REFLECT(point, x, y, z);
+UTL_JSON_REFLECT(task, input_path, output_path, time_limit);
+UTL_JSON_REFLECT(workload, map_of_tasks, matrix_of_points);
 
 int main() {
     using namespace utl;
 
-    const TaskList task_list = {
+    const workload task_list = {
         // Map of tasks
         {
             { "task_1", { "input_1.dat", "output_1.dat", 170. } },

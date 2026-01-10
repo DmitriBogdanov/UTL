@@ -28,10 +28,8 @@ int main() {
     const auto str = json.at("string").get_string(); // '.at(key)' and '[key]' are both valid
 
     // Iterate over a JSON object node
-    for (const auto &[key, value] : json.at("object").get_object())
-        assert( key.front() == 'k' && value.get_number() > 0 );
+    for (const auto &[key, value] : json.at("object").get_object()) assert( key.front() == 'k' );
 
     // Iterate over a JSON array node
-    for (const auto &element : json.at("array").get_array())
-        assert( element.get_number() > 0 );
+    for (const auto &element : json.at("array").get_array()) assert( element.get_number() > 0 );
 }

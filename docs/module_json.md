@@ -393,7 +393,7 @@ Evaluates to `true` if `T` was reflected with `UTL_JSON_REFLECT()`, `false` othe
 using namespace utl;
 
 // Serialize JSON
-json::Node config;
+json::node config;
 
 config["auxiliary_info"]       = true;
 config["date"]                 = "2024.04.02";
@@ -436,19 +436,19 @@ Output:
 ```cpp
 using namespace utl;
 
-json::Node json;
+json::node json;
 
 // Ways to assign a JSON object
 json["object"]["key_1"] = 1;
 json["object"]["key_2"] = 2;
 json["object"]          =                                     { { "key_1", 1 }, { "key_2", 2 } };
-json["object"]          =                         json::Object{ { "key_1", 1 }, { "key_2", 2 } };
+json["object"]          =                         json::object{ { "key_1", 1 }, { "key_2", 2 } };
 json["object"]          =           std::map<std::string, int>{ { "key_1", 1 }, { "key_2", 2 } };
 json["object"]          = std::unordered_map<std::string, int>{ { "key_1", 1 }, { "key_2", 2 } };
 
 // Ways to assign a JSON array
 json["array"] =            { 1, 2, 3 };
-json["array"] = json::Array{ 1, 2, 3 };
+json["array"] = json::array{ 1, 2, 3 };
 json["array"] = std::vector{ 1, 2, 3 };
 json["array"] =   std::list{ 1, 2, 3 };
 json["array"] =    std::set{ 1, 2, 3 };
@@ -458,7 +458,7 @@ json["tensor"] = { { { 1, 2 }, { 3, 4 } }, { { 4, 5 }, { 6, 7 } } };
 
 // Ways to assign a JSON string
 json["string"] =                  "lorem ipsum" ;
-json["string"] =     json::String("lorem ipsum");
+json["string"] =     json::string("lorem ipsum");
 json["string"] =      std::string("lorem ipsum");
 json["string"] = std::string_view("lorem ipsum");
 
@@ -496,12 +496,10 @@ assert( json["string"].is_string() );
 const auto str = json.at("string").get_string(); // '.at(key)' and '[key]' are both valid
 
 // Iterate over a JSON object node
-for (const auto &[key, value] : json.at("object").get_object())
-    assert( key.front() == 'k' && value.get_number() > 0 );
+for (const auto &[key, value] : json.at("object").get_object()) assert( key.front() == 'k' );
 
 // Iterate over a JSON array node
-for (const auto &element : json.at("array").get_array())
-    assert( element.get_number() > 0 );
+for (const auto &element : json.at("array").get_array()) assert( element.get_number() > 0 );
 ```
 
 ### Formatting
@@ -510,8 +508,8 @@ for (const auto &element : json.at("array").get_array())
 
 ```cpp
 using namespace utl;
-
-json::Node json;
+    
+json::node json;
 
 json["string"]           = "lorem ipsum";
 json["array"]            = { 1, 2, 3 }; 
@@ -526,7 +524,7 @@ std::cout
     << "\n\n"
     << "--- Minimized JSON ---"
     << "\n\n"
-    << json.to_string(json::Format::MINIMIZED);
+    << json.to_string(json::format::minimized);
 ```
 
 Output:
@@ -591,41 +589,41 @@ Line 4:         "key_2":  value_2",
 [ [Run this code](https://godbolt.org/z/arv1sb46r) ] [ [Open source file](../examples/module_json/structure_reflection.cpp) ]
 
 ```cpp
-struct Config {
+struct method_config {
     bool        auxiliary_info = true;
     std::string date           = "2024.04.02";
 
-    struct Options {
+    struct numeric_options {
         int grid_size = 120;
         int phi_order = 5;
-    } options;
+    } numeric;
 
     std::vector<std::string> scaling_functions = {"identity", "log10"};
     std::size_t              time_steps        = 500;
     double                   time_period       = 1.24709e+2;
 };
 
-UTL_JSON_REFLECT(Config, auxiliary_info, date, options, scaling_functions, time_steps, time_period);
-UTL_JSON_REFLECT(Config::Options, grid_size, phi_order);
+UTL_JSON_REFLECT(method_config, auxiliary_info, date, numeric, scaling_functions, time_steps, time_period);
+UTL_JSON_REFLECT(method_config::numeric_options, grid_size, phi_order);
 
 // ...
 
 using namespace utl;
 
 // Parse JSON from struct
-auto       config = Config{};
-json::Node json   = json::from_struct(config);
+auto       config = method_config{};
+json::node json   = json::from_struct(config);
 
 // Test the result
 std::cout << "--- Struct to JSON ---\n" << json.to_string();
 
 // Serialize JSON to struct
-auto serialized_config = json.to_struct<Config>();
+auto serialized_config = json.to_struct<method_config>();
 
 // Test the result
 assert( config.auxiliary_info    == serialized_config.auxiliary_info    );
 assert( config.date              == serialized_config.date              );
-assert( config.options.grid_size == serialized_config.options.grid_size );
+assert( config.numeric.grid_size == serialized_config.numeric.grid_size );
 // ...and so on
 ```
 
@@ -657,21 +655,21 @@ Output:
 
 ```cpp
 // Set up some complex nested structs
-struct Point {
+struct point {
     double x, y, z;
 };
 
-struct Task {
+struct task {
     std::string input_path;
     std::string output_path;
     double      time_limit;
 };
 
-struct TaskList {
-    std::map<std::string, Task> map_of_tasks;
+struct workload {
+    std::map<std::string, task> map_of_tasks;
     // this is fine
     
-    std::vector<std::vector<Point>> matrix_of_points;
+    std::vector<std::vector<point>> matrix_of_points;
     // this is also fine
     
     // std::vector<std::vector<std::vector<std::map<std::string, Point>>>> tensor_of_maps_of_points;
@@ -681,15 +679,15 @@ struct TaskList {
     // ... and so will be this
 };
 
-UTL_JSON_REFLECT(Point, x, y, z);
-UTL_JSON_REFLECT(Task, input_path, output_path, time_limit);
-UTL_JSON_REFLECT(TaskList, map_of_tasks, matrix_of_points);
+UTL_JSON_REFLECT(point, x, y, z);
+UTL_JSON_REFLECT(task, input_path, output_path, time_limit);
+UTL_JSON_REFLECT(workload, map_of_tasks, matrix_of_points);
 
 // ...
 
 using namespace utl;
 
-const TaskList task_list = {
+const workload task_list = {
     // Map of tasks
     {
         { "task_1", { "input_1.dat", "output_1.dat", 170. } },

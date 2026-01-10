@@ -41,14 +41,14 @@ void generate_test_data() {
         }
     }
 
-    json::Node(strings).to_file("benchmarks/data/strings.json");
+    json::node(strings).to_file("benchmarks/data/strings.json");
 
     // Generate numeric JSON data
     std::vector<double> numbers(180'000);
 
     for (auto& num : numbers) num = random::choose({random::uniform(-10., 10.), random::uniform(-1e108, 1e108)});
 
-    json::Node(numbers).to_file("benchmarks/data/numbers.json");
+    json::node(numbers).to_file("benchmarks/data/numbers.json");
 }
 
 // =================
@@ -69,7 +69,7 @@ void benchmark_parse_serialize_on_data(const std::string& filepath) {
     const std::string string_buffer = (std::ostringstream() << std::ifstream(filepath).rdbuf()).str();
 
     // utl::json
-    json::Node     json_utl = json::from_string(string_buffer);
+    json::node     json_utl = json::from_string(string_buffer);
     // nlohmann
     nlohmann::json json_nlohmann;
     std::ifstream(filepath) >> json_nlohmann;
@@ -81,8 +81,8 @@ void benchmark_parse_serialize_on_data(const std::string& filepath) {
     json_rapidjson.Parse(string_buffer.data());
 
     // Create minimized & prettified JSON file that will be used to benchmark parsing
-    json_utl.to_file(parsing_target_minimized, json::Format::MINIMIZED);
-    json_utl.to_file(parsing_target_prettified, json::Format::PRETTY);
+    json_utl.to_file(parsing_target_minimized, json::format::minimized);
+    json_utl.to_file(parsing_target_prettified, json::format::pretty);
 
     // Set global benchmark options
     bench.minEpochIterations(4).timeUnit(1ms, "ms");
@@ -150,7 +150,7 @@ void benchmark_parse_serialize_on_data(const std::string& filepath) {
     // Benchmark serializing (minimized)
     bench.title("Serializing minimized JSON").relative(true);
 
-    benchmark("utl::json", [&]() { json_utl.to_file(serializing_target_minimized, json::Format::MINIMIZED); });
+    benchmark("utl::json", [&]() { json_utl.to_file(serializing_target_minimized, json::format::minimized); });
 
     benchmark("nlohmann", [&]() { std::ofstream(serializing_target_minimized) << json_nlohmann.dump(); });
 
@@ -167,7 +167,7 @@ void benchmark_parse_serialize_on_data(const std::string& filepath) {
     // Benchmark serializing (prettified)
     bench.title("Serializing prettified JSON").relative(true);
 
-    benchmark("utl::json", [&]() { json_utl.to_file(serializing_target_prettified, json::Format::PRETTY); });
+    benchmark("utl::json", [&]() { json_utl.to_file(serializing_target_prettified, json::format::pretty); });
 
     benchmark("nlohmann", [&]() { std::ofstream(serializing_target_prettified) << json_nlohmann.dump(4); });
 
