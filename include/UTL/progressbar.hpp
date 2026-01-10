@@ -45,7 +45,7 @@ namespace utl::progressbar::impl {
 class percentage {
 public:
     // - Public parameters -
-    struct Style {
+    struct {
         char        fill            = '#';
         char        empty           = '.';
         char        left            = '[';
@@ -196,7 +196,7 @@ class ruler {
 
 public:
     // - Public parameters -
-    struct Style {
+    struct {
         char fill            = '#';
         char ruler_line      = '-';
         char ruler_delimiter = '|';

@@ -39,7 +39,7 @@ Below is basic showcase:
 struct percentage {
 
     // - Style configuration -
-    struct Style {
+    struct {
         char        fill            = '#';
         char        empty           = '.';
         char        left            = '[';
@@ -68,7 +68,7 @@ struct percentage {
 struct ruler {
     
     // - Style configuration -
-    struct Style {
+    struct {
         char fill            = '#';
         char ruler_line      = '-';
         char ruler_delimiter = '|';
@@ -97,7 +97,7 @@ struct ruler {
 
 > ```cpp
 > // - Style configuration -
-> struct Style {
+> struct {
 >     char        fill            = '#';
 >     char        empty           = '.';
 >     char        left            = '[';
@@ -153,7 +153,7 @@ Redraws progress bar to update its style configuration immediately.
 
 > ```cpp
 > // - Style configuration -
-> struct Style {
+> struct {
 >     char fill            = '#';
 >     char ruler_line      = '-';
 >     char ruler_delimiter = '|';
