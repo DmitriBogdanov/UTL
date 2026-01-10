@@ -872,7 +872,7 @@ constexpr std::array<bool, number_of_char_values> lookup_numeric_chars = [] {
 //
 // For usage convenience we expose the same API as regular 'from_chars()'.
 //
-inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, Number& value) {
+inline std::from_chars_result available_from_chars_impl(const char* first, const char* last, number& value) {
     const char* cursor = first;
     while (cursor < last && lookup_numeric_chars[u8(*cursor)]) ++cursor; // skip to the first non-numeric char
 

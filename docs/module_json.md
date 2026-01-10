@@ -51,12 +51,12 @@
 
 ```cpp
 // JSON Node
-enum class Format { PRETTY, MINIMIZED };
+enum class format { pretty, minimized };
 
-class Node {
+class node {
     // - Member Types -
-    using object_type = std::map<std::string, Node, std::less<>>;
-    using array_type  = std::vector<Node>;
+    using object_type = std::map<std::string, node, std::less<>>;
+    using array_type  = std::vector<node>;
     using string_type = std::string;
     using number_type = double;
     using bool_type   = bool;
@@ -93,56 +93,56 @@ class Node {
     template <class T> const T* get_if() const;
     
     // - Object methods -
-    Node      & operator[](std::string_view key);
-    const Node& operator[](std::string_view key) const;
-    Node      &         at(std::string_view key);
-    const Node&         at(std::string_view key) const;
+    node      & operator[](std::string_view key);
+    const node& operator[](std::string_view key) const;
+    node      &         at(std::string_view key);
+    const node&         at(std::string_view key) const;
     
     bool              contains(std::string_view key) const;
     template<class T> value_or(std::string_view key, const T &else_value);
     
     // - Array methods -
-    Node      & operator[](std::size_t pos);
-    const Node& operator[](std::size_t pos) const;
-    Node      &         at(std::size_t pos);
-    const Node&         at(std::size_t pos) const;
+    node      & operator[](std::size_t pos);
+    const node& operator[](std::size_t pos) const;
+    node      &         at(std::size_t pos);
+    const node&         at(std::size_t pos) const;
     
-    void push_back(const Node&  node);
-    void push_back(      Node&& node);
+    void push_back(const node&  json);
+    void push_back(      node&& json);
     
     // - Assignment -
-    Node& operator=(const Node&) = default;
-    Node& operator=(Node&&)      = default;
+    node& operator=(const node&) = default;
+    node& operator=(node&&)      = default;
     
-    template <class T> Node& operator=(const T& value); // type-trait based conversion
+    template <class T> node& operator=(const T& value); // type-trait based conversion
     
     // - Constructors -
-    Node()            = default;
-    Node(const Node&) = default;
-    Node(Node&&)      = default;
+    node()            = default;
+    node(const node&) = default;
+    node(node&&)      = default;
     
-    template <class T> Node(const T& value); // type-trait based conversion
+    template <class T> node(const T& value); // type-trait based conversion
     
     // Serializing
-    std::string          to_string(                           Format format = Format::PRETTY) const;
-    void                 to_file(const std::string& filepath, Format format = Format::PRETTY) const;
-    template <class T> T to_struct()                                                          const;
+    std::string          to_string(                           format fmt = format::pretty) const;
+    void                 to_file(const std::string& filepath, format fmt = format::pretty) const;
+    template <class T> T to_struct()                                                       const;
 };
 
 // Typedefs
-using Object = Node::object_type;
-using Array  = Node::array_type;
-using String = Node::string_type;
-using Number = Node::number_type;
-using Bool   = Node::bool_type;
-using Null   = Node::null_type;
+using object  = node::object_type;
+using array   = node::array_type;
+using string  = node::string_type;
+using number  = node::number_type;
+using boolean = node::bool_type;
+using null    = node::null_type;
 
 // Parsing
-Node                    from_string(const std::string& chars   , unsigned int recursion_limit = 100);
-Node                    from_file  (const std::string& filepath, unsigned int recursion_limit = 100);
-template <class T> Node from_struct(const           T& value   );
+node                    from_string(const std::string& chars   , unsigned int recursion_limit = 100);
+node                    from_file  (const std::string& filepath, unsigned int recursion_limit = 100);
+template <class T> node from_struct(const           T& value   );
 
-Node literals::operator""_utl_json(const char* c_str, std::size_t c_str_size);
+node literals::operator""_utl_json(const char* c_str, std::size_t c_str_size);
 
 // Reflection
 #define UTL_JSON_REFLECT(struct_name, ...)
@@ -152,13 +152,13 @@ template <class T> constexpr bool is_reflected_struct;
 
 ## Methods
 
-### `Node` Class
+### Node class
 
 #### Member types
 
 > ```cpp
-> using object_type = std::map<std::string, Node, std::less<>>;
-> using array_type  = std::vector<Node>;
+> using object_type = std::map<std::string, node, std::less<>>;
+> using array_type  = std::vector<node>;
 > using string_type = std::string;
 > using number_type = double;
 > using bool_type   = bool;
@@ -230,8 +230,8 @@ Returns a `T*` pointer to the value stored at the JSON node, if stored value has
 > Object methods can only be called for nodes that contain an object, incorrect node type will cause methods below to throw an exception.
 
 > ```cpp
-> Node      & operator[](std::string_view key);
-> const Node& operator[](std::string_view key) const;
+> node      & operator[](std::string_view key);
+> const node& operator[](std::string_view key) const;
 > ```
 
 Returns a reference to the node corresponding to a given `key` in the JSON object, performs an insertion if such key does not already exist.
@@ -239,8 +239,8 @@ Returns a reference to the node corresponding to a given `key` in the JSON objec
 **Note:** If current node is `null_type` overload **(1)** will convert it to `object_type` and perform an insertion. This allows for a more natural syntax.
 
 > ```cpp
-> Node      & at(std::string_view key);
-> const Node& at(std::string_view key) const;
+> node      & at(std::string_view key);
+> const node& at(std::string_view key) const;
 > ```
 
 Returns a reference to the node corresponding to a given `key` in the JSON object, throws an exception if such key does not exist. 
@@ -265,22 +265,22 @@ Returns value stored at given `key` in the JSON object, if no such key can be fo
 > Array methods can only be called for nodes that contain an array, incorrect node type will cause methods below to throw an exception.
 
 > ```cpp
-> Node      & operator[](std::size_t pos);
-> const Node& operator[](std::size_t pos) const;
+> node      & operator[](std::size_t pos);
+> const node& operator[](std::size_t pos) const;
 > ```
 
 Returns a reference to the node at given `pos`. 
 
 > ```cpp
-> Node      &         at(std::size_t pos);
-> const Node&         at(std::size_t pos) const;
+> node      &         at(std::size_t pos);
+> const node&         at(std::size_t pos) const;
 > ```
 
 Returns a reference to the node at given `pos`, throws an exception if index is out of bounds.
 
 > ```cpp
-> void push_back(const Node&  node);
-> void push_back(      Node&& node);
+> void push_back(const node&  json);
+> void push_back(      node&& json);
 > ```
 
 Inserts a new node at the end of JSON array.
@@ -290,8 +290,8 @@ Inserts a new node at the end of JSON array.
 #### Assignment & Constructors
 
 > ```cpp
-> template <class T> Node& operator=(const T& value);
-> template <class T> Node(const T& value);
+> template <class T> node& operator=(const T& value);
+> template <class T> node(const T& value);
 > ```
 
 Converting assignment & constructors. Tries to convert `T` to one of the possible JSON types based on `T` traits, conversions and provided methods. If no such conversion is possible, SFINAE rejects the overload.
@@ -299,13 +299,13 @@ Converting assignment & constructors. Tries to convert `T` to one of the possibl
 #### Serializing
 
 > ```cpp
-> std::string to_string(Format format = Format::PRETTY) const;
+> std::string to_string(format fmt = format::pretty) const;
 > ```
 
 Serializes JSON node to a string using a given `format`.
 
 > ```cpp
-> void to_file(const std::string& filepath, Format format = Format::PRETTY) const;
+> void to_file(const std::string& filepath, format fmt = format::pretty) const;
 > ```
 
 Serializes JSON node to the file at `filepath` using a given `format`.
@@ -323,7 +323,7 @@ Type `T` must be reflected with `UTL_JSON_REFLECT()` macro, otherwise compilatio
 ### Parsing
 
 > ```cpp
-> Node from_string(const std::string& buffer, unsigned int recursion_limit = 100);
+> node from_string(const std::string& buffer, unsigned int recursion_limit = 100);
 > ```
 
 Parses JSON from a given string `buffer`.
@@ -331,13 +331,13 @@ Parses JSON from a given string `buffer`.
 **Note:** JSON parsers need recursion depth limit to prevent malicious inputs (such as 100'000+ nested object opening braces) from causing stack overflows, instead we get a controllable `std::runtime_error`.
 
 > ```cpp
-> Node from_file(const std::string& filepath, unsigned int recursion_limit = 100);
+> node from_file(const std::string& filepath, unsigned int recursion_limit = 100);
 > ```
 
 Parses JSON from the file at `filepath`.
 
 > ```cpp
-> template <class T> Node from_struct(const T& value);
+> template <class T> node from_struct(const T& value);
 > ```
 
 Parses JSON from structure / class object `value`.
@@ -345,20 +345,20 @@ Parses JSON from structure / class object `value`.
 Type `T` must be reflected with `UTL_JSON_REFLECT()` macro, otherwise compilation fails with a proper assertion.
 
 > ```cpp
-> Node literals::operator""_utl_json(const char* c_str, std::size_t c_str_size);
+> node literals::operator""_utl_json(const char* c_str, std::size_t c_str_size);
 > ```
 
-`json::Node` custom literals.
+`json::node` custom literals.
 
 ### Typedefs
 
 > ```cpp
-> using Object = Node::object_type;
-> using Array  = Node::array_type;
-> using String = Node::string_type;
-> using Number = Node::number_type;
-> using Bool   = Node::bool_type;
-> using Null   = Node::null_type;
+> using object  = node::object_type;
+> using array   = node::array_type;
+> using string  = node::string_type;
+> using number  = node::number_type;
+> using boolean = node::bool_type;
+> using null    = node::null_type;
 > ```
 
 Shorter typedefs for all existing JSON value types.
@@ -371,7 +371,7 @@ Shorter typedefs for all existing JSON value types.
 
 Reflects structure / class `struct_name` with member variables `...`.
 
-Declaring this macro defines methods `Node::to_struct<struct_name>()` and `from_struct(const struct_name&)` for parsing and serialization.
+Declaring this macro defines methods `node::to_struct<struct_name>()` and `from_struct(const struct_name&)` for parsing and serialization.
 
 **Note 1:** Reflection supports nested classes, each class should be reflected with a macro and `to_struct()` / `from_struct()` will call each other recursively whenever appropriate. Containers of reflected classes are also supported with any level of nesting. See [examples](#structure-reflection).
 
