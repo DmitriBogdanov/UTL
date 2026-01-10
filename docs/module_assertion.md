@@ -49,7 +49,7 @@ ASSERT(rows == cols, "Linear system requires a square matrix.");
 #define UTL_ASSERTION_ENABLE_FULL_PATHS
 
 // Handler customization
-struct FailureInfo {
+struct failure_info {
     std::string_view file;
     std::size_t      line;
     std::string_view func;
@@ -61,7 +61,7 @@ struct FailureInfo {
     std::string to_string(bool color = false) const;
 };
 
-void set_handler(std::function<void(const FailureInfo&)> handler);
+void set_handler(std::function<void(const failure_info&)> handler);
 ```
 
 ## Methods
@@ -115,7 +115,7 @@ When defined before including the header, this macro enables full filepath displ
 ### Handler customization
 
 > ```cpp
-> struct FailureInfo {
+> struct failure_info {
 >     std::string_view file;
 >     std::size_t      line;
 >     std::string_view func;
@@ -141,7 +141,7 @@ It can be stringified with `to_string()` method, which uses ANSI color codes to 
 **Note:** If `context` was no provided, it defaults to `<no context provided>`.
 
 > ```cpp
-> void set_handler(std::function<void(const FailureInfo&)> handler);
+> void set_handler(std::function<void(const failure_info&)> handler);
 > ```
 
 **Note 1:** Assertion failure `handler` is invoked in a **thread-safe** manner.
@@ -210,7 +210,7 @@ ASSERT(2 + 4 == 17);
 [ [Run this code](https://godbolt.org/z/bhdfj7a91) ] [ [Open source file](../examples/module_assertion/logging_on_failure.cpp) ]
 
 ```cpp
-utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
+utl::assertion::set_handler([](const utl::assertion::failure_info& info) {
     // Forward assertion message to some logging facility with colors disabled
     std::ofstream("failure.txt") << info.to_string();
     

@@ -12,7 +12,7 @@ int main() {
 
     std::signal(SIGABRT, [](int){ std::quick_exit(EXIT_SUCCESS); }); // treat assert trigger as success
     
-    utl::assertion::set_handler([](const utl::assertion::FailureInfo& info) {
+    utl::assertion::set_handler([](const utl::assertion::failure_info& info) {
         // Forward assertion message to some logging facility with colors disabled
         std::ofstream("failure.txt") << info.to_string();
         

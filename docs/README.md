@@ -54,7 +54,6 @@ Quality goals include:
 | [**utl::profiler**](module_profiler.md)               | **C++17** | Call graph & thread profiling                                |
 | [**utl::progressbar**](module_progressbar.md)         | **C++17** | Progress bars for CLI apps                                   |
 | [**utl::random**](module_random.md)                   | **C++17** | PRNGs & random number generation                             |
-| [**utl::reflect_enum**](module_reflect_enum.md)       | **C++20** | Enum reflection                                              |
 | [**utl::reflect_struct**](module_reflect_struct.md)   | **C++20** | Struct reflection                                            |
 | [**utl::shell**](module_shell.md)                     | **C++17** | Shell commands and temporary files                           |
 | [**utl::sleep**](module_sleep.md)                     | **C++17** | Precise sleep implementations                                |

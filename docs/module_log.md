@@ -54,6 +54,9 @@ log::println("Finished in ", std::chrono::steady_clock::now() - start);
 
 <img src="images/log_showcase_println.png">
 
+> [!Warning]
+> This module is currently **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation coverage.
+
 ## Definitions
 
 ```cpp

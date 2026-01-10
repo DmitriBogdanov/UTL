@@ -13,9 +13,9 @@
 #ifndef utl_assertion_headerguard
 #define utl_assertion_headerguard
 
-#define UTL_ASSERTION_VERSION_MAJOR 1
+#define UTL_ASSERTION_VERSION_MAJOR 2
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 4
+#define UTL_ASSERTION_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -111,13 +111,13 @@ struct is_printable<T, std::void_t<decltype(std::declval<std::ostringstream>() <
 // --- Decomposed operations ---
 // =============================
 
-enum class Operation : std::size_t {
-    EQ  = 0, // ==
-    NEQ = 1, // !=
-    LEQ = 2, // <=
-    GEQ = 3, // >=
-    L   = 4, // <
-    G   = 5  // >
+enum class operation : std::size_t {
+    eq  = 0, // ==
+    neq = 1, // !=
+    leq = 2, // <=
+    geq = 3, // >=
+    l   = 4, // <
+    g   = 5  // >
 };
 
 constexpr std::array<const char*, 6> op_names = {" == ", " != ", " <= ", " >= ", " < ", " > "};
@@ -127,7 +127,7 @@ constexpr std::array<const char*, 6> op_names = {" == ", " != ", " <= ", " >= ",
 // ======================
 
 // Lightweight struct that captures the assertion context internally
-struct Info {
+struct callsite_info {
     const char* file;
     int         line;
     const char* func;
@@ -137,13 +137,13 @@ struct Info {
 };
 
 // Once we hit a slow failure path we can convert internal info to a nicer format for public API
-class FailureInfo {
+class failure_info {
     std::string evaluated_string;
     // since evaluated string is constructed at runtime we have to store it here,
     // while exposing string_view in a public API for the sake of uniformity
 
 public:
-    FailureInfo(const Info& info, std::string evaluated_string)
+    failure_info(const callsite_info& info, std::string evaluated_string)
         : evaluated_string(std::move(evaluated_string)), file(info.file), line(static_cast<std::size_t>(info.line)),
           func(info.func), expression(info.expression), evaluated(this->evaluated_string), context(info.context) {}
 
@@ -200,38 +200,38 @@ public:
 // --- Failure handler ---
 // =======================
 
-inline void standard_handler(const FailureInfo& info) {
+inline void standard_handler(const failure_info& info) {
     std::cerr << info.to_string(true) << std::endl;
     std::abort();
 }
 
-class GlobalHandler {
-    std::function<void(const FailureInfo&)> handler = standard_handler;
-    std::mutex                              mutex;
+class failure_handler {
+    std::function<void(const failure_info&)> handler = standard_handler;
+    std::mutex                               mutex;
     // regular 'assert()' doesn't need thread safety since it always aborts, in a general case
     // with custom handlers however thread safety on failure should be provided
 
 public:
-    static GlobalHandler& instance() {
-        static GlobalHandler handler;
+    static failure_handler& instance() {
+        static failure_handler handler;
         return handler;
     }
 
-    void set(std::function<void(const FailureInfo&)> new_handler) {
+    void set(std::function<void(const failure_info&)> new_handler) {
         const std::scoped_lock lock(this->mutex);
 
         this->handler = std::move(new_handler);
     }
 
-    void invoke(const FailureInfo& info) {
+    void invoke(const failure_info& info) {
         const std::scoped_lock lock(this->mutex);
 
         this->handler(info);
     }
 };
 
-inline void set_handler(std::function<void(const FailureInfo&)> new_handler) {
-    GlobalHandler::instance().set(std::move(new_handler));
+inline void set_handler(std::function<void(const failure_info&)> new_handler) {
+    failure_handler::instance().set(std::move(new_handler));
 }
 
 // =====================
@@ -239,15 +239,15 @@ inline void set_handler(std::function<void(const FailureInfo&)> new_handler) {
 // =====================
 
 template <class T>
-struct UnaryCapture {
+struct unary_capture {
     static_assert(is_printable<T>::value,
                   "Decomposed expression values should be printable with 'std::ostream::operator<<()'.");
 
-    const Info& info;
+    const callsite_info& info;
 
     T value;
 
-    FailureInfo get_failure_info() const {
+    failure_info get_failure_info() const {
         if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
             return {this->info, "false"}; // makes boolean case look nicer
         } else if constexpr (std::is_pointer_v<std::decay_t<T>>) {
@@ -260,31 +260,31 @@ struct UnaryCapture {
 };
 
 template <class T>
-UnaryCapture<T> operator<(const Info& info, T&& value) noexcept(noexcept(T(std::forward<T>(value)))) {
+unary_capture<T> operator<(const callsite_info& info, T&& value) noexcept(noexcept(T(std::forward<T>(value)))) {
     return {info, std::forward<T>(value)};
 } // Note: Successful assertions should be 'noexcept' if possible, this also applies to the binary case
 
 template <class T>
-void handle_capture(UnaryCapture<T>&& capture) {
+void handle_capture(unary_capture<T>&& capture) {
     if (static_cast<bool>(capture.value)) return; // some compilers might complain without explicit casting
-    GlobalHandler::instance().invoke(capture.get_failure_info());
+    failure_handler::instance().invoke(capture.get_failure_info());
 }
 
 // ======================
 // --- Binary capture ---
 // ======================
 
-template <class T, class U, Operation Op>
-struct BinaryCapture {
+template <class T, class U, operation Op>
+struct binary_capture {
     static_assert(is_printable<T>::value && is_printable<U>::value,
                   "Decomposed expression values should be printable with 'std::ostream::operator<<()'.");
 
-    const Info& info;
+    const callsite_info& info;
 
     T lhs;
     U rhs;
 
-    FailureInfo get_failure_info() const {
+    failure_info get_failure_info() const {
         constexpr std::size_t op_index = static_cast<std::size_t>(Op);
 
         std::string evaluated = stringify(this->lhs) + op_names[op_index] + stringify(this->rhs);
@@ -295,26 +295,26 @@ struct BinaryCapture {
 // Macro to avoid 6x code repetition
 #define utl_assertion_define_binary_capture_op(op_enum_, op_)                                                          \
     template <class T, class U>                                                                                        \
-    BinaryCapture<T, U, op_enum_> operator op_(UnaryCapture<T>&& lhs, U&& rhs) noexcept(                               \
+    binary_capture<T, U, op_enum_> operator op_(unary_capture<T>&& lhs, U&& rhs) noexcept(                             \
         std::is_nothrow_move_constructible_v<T> && noexcept(U(std::forward<U>(rhs)))) {                                \
                                                                                                                        \
         return {lhs.info, std::move(lhs).value, std::forward<U>(rhs)};                                                 \
     }                                                                                                                  \
                                                                                                                        \
     template <class T, class U>                                                                                        \
-    void handle_capture(BinaryCapture<T, U, op_enum_>&& capture) {                                                     \
+    void handle_capture(binary_capture<T, U, op_enum_>&& capture) {                                                    \
         if (capture.lhs op_ capture.rhs) return;                                                                       \
-        GlobalHandler::instance().invoke(capture.get_failure_info());                                                  \
+        failure_handler::instance().invoke(capture.get_failure_info());                                                \
     }                                                                                                                  \
                                                                                                                        \
     static_assert(true)
 
-utl_assertion_define_binary_capture_op(Operation::EQ, ==);
-utl_assertion_define_binary_capture_op(Operation::NEQ, !=);
-utl_assertion_define_binary_capture_op(Operation::LEQ, <=);
-utl_assertion_define_binary_capture_op(Operation::GEQ, >=);
-utl_assertion_define_binary_capture_op(Operation::L, <);
-utl_assertion_define_binary_capture_op(Operation::G, >);
+utl_assertion_define_binary_capture_op(operation::eq, ==);
+utl_assertion_define_binary_capture_op(operation::neq, !=);
+utl_assertion_define_binary_capture_op(operation::leq, <=);
+utl_assertion_define_binary_capture_op(operation::geq, >=);
+utl_assertion_define_binary_capture_op(operation::l, <);
+utl_assertion_define_binary_capture_op(operation::g, >);
 
 #undef utl_assertion_define_binary_capture_op
 
@@ -355,7 +355,7 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 
 #define utl_assertion_impl_2(expr_, context_)                                                                          \
     utl::assertion::impl::handle_capture(                                                                              \
-        utl::assertion::impl::Info{__FILE__, __LINE__, utl_check_pretty_function, #expr_, context_} < expr_)
+        utl::assertion::impl::callsite_info{__FILE__, __LINE__, utl_check_pretty_function, #expr_, context_} < expr_)
 
 #define utl_assertion_impl_1(expr_) utl_assertion_impl_2(expr_, "<no context provided>")
 
@@ -408,7 +408,7 @@ utl_assertion_define_binary_capture_op(Operation::G, >);
 
 namespace utl::assertion {
 
-using impl::FailureInfo;
+using impl::failure_info;
 
 using impl::set_handler;
 
@@ -1553,9 +1553,9 @@ namespace literals = impl::literals;
 #ifndef utl_json_headerguard
 #define utl_json_headerguard
 
-#define UTL_JSON_VERSION_MAJOR 1
-#define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 5
+#define UTL_JSON_VERSION_MAJOR 2
+#define UTL_JSON_VERSION_MINOR 0
+#define UTL_JSON_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
@@ -10601,7 +10601,7 @@ struct Profiler {
 
 #define UTL_PROGRESSBAR_VERSION_MAJOR 3
 #define UTL_PROGRESSBAR_VERSION_MINOR 0
-#define UTL_PROGRESSBAR_VERSION_PATCH 0
+#define UTL_PROGRESSBAR_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 

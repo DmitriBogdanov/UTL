@@ -14,7 +14,7 @@
 
 TEST_CASE("Assertions") {
     // Make assertions throw instead of aborting so we can test them
-    assertion::set_handler([](const assertion::FailureInfo& info) { throw std::runtime_error(info.to_string()); });
+    assertion::set_handler([](const assertion::failure_info& info) { throw std::runtime_error(info.to_string()); });
 
     // Test all the decomposed binary operators
     CHECK_NOTHROW(ASSERT(2 + 1 < 4));

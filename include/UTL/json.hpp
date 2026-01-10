@@ -13,9 +13,9 @@
 #ifndef utl_json_headerguard
 #define utl_json_headerguard
 
-#define UTL_JSON_VERSION_MAJOR 1
-#define UTL_JSON_VERSION_MINOR 1
-#define UTL_JSON_VERSION_PATCH 5
+#define UTL_JSON_VERSION_MAJOR 2
+#define UTL_JSON_VERSION_MINOR 0
+#define UTL_JSON_VERSION_PATCH 2
 
 // _______________________ INCLUDES _______________________
 
