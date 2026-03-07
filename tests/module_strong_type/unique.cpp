@@ -34,7 +34,7 @@ void destroy_handle(abstract_handle& handle) {
 }
 
 TEST_CASE("Unique / Abstract handle") {
-    using handle = strong_type::unique<abstract_handle, class HandleTag, strong_type::bind<&destroy_handle>>;
+    using handle = strong_type::unique<abstract_handle, class handle_tag, strong_type::bind<&destroy_handle>>;
 
     handle_state state;
 

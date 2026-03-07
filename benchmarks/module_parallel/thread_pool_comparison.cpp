@@ -41,7 +41,7 @@
 
 constexpr std::size_t task_count = 1000;
 
-struct SmallTask {
+struct small_task {
     template <class Pool>
     void execute(std::atomic<std::size_t>& tasks_done, Pool&) {
         constexpr unsigned int duration_min = 0;
@@ -53,7 +53,7 @@ struct SmallTask {
     }
 };
 
-struct LargeTask {
+struct large_task {
     template <class Pool>
     void execute(std::atomic<std::size_t>& tasks_done, Pool&) {
         constexpr unsigned int duration_min = 1000;
@@ -65,7 +65,7 @@ struct LargeTask {
     }
 };
 
-struct ShallowRecursiveTask {
+struct shallow_recursive_task {
     template <class Pool>
     void execute(std::atomic<std::size_t>& tasks_done, Pool& pool) {
         constexpr unsigned int duration_min     = 0;
@@ -75,7 +75,7 @@ struct ShallowRecursiveTask {
         sleep::spinlock(std::chrono::microseconds(random::uniform_uint(duration_min, duration_max)));
 
         if (random::uniform_double() < recursion_chance) {
-            ShallowRecursiveTask subtask;
+            shallow_recursive_task subtask;
 
             auto future = pool.awaitable_task([&] { subtask.execute(tasks_done, pool); });
             future.get();
@@ -85,7 +85,7 @@ struct ShallowRecursiveTask {
     }
 };
 
-struct DeepRecursiveTask {
+struct deep_recursive_task {
     template <class Pool>
     void execute(std::atomic<std::size_t>& tasks_done, Pool& pool) {
         constexpr unsigned int duration_min     = 0;
@@ -95,7 +95,7 @@ struct DeepRecursiveTask {
         sleep::spinlock(std::chrono::microseconds(random::uniform_uint(duration_min, duration_max)));
 
         if (random::uniform_double() < recursion_chance) {
-            ShallowRecursiveTask subtask;
+            shallow_recursive_task subtask;
 
             auto future_1 = pool.awaitable_task([&] { subtask.execute(tasks_done, pool); });
             auto future_2 = pool.awaitable_task([&] { subtask.execute(tasks_done, pool); });
@@ -113,13 +113,13 @@ struct DeepRecursiveTask {
 
 // Here we simply wrap different tasking mechanisms into a uniform API to make benchmarking easier
 
-struct SerialExecutor {
+struct serial_executor {
     template <class = void>
     struct future_type {
         void get() {}
     }; // dummy future to make serial code fit the template of async code without additional overhead
 
-    SerialExecutor(std::size_t) {} // dummy constructor for the same purpose
+    serial_executor(std::size_t) {} // dummy constructor for the same purpose
 
     template <class F, class... Args>
     future_type<> awaitable_task(F&& f, Args&&... args) {
@@ -128,11 +128,11 @@ struct SerialExecutor {
     }
 };
 
-struct StdAsyncExecutor {
+struct std_async_executor {
     template <class = void>
     using future_type = std::future<void>;
 
-    StdAsyncExecutor(std::size_t) {}
+    std_async_executor(std::size_t) {}
 
     template <class F, class... Args>
     future_type<> awaitable_task(F&& f, Args&&... args) {
@@ -140,13 +140,13 @@ struct StdAsyncExecutor {
     }
 };
 
-struct BSThreadPoolExecutor {
+struct bs_thread_pool_executor {
     template <class = void>
     using future_type = std::future<void>;
 
     BS::thread_pool<> pool;
 
-    BSThreadPoolExecutor(std::size_t count) : pool(count) {}
+    bs_thread_pool_executor(std::size_t count) : pool(count) {}
 
     template <class F, class... Args>
     future_type<> awaitable_task(F&& f, Args&&... args) {
@@ -155,13 +155,13 @@ struct BSThreadPoolExecutor {
     }
 };
 
-struct ProgschjThreadPoolExecutor {
+struct progschj_thread_pool_executor {
     template <class = void>
     using future_type = std::future<void>;
 
     ThreadPool pool;
 
-    ProgschjThreadPoolExecutor(std::size_t count) : pool(count) {}
+    progschj_thread_pool_executor(std::size_t count) : pool(count) {}
 
     template <class F, class... Args>
     future_type<> awaitable_task(F&& f, Args&&... args) {
@@ -206,29 +206,29 @@ int main() {
 
     // clang-format off
     bench.title("Small non-recursive tasks");
-    benchmark_thread_pool<SerialExecutor            , SmallTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor          , SmallTask>("std::async()"        );
-    benchmark_thread_pool<parallel::thread_pool     , SmallTask>("parallel::ThreadPool");
-    benchmark_thread_pool<BSThreadPoolExecutor      , SmallTask>("BS::thread_pool"     );
-    benchmark_thread_pool<ProgschjThreadPoolExecutor, SmallTask>("progschj/ThreadPool" );
+    benchmark_thread_pool<serial_executor              , small_task>("Serial"              );
+    benchmark_thread_pool<std_async_executor           , small_task>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool        , small_task>("parallel::ThreadPool");
+    benchmark_thread_pool<bs_thread_pool_executor      , small_task>("BS::thread_pool"     );
+    benchmark_thread_pool<progschj_thread_pool_executor, small_task>("progschj/ThreadPool" );
     
     bench.title("Large non-recursive tasks");
-    benchmark_thread_pool<SerialExecutor            , LargeTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor          , LargeTask>("std::async()"        );
-    benchmark_thread_pool<parallel::thread_pool     , LargeTask>("parallel::ThreadPool");
-    benchmark_thread_pool<BSThreadPoolExecutor      , LargeTask>("BS::thread_pool"     );
-    benchmark_thread_pool<ProgschjThreadPoolExecutor, LargeTask>("progschj/ThreadPool" );
+    benchmark_thread_pool<serial_executor              , large_task>("Serial"              );
+    benchmark_thread_pool<std_async_executor           , large_task>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool        , large_task>("parallel::ThreadPool");
+    benchmark_thread_pool<bs_thread_pool_executor      , large_task>("BS::thread_pool"     );
+    benchmark_thread_pool<progschj_thread_pool_executor, large_task>("progschj/ThreadPool" );
     
     bench.title("Shallow recursive tasks");
-    benchmark_thread_pool<SerialExecutor       , ShallowRecursiveTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor     , ShallowRecursiveTask>("std::async()"        );
-    benchmark_thread_pool<parallel::thread_pool, ShallowRecursiveTask>("parallel::ThreadPool");
+    benchmark_thread_pool<serial_executor      , shallow_recursive_task>("Serial"              );
+    benchmark_thread_pool<std_async_executor   , shallow_recursive_task>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool, shallow_recursive_task>("parallel::ThreadPool");
     // others deadlock
     
     bench.title("Deep recursive tasks");
-    benchmark_thread_pool<SerialExecutor       , DeepRecursiveTask>("Serial"              );
-    benchmark_thread_pool<StdAsyncExecutor     , DeepRecursiveTask>("std::async()"        );
-    benchmark_thread_pool<parallel::thread_pool, DeepRecursiveTask>("parallel::ThreadPool");
+    benchmark_thread_pool<serial_executor      , deep_recursive_task>("Serial"              );
+    benchmark_thread_pool<std_async_executor   , deep_recursive_task>("std::async()"        );
+    benchmark_thread_pool<parallel::thread_pool, deep_recursive_task>("parallel::ThreadPool");
     // others deadlock
     // clang-format on
 }

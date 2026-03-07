@@ -15,7 +15,7 @@
 
 #define UTL_ASSERTION_VERSION_MAJOR 2
 #define UTL_ASSERTION_VERSION_MINOR 0
-#define UTL_ASSERTION_VERSION_PATCH 0
+#define UTL_ASSERTION_VERSION_PATCH 1
 
 // _______________________ INCLUDES _______________________
 
@@ -47,18 +47,18 @@
 //    | {lhs}    {rhs}
 //
 // Now let's declare:
-//    - 'Info'          object which carries assertion info (callsite, message, etc.)
-//    - 'UnaryCapture'  object which carries 'info' + 'lhs'
-//    - 'BinaryCapture' object which carries 'info' + 'lhs' + 'rhs'
+//    - 'callsite_info'  object which carries assertion info (callsite, message, etc.)
+//    - 'unary_capture'  object which carries 'info' + 'lhs'
+//    - 'binary_capture' object which carries 'info' + 'lhs' + 'rhs'
 // and write:
 //    | info < x + y <= z * 4
 // which is a non-intrusive expression which will look like
 //    | info < {expr}
 // when evaluated in a general macro.
 //
-// We can declare custom 'operator<()' that wraps 'info' + 'lhs' into an 'UnaryCapture', and custom set of comparisons
-// turning 'UnaryCapture' + 'rhs' into a 'BinaryCapture'. Due to the operator precedence 'lhs' / 'rhs' will be evaluated
-// before the comparisons so we can always capture them. This might produce some warnings, but we can silence them.
+// We can declare custom 'operator<()' that wraps 'info' + 'lhs' into an 'unary_capture', and custom set of comparisons
+// turning 'unary_capture' + 'rhs' into a 'binary_capture'. Due to the operator precedence 'lhs' / 'rhs' will be 
+// evaluated before the comparison so we can always capture them. This may produce warnings, but we can silence them.
 //
 // After this the captured expression can be forwarded to a relatively standard assertion handler, which will use
 // this decomposition for pretty printing and more debug info. Performance-wise the cost should be minimal since
@@ -99,7 +99,7 @@ constexpr std::string_view reset        = "\033[0m";
 
 // SFINAE to restrict assertion captures to printable types. It doesn't affect functionality
 // since non-printable types would cause compile error regardless, but we can use it to
-// improve LSP highlighting and error message by failing the instantiation early
+// improve LSP highlighting and error messages by failing the instantiation early
 template <class T, class = void>
 struct is_printable : std::false_type {};
 

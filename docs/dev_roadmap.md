@@ -47,6 +47,34 @@ Once this is done, the current branch can be archived as `cpp17` branch, while `
 | Remove `to_underlying()` as it is now a part of `std`        | `enum_reflect()`                                             | **!** Might be be worth leaving to prevent API breakage      | ✘          |
 | Replace `rotl()` and `popcount()` with `std` functions       | `random`                                                     | Possible performance enhancement, needs benchmarking         | ✘          |
 
+## snake_case migration checklist
+
+| Module            | Code              | Docs          | Godbolt | Tests | Benchmarks |
+| ----------------- | ----------------- | ------------- | ------- | ----- | ---------- |
+| `assertion`       | ✔                 | ✔             |         | ✔     | ✔          |
+| `bit`             | ✔                 | ✔             |         | ✔     | ✔          |
+| `describe_struct` | ✔                 | ✔             |         | ✔     | ✔          |
+| `describe_enum`   | REQUIRES RENAME   | -             | -       | -     | ✔          |
+| `integral`        | ✔                 | ✔             |         | ✔     | ✔          |
+| `json`            | ✔                 | ✔             |         | ✔     | ✔          |
+| `log`             | REQUIRES REWRITE  | -             | -       | -     | -          |
+| `math`            | ✔                 | ✔             |         | ✔     | ✔          |
+| `mvl`             | DEPRECATE         | -             | -       | -     | -          |
+| `parallel`        | ✔                 | ✔             |         | ✔     | ✔          |
+| `predef`          | ✔                 | ✔             |         | ✔     | ✔          |
+| `profiler`        | REQUIRES REFACTOR |               |         | ✔     | ✔          |
+| `progressbar`     | ✔                 | ✔             |         | ✔     | ✔          |
+| `random`          | ✔                 | ✔             |         | ✔     | ✔          |
+| `reflect_struct`  | ✔                 | ✔             |         | ADD   | ✔          |
+| `shell`           | ✔                 | ✔             |         | ✔     | ✔          |
+| `sleep`           | ✔                 | ✔             |         | ✔     | ✔          |
+| `stre`            | ✔                 | ✔             |         | ✔     | ✔          |
+| `strong_type`     | ✔                 | ✔             |         | ✔     | ✔          |
+| `table`           | ✔                 | UPDATE IMAGES |         | ✔     | ✔          |
+| `time`            | ✔                 | ✔             |         | ✔     | ✔          |
+
+
+
 ### Useful links
 
 - [Listing of features added in each standard from C++11 to C++20](https://github.com/AnthonyCalandra/modern-cpp-features)

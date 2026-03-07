@@ -33,7 +33,7 @@ template<class T> using wider_t = typename wider<T>::type;
 // clang-format on
 
 template <class T>
-struct UintBiasedBigMulDist {
+struct uint_biased_big_mul_dist {
     using result_type = T;
 
     using narrow = T;
@@ -42,7 +42,7 @@ struct UintBiasedBigMulDist {
     narrow min;
     narrow max;
 
-    constexpr UintBiasedBigMulDist(T min, T max) noexcept : min(min), max(max) {}
+    constexpr uint_biased_big_mul_dist(T min, T max) noexcept : min(min), max(max) {}
 
     template <class Gen>
     constexpr T operator()(Gen& gen) const noexcept {
@@ -93,40 +93,40 @@ int main() {
     bench.title("64-bit uint distribution | splitmix_64");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint64_t>, random::generators::splitmix_64);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint64_t>, random::generators::splitmix_64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint64_t>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint64_t>, random::generators::splitmix_64);
     
     bench.title("64-bit uint distribution | splitmix_32");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint64_t>, random::generators::splitmix_32);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint64_t>, random::generators::splitmix_32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint64_t>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint64_t>, random::generators::splitmix_32);
     
     bench.title("32-bit uint distribution | splitmix_64");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint32_t>, random::generators::splitmix_64);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint32_t>, random::generators::splitmix_64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint32_t>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint32_t>, random::generators::splitmix_64);
     
     bench.title("32-bit uint distribution | splitmix_32");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint32_t>, random::generators::splitmix_32);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint32_t>, random::generators::splitmix_32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint32_t>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint32_t>, random::generators::splitmix_32);
     
     bench.title("16-bit uint distribution | splitmix_64");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint16_t>, random::generators::splitmix_64);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint16_t>, random::generators::splitmix_64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint16_t>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint16_t>, random::generators::splitmix_64);
     
     bench.title("16-bit uint distribution | splitmix_32");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(   std::uniform_int_distribution<std::uint16_t>, random::generators::splitmix_32);
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution<std::uint16_t>, random::generators::splitmix_32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist<std::uint16_t>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist<std::uint16_t>, random::generators::splitmix_32);
     
     bench.title("8-bit uint distribution | splitmix_64");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution< std::uint8_t>, random::generators::splitmix_64);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist< std::uint8_t>, random::generators::splitmix_64);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist< std::uint8_t>, random::generators::splitmix_64);
     
     bench.title(" 8-bit uint distribution | splitmix_32");
     BENCHMARK_DISTRIBUTION_FOR_PRNG(random::uniform_int_distribution< std::uint8_t>, random::generators::splitmix_32);
-    BENCHMARK_DISTRIBUTION_FOR_PRNG(            UintBiasedBigMulDist< std::uint8_t>, random::generators::splitmix_32);
+    BENCHMARK_DISTRIBUTION_FOR_PRNG(        uint_biased_big_mul_dist< std::uint8_t>, random::generators::splitmix_32);
     // clang-format on
 
     // Note: 'std::uniform_int_distribution<>' does not support 8-bit integers, GCC and Clang

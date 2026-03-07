@@ -15,12 +15,11 @@
 
 #define UTL_INTEGRAL_VERSION_MAJOR 1
 #define UTL_INTEGRAL_VERSION_MINOR 0
-#define UTL_INTEGRAL_VERSION_PATCH 3
+#define UTL_INTEGRAL_VERSION_PATCH 4
 
 // _______________________ INCLUDES _______________________
 
 #include <cassert>     // assert()
-#include <climits>     // CHAR_BIT
 #include <cstddef>     // size_t
 #include <cstdint>     // uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t
 #include <limits>      // numeric_limits<>::digits, numeric_limits<>::min(), numeric_limits<>::max()

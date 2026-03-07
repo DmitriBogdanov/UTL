@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: [-std=c++20, -ferror-limit=0]
+  Add: [-std=c++20, -stdlib=libc++, -ferror-limit=0]

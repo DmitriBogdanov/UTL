@@ -145,8 +145,8 @@ Returns the number of set bits in an integer.
 ### Enum bitflags
 
 > ```cpp
-> constexpr flags::flags(                       E      flag) noexcept;
-> constexpr flags::flags(std::initializer_list<E> flag_list) noexcept;
+> constexpr flags(                       E      flag) noexcept;
+> constexpr flags(std::initializer_list<E> flag_list) noexcept;
 > ```
 
 Constructs bitflag object from one or several enum values.
@@ -164,8 +164,8 @@ Converts to `false` if underlying bitflag value is `0`, otherwise `true`.
 Returns the underlying `enum class` value.
 
 > ```cpp
-> constexpr bool flags::contains(E      flag) const noexcept;
-> constexpr bool flags::contains(flags other) const noexcept;
+> constexpr bool contains(E      flag) const noexcept;
+> constexpr bool contains(flags other) const noexcept;
 > ```
 
 Returns whether bitflag object contains a specific flag(s).

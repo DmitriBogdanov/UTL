@@ -15,7 +15,7 @@
 
 #define UTL_PREDEF_VERSION_MAJOR 3
 #define UTL_PREDEF_VERSION_MINOR 0
-#define UTL_PREDEF_VERSION_PATCH 2
+#define UTL_PREDEF_VERSION_PATCH 3
 
 // _______________________ INCLUDES _______________________
 
@@ -35,12 +35,6 @@
 // Boost Predef (https://www.boost.org/doc/libs/1_55_0/libs/predef/doc/html/index.html) provides
 // a more complete package when it comes to supporting some esoteric platforms & compilers,
 // but has a rather (in my opinion) ugly API.
-//
-// In addition utl::predef also provides some miscellaneous macros for automatic codegen, such as:
-//    UTL_PREDEF_VA_ARGS_COUNT(args...)
-//    UTL_PREDEF_IS_FUNCTION_DEFINED() - a nightmare of implementation, but it works
-// some implementations may be rather sketchy due to trying to achieve things that weren't really
-// meant to be achieved, but at the end of the day everything is standard-compliant.
 
 // ____________________ IMPLEMENTATION ____________________
 
