@@ -23,17 +23,17 @@ TEST_CASE("Functions / Basic functions (integer)") {
 }
 
 TEST_CASE("Functions / Basic functions (float)") {
-    static_assert(math::abs(4.f) == Flt{4.f});
-    static_assert(math::abs(-5.f) == Flt{5.f});
-    static_assert(math::sign(15.f) == Flt{1.f});
-    static_assert(math::sign(-4.f) == Flt{-1.f});
-    static_assert(math::sqr(1.f) == Flt{1.f});
-    static_assert(math::sqr(-7.f) == Flt{49.f});
-    static_assert(math::cube(1.f) == Flt{1.f});
-    static_assert(math::cube(-3.f) == Flt{-27.f});
-    static_assert(math::heaviside(1.f) == Flt{1.f});
-    static_assert(math::heaviside(0.f) == Flt{0.f});
-    static_assert(math::heaviside(-3.f) == Flt{0.f});
+    static_assert(math::abs(4.f) == approx{4.f});
+    static_assert(math::abs(-5.f) == approx{5.f});
+    static_assert(math::sign(15.f) == approx{1.f});
+    static_assert(math::sign(-4.f) == approx{-1.f});
+    static_assert(math::sqr(1.f) == approx{1.f});
+    static_assert(math::sqr(-7.f) == approx{49.f});
+    static_assert(math::cube(1.f) == approx{1.f});
+    static_assert(math::cube(-3.f) == approx{-27.f});
+    static_assert(math::heaviside(1.f) == approx{1.f});
+    static_assert(math::heaviside(0.f) == approx{0.f});
+    static_assert(math::heaviside(-3.f) == approx{0.f});
 }
 
 TEST_CASE("Functions / Non-overflowing functions (integer)") {
@@ -48,8 +48,8 @@ TEST_CASE("Functions / Non-overflowing functions (integer)") {
 }
 
 TEST_CASE("Functions / Non-overflowing functions (float)") {
-    static_assert(math::midpoint(20.f, 30.f) == Flt{25.f});
-    static_assert(math::absdiff(2.5f, 3.5f) == Flt{1.f});
+    static_assert(math::midpoint(20.f, 30.f) == approx{25.f});
+    static_assert(math::absdiff(2.5f, 3.5f) == approx{1.f});
 }
 
 TEST_CASE("Functions / Power functions (integer)") {
@@ -63,9 +63,9 @@ TEST_CASE("Functions / Power functions (integer)") {
 }
 
 TEST_CASE("Functions / Power functions (floating point)") {
-    static_assert(math::pow(7.f, 2) == Flt{49.f});
-    static_assert(math::pow(0.5f, 2) == Flt{0.25f});
-    static_assert(math::pow(-2.f, 7) == Flt{-128.f});
+    static_assert(math::pow(7.f, 2) == approx{49.f});
+    static_assert(math::pow(0.5f, 2) == approx{0.25f});
+    static_assert(math::pow(-2.f, 7) == approx{-128.f});
 }
 
 TEST_CASE("Functions / Index functions") {
@@ -77,14 +77,14 @@ TEST_CASE("Functions / Index functions") {
 }
 
 TEST_CASE("Functions / Conversions") {
-    static_assert(math::deg_to_rad(0.) == Flt{0.});
-    static_assert(math::deg_to_rad(360.) == Flt{math::constants::two_pi});
-    static_assert(math::deg_to_rad(17 * 180.) == Flt{17. * math::constants::pi});
-    static_assert(math::deg_to_rad(-180.) == Flt{-math::constants::pi});
-    static_assert(math::rad_to_deg(0.) == Flt{0.});
-    static_assert(math::rad_to_deg(math::constants::two_pi) == Flt{360.});
-    static_assert(math::rad_to_deg(17. * math::constants::pi) == Flt{17 * 180.});
-    static_assert(math::rad_to_deg(-math::constants::pi) == Flt{-180.});
+    static_assert(math::deg_to_rad(0.) == approx{0.});
+    static_assert(math::deg_to_rad(360.) == approx{math::constants::two_pi});
+    static_assert(math::deg_to_rad(17 * 180.) == approx{17. * math::constants::pi});
+    static_assert(math::deg_to_rad(-180.) == approx{-math::constants::pi});
+    static_assert(math::rad_to_deg(0.) == approx{0.});
+    static_assert(math::rad_to_deg(math::constants::two_pi) == approx{360.});
+    static_assert(math::rad_to_deg(17. * math::constants::pi) == approx{17 * 180.});
+    static_assert(math::rad_to_deg(-math::constants::pi) == approx{-180.});
 }
 
 TEST_CASE("Functions / Sequence operations") {

@@ -14,6 +14,7 @@
 
 #include <filesystem>  // IWYU pragma: keep // filesystem::
 #include <limits>      // IWYU pragma: keep // numeric_limits<>::
+#include <sstream>     // ostringstream
 #include <string>      // IWYU pragma: keep // string_literals::
 #include <string_view> // IWYU pragma: keep // string_view_literals::
 #include <type_traits> // IWYU pragma: keep // enable_if_t<>, is_floating_point_v<>
@@ -69,25 +70,26 @@ template <class T>
 using require_float = require<std::is_floating_point_v<T>>;
 
 template <class T, require_float<T> = true>
-struct Flt {
+struct approx {
     T value;
-    constexpr Flt(T value) noexcept : value(value) {}
+    
+    constexpr approx(T value) noexcept : value(value) {}
 };
 
 template <class T, require_float<T> = true>
-[[nodiscard]] constexpr bool operator==(Flt<T> lhs, Flt<T> rhs) noexcept {
+[[nodiscard]] constexpr bool operator==(approx<T> lhs, approx<T> rhs) noexcept {
     const auto l    = lhs.value;
     const auto r    = rhs.value;
     const auto diff = (l > r) ? (l - r) : (r - l);
     return diff < std::numeric_limits<T>::epsilon();
 }
 template <class T, require_float<T> = true>
-[[nodiscard]] constexpr bool operator==(T lhs, Flt<T> rhs) noexcept {
-    return Flt{lhs} == rhs;
+[[nodiscard]] constexpr bool operator==(T lhs, approx<T> rhs) noexcept {
+    return approx{lhs} == rhs;
 }
 template <class T, require_float<T> = true>
-[[nodiscard]] constexpr bool operator==(Flt<T> lhs, T rhs) noexcept {
-    return lhs == Flt{rhs};
+[[nodiscard]] constexpr bool operator==(approx<T> lhs, T rhs) noexcept {
+    return lhs == approx{rhs};
 }
 
 // --- Macros ---

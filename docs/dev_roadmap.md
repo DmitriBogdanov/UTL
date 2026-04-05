@@ -65,7 +65,7 @@ Once this is done, the current branch can be archived as `cpp17` branch, while `
 | `profiler`        | REQUIRES REFACTOR |               |         | ✔     | ✔          |
 | `progressbar`     | ✔                 | ✔             |         | ✔     | ✔          |
 | `random`          | ✔                 | ✔             |         | ✔     | ✔          |
-| `reflect_struct`  | ✔                 | ✔             |         | ADD   | ✔          |
+| `reflect_struct`  | ✔                 | ✔             |         | ✔     | ✔          |
 | `shell`           | ✔                 | ✔             |         | ✔     | ✔          |
 | `sleep`           | ✔                 | ✔             |         | ✔     | ✔          |
 | `stre`            | ✔                 | ✔             |         | ✔     | ✔          |
