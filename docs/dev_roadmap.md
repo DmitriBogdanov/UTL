@@ -54,7 +54,7 @@ Once this is done, the current branch can be archived as `cpp17` branch, while `
 | `assertion`       | ✔                 | ✔             |         | ✔     | ✔          |
 | `bit`             | ✔                 | ✔             |         | ✔     | ✔          |
 | `describe_struct` | ✔                 | ✔             |         | ✔     | ✔          |
-| `describe_enum`   | REQUIRES RENAME   | -             | -       | -     | ✔          |
+| `describe_enum`   | ✔                 | ✔             | -       | ✔     | ✔          |
 | `integral`        | ✔                 | ✔             |         | ✔     | ✔          |
 | `json`            | ✔                 | ✔             |         | ✔     | ✔          |
 | `log`             | REQUIRES REWRITE  | -             | -       | -     | -          |
