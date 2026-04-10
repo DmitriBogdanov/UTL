@@ -24,7 +24,7 @@ Key features:
 - Serializes [almost every type & container](#serialization-support)
 - Automatically adapts to containers with std-like API
 - Concise syntax for alignment / color / number formatting
-- Sync/async logging with various buffering policies
+- Sync / async logging with various buffering policies
 - Convenient `println()` and `stringify()`
 
 Quirks of the library:
@@ -54,16 +54,16 @@ log::println("Finished in ", std::chrono::steady_clock::now() - start);
 
 <img src="images/log_showcase_println.png">
 
-> [!Warning]
-> This module is currently **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation coverage.
+> [!Note]
+> While certainly a curious experiment, in hindsight variadic syntax simply doesn't beat [fmt](https://github.com/fmtlib/fmt) for practical use cases. Prefer fmt-based loggers such as [spdlog](https://github.com/gabime/spdlog), [quill](https://github.com/odygrd/quill) or [lwlog](https://github.com/ChristianPanov/lwlog) for production use cases that might require localization.
 
 ## Definitions
 
 ```cpp
 // Logger
 template <class... Sinks>
-struct Logger {
-    Logger(Sinks&&... sinks);
+struct logger {
+    logger(Sinks&&... sinks);
     
     template <class... Args> void err  (const Args&... args);
     template <class... Args> void warn (const Args&... args);
@@ -75,32 +75,32 @@ struct Logger {
 
 // Sink
 template <
-    policy::Type      type,     = /* inferred from constructor */,
-    policy::Level     level     = /* defaults based on 'type'  */,
-    policy::Color     color     = /* defaults based on 'type'  */,
-    policy::Format    format    = /* defaults based on 'type'  */,
-    policy::Buffering buffering = /* defaults based on 'type'  */,
-    policy::Flushing  flushing  = /* defaults based on 'type'  */,
-    policy::Threading threading = /* defaults based on 'type'  */
-> struct Sink {
-    Sink(std::ofstream&&  file); // for file   sinks
-    Sink(std::string_view name); // for file   sinks
-    Sink(std::ostream&      os); // for stream sinks
-    Sink(std::string&      str); // for string sinks
+    policy::type      type,     = /* inferred from constructor */,
+    policy::level     level     = /* defaults based on 'type'  */,
+    policy::color     color     = /* defaults based on 'type'  */,
+    policy::format    format    = /* defaults based on 'type'  */,
+    policy::buffering buffering = /* defaults based on 'type'  */,
+    policy::flushing  flushing  = /* defaults based on 'type'  */,
+    policy::threading threading = /* defaults based on 'type'  */
+> struct sink {
+    sink(std::ofstream&&  file); // for file   sinks
+    sink(std::string_view name); // for file   sinks
+    sink(std::ostream&      os); // for stream sinks
+    sink(std::string&      str); // for string sinks
 };
 
 // Policies
 namespace policy {
-    enum class Type      { FILE, STREAM };
-    enum class Level     { ERR, WARN, NOTE, INFO, DEBUG, TRACE };
-    enum class Color     { NONE, ANSI };
-    enum class Format    { DATE, TITLE, THREAD, UPTIME, CALLSITE, LEVEL, NONE, FULL }; // bitmask
-    enum class Buffering { NONE, FIXED, TIMED };
-    enum class Flushing  { SYNC, ASYNC };
-    enum class Threading { UNSAFE, SAFE };
+    enum class type      { file, stream };
+    enum class level     { err, warn, note, info, debug, trace };
+    enum class color     { none, ansi };
+    enum class format    { date, title, thread, uptime, callsite, level, none, full }; // bitmask
+    enum class buffering { none, fixed, timed };
+    enum class flushing  { sync, async };
+    enum class threading { unsafe, safe };
 }
 
-// Pre-defined global logger
+// Default logger
 template <class... Args> void err  (const Args&... args);
 template <class... Args> void warn (const Args&... args);
 template <class... Args> void note (const Args&... args);
@@ -115,14 +115,14 @@ template <class... Args> void println(const Args&... args);
 template <class... Args> std::string stringify(const Args&... args);
 
 // Formatting modifiers
-constexpr mods::FloatFormat general     (std::size_t precision = 6) noexcept;
-constexpr mods::FloatFormat fixed       (std::size_t precision = 3) noexcept;
-constexpr mods::FloatFormat scientific  (std::size_t precision = 3) noexcept;
-constexpr mods::FloatFormat hex         (std::size_t precision = 3) noexcept;
-constexpr mods::IntFormat   base        (std::size_t base         ) noexcept;
-constexpr mods::AlignLeft   align_left  (std::size_t size         ) noexcept;
-constexpr mods::AlignCenter align_center(std::size_t size         ) noexcept;
-constexpr mods::AlignRight  align_right (std::size_t size         ) noexcept;
+constexpr mods::float_format general     (std::size_t precision = 6) noexcept;
+constexpr mods::float_format fixed       (std::size_t precision = 3) noexcept;
+constexpr mods::float_format scientific  (std::size_t precision = 3) noexcept;
+constexpr mods::float_format hex         (std::size_t precision = 3) noexcept;
+constexpr mods::int_format   base        (std::size_t base         ) noexcept;
+constexpr mods::align_left   align_left  (std::size_t size         ) noexcept;
+constexpr mods::align_center align_center(std::size_t size         ) noexcept;
+constexpr mods::align_right  align_right (std::size_t size         ) noexcept;
 // + all ANSI colors, see methods for the full list
 
 template <class T>
@@ -135,8 +135,8 @@ constexpr /*formatted-value*/ operator|(T&& value, /*formatting-mod*/ modifier) 
 
 > ```cpp
 > template <class... Sinks>
-> struct Logger {
->     Logger(Sinks&&... sinks);
+> struct logger {
+>     logger(Sinks&&... sinks);
 >     
 >     template <class... Args> void err  (const Args&... args);
 >     template <class... Args> void warn (const Args&... args);
@@ -151,41 +151,41 @@ A **logger** containing one or several sinks.
 
 Functions `err()` / `warn()` / `note()` / `info()` / `debug()` / `trace()` create log entries at corresponding [verbosity levels](#level) with `args...` as a message.
 
-**Note:** The `Logger` object can be used [locally](#local-logger) as a regular [RAII](https://en.cppreference.com/w/cpp/language/raii.html) object, or wrapped in a function to work [globally](#global-logger).
+**Note:** The `logger` object can be used [locally](#local-logger) as a regular [RAII](https://en.cppreference.com/w/cpp/language/raii.html) object, or wrapped in a function to work [globally](#global-logger).
 
 ### Sink
 
 > ```cpp
 > template <
->     policy::Type      type,     = /* inferred from constructor */,
->     policy::Level     level     = /* defaults based on 'type'  */,
->     policy::Color     color     = /* defaults based on 'type'  */,
->     policy::Format    format    = /* defaults based on 'type'  */,
->     policy::Buffering buffering = /* defaults based on 'type'  */,
->     policy::Flushing  flushing  = /* defaults based on 'type'  */,
->     policy::Threading threading = /* defaults based on 'type'  */
-> > struct Sink {
->     Sink(std::ofstream&&  file); // for file   sinks
->     Sink(std::string_view name); // for file   sinks
->     Sink(std::ostream&      os); // for stream sinks
->     Sink(std::string&      str); // for string sinks
+>     policy::type      type,     = /* inferred from constructor */,
+>     policy::level     level     = /* defaults based on 'type'  */,
+>     policy::color     color     = /* defaults based on 'type'  */,
+>     policy::format    format    = /* defaults based on 'type'  */,
+>     policy::buffering buffering = /* defaults based on 'type'  */,
+>     policy::flushing  flushing  = /* defaults based on 'type'  */,
+>     policy::threading threading = /* defaults based on 'type'  */
+> > struct sink {
+>     sink(std::ofstream&&  file); // for file   sinks
+>     sink(std::string_view name); // for file   sinks
+>     sink(std::ostream&      os); // for stream sinks
+>     sink(std::string&      str); // for string sinks
 > };
 > ```
 
 Logger **sink** is a wrapper around the file handle ([`std::ofstream`](https://en.cppreference.com/w/cpp/io/basic_ofstream.html)) or stream ([`std::ostream&`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)) that handles writing log messages to them.
 
-`Sink` behavior can be customized at compile-time using **policies**. See the [example](#sink-configuration).
+`sink` behavior can be customized at compile-time using **policies**. See the [example](#sink-configuration).
 
-By default, the `Sink` will infer its `type` based on the constructor argument, while its policies get defaulted to suit the common use case:
+By default, the `sink` will infer its `type` based on the constructor argument, while its policies get defaulted to suit the common use case:
 
-| Type                | `Type::STREAM`    | `Type::FILE`       |
+| Type                | `type::stream`    | `type::file`       |
 | ------------------- | ----------------- | ------------------ |
-| Default `level`     | `Level::INFO`     | `Level::TRACE`     |
-| Default `color`     | `Color::ANSI`     | `Color::NONE`      |
-| Default `format`    | `Format::FULL`    | `Format::FULL`     |
-| Default `buffering` | `Buffering::NONE` | `Buffering::FIXED` |
-| Default `flushing`  | `Flushing::SYNC`  | `Flushing::ASYNC`  |
-| Default `threading` | `Threading::SAFE` | `Threading::SAFE`  |
+| Default `level`     | `level::info`     | `level::trace`     |
+| Default `color`     | `color::ansi`     | `color::none`      |
+| Default `format`    | `format::full`    | `format::full`     |
+| Default `buffering` | `buffering::none` | `buffering::fixed` |
+| Default `flushing`  | `flushing::sync`  | `flushing::async`  |
+| Default `threading` | `threading::safe` | `threading::safe`  |
 
 ### Policies
 
@@ -195,114 +195,114 @@ By default, the `Sink` will infer its `type` based on the constructor argument, 
 #### Type
 
 > ```cpp
-> enum class Type { FILE, STREAM };
+> enum class type { file, stream };
 > ```
 
 Specifies the **output type** of the sink:
 
 | Value          | Output type                                                  |
 | -------------- | ------------------------------------------------------------ |
-| `Type::FILE`   | File handle ([`std::ofstream`](https://en.cppreference.com/w/cpp/io/basic_ofstream.html)) |
-| `Type::STREAM` | Stream ([`std::ostream&`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)) |
+| `type::file`   | File handle ([`std::ofstream`](https://en.cppreference.com/w/cpp/io/basic_ofstream.html)) |
+| `type::stream` | Stream ([`std::ostream&`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)) |
 
 #### Level
 
 > ```cpp
-> enum class Level { ERR, WARN, NOTE, INFO, DEBUG, TRACE };
+> enum class level { err, warn, note, info, debug, trace };
 > ```
 
 Specifies the **verbosity level** of the sink:
 
 | Value          | Verbosity level  |
 | -------------- | ---------------- |
-| `Level::ERR`   | `ERR` only       |
-| `Level::WARN`  | `WARN` or above  |
-| `Level::NOTE`  | `NOTE` or above  |
-| `Level::INFO`  | `INFO` or above  |
-| `Level::DEBUG` | `DEBUG` or above |
-| `Level::TRACE` | `TRACE` or above |
+| `level::err`   | `err` only       |
+| `level::warn`  | `warn` or above  |
+| `level::note`  | `note` or above  |
+| `level::info`  | `info` or above  |
+| `level::debug` | `debug` or above |
+| `level::trace` | `trace` or above |
 
 #### Color
 
 > ```cpp
-> enum class Color { NONE, ANSI };
+> enum class color { none, ansi };
 > ```
 
 Specifies the **color setting** of the sink:
 
 | Value         | Color setting                                                |
 | ------------- | ------------------------------------------------------------ |
-| `Color::NONE` | Ignore color modifiers                                       |
-| `Color::ANSI` | Use [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) to format color modifiers |
+| `color::none` | Ignore color modifiers                                       |
+| `color::ansi` | Use [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) to format color modifiers |
 
 #### Format
 
 > ```cpp
-> enum class Format { DATE, TITLE, THREAD, UPTIME, CALLSITE, LEVEL, NONE, FULL };
+> enum class format { date, title, thread, uptime, callsite, level, none, full };
 > ```
 
 Specifies the **enabled parts** of the sink output:
 
 | Value      | Enabled parts                                       |
 | ---------- | --------------------------------------------------- |
-| `DATE`     | Date & time at the top of the log                   |
-| `TITLE`    | Column titles at the top of the log                 |
-| `THREAD`   | Thread id column                                    |
-| `UPTIME`   | Uptime in milliseconds column                       |
-| `CALLSITE` | Callsite column                                     |
-| `LEVEL`    | Message level column                                |
-| `NONE`     | Only message is displayed                           |
-| `FULL`     | `DATE | TITLE | THREAD | UPTIME | CALLSITE | LEVEL` |
+| `date`     | Date & time at the top of the log                   |
+| `title`    | Column titles at the top of the log                 |
+| `thread`   | Thread id column                                    |
+| `uptime`   | Uptime in milliseconds column                       |
+| `callsite` | Callsite column                                     |
+| `level`    | Message level column                                |
+| `none`     | Only message is displayed                           |
+| `full`     | `date | title | thread | uptime | callsite | level` |
 
-**Note:** This `enum` works like bitmask, for example, value `THREAD | UPTIME` will correspond to formatting both columns.
+**Note:** This `enum` works like bitmask, for example, value `thread | uptime` will correspond to formatting both columns.
 
 #### Buffering
 
 > ```cpp
-> enum class Buffering { NONE, FIXED, TIMED };
+> enum class buffering { none, fixed, timed };
 > ```
 
 Specifies the **buffering strategy** of the sink output:
 
 | Value              | Buffering strategy                           |
 | ------------------ | -------------------------------------------- |
-| `Buffering::NONE`  | All output is flushed immediately            |
-| `Buffering::FIXED` | Output is flushed after every 8 KiB          |
-| `Buffering::TIMED` | Output is flushed after every 5 milliseconds |
+| `buffering::none`  | All output is flushed immediately            |
+| `buffering::fixed` | Output is flushed after every 8 KiB          |
+| `buffering::timed` | Output is flushed after every 5 milliseconds |
 
 **Note:** Instant buffering tends to be useful during debugging as it ensures no lost messages in case of a crash. Fixed buffering strategy is generally the most reliable in terms of performance. Timed buffering is a hybrid solution that doesn't suffer the full slowdown of instant buffering while still keeping the logs close to the real-time. 
 
 #### Flushing
 
 > ```cpp
-> enum class Flushing  { SYNC, ASYNC };
+> enum class flushing  { sync, async };
 > ```
 
 Specifies the **flushing strategy** of the sink output:
 
 | Value             | Flushing strategy                                      |
 | ----------------- | ------------------------------------------------------ |
-| `Flushing::SYNC`  | Flushing is performed on the same thread               |
-| `Flushing::ASYNC` | Flushing is performed asynchronously on another thread |
+| `flushing::sync`  | Flushing is performed on the same thread               |
+| `flushing::async` | Flushing is performed asynchronously on another thread |
 
 **Note:** Async flushing reduces logging latency for the caller, but increases the total amount of work that needs to be done by all threads. It is generally beneficial unless all threads are 100% busy.
 
 #### Threading
 
 > ```cpp
-> enum class Threading { UNSAFE, SAFE };
+> enum class threading { unsafe, safe };
 > ```
 
 Specifies the **thread safety** of the sink output:
 
 | Value               | Thread safety              |
 | ------------------- | -------------------------- |
-| `Threading::UNSAFE` | Logging is not thread-safe |
-| `Threading::SAFE`   | Logging is thread-safe     |
+| `threading::unsafe` | Logging is not thread-safe |
+| `threading::safe`   | Logging is thread-safe     |
 
 **Note:** Disabling thread safety is generally not advised, but can lead to a performance increase in single-threaded scenarios.
 
-### Pre-defined global logger
+### Default logger
 
 > ```cpp
 > template <class... Args> void err  (const Args&... args);
@@ -354,10 +354,10 @@ For example, `x | mod_1 | mod_2` will apply formatting modifiers `mod_1` and `mo
 ### Numeric format
 
 > ```cpp
-> constexpr mods::FloatFormat general    (std::size_t precision = 6) noexcept;
-> constexpr mods::FloatFormat fixed      (std::size_t precision = 3) noexcept;
-> constexpr mods::FloatFormat scientific (std::size_t precision = 3) noexcept;
-> constexpr mods::FloatFormat hex        (std::size_t precision = 3) noexcept;
+> constexpr mods::float_format general    (std::size_t precision = 6) noexcept;
+> constexpr mods::float_format fixed      (std::size_t precision = 3) noexcept;
+> constexpr mods::float_format scientific (std::size_t precision = 3) noexcept;
+> constexpr mods::float_format hex        (std::size_t precision = 3) noexcept;
 > ```
 
 Modifiers that specify the precision and format of a floating point value.
@@ -369,7 +369,7 @@ Modifiers that specify the precision and format of a floating point value.
 **Note 3:** Standard streams implement similar behavior using [`std::setprecision`](https://en.cppreference.com/w/cpp/io/manip/setprecision.html) in combination with [`std::fixed`](https://en.cppreference.com/w/cpp/io/manip/fixed) / [`std::scientific`](https://en.cppreference.com/w/cpp/io/manip/fixed) / [`std::hexfloat`](https://en.cppreference.com/w/cpp/io/manip/fixed) / [`std::defaultfloat`](https://en.cppreference.com/w/cpp/io/manip/fixed).
 
 > ```cpp
-> constexpr mods::IntFormat base(std::size_t base) noexcept;
+> constexpr mods::int_format base(std::size_t base) noexcept;
 > ```
 
 Modifier that specifies the base of an integer value.
@@ -383,9 +383,9 @@ Modifier that specifies the base of an integer value.
 #### Alignment
 
 > ```cpp
-> constexpr mods::AlignLeft   align_left  (std::size_t size) noexcept;
-> constexpr mods::AlignCenter align_center(std::size_t size) noexcept;
-> constexpr mods::AlignRight  align_right (std::size_t size) noexcept;
+> constexpr mods::align_left   align_left  (std::size_t size) noexcept;
+> constexpr mods::align_center align_center(std::size_t size) noexcept;
+> constexpr mods::align_right  align_right (std::size_t size) noexcept;
 > ```
 
 Modifiers that specify the horizontal alignment of serialized value.
@@ -398,38 +398,38 @@ Modifiers that specify the horizontal alignment of serialized value.
 
 > ```cpp
 > namespace color {
->     constexpr mods::Color black;
->     constexpr mods::Color red;
->     constexpr mods::Color green;
->     constexpr mods::Color yellow;
->     constexpr mods::Color blue;
->     constexpr mods::Color magenta;
->     constexpr mods::Color cyan;
->     constexpr mods::Color white;
->     constexpr mods::Color bright_black;
->     constexpr mods::Color bright_red;
->     constexpr mods::Color bright_green;
->     constexpr mods::Color bright_yellow;
->     constexpr mods::Color bright_blue;
->     constexpr mods::Color bright_magenta;
->     constexpr mods::Color bright_cyan;
->     constexpr mods::Color bright_white;
->     constexpr mods::Color bold_black;
->     constexpr mods::Color bold_red;
->     constexpr mods::Color bold_green;
->     constexpr mods::Color bold_yellow;
->     constexpr mods::Color bold_blue;
->     constexpr mods::Color bold_magenta;
->     constexpr mods::Color bold_cyan;
->     constexpr mods::Color bold_white;
->     constexpr mods::Color bold_bright_black;
->     constexpr mods::Color bold_bright_red;
->     constexpr mods::Color bold_bright_green;
->     constexpr mods::Color bold_bright_yellow;
->     constexpr mods::Color bold_bright_blue;
->     constexpr mods::Color bold_bright_magenta;
->     constexpr mods::Color bold_bright_cyan;
->     constexpr mods::Color bold_bright_white;
+>     constexpr mods::color black;
+>     constexpr mods::color red;
+>     constexpr mods::color green;
+>     constexpr mods::color yellow;
+>     constexpr mods::color blue;
+>     constexpr mods::color magenta;
+>     constexpr mods::color cyan;
+>     constexpr mods::color white;
+>     constexpr mods::color bright_black;
+>     constexpr mods::color bright_red;
+>     constexpr mods::color bright_green;
+>     constexpr mods::color bright_yellow;
+>     constexpr mods::color bright_blue;
+>     constexpr mods::color bright_magenta;
+>     constexpr mods::color bright_cyan;
+>     constexpr mods::color bright_white;
+>     constexpr mods::color bold_black;
+>     constexpr mods::color bold_red;
+>     constexpr mods::color bold_green;
+>     constexpr mods::color bold_yellow;
+>     constexpr mods::color bold_blue;
+>     constexpr mods::color bold_magenta;
+>     constexpr mods::color bold_cyan;
+>     constexpr mods::color bold_white;
+>     constexpr mods::color bold_bright_black;
+>     constexpr mods::color bold_bright_red;
+>     constexpr mods::color bold_bright_green;
+>     constexpr mods::color bold_bright_yellow;
+>     constexpr mods::color bold_bright_blue;
+>     constexpr mods::color bold_bright_magenta;
+>     constexpr mods::color bold_bright_cyan;
+>     constexpr mods::color bold_bright_white;
 > }
 > ```
 
@@ -750,12 +750,13 @@ Serialization of following types is supported out of the box:
 - Anything printable with [`std::ostream`](https://en.cppreference.com/w/cpp/io/basic_ostream.html)
 - Nested containers and types that can be resolved recursively (such as [`std::map`](https://en.cppreference.com/w/cpp/container/map.html), [`std::unordered_map`](https://en.cppreference.com/w/cpp/container/unordered_map.html) and etc.)
 
-Additional types added by fully or partially specializing the `Formatter<>`.
+Additional types added by fully or partially specializing the `formatter<>`.
 
-## Compatibility with other modules
+## Useful with modules
 
 - [utl::assertion](module_assertion.md) ‒ can be set up to log assertion failures
-- [utl::enum_reflect](module_enum_reflect.md) ‒ provides an easy way to serialize enums
-- [utl::struct_reflect](module_struct_reflect.md) ‒ provides an easy way to serialize classes
+- [utl::describe_enum](module_describe_enum.md) ‒ provides C++17 annotation-based reflection for enum serialization
+- [utl::describe_struct](module_describe_struct.md) ‒ provides C++17 annotation-based reflection for class serialization
+- [utl::reflect_struct](module_reflect_struct.md) ‒ provides C++20 annotation-free reflection for class serialization
 - [utl::table](module_table.md) ‒ provides a way to serialize tables
 - [utl::time](module_time.md) ‒ provides a way to serialize time and date in various formats
