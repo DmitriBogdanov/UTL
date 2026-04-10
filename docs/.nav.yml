@@ -26,7 +26,6 @@ nav:
     - "utl::profiler"        : module_profiler.md
     - "utl::progressbar"     : module_progressbar.md
     - "utl::random"          : module_random.md
-    - "utl::reflect_enum"    : module_reflect_enum.md
     - "utl::reflect_struct"  : module_reflect_struct.md
     - "utl::shell"           : module_shell.md
     - "utl::sleep"           : module_sleep.md

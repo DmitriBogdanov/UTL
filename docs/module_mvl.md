@@ -24,7 +24,7 @@ Unlike most existing matrix implementations, **mvl** focuses on data-oriented ma
 > Due to rather extensive API, seeing [usage examples](#declaring-and-indexing-a-matrix) first might be helpful.
 
 > [!Warning]
-> This module is currently **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation coverage.
+> This module is **experimental**. It is generally functional, however there are no guarantees about its API, stability and documentation correctness.
 
 ## Class structure
 
@@ -1365,11 +1365,10 @@ Tensor [size = 3] (3 x 3):
   [ - - 3 ]
 ```
 
-## Roadmap for v1.0.0 release
+## Requirements for v1.0.0 release
 
-- Allow usage of static matrix extents
+- Refactor to `snake_case` naming for uniformity
 - Vector specializations
-- Sparse matrices with a different "default element"
 - Binary element-wise operators `+`, `-`, `*`, `+=`, `-=`, `*=` and etc.
 - Matrix multiplication
 - Matrix concatenation

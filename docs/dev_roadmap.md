@@ -49,29 +49,29 @@ Once this is done, the current branch can be archived as `cpp17` branch, while `
 
 ## snake_case migration checklist
 
-| Module            | Code              | Docs          | Godbolt | Tests | Benchmarks |
-| ----------------- | ----------------- | ------------- | ------- | ----- | ---------- |
-| `assertion`       | ✔                 | ✔             |         | ✔     | ✔          |
-| `bit`             | ✔                 | ✔             |         | ✔     | ✔          |
-| `describe_struct` | ✔                 | ✔             |         | ✔     | ✔          |
-| `describe_enum`   | ✔                 | ✔             | -       | ✔     | ✔          |
-| `integral`        | ✔                 | ✔             |         | ✔     | ✔          |
-| `json`            | ✔                 | ✔             |         | ✔     | ✔          |
-| `log`             | REQUIRES REWRITE  | -             | -       | -     | -          |
-| `math`            | ✔                 | ✔             |         | ✔     | ✔          |
-| `mvl`             | DEPRECATE         | -             | -       | -     | -          |
-| `parallel`        | ✔                 | ✔             |         | ✔     | ✔          |
-| `predef`          | ✔                 | ✔             |         | ✔     | ✔          |
-| `profiler`        | REQUIRES REFACTOR |               |         | ✔     | ✔          |
-| `progressbar`     | ✔                 | ✔             |         | ✔     | ✔          |
-| `random`          | ✔                 | ✔             |         | ✔     | ✔          |
-| `reflect_struct`  | ✔                 | ✔             |         | ✔     | ✔          |
-| `shell`           | ✔                 | ✔             |         | ✔     | ✔          |
-| `sleep`           | ✔                 | ✔             |         | ✔     | ✔          |
-| `stre`            | ✔                 | ✔             |         | ✔     | ✔          |
-| `strong_type`     | ✔                 | ✔             |         | ✔     | ✔          |
-| `table`           | ✔                 | UPDATE IMAGES |         | ✔     | ✔          |
-| `time`            | ✔                 | ✔             |         | ✔     | ✔          |
+| Module            | Code                 | Docs          | Godbolt | Tests | Benchmarks |
+| ----------------- | -------------------- | ------------- | ------- | ----- | ---------- |
+| `assertion`       | ✔                    | ✔             |         | ✔     | ✔          |
+| `bit`             | ✔                    | ✔             |         | ✔     | ✔          |
+| `describe_struct` | ✔                    | ✔             |         | ✔     | ✔          |
+| `describe_enum`   | ✔                    | ✔             |         | ✔     | ✔          |
+| `integral`        | ✔                    | ✔             |         | ✔     | ✔          |
+| `json`            | ✔                    | ✔             |         | ✔     | ✔          |
+| `log`             | ✔                    | ✔             |         | ✔     | ✔          |
+| `math`            | ✔                    | ✔             |         | ✔     | ✔          |
+| `mvl`             | KEEP AS EXPERIMENTAL | -             | -       | -     | -          |
+| `parallel`        | ✔                    | ✔             |         | ✔     | ✔          |
+| `predef`          | ✔                    | ✔             |         | ✔     | ✔          |
+| `profiler`        | REQUIRES REFACTOR    |               |         | ✔     | ✔          |
+| `progressbar`     | ✔                    | ✔             |         | ✔     | ✔          |
+| `random`          | ✔                    | ✔             |         | ✔     | ✔          |
+| `reflect_struct`  | ✔                    | ✔             |         | ✔     | ✔          |
+| `shell`           | ✔                    | ✔             |         | ✔     | ✔          |
+| `sleep`           | ✔                    | ✔             |         | ✔     | ✔          |
+| `stre`            | ✔                    | ✔             |         | ✔     | ✔          |
+| `strong_type`     | ✔                    | ✔             |         | ✔     | ✔          |
+| `table`           | ✔                    | UPDATE IMAGES |         | ✔     | ✔          |
+| `time`            | ✔                    | ✔             |         | ✔     | ✔          |
 
 
 
