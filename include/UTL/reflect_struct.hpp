@@ -15,7 +15,7 @@
 
 #define UTL_REFLECT_STRUCT_VERSION_MAJOR 1
 #define UTL_REFLECT_STRUCT_VERSION_MINOR 0
-#define UTL_REFLECT_STRUCT_VERSION_PATCH 4
+#define UTL_REFLECT_STRUCT_VERSION_PATCH 5
 
 // _______________________ INCLUDES _______________________
 
@@ -212,11 +212,20 @@ template <std::size_t N, reflectable T>
 
 template <auto arg>
 [[nodiscard]] consteval std::string_view mangled_value_name() noexcept {
+#ifdef _MSC_VER
+    return __FUNCSIG__;
+    // workaround for MSVC IntelliSense, while the compiler itself works fine with 'std::source_location',
+    // its IntelliSense uses an entirely separate engine which doesn't properly evaluate <source_locations>
+    // (and a lot of other constexpr things) resulting in broken syntax highlighting
+#endif
     return std::source_location::current().function_name();
 }
 
 template <class Arg>
 [[nodiscard]] consteval std::string_view mangled_type_name() noexcept {
+#ifdef _MSC_VER
+    return __FUNCSIG__;
+#endif
     return std::source_location::current().function_name();
 }
 
