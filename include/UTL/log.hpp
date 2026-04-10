@@ -13,9 +13,9 @@
 #ifndef utl_log_headerguard
 #define utl_log_headerguard
 
-#define UTL_LOG_VERSION_MAJOR 2
-#define UTL_LOG_VERSION_MINOR 3
-#define UTL_LOG_VERSION_PATCH 3
+#define UTL_LOG_VERSION_MAJOR 3
+#define UTL_LOG_VERSION_MINOR 0
+#define UTL_LOG_VERSION_PATCH 0
 
 // _______________________ INCLUDES _______________________
 
@@ -65,14 +65,14 @@
 //    |  D. Backend thread pops entries from the queue and puts them into an unbounded transit buffer
 //    |     ordered by the entry timestamp, this buffer gets periodically flushed, this is necessary
 //    |     to sort multi-threaded logs by time without introducing syncronization on the logging
-//    |     threads, perfect ordering is not theoretically guaranteed it is good enough in practice
+//    |     threads, perfect ordering is not theoretically guaranteed but it is good enough in practice
 //    |  E. When flushing, backend thread performs:
 //    |  |  a. Decoding using the received function pointer
 //    |  |  b. Formatting using fmtlib
 //    |  |  c. Buffered IO using the manual buffer and the underlying IO library
 //    4. Use macro API to generate & format callsite and other metadata at compile-time,
 //       doing the same with functions is non-feasible / extremely difficult due to the
-//       design of 'std::source_location' which prevent proper compile-time evaluation
+//       design of 'std::source_location' which prevents proper compile-time evaluation
 //    5. Use a custom <chrono> clock based on RDTSC timestamps for lower overhead
 // this, however, would require a project of a whole different scale and integration complexity.
 
@@ -97,7 +97,7 @@
 #if utl_log_cpp_standard >= 202002L
     #include <source_location>
     namespace utl::log::impl {
-        using SourceLocation = std::source_location;
+        using source_location = std::source_location;
     }
     #define utl_log_has_source_location
 #endif
@@ -130,22 +130,22 @@
 
 #ifdef utl_log_use_source_location_builtin
 namespace utl::log::impl {
-class SourceLocation {
+class source_location {
     int         _line = -1;
     const char* _func = nullptr;
     const char* _file = nullptr;
 
-    constexpr SourceLocation(int line, const char* func, const char* file) noexcept
+    constexpr source_location(int line, const char* func, const char* file) noexcept
         : _line(line), _func(func), _file(file) {}
 
 public:
-    constexpr SourceLocation()                      = default;
-    constexpr SourceLocation(const SourceLocation&) = default;
-    constexpr SourceLocation(SourceLocation&&)      = default;
+    constexpr source_location()                       = default;
+    constexpr source_location(const source_location&) = default;
+    constexpr source_location(source_location&&)      = default;
 
-    [[nodiscard]] constexpr static SourceLocation
+    [[nodiscard]] constexpr static source_location
     current(int line = __builtin_LINE(), const char* func = __builtin_FUNCTION(), const char* file = __builtin_FILE()) {
-        return SourceLocation{line, func, file};
+        return source_location{line, func, file};
     }
 
     [[nodiscard]] constexpr int         line() const noexcept { return this->_line; }
@@ -160,8 +160,8 @@ public:
 #ifndef utl_log_has_source_location
 #define utl_log_has_source_location
 namespace utl::log::impl {
-struct SourceLocation {
-    [[nodiscard]] constexpr static SourceLocation current() { return SourceLocation{}; }
+struct source_location {
+    [[nodiscard]] constexpr static source_location current() { return source_location{}; }
 
     [[nodiscard]] constexpr int         line() const noexcept { return 0; }
     [[nodiscard]] constexpr const char* file_name() const noexcept { return ""; }
@@ -335,7 +335,7 @@ constexpr auto        buffering_time  = std::chrono::milliseconds{5};
 // --- <chrono> formatting ---
 // ---------------------------
 
-struct SplitDuration {
+struct split_duration {
     std::chrono::hours        hours;
     std::chrono::minutes      min;
     std::chrono::seconds      sec;
@@ -349,14 +349,14 @@ struct SplitDuration {
                                           decltype(ms)::rep, decltype(us)::rep, decltype(ns)::rep>;
     // standard doesn't specify common representation type, usually it's 'std::int64_t'
 
-    std::array<common_rep, SplitDuration::size> count() {
+    std::array<common_rep, split_duration::size> count() {
         return {this->hours.count(), this->min.count(), this->sec.count(),
                 this->ms.count(),    this->us.count(),  this->ns.count()};
     }
 };
 
 template <class Rep, class Period>
-[[nodiscard]] constexpr SplitDuration unit_split(std::chrono::duration<Rep, Period> val) {
+[[nodiscard]] constexpr split_duration unit_split(std::chrono::duration<Rep, Period> val) {
     // for some reason 'duration_cast<>()' is not 'noexcept'
     const auto hours = std::chrono::duration_cast<std::chrono::hours>(val);
     const auto min   = std::chrono::duration_cast<std::chrono::minutes>(val - hours);
@@ -373,7 +373,7 @@ using Sec = std::chrono::duration<double, std::chrono::seconds::period>; // conv
 // ---------------------
 
 // A single persistent thread that executes detached tasks, effectively a single-thread thread pool
-class WorkerThread {
+class worker_thread {
     bool                              terminating;
     std::queue<std::function<void()>> tasks;
     std::mutex                        mutex;
@@ -400,9 +400,9 @@ class WorkerThread {
     }
 
 public:
-    WorkerThread() : terminating(false), thread([this] { this->thread_main(); }) {}
+    worker_thread() : terminating(false), thread([this] { this->thread_main(); }) {}
 
-    ~WorkerThread() { // stops the worker thread & joins once the tasks are done
+    ~worker_thread() { // stops the worker thread & joins once the tasks are done
         {
             const std::scoped_lock lock(this->mutex);
             this->terminating = true;
@@ -455,9 +455,9 @@ template <class E, require_enum<E> = true>
 template <class Adaptor>
 const auto& underlying_container_cref(const Adaptor& adaptor) {
 
-    struct Hack : private Adaptor {
+    struct access_hack : private Adaptor {
         static const typename Adaptor::container_type& get_container(const Adaptor& adp) {
-            return adp.*&Hack::c;
+            return adp.*&access_hack::c;
             // An extremely hacky yet standard-compliant way of accessing protected member
             // of a class without actually creating any instances of the derived class.
             //
@@ -473,7 +473,7 @@ const auto& underlying_container_cref(const Adaptor& adaptor) {
         }
     };
 
-    return Hack::get_container(adaptor);
+    return access_hack::get_container(adaptor);
 }
 
 // ===============
@@ -485,12 +485,12 @@ const auto& underlying_container_cref(const Adaptor& adaptor) {
 
 // clang-format off
 namespace mods {
-struct FloatFormat   { std::chars_format format; int precision; };
-struct IntegerFormat { int               base;                  };
-struct AlignLeft     { std::size_t       size;                  };
-struct AlignCenter   { std::size_t       size;                  };
-struct AlignRight    { std::size_t       size;                  };
-struct Color         { std::string_view  code;                  };
+struct float_format   { std::chars_format format; int precision; };
+struct integer_format { int               base;                  };
+struct align_left     { std::size_t       size;                  };
+struct align_center   { std::size_t       size;                  };
+struct align_right    { std::size_t       size;                  };
+struct color          { std::string_view  code;                  };
 } // namespace mods
 // clang-format on
 
@@ -531,12 +531,12 @@ struct Color         { std::string_view  code;                  };
     wrapper_(T&&, style_)->wrapper_<T>
 
 // clang-format off
-utl_log_define_style_wrapper(FormattedFloat  , mods::FloatFormat  );
-utl_log_define_style_wrapper(FormattedInteger, mods::IntegerFormat);
-utl_log_define_style_wrapper(AlignedLeft     , mods::AlignLeft    );
-utl_log_define_style_wrapper(AlignedCenter   , mods::AlignCenter  );
-utl_log_define_style_wrapper(AlignedRight    , mods::AlignRight   );
-utl_log_define_style_wrapper(Colored         , mods::Color        );
+utl_log_define_style_wrapper(formatted_float  , mods::float_format  );
+utl_log_define_style_wrapper(formatted_integer, mods::integer_format);
+utl_log_define_style_wrapper(aligned_left     , mods::align_left    );
+utl_log_define_style_wrapper(aligned_center   , mods::align_center  );
+utl_log_define_style_wrapper(aligned_right    , mods::align_right   );
+utl_log_define_style_wrapper(colored          , mods::color         );
 // clang-format on
 
 #undef utl_log_define_style_wrapper
@@ -554,12 +554,12 @@ namespace mods { // necessary for unqualified name lookup to discover operators 
     static_assert(true)
 
 // clang-format off
-utl_log_define_style_merging(FormattedFloat  , mods::FloatFormat  , require_float   <std::decay_t<T>>);
-utl_log_define_style_merging(FormattedInteger, mods::IntegerFormat, require_integral<std::decay_t<T>>);
-utl_log_define_style_merging(AlignedLeft     , mods::AlignLeft    , bool                             );
-utl_log_define_style_merging(AlignedCenter   , mods::AlignCenter  , bool                             );
-utl_log_define_style_merging(AlignedRight    , mods::AlignRight   , bool                             );
-utl_log_define_style_merging(Colored         , mods::Color        , bool                             );
+utl_log_define_style_merging(formatted_float  , mods::float_format  , require_float   <std::decay_t<T>>);
+utl_log_define_style_merging(formatted_integer, mods::integer_format, require_integral<std::decay_t<T>>);
+utl_log_define_style_merging(aligned_left     , mods::align_left    , bool                             );
+utl_log_define_style_merging(aligned_center   , mods::align_center  , bool                             );
+utl_log_define_style_merging(aligned_right    , mods::align_right   , bool                             );
+utl_log_define_style_merging(colored          , mods::color         , bool                             );
 // clang-format on
 
 #undef utl_log_define_style_merging
@@ -574,12 +574,12 @@ utl_log_define_style_merging(Colored         , mods::Color        , bool        
     static_assert(true)
 
 // clang-format off
-utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignRight );
-utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignCenter);
-utl_log_prohibit_style_merging(const Colored<T>& , mods::AlignLeft  );
-utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignRight );
-utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignCenter);
-utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignLeft  );
+utl_log_prohibit_style_merging(const colored<T>& , mods::align_right );
+utl_log_prohibit_style_merging(const colored<T>& , mods::align_center);
+utl_log_prohibit_style_merging(const colored<T>& , mods::align_left  );
+utl_log_prohibit_style_merging(      colored<T>&&, mods::align_right );
+utl_log_prohibit_style_merging(      colored<T>&&, mods::align_center);
+utl_log_prohibit_style_merging(      colored<T>&&, mods::align_left  );
 // clang-format on
 
 #undef utl_log_prohibit_style_merging
@@ -590,56 +590,56 @@ utl_log_prohibit_style_merging(      Colored<T>&&, mods::AlignLeft  );
 // --------------------------------------
 
 [[nodiscard]] constexpr auto general(std::size_t precision = 6) noexcept {
-    return mods::FloatFormat{std::chars_format::general, static_cast<int>(precision)};
+    return mods::float_format{std::chars_format::general, static_cast<int>(precision)};
 }
 [[nodiscard]] constexpr auto fixed(std::size_t precision = 3) noexcept {
-    return mods::FloatFormat{std::chars_format::fixed, static_cast<int>(precision)};
+    return mods::float_format{std::chars_format::fixed, static_cast<int>(precision)};
 }
 [[nodiscard]] constexpr auto scientific(std::size_t precision = 3) noexcept {
-    return mods::FloatFormat{std::chars_format::scientific, static_cast<int>(precision)};
+    return mods::float_format{std::chars_format::scientific, static_cast<int>(precision)};
 }
 [[nodiscard]] constexpr auto hex(std::size_t precision = 3) noexcept {
-    return mods::FloatFormat{std::chars_format::hex, static_cast<int>(precision)};
+    return mods::float_format{std::chars_format::hex, static_cast<int>(precision)};
 }
-[[nodiscard]] constexpr auto base(std::size_t base) noexcept { return mods::IntegerFormat{static_cast<int>(base)}; }
-[[nodiscard]] constexpr auto align_left(std::size_t size) noexcept { return mods::AlignLeft{size}; }
-[[nodiscard]] constexpr auto align_center(std::size_t size) noexcept { return mods::AlignCenter{size}; }
-[[nodiscard]] constexpr auto align_right(std::size_t size) noexcept { return mods::AlignRight{size}; }
+[[nodiscard]] constexpr auto base(std::size_t base) noexcept { return mods::integer_format{static_cast<int>(base)}; }
+[[nodiscard]] constexpr auto align_left(std::size_t size) noexcept { return mods::align_left{size}; }
+[[nodiscard]] constexpr auto align_center(std::size_t size) noexcept { return mods::align_center{size}; }
+[[nodiscard]] constexpr auto align_right(std::size_t size) noexcept { return mods::align_right{size}; }
 
 // clang-format off
 namespace color {
-constexpr auto black               = mods::Color{ansi::black              };
-constexpr auto red                 = mods::Color{ansi::red                };
-constexpr auto green               = mods::Color{ansi::green              };
-constexpr auto yellow              = mods::Color{ansi::yellow             };
-constexpr auto blue                = mods::Color{ansi::blue               };
-constexpr auto magenta             = mods::Color{ansi::magenta            };
-constexpr auto cyan                = mods::Color{ansi::cyan               };
-constexpr auto white               = mods::Color{ansi::white              };
-constexpr auto bright_black        = mods::Color{ansi::bright_black       };
-constexpr auto bright_red          = mods::Color{ansi::bright_red         };
-constexpr auto bright_green        = mods::Color{ansi::bright_green       };
-constexpr auto bright_yellow       = mods::Color{ansi::bright_yellow      };
-constexpr auto bright_blue         = mods::Color{ansi::bright_blue        };
-constexpr auto bright_magenta      = mods::Color{ansi::bright_magenta     };
-constexpr auto bright_cyan         = mods::Color{ansi::bright_cyan        };
-constexpr auto bright_white        = mods::Color{ansi::bright_white       };
-constexpr auto bold_black          = mods::Color{ansi::bold_black         };
-constexpr auto bold_red            = mods::Color{ansi::bold_red           };
-constexpr auto bold_green          = mods::Color{ansi::bold_green         };
-constexpr auto bold_yellow         = mods::Color{ansi::bold_yellow        };
-constexpr auto bold_blue           = mods::Color{ansi::bold_blue          };
-constexpr auto bold_magenta        = mods::Color{ansi::bold_magenta       };
-constexpr auto bold_cyan           = mods::Color{ansi::bold_cyan          };
-constexpr auto bold_white          = mods::Color{ansi::bold_white         };
-constexpr auto bold_bright_black   = mods::Color{ansi::bold_bright_black  };
-constexpr auto bold_bright_red     = mods::Color{ansi::bold_bright_red    };
-constexpr auto bold_bright_green   = mods::Color{ansi::bold_bright_green  };
-constexpr auto bold_bright_yellow  = mods::Color{ansi::bold_bright_yellow };
-constexpr auto bold_bright_blue    = mods::Color{ansi::bold_bright_blue   };
-constexpr auto bold_bright_magenta = mods::Color{ansi::bold_bright_magenta};
-constexpr auto bold_bright_cyan    = mods::Color{ansi::bold_bright_cyan   };
-constexpr auto bold_bright_white   = mods::Color{ansi::bold_bright_white  };
+constexpr auto black               = mods::color{ansi::black              };
+constexpr auto red                 = mods::color{ansi::red                };
+constexpr auto green               = mods::color{ansi::green              };
+constexpr auto yellow              = mods::color{ansi::yellow             };
+constexpr auto blue                = mods::color{ansi::blue               };
+constexpr auto magenta             = mods::color{ansi::magenta            };
+constexpr auto cyan                = mods::color{ansi::cyan               };
+constexpr auto white               = mods::color{ansi::white              };
+constexpr auto bright_black        = mods::color{ansi::bright_black       };
+constexpr auto bright_red          = mods::color{ansi::bright_red         };
+constexpr auto bright_green        = mods::color{ansi::bright_green       };
+constexpr auto bright_yellow       = mods::color{ansi::bright_yellow      };
+constexpr auto bright_blue         = mods::color{ansi::bright_blue        };
+constexpr auto bright_magenta      = mods::color{ansi::bright_magenta     };
+constexpr auto bright_cyan         = mods::color{ansi::bright_cyan        };
+constexpr auto bright_white        = mods::color{ansi::bright_white       };
+constexpr auto bold_black          = mods::color{ansi::bold_black         };
+constexpr auto bold_red            = mods::color{ansi::bold_red           };
+constexpr auto bold_green          = mods::color{ansi::bold_green         };
+constexpr auto bold_yellow         = mods::color{ansi::bold_yellow        };
+constexpr auto bold_blue           = mods::color{ansi::bold_blue          };
+constexpr auto bold_magenta        = mods::color{ansi::bold_magenta       };
+constexpr auto bold_cyan           = mods::color{ansi::bold_cyan          };
+constexpr auto bold_white          = mods::color{ansi::bold_white         };
+constexpr auto bold_bright_black   = mods::color{ansi::bold_bright_black  };
+constexpr auto bold_bright_red     = mods::color{ansi::bold_bright_red    };
+constexpr auto bold_bright_green   = mods::color{ansi::bold_bright_green  };
+constexpr auto bold_bright_yellow  = mods::color{ansi::bold_bright_yellow };
+constexpr auto bold_bright_blue    = mods::color{ansi::bold_bright_blue   };
+constexpr auto bold_bright_magenta = mods::color{ansi::bold_bright_magenta};
+constexpr auto bold_bright_cyan    = mods::color{ansi::bold_bright_cyan   };
+constexpr auto bold_bright_white   = mods::color{ansi::bold_bright_white  };
 } // namespace color
 // clang-format on
 
@@ -696,7 +696,7 @@ utl_log_define_trait(has_ostream_insert, std::declval<std::ostream>() << std::de
 // in terms of compile times, as we don't introduce and deep template nesting & minimize instantiations.
 
 template <class Type>
-struct Traits {
+struct traits {
     using T = std::decay_t<Type>;
 
     // char types ('char')
@@ -763,11 +763,11 @@ struct Traits {
 // Simplest case of a 'buffer' concept, wraps 'std::string' into a buffer-like API for appending
 // so we can use it in formatters that require an intermediate string for formatting
 
-class StringBuffer {
+class string_buffer {
     std::string& str;
 
 public:
-    StringBuffer(std::string& str) noexcept : str(str) {}
+    string_buffer(std::string& str) noexcept : str(str) {}
 
     void push_string(std::string_view sv) { this->str += sv; }
 
@@ -779,13 +779,13 @@ public:
 
 // Base template
 template <class T, class = void>
-struct Formatter {
+struct formatter {
     static_assert(always_false_v<T>, "No formatter could be deduced for the type.");
 };
 
 // char types ('char')
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_char_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_char_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_chars(1, arg);
@@ -794,16 +794,16 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_char_v>> {
 
 // enum types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_enum_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_enum_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
-        Formatter<std::underlying_type_t<std::decay_t<T>>>{}(buffer, to_underlying(arg));
+        formatter<std::underlying_type_t<std::decay_t<T>>>{}(buffer, to_underlying(arg));
     }
 };
 
 // types with '.string()' ('std::path')
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_path_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_path_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(arg.string());
@@ -812,7 +812,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_path_v>> {
 
 // string-like types ('std::string_view', 'std::string', 'const char*')
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_string_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_string_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(std::string_view{arg});
@@ -821,7 +821,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_string_v>> {
 
 // string-convertible types (custom classes)
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_string_convertible_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_string_convertible_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(std::string{arg});
@@ -830,7 +830,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_string_convertible_v>> {
 
 // boolean types ('bool')
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_bool_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_bool_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string(arg ? "true" : "false");
@@ -839,7 +839,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_bool_v>> {
 
 // integral types ('int', 'std::uint64_t', etc.)
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_integer_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_integer_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         std::array<char, max_chars_int> res;
@@ -852,7 +852,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_integer_v>> {
 
 // floating-point types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_float_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_float_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         std::array<char, max_chars_int> res;
@@ -865,11 +865,11 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_float_v>> {
 
 // 'std::complex'-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_complex_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_complex_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
-        const auto string_formatter = Formatter<std::string_view>{};
-        const auto value_formatter  = Formatter<decltype(arg.real())>{};
+        const auto string_formatter = formatter<std::string_view>{};
+        const auto value_formatter  = formatter<decltype(arg.real())>{};
 
         value_formatter(buffer, arg.real());
         if (arg.imag() >= 0) {
@@ -885,15 +885,15 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_complex_v>> {
 
 // array-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_array_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_array_v>> {
     static constexpr std::string_view prefix    = "[ ";
     static constexpr std::string_view suffix    = " ]";
     static constexpr std::string_view delimiter = ", ";
 
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
-        const auto string_formatter = Formatter<std::string_view>{};
-        const auto value_formatter  = Formatter<typename std::decay_t<T>::value_type>{};
+        const auto string_formatter = formatter<std::string_view>{};
+        const auto value_formatter  = formatter<typename std::decay_t<T>::value_type>{};
 
         string_formatter(buffer, prefix);
         if (arg.begin() != arg.end()) {
@@ -909,14 +909,14 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_array_v>> {
 
 // tuple-like types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_tuple_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_tuple_v>> {
     static constexpr std::string_view prefix    = "< ";
     static constexpr std::string_view suffix    = " >";
     static constexpr std::string_view delimiter = ", ";
 
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
-        const auto string_formatter = Formatter<std::string_view>{};
+        const auto string_formatter = formatter<std::string_view>{};
 
         string_formatter(buffer, prefix);
 
@@ -925,7 +925,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_tuple_v>> {
 
             if constexpr (index != 0) string_formatter(buffer, delimiter);
 
-            Formatter<std::tuple_element_t<index, T>>{}(buffer, element);
+            formatter<std::tuple_element_t<index, T>>{}(buffer, element);
         });
 
         string_formatter(buffer, suffix);
@@ -934,28 +934,28 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_tuple_v>> {
 
 // container adaptor types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_adaptor_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_adaptor_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         const auto& ref = underlying_container_cref(arg);
 
-        Formatter<std::decay_t<decltype(ref)>>{}(buffer, ref);
+        formatter<std::decay_t<decltype(ref)>>{}(buffer, ref);
     }
 };
 
 // <chrono> types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_duration_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_duration_v>> {
     constexpr static std::size_t relevant_units = 3;
 
-    constexpr static std::array<std::string_view, SplitDuration::size> names = {"hours", "min", "sec",
-                                                                                "ms",    "us",  "ns"};
+    constexpr static std::array<std::string_view, split_duration::size> names = {"hours", "min", "sec",
+                                                                                 "ms",    "us",  "ns"};
 
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
 
-        auto string_formatter  = Formatter<std::string_view>{};
-        auto integer_formatter = Formatter<SplitDuration::common_rep>{};
+        auto string_formatter  = formatter<std::string_view>{};
+        auto integer_formatter = formatter<split_duration::common_rep>{};
 
         // Takes 'unit_count' of the highest relevant units and converts them to string,
         // for example with 'unit_count' equal to '3', we will have:
@@ -967,7 +967,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_duration_v>> {
         // timescale <= us      =>   show {    us,  ns      }   =>   string "___ us ___ ns"
         // timescale <= ns      =>   show {    ns           }   =>   string "___ ns"
 
-        const std::array<SplitDuration::common_rep, SplitDuration::size> counts = unit_split(arg).count();
+        const std::array<split_duration::common_rep, split_duration::size> counts = unit_split(arg).count();
 
         for (std::size_t unit = 0; unit < counts.size(); ++unit) {
             if (counts[unit]) {
@@ -991,7 +991,7 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_duration_v>> {
 
 // printable types
 template <class T>
-struct Formatter<T, std::enable_if_t<Traits<T>::is_printable_v>> {
+struct formatter<T, std::enable_if_t<traits<T>::is_printable_v>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) const {
         buffer.push_string((std::ostringstream{} << arg).str());
@@ -1002,9 +1002,9 @@ struct Formatter<T, std::enable_if_t<Traits<T>::is_printable_v>> {
 
 // 'FormattedFloat<T>' types
 template <class T>
-struct Formatter<FormattedFloat<T>, std::enable_if_t<Traits<T>::is_float_v>> {
+struct formatter<formatted_float<T>, std::enable_if_t<traits<T>::is_float_v>> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const FormattedFloat<T>& arg) const {
+    void operator()(Buffer& buffer, const formatted_float<T>& arg) const {
         std::array<char, max_chars_int> res;
 
         const std::size_t serialized =
@@ -1017,9 +1017,9 @@ struct Formatter<FormattedFloat<T>, std::enable_if_t<Traits<T>::is_float_v>> {
 
 // 'FormattedInteger<T>' types
 template <class T>
-struct Formatter<FormattedInteger<T>, std::enable_if_t<Traits<T>::is_integer_v>> {
+struct formatter<formatted_integer<T>, std::enable_if_t<traits<T>::is_integer_v>> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const FormattedInteger<T>& arg) const {
+    void operator()(Buffer& buffer, const formatted_integer<T>& arg) const {
         std::array<char, max_chars_int> res;
 
         const std::size_t serialized =
@@ -1031,13 +1031,13 @@ struct Formatter<FormattedInteger<T>, std::enable_if_t<Traits<T>::is_integer_v>>
 
 // 'AlignedLeft<T>' types
 template <class T>
-struct Formatter<AlignedLeft<T>, void> {
+struct formatter<aligned_left<T>, void> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const AlignedLeft<T>& arg) const {
-        std::string& temp = thread_local_temporary_string();
-        StringBuffer temp_buffer(temp);
+    void operator()(Buffer& buffer, const aligned_left<T>& arg) const {
+        std::string&  temp = thread_local_temporary_string();
+        string_buffer temp_buffer(temp);
 
-        Formatter<T>{}(temp_buffer, arg.value);
+        formatter<T>{}(temp_buffer, arg.value);
 
         const std::size_t size_no_pad   = temp.size();
         const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
@@ -1050,13 +1050,13 @@ struct Formatter<AlignedLeft<T>, void> {
 
 // 'AlignedCenter<T>' types
 template <class T>
-struct Formatter<AlignedCenter<T>, void> {
+struct formatter<aligned_center<T>, void> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const AlignedCenter<T>& arg) const {
-        std::string& temp = thread_local_temporary_string();
-        StringBuffer temp_buffer(temp);
+    void operator()(Buffer& buffer, const aligned_center<T>& arg) const {
+        std::string&  temp = thread_local_temporary_string();
+        string_buffer temp_buffer(temp);
 
-        Formatter<T>{}(temp_buffer, arg.value);
+        formatter<T>{}(temp_buffer, arg.value);
 
         const std::size_t size_no_pad   = temp.size();
         const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
@@ -1071,13 +1071,13 @@ struct Formatter<AlignedCenter<T>, void> {
 
 // 'AlignedRight<T>' types
 template <class T>
-struct Formatter<AlignedRight<T>, void> {
+struct formatter<aligned_right<T>, void> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const AlignedRight<T>& arg) const {
-        std::string& temp = thread_local_temporary_string();
-        StringBuffer temp_buffer(temp);
+    void operator()(Buffer& buffer, const aligned_right<T>& arg) const {
+        std::string&  temp = thread_local_temporary_string();
+        string_buffer temp_buffer(temp);
 
-        Formatter<T>{}(temp_buffer, arg.value);
+        formatter<T>{}(temp_buffer, arg.value);
 
         const std::size_t size_no_pad   = temp.size();
         const std::size_t size_with_pad = max(arg.mod.size, size_no_pad);
@@ -1090,11 +1090,11 @@ struct Formatter<AlignedRight<T>, void> {
 
 // 'Colored<T>' types
 template <class T>
-struct Formatter<Colored<T>, void> {
+struct formatter<colored<T>, void> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const Colored<T>& arg) const {
+    void operator()(Buffer& buffer, const colored<T>& arg) const {
         buffer.push_string(arg.mod.code);
-        Formatter<T>{}(buffer, arg.value);
+        formatter<T>{}(buffer, arg.value);
         buffer.push_string(ansi::reset);
     }
 };
@@ -1120,11 +1120,11 @@ struct Formatter<Colored<T>, void> {
 // --- Message metadata ---
 // ------------------------
 
-using Clock = std::chrono::steady_clock;
+using clock = std::chrono::steady_clock;
 
 // Metadata associated with a logging record, generated once by the 'Logger' and distributed to all sinks
-struct Record {
-    Clock::duration  elapsed;
+struct record_type {
+    clock::duration  elapsed;
     std::string_view file;
     std::size_t      line;
 };
@@ -1134,36 +1134,36 @@ struct Record {
 
 namespace policy {
 
-enum class Type { FILE, STREAM };
+enum class type { file, stream };
 
-enum class Level { ERR = 0, WARN = 1, NOTE = 2, INFO = 3, DEBUG = 4, TRACE = 5 };
+enum class level { err = 0, warn = 1, note = 2, info = 3, debug = 4, trace = 5 };
 
-enum class Color { NONE, ANSI };
+enum class color { none, ansi };
 
-enum class Format {
-    DATE     = 1 << 0,
-    TITLE    = 1 << 1,
-    THREAD   = 1 << 2,
-    UPTIME   = 1 << 3,
-    CALLSITE = 1 << 4,
-    LEVEL    = 1 << 5,
-    NONE     = 0,
-    FULL     = DATE | TITLE | THREAD | UPTIME | CALLSITE | LEVEL
+enum class format {
+    date     = 1 << 0,
+    title    = 1 << 1,
+    thread   = 1 << 2,
+    uptime   = 1 << 3,
+    callsite = 1 << 4,
+    level    = 1 << 5,
+    none     = 0,
+    full     = date | title | thread | uptime | callsite | level
 }; // bitmask enum
 
-[[nodiscard]] constexpr Format operator|(Format a, Format b) noexcept {
-    return static_cast<Format>(to_underlying(a) | to_underlying(b));
+[[nodiscard]] constexpr format operator|(format a, format b) noexcept {
+    return static_cast<format>(to_underlying(a) | to_underlying(b));
 }
 
-[[nodiscard]] constexpr Format operator&(Format a, Format b) noexcept {
-    return static_cast<Format>(to_underlying(a) & to_underlying(b));
+[[nodiscard]] constexpr format operator&(format a, format b) noexcept {
+    return static_cast<format>(to_underlying(a) & to_underlying(b));
 }
 
-enum class Buffering { NONE, FIXED, TIMED };
+enum class buffering { none, fixed, timed };
 
-enum class Flushing { SYNC, ASYNC };
+enum class flushing { sync, async };
 
-enum class Threading { UNSAFE, SAFE };
+enum class threading { unsafe, safe };
 
 } // namespace policy
 
@@ -1171,19 +1171,19 @@ enum class Threading { UNSAFE, SAFE };
 // --- Component: Output ---
 // =========================
 
-template <policy::Type type>
-class Output;
+template <policy::type type>
+class output_type;
 
 // --- File output ---
 // -------------------
 
 template <>
-class Output<policy::Type::FILE> {
+class output_type<policy::type::file> {
     std::ofstream file;
 
 public:
-    Output(const std::string& name) : file(name) {}
-    Output(std::ofstream&& file) : file(std::move(file)) {}
+    output_type(const std::string& name) : file(name) {}
+    output_type(std::ofstream&& file) : file(std::move(file)) {}
 
     void flush_string(std::string_view sv) {
         this->file.write(sv.data(), sv.size());
@@ -1202,11 +1202,11 @@ public:
 // ---------------------
 
 template <>
-class Output<policy::Type::STREAM> {
+class output_type<policy::type::stream> {
     std::ostream& os;
 
 public:
-    Output(std::ostream& os) noexcept : os(os) {}
+    output_type(std::ostream& os) noexcept : os(os) {}
 
     void flush_string(std::string_view sv) {
         this->os.write(sv.data(), sv.size());
@@ -1225,18 +1225,18 @@ public:
 // --- Component: Flusher ---
 // ==========================
 
-template <class OutputType, policy::Flushing flushing>
-class Flusher;
+template <class OutputType, policy::flushing flushing>
+class flusher_type;
 
 // --- Synchonous flushing ---
 // ---------------------------
 
 template <class OutputType>
-class Flusher<OutputType, policy::Flushing::SYNC> {
+class flusher_type<OutputType, policy::flushing::sync> {
     OutputType output;
 
 public:
-    Flusher(OutputType&& output) : output(std::move(output)) {}
+    flusher_type(OutputType&& output) : output(std::move(output)) {}
 
     void flush_string(std::string_view sv) { this->output.flush_string(sv); }
 
@@ -1247,15 +1247,15 @@ public:
 // ----------------------
 
 template <class OutputType>
-class Flusher<OutputType, policy::Flushing::ASYNC> {
+class flusher_type<OutputType, policy::flushing::async> {
     OutputType output; // destruction order matters here, 'output' should be available until 'worker' thread joins
 
-    std::unique_ptr<WorkerThread> worker = std::make_unique<WorkerThread>();
+    std::unique_ptr<worker_thread> worker = std::make_unique<worker_thread>();
 
 public:
-    Flusher(OutputType&& output) : output(std::move(output)) {}
+    flusher_type(OutputType&& output) : output(std::move(output)) {}
 
-    Flusher(Flusher&& other) : output(std::move(other.output)), worker(std::move(other.worker)) {}
+    flusher_type(flusher_type&& other) : output(std::move(other.output)), worker(std::move(other.worker)) {}
 
     void flush_string(std::string_view sv) {
         this->worker->detached_task([&out = output, str = std::string(sv)]() { out.flush_string(str); });
@@ -1273,20 +1273,20 @@ public:
 // --- Component: Buffer ---
 // =========================
 
-template <class FlusherType, policy::Buffering buffering>
-class Buffer;
+template <class FlusherType, policy::buffering buffering>
+class buffer_type;
 
 // --- Instant buffering ---
 // -------------------------
 
 template <class FlusherType>
-class Buffer<FlusherType, policy::Buffering::NONE> {
+class buffer_type<FlusherType, policy::buffering::none> {
     FlusherType flusher;
 
 public:
-    Buffer(FlusherType&& flusher) : flusher(std::move(flusher)) {}
+    buffer_type(FlusherType&& flusher) : flusher(std::move(flusher)) {}
 
-    void push_record(const Record&) const noexcept {} // only matters for timed buffer
+    void push_record(const record_type&) const noexcept {} // only matters for timed buffer
 
     void push_string(std::string_view sv) { this->flusher.flush_string(sv); }
 
@@ -1297,7 +1297,7 @@ public:
 // -----------------------
 
 template <class FlusherType>
-class Buffer<FlusherType, policy::Buffering::FIXED> {
+class buffer_type<FlusherType, policy::buffering::fixed> {
     constexpr static std::size_t size = buffering_size;
 
     FlusherType            flusher;
@@ -1305,21 +1305,21 @@ class Buffer<FlusherType, policy::Buffering::FIXED> {
     std::size_t            cursor{};
 
 public:
-    Buffer(FlusherType&& output) : flusher(std::move(output)) {}
+    buffer_type(FlusherType&& output) : flusher(std::move(output)) {}
 
     // Buffered flusher need non-trivial destructor and move semantics to ensure correct flushing of
     // the remaining buffer upon destruction. Moved-from buffer should not flush upon destruction.
-    Buffer(Buffer&& other) : flusher(std::move(other.flusher)), buffer(other.buffer), cursor(other.cursor) {
+    buffer_type(buffer_type&& other) : flusher(std::move(other.flusher)), buffer(other.buffer), cursor(other.cursor) {
         other.cursor = size;
     }
 
-    ~Buffer() {
+    ~buffer_type() {
         if (this->cursor == size) return;
 
         this->flusher.flush_string(std::string_view{this->buffer.data(), this->cursor});
     }
 
-    void push_record(const Record&) const noexcept {} // only matters for timed buffer
+    void push_record(const record_type&) const noexcept {} // only matters for timed buffer
 
     void push_string(std::string_view sv) {
         while (true) {
@@ -1372,10 +1372,10 @@ public:
 // -----------------------
 
 template <class FlusherType>
-class Buffer<FlusherType, policy::Buffering::TIMED> {
+class buffer_type<FlusherType, policy::buffering::timed> {
     FlusherType     flusher;
     std::string     buffer;
-    Clock::duration last_flush_uptime{};
+    clock::duration last_flush_uptime{};
 
     void flush() {
         this->flusher.flush_string(this->buffer);
@@ -1386,19 +1386,19 @@ class Buffer<FlusherType, policy::Buffering::TIMED> {
     }
 
 public:
-    Buffer(FlusherType&& flusher) : flusher(std::move(flusher)) {}
+    buffer_type(FlusherType&& flusher) : flusher(std::move(flusher)) {}
 
-    Buffer(Buffer&& other)
+    buffer_type(buffer_type&& other)
         : flusher(std::move(other).flusher), buffer(std::move(other).buffer),
           last_flush_uptime(other.last_flush_uptime) {
         other.buffer.clear(); // ensures moved-from buffer will not flush in destructor
     }
 
-    ~Buffer() {
+    ~buffer_type() {
         if (!this->buffer.empty()) this->flush();
     }
 
-    void push_record(const Record& record) noexcept {
+    void push_record(const record_type& record) noexcept {
         // retrieving timestamps is expensive, we can reuse the one already produced by the logger
 
         if (record.elapsed - this->last_flush_uptime > buffering_time) {
@@ -1478,24 +1478,24 @@ static_assert(width_level == name_err.size());
 // --- Component ---
 // -----------------
 
-// Component that wraps 'Formatter' with sink-specific formatting
+// Component that wraps 'formatter' with sink-specific formatting
 
-template <class BufferType, policy::Level level, policy::Color color, policy::Format format>
-struct Writer {
+template <class BufferType, policy::level level, policy::color color, policy::format format>
+struct writer_type {
 private:
     BufferType buffer;
 
-    constexpr static bool has_color = color == policy::Color::ANSI;
+    constexpr static bool has_color = color == policy::color::ansi;
 
-    constexpr static bool format_date  = to_bool(format & policy::Format::DATE);
-    constexpr static bool format_title = to_bool(format & policy::Format::TITLE);
+    constexpr static bool format_date  = to_bool(format & policy::format::date);
+    constexpr static bool format_title = to_bool(format & policy::format::title);
 
     constexpr static auto delimiter_date = config::delimiter_front;
 
-    constexpr static bool format_thread   = to_bool(format & policy::Format::THREAD);
-    constexpr static bool format_uptime   = to_bool(format & policy::Format::UPTIME);
-    constexpr static bool format_callsite = to_bool(format & policy::Format::CALLSITE);
-    constexpr static bool format_level    = to_bool(format & policy::Format::LEVEL);
+    constexpr static bool format_thread   = to_bool(format & policy::format::thread);
+    constexpr static bool format_uptime   = to_bool(format & policy::format::uptime);
+    constexpr static bool format_callsite = to_bool(format & policy::format::callsite);
+    constexpr static bool format_level    = to_bool(format & policy::format::level);
     constexpr static bool format_message  = true;
 
     constexpr static bool front_is_thread   = format_thread;
@@ -1512,52 +1512,52 @@ private:
     constexpr static auto delimiter_message  = front_is_message ? config::delimiter_front : config::delimiter_mid;
 
     void write_thread() {
-        using styled_type     = AlignedLeft<int>;
+        using styled_type     = aligned_left<int>;
         const styled_type arg = this_thread_linear_id() | align_left(config::width_thread);
 
-        Formatter<styled_type>{}(this->buffer, arg);
+        formatter<styled_type>{}(this->buffer, arg);
     }
 
-    void write_uptime(const Record& record) {
-        using styled_type     = AlignedRight<FormattedFloat<double>>;
+    void write_uptime(const record_type& record) {
+        using styled_type     = aligned_right<formatted_float<double>>;
         const styled_type arg = Sec(record.elapsed).count() | fixed(2) | align_right(config::width_uptime);
 
-        Formatter<styled_type>{}(this->buffer, arg);
+        formatter<styled_type>{}(this->buffer, arg);
     }
 
-    void write_callsite([[maybe_unused]] const Record& record) {
-        using styled_file      = AlignedRight<const std::string_view&>;
+    void write_callsite([[maybe_unused]] const record_type& record) {
+        using styled_file      = aligned_right<const std::string_view&>;
         const styled_file file = record.file | align_right(config::width_callsite_name);
 
-        using styled_line      = AlignedLeft<const std::size_t&>;
+        using styled_line      = aligned_left<const std::size_t&>;
         const styled_line line = record.line | align_left(config::width_callsite_line);
 
-        Formatter<styled_file>{}(this->buffer, file);
-        Formatter<char>{}(this->buffer, ':');
-        Formatter<styled_line>{}(this->buffer, line);
+        formatter<styled_file>{}(this->buffer, file);
+        formatter<char>{}(this->buffer, ':');
+        formatter<styled_line>{}(this->buffer, line);
     }
 
-    template <policy::Level message_level>
+    template <policy::level message_level>
     void write_level() {
         // clang-format off
-        if constexpr (message_level == policy::Level::ERR  ) this->buffer.push_string(config::name_err  );
-        if constexpr (message_level == policy::Level::WARN ) this->buffer.push_string(config::name_warn );
-        if constexpr (message_level == policy::Level::NOTE ) this->buffer.push_string(config::name_note );
-        if constexpr (message_level == policy::Level::INFO ) this->buffer.push_string(config::name_info );
-        if constexpr (message_level == policy::Level::DEBUG) this->buffer.push_string(config::name_debug);
-        if constexpr (message_level == policy::Level::TRACE) this->buffer.push_string(config::name_trace);
+        if constexpr (message_level == policy::level::err  ) this->buffer.push_string(config::name_err  );
+        if constexpr (message_level == policy::level::warn ) this->buffer.push_string(config::name_warn );
+        if constexpr (message_level == policy::level::note ) this->buffer.push_string(config::name_note );
+        if constexpr (message_level == policy::level::info ) this->buffer.push_string(config::name_info );
+        if constexpr (message_level == policy::level::debug) this->buffer.push_string(config::name_debug);
+        if constexpr (message_level == policy::level::trace) this->buffer.push_string(config::name_trace);
         // clang-format on
     }
 
-    template <policy::Level message_level>
+    template <policy::level message_level>
     void write_color_message() {
         // clang-format off
-        if constexpr (message_level == policy::Level::ERR  ) this->buffer.push_string(config::color_err  );
-        if constexpr (message_level == policy::Level::WARN ) this->buffer.push_string(config::color_warn );
-        if constexpr (message_level == policy::Level::NOTE ) this->buffer.push_string(config::color_note );
-        if constexpr (message_level == policy::Level::INFO ) this->buffer.push_string(config::color_info );
-        if constexpr (message_level == policy::Level::DEBUG) this->buffer.push_string(config::color_debug);
-        if constexpr (message_level == policy::Level::TRACE) this->buffer.push_string(config::color_trace);
+        if constexpr (message_level == policy::level::err  ) this->buffer.push_string(config::color_err  );
+        if constexpr (message_level == policy::level::warn ) this->buffer.push_string(config::color_warn );
+        if constexpr (message_level == policy::level::note ) this->buffer.push_string(config::color_note );
+        if constexpr (message_level == policy::level::info ) this->buffer.push_string(config::color_info );
+        if constexpr (message_level == policy::level::debug) this->buffer.push_string(config::color_debug);
+        if constexpr (message_level == policy::level::trace) this->buffer.push_string(config::color_trace);
         // clang-format on
     }
 
@@ -1565,15 +1565,15 @@ private:
 
     void write_color_reset() { this->buffer.push_string(ansi::reset); }
 
-    template <policy::Level message_level, class T>
+    template <policy::level message_level, class T>
     void write_arg(const T& arg) {
-        Formatter<T>{}(this->buffer, arg);
+        formatter<T>{}(this->buffer, arg);
     }
 
     // Color modifier requires special handling at the logger level since we need to properly escape & restore
     // current logging level color. This wouldn't be required if ANSI codes could be nested.
-    template <policy::Level message_level, class T>
-    void write_arg(const Colored<T>& arg) {
+    template <policy::level message_level, class T>
+    void write_arg(const colored<T>& arg) {
         // Switch to message color
         if constexpr (has_color) this->write_color_reset();
         if constexpr (has_color) this->buffer.push_string(arg.mod.code);
@@ -1654,8 +1654,8 @@ private:
         if constexpr (has_color) this->write_color_reset();
     }
 
-    template <policy::Level message_level, class... Args>
-    void write_message(const Record& record, const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void write_message(const record_type& record, const Args&... args) {
         // Start color
         if constexpr (has_color) this->write_color_message<message_level>();
 
@@ -1681,14 +1681,14 @@ private:
     }
 
 public:
-    Writer(BufferType&& buffer) : buffer(std::move(buffer)) {}
+    writer_type(BufferType&& buffer) : buffer(std::move(buffer)) {}
 
     void header() {
         if constexpr (format_date || format_title) this->write_header();
     }
 
-    template <policy::Level message_level, class... Args>
-    void message([[maybe_unused]] const Record& record, [[maybe_unused]] const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void message([[maybe_unused]] const record_type& record, [[maybe_unused]] const Args&... args) {
         if constexpr (message_level <= level) this->write_message<message_level>(record, args...);
         // Note: Both '[[maybe_unused]]' and splitting 'write_message()' into a separate method are
         //       necessary to prevent MSVC from complaining about unused code at W4 warning level
@@ -1700,23 +1700,23 @@ public:
 // --- Component: Protector ---
 // ============================
 
-template <class WriterType, policy::Threading>
-class Protector;
+template <class WriterType, policy::threading>
+class protector_type;
 
 // --- Thread-unsafe writing ---
 // -----------------------------
 
 template <class WriterType>
-class Protector<WriterType, policy::Threading::UNSAFE> {
+class protector_type<WriterType, policy::threading::unsafe> {
     WriterType writer;
 
 public:
-    Protector(WriterType&& writer) : writer(std::move(writer)) {}
+    protector_type(WriterType&& writer) : writer(std::move(writer)) {}
 
     void header() { this->writer.header(); }
 
-    template <policy::Level message_level, class... Args>
-    void message(const Record& record, const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void message(const record_type& record, const Args&... args) {
         this->writer.template message<message_level>(record, args...);
     }
 };
@@ -1725,21 +1725,21 @@ public:
 // ---------------------------
 
 template <class WriterType>
-class Protector<WriterType, policy::Threading::SAFE> {
+class protector_type<WriterType, policy::threading::safe> {
     WriterType writer;
     std::mutex mutex;
 
 public:
-    Protector(WriterType&& writer) : writer(std::move(writer)) {}
+    protector_type(WriterType&& writer) : writer(std::move(writer)) {}
 
-    Protector(Protector&& other) : writer(std::move(other.writer)) {}
+    protector_type(protector_type&& other) : writer(std::move(other.writer)) {}
     // we assume move to be thread-safe since it should only be done in logger constructor which is thread-safe
     // by itself due being either 'static' or function-local, otherwise we'd need to lock 'other.mutex'
 
     void header() { this->writer.header(); }
 
-    template <policy::Level message_level, class... Args>
-    void message(const Record& record, const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void message(const record_type& record, const Args&... args) {
         const std::lock_guard lock(this->mutex);
         this->writer.template message<message_level>(record, args...);
     }
@@ -1753,47 +1753,50 @@ public:
 
 // clang-format off
 template <
-    policy::Type      type,
-    policy::Level     level     = (type == policy::Type::STREAM) ? policy::Level::INFO : policy::Level::TRACE,
-    policy::Color     color     = (type == policy::Type::STREAM) ? policy::Color::ANSI : policy::Color::NONE,
-    policy::Format    format    = policy::Format::FULL,
-    policy::Buffering buffering = (type == policy::Type::STREAM) ? policy::Buffering::NONE : policy::Buffering::FIXED,
-    policy::Flushing  flushing  = policy::Flushing::SYNC,
-    policy::Threading threading = policy::Threading::SAFE
+    policy::type      type,
+    policy::level     level     = (type == policy::type::stream) ? policy::level::info : policy::level::trace,
+    policy::color     color     = (type == policy::type::stream) ? policy::color::ansi : policy::color::none,
+    policy::format    format    = policy::format::full,
+    policy::buffering buffering = (type == policy::type::stream) ? policy::buffering::none : policy::buffering::fixed,
+    policy::flushing  flushing  = policy::flushing::sync,
+    policy::threading threading = policy::threading::safe
 >
 // clang-format on
-class Sink {
-    using output_type    = Output<type>;
-    using flusher_type   = Flusher<output_type, flushing>;
-    using buffer_type    = Buffer<flusher_type, buffering>;
-    using writer_type    = Writer<buffer_type, level, color, format>;
-    using protector_type = Protector<writer_type, threading>;
+class sink {
+    using sink_output_type    = output_type<type>;
+    using sink_flusher_type   = flusher_type<sink_output_type, flushing>;
+    using sink_buffer_type    = buffer_type<sink_flusher_type, buffering>;
+    using sink_writer_type    = writer_type<sink_buffer_type, level, color, format>;
+    using sink_protector_type = protector_type<sink_writer_type, threading>;
 
-    protector_type protector;
+    sink_protector_type protector;
 
 public:
-    Sink(protector_type&& protector) : protector(std::move(protector)) {}
+    sink(sink_protector_type&& protector) : protector(std::move(protector)) {}
 
     void header() { this->protector.header(); }
 
-    template <policy::Level message_level, class... Args>
-    void message(const Record& record, const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void message(const record_type& record, const Args&... args) {
         this->protector.template message<message_level>(record, args...);
     }
 
     // Stream sink preset
-    Sink(std::ostream& os) : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(os)))))) {}
+    sink(std::ostream& os)
+        : sink(sink_protector_type(sink_writer_type(sink_buffer_type(sink_flusher_type(sink_output_type(os)))))) {}
     // File sink preset
-    Sink(std::ofstream&& file)
-        : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(std::move(file))))))) {}
-    Sink(std::string_view name)
-        : Sink(protector_type(writer_type(buffer_type(flusher_type(output_type(std::string(name))))))) {}
+    sink(std::ofstream&& file)
+        : sink(sink_protector_type(
+              sink_writer_type(sink_buffer_type(sink_flusher_type(sink_output_type(std::move(file))))))) {}
+    sink(std::string_view name)
+        : sink(sink_protector_type(
+              sink_writer_type(sink_buffer_type(sink_flusher_type(sink_output_type(std::string(name))))))) {}
 };
 
 // CTAD for presets
-Sink(std::ostream&) -> Sink<policy::Type::STREAM>;
-Sink(std::ofstream&&) -> Sink<policy::Type::FILE>;
-Sink(std::string_view) -> Sink<policy::Type::FILE>;
+sink(std::ostream&) -> sink<policy::type::stream>;
+sink(std::ofstream&&) -> sink<policy::type::file>;
+sink(std::string_view) -> sink<policy::type::file>;
 
 // =========================
 // --- Component: Logger ---
@@ -1823,53 +1826,53 @@ Sink(std::string_view) -> Sink<policy::Type::FILE>;
 
 #define utl_log_member_alias(template_params_, function_params_, args_)                                                \
     template <template_params_>                                                                                        \
-    void err(function_params_, SourceLocation location = SourceLocation::current()) {                                  \
-        this->message<policy::Level::ERR>(location, args_);                                                            \
+    void err(function_params_, source_location location = source_location::current()) {                                \
+        this->message<policy::level::err>(location, args_);                                                            \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void warn(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
-        this->message<policy::Level::WARN>(location, args_);                                                           \
+    void warn(function_params_, source_location location = source_location::current()) {                               \
+        this->message<policy::level::warn>(location, args_);                                                           \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void note(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
-        this->message<policy::Level::NOTE>(location, args_);                                                           \
+    void note(function_params_, source_location location = source_location::current()) {                               \
+        this->message<policy::level::note>(location, args_);                                                           \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void info(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
-        this->message<policy::Level::INFO>(location, args_);                                                           \
+    void info(function_params_, source_location location = source_location::current()) {                               \
+        this->message<policy::level::info>(location, args_);                                                           \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void debug(function_params_, SourceLocation location = SourceLocation::current()) {                                \
-        this->message<policy::Level::DEBUG>(location, args_);                                                          \
+    void debug(function_params_, source_location location = source_location::current()) {                              \
+        this->message<policy::level::debug>(location, args_);                                                          \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void trace(function_params_, SourceLocation location = SourceLocation::current()) {                                \
-        this->message<policy::Level::TRACE>(location, args_);                                                          \
+    void trace(function_params_, source_location location = source_location::current()) {                              \
+        this->message<policy::level::trace>(location, args_);                                                          \
     }
 
 #define utl_log_function_alias(template_params_, function_params_, args_)                                              \
     template <template_params_>                                                                                        \
-    void err(function_params_, SourceLocation location = SourceLocation::current()) {                                  \
+    void err(function_params_, source_location location = source_location::current()) {                                \
         default_logger().err(args_, location);                                                                         \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void warn(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+    void warn(function_params_, source_location location = source_location::current()) {                               \
         default_logger().warn(args_, location);                                                                        \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void note(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+    void note(function_params_, source_location location = source_location::current()) {                               \
         default_logger().note(args_, location);                                                                        \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void info(function_params_, SourceLocation location = SourceLocation::current()) {                                 \
+    void info(function_params_, source_location location = source_location::current()) {                               \
         default_logger().info(args_, location);                                                                        \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void debug(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+    void debug(function_params_, source_location location = source_location::current()) {                              \
         default_logger().debug(args_, location);                                                                       \
     }                                                                                                                  \
     template <template_params_>                                                                                        \
-    void trace(function_params_, SourceLocation location = SourceLocation::current()) {                                \
+    void trace(function_params_, source_location location = source_location::current()) {                              \
         default_logger().trace(args_, location);                                                                       \
     }
 
@@ -1879,15 +1882,15 @@ Sink(std::string_view) -> Sink<policy::Type::FILE>;
 // Component that wraps a number of sinks and distributes records to them
 
 template <class... Sinks>
-class Logger {
+class logger {
     std::tuple<Sinks...> sinks;
-    Clock::time_point    creation_time_point = Clock::now();
+    clock::time_point    creation_time_point = clock::now();
 
-    template <policy::Level message_level, class... Args>
-    void message(SourceLocation location, const Args&... args) {
+    template <policy::level message_level, class... Args>
+    void message(source_location location, const Args&... args) {
         // Get record info
-        Record record;
-        record.elapsed = Clock::now() - this->creation_time_point;
+        record_type record;
+        record.elapsed = clock::now() - this->creation_time_point;
 
         std::string_view path = location.function_name();
 
@@ -1906,7 +1909,7 @@ class Logger {
     }
 
 public:
-    Logger(Sinks&&... sinks) : sinks(std::move(sinks)...) {
+    logger(Sinks&&... sinks) : sinks(std::move(sinks)...) {
         tuple_for_each(this->sinks, [&](auto&& sink) { sink.header(); }); // [Important!]
         // any buffer operations should happen AFTER the sink construction, since during construction
         // buffer & output pointers can change, which would break the async case (single-threaded case is fine)
@@ -2039,8 +2042,9 @@ public:
 // =============================
 
 inline auto& default_logger() {
-    static auto logger = Logger{Sink{std::cout}, Sink{"latest.log"}};
-    return logger;
+    static auto instance = logger{sink{std::cout}, sink{"latest.log"}};
+
+    return instance;
 }
 
 // Expose default logger err() / warn() / note() / info() / debug() / trace() as functions in the global namespace
@@ -2162,18 +2166,21 @@ utl_log_function_alias( // 18
     utl_log_hold(         a,          b,          c,          d,          e,          f,          g,          h,          i,
                           j,          k,          l,          m,          n,          o,          p,          q,          r)
 )
-    // clang-format on
 
-    // ================
-    // --- Printing ---
-    // ================
+// ================
+// --- Printing ---
+// ================
 
-    template <class... Args>
-    void stringify_append(std::string& str, const Args&... args) {
+template <class... Args>
+void stringify_append(std::string& str, const Args&... args) {
     // Format all 'args' into a string using the same buffer abstraction as logging sinks, this doesn't add overhead
-    StringBuffer buffer(str);
-    (Formatter<Args>{}(buffer, args), ...);
+    string_buffer buffer(str);
+    (formatter<Args>{}(buffer, args), ...);
 }
+
+// clang-format on
+
+// Note: Placing 'clang-format on' higher confuses clang-format into believing it has to indent stuff?
 
 template <class... Args>
 std::string stringify(const Args&... args) {
@@ -2202,10 +2209,10 @@ void println(const Args&... args) {
 
 namespace utl::log {
 
-using impl::Formatter;
+using impl::formatter;
 
-using impl::Logger;
-using impl::Sink;
+using impl::logger;
+using impl::sink;
 
 namespace policy = impl::policy;
 

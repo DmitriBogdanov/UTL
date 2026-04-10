@@ -4,9 +4,9 @@ int main() {
     using namespace utl;
     
     // Create local logger
-    auto logger = log::Logger{
-        log::Sink{"log.txt"},
-        log::Sink{std::cout}
+    auto logger = log::logger{
+        log::sink{"log.txt"},
+        log::sink{std::cout}
     };
     
     // Use it

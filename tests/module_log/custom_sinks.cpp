@@ -10,20 +10,20 @@
 
 // Tests styling stringification output
 
-using namespace log::policy;
+namespace pl = log::policy;
 
-constexpr auto type   = Type::STREAM;
-constexpr auto level  = Level::TRACE;
-constexpr auto color  = Color::NONE;
-constexpr auto format = Format::TITLE | Format::LEVEL;
+constexpr auto type   = pl::type::stream;
+constexpr auto level  = pl::level::trace;
+constexpr auto color  = pl::color::none;
+constexpr auto format = pl::format::title | pl::format::level;
 // don't format time dependent fields that are not reproducible
 
-template <Buffering buffering, Flushing flushing, Threading threading>
+template <pl::buffering buffering, pl::flushing flushing, pl::threading threading>
 void test_config() {
     std::ostringstream oss;
 
     {
-        auto logger = log::Logger{log::Sink<type, level, color, format, buffering, flushing, threading>{oss}};
+        auto logger = log::logger{log::sink<type, level, color, format, buffering, flushing, threading>{oss}};
 
         logger.info("Message 1");
         logger.note("Message 2");
@@ -60,23 +60,25 @@ TEST_CASE("Sinks / Configuration") {
 
         for (std::size_t task = 0; task < tasks_per_repeat; ++task) {
             println("========================\n> Repeat = ", repeat, ", task = ", task);
-            
+
             futures[task] = std::async([] {
-                test_config<Buffering::NONE, Flushing::SYNC, Threading::UNSAFE>();
-                test_config<Buffering::NONE, Flushing::ASYNC, Threading::UNSAFE>();
-                test_config<Buffering::NONE, Flushing::SYNC, Threading::SAFE>();
-                test_config<Buffering::NONE, Flushing::ASYNC, Threading::SAFE>();
-                test_config<Buffering::FIXED, Flushing::SYNC, Threading::UNSAFE>();
-                test_config<Buffering::FIXED, Flushing::ASYNC, Threading::UNSAFE>();
-                test_config<Buffering::FIXED, Flushing::SYNC, Threading::SAFE>();
-                test_config<Buffering::FIXED, Flushing::ASYNC, Threading::SAFE>();
-                test_config<Buffering::TIMED, Flushing::SYNC, Threading::UNSAFE>();
-                test_config<Buffering::TIMED, Flushing::ASYNC, Threading::UNSAFE>();
-                test_config<Buffering::TIMED, Flushing::SYNC, Threading::SAFE>();
-                test_config<Buffering::TIMED, Flushing::ASYNC, Threading::SAFE>();
+                // clang-format off
+                test_config<pl::buffering::none , pl::flushing::sync , pl::threading::unsafe>();
+                test_config<pl::buffering::none , pl::flushing::async, pl::threading::unsafe>();
+                test_config<pl::buffering::none , pl::flushing::sync , pl::threading::safe  >();
+                test_config<pl::buffering::none , pl::flushing::async, pl::threading::safe  >();
+                test_config<pl::buffering::fixed, pl::flushing::sync , pl::threading::unsafe>();
+                test_config<pl::buffering::fixed, pl::flushing::async, pl::threading::unsafe>();
+                test_config<pl::buffering::fixed, pl::flushing::sync , pl::threading::safe  >();
+                test_config<pl::buffering::fixed, pl::flushing::async, pl::threading::safe  >();
+                test_config<pl::buffering::timed, pl::flushing::sync , pl::threading::unsafe>();
+                test_config<pl::buffering::timed, pl::flushing::async, pl::threading::unsafe>();
+                test_config<pl::buffering::timed, pl::flushing::sync , pl::threading::safe  >();
+                test_config<pl::buffering::timed, pl::flushing::async, pl::threading::safe  >();
+                // clang-format on
             });
         }
-        
+
         for (std::size_t task = 0; task < tasks_per_repeat; ++task) futures[task].wait();
     }
 }

@@ -48,8 +48,8 @@ void benchmark_logging_overhead_raw() {
     };
 
     // Create logging sinks
-    auto logger = log::Logger{log::Sink<log::policy::Type::FILE, log::policy::Level::TRACE, log::policy::Color::NONE,
-                                        log::policy::Format::NONE>{"temp/log1.log"}};
+    auto logger = log::logger{log::sink<log::policy::type::file, log::policy::level::trace, log::policy::color::none,
+                                        log::policy::format::none>{"temp/log1.log"}};
 
     std::ofstream log_file_2("temp/log2.log");
     std::ofstream log_file_3("temp/log3.log");

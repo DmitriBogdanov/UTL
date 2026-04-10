@@ -3,24 +3,24 @@
 using namespace utl;
 
 // Custom type
-struct Vec3 { double x, y, z; };
+struct vec3 { double x, y, z; };
 
-// Extend formatter to support 'Vec3'
+// Extend formatter to support 'vec3'
 template <>
-struct log::Formatter<Vec3> {
+struct log::formatter<vec3> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const Vec3& vec) {
-        Formatter<const char*>{}(buffer, "Vec3{");
-        Formatter<     double>{}(buffer, vec.x  );
-        Formatter<const char*>{}(buffer, ", "   );
-        Formatter<     double>{}(buffer, vec.y  );
-        Formatter<const char*>{}(buffer, ", "   );
-        Formatter<     double>{}(buffer, vec.z  );
-        Formatter<const char*>{}(buffer, "}"    );
+    void operator()(Buffer& buffer, const vec3& vec) {
+        formatter<const char*>{}(buffer, "vec3{");
+        formatter<     double>{}(buffer, vec.x  );
+        formatter<const char*>{}(buffer, ", "   );
+        formatter<     double>{}(buffer, vec.y  );
+        formatter<const char*>{}(buffer, ", "   );
+        formatter<     double>{}(buffer, vec.z  );
+        formatter<const char*>{}(buffer, "}"    );
     }
 };
 
 int main() {
     // Test
-    assert(log::stringify(Vec3{1, 2, 3}) == "Vec3{1, 2, 3}");
+    assert(log::stringify(vec3{1, 2, 3}) == "vec3{1, 2, 3}");
 }

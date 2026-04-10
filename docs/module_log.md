@@ -509,7 +509,7 @@ Output:
 > [!Tip]
 > The exact same syntax can be used with `println()` / `stringify()`, which is both performant and convenient even outside of logging.
 
-[ [Run this code](https://godbolt.org/z/9cYvx97Tz) ] [ [Open source file](../examples/module_log/formatting_modifiers.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/formatting_modifiers.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -550,15 +550,15 @@ Output:
 
 ### Local logger
 
-[ [Run this code](https://godbolt.org/z/eMvzf88da) ] [ [Open source file](../examples/module_log/local_logger.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/local_logger.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Create a local logger
-auto logger = log::Logger{
-    log::Sink{"log.txt"},
-    log::Sink{std::cout}
+auto logger = log::logger{
+    log::sink{"log.txt"},
+    log::sink{std::cout}
 };
 
 // Use it
@@ -582,19 +582,19 @@ Output:
 
 ### Global logger
 
-[ [Run this code](https://godbolt.org/z/Y9Ynjczsj) ] [ [Open source file](../examples/module_log/global_logger.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/global_logger.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Create global logger
 auto& logger() {
-    static auto logger = log::Logger{
-        log::Sink{"log.txt"},
-        log::Sink{std::cout}
+    static auto instance = log::logger{
+        log::sink{"log.txt"},
+        log::sink{std::cout}
     };
     
-    return logger;
+    return instance;
 }
 
 // ...
@@ -623,21 +623,21 @@ Output:
 > [!Tip]
 > Most of the time default configuration works well enough: stream sinks are colored and flush instantly, while file sinks are buffered, async and stripped of any color codes.
 
-[ [Run this code](https://godbolt.org/z/qrKn834xW) ] [ [Open source file](../examples/module_log/sink_configuration.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/sink_configuration.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Verbose async file logger
-auto logger = log::Logger{
-    log::Sink<
-        log::policy::Type::FILE,
-        log::policy::Level::TRACE,
-        log::policy::Color::NONE,
-        log::policy::Format::FULL,
-        log::policy::Buffering::FIXED,
-        log::policy::Flushing::ASYNC
-        log::policy::Threading::SAFE
+auto logger = log::logger{
+    log::sink<
+        log::policy::type::file,
+        log::policy::level::trace,
+        log::policy::color::none,
+        log::policy::format::full,
+        log::policy::buffering::fixed,
+        log::policy::flushing::async,
+        log::policy::threading::safe
     >{"latest.log"}
 };
 
@@ -664,46 +664,46 @@ logger.warn("Message 3");
 > [!Tip]
 > This can also be used to override behavior for types that are already supported, user-defined explicit specialization always gets higher priority.
 
-[ [Run this code](https://godbolt.org/z/hYeqavYEq) ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_types.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_types.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Custom type
-struct Vec3 { double x, y, z; };
+struct vec3 { double x, y, z; };
 
-// Extend formatter to support 'Vec3'
+// Extend formatter to support 'vec3'
 template <>
-struct log::Formatter<Vec3> {
+struct log::formatter<vec3> {
     template <class Buffer>
-    void operator()(Buffer& buffer, const Vec3& vec) {
-        Formatter<const char*>{}(buffer, "Vec3{");
-        Formatter<     double>{}(buffer, vec.x  );
-        Formatter<const char*>{}(buffer, ", "   );
-        Formatter<     double>{}(buffer, vec.y  );
-        Formatter<const char*>{}(buffer, ", "   );
-        Formatter<     double>{}(buffer, vec.z  );
-        Formatter<const char*>{}(buffer, "}"    );
+    void operator()(Buffer& buffer, const vec3& vec) {
+        formatter<const char*>{}(buffer, "vec3{");
+        formatter<     double>{}(buffer, vec.x  );
+        formatter<const char*>{}(buffer, ", "   );
+        formatter<     double>{}(buffer, vec.y  );
+        formatter<const char*>{}(buffer, ", "   );
+        formatter<     double>{}(buffer, vec.z  );
+        formatter<const char*>{}(buffer, "}"    );
     }
 };
 
 // ...
 
 // Test
-assert(log::stringify(Vec3{1, 2, 3}) == "Vec3{1, 2, 3}");
+assert(log::stringify(vec3{1, 2, 3}) == "vec3{1, 2, 3}");
 ```
 
 ### Extending formatter for custom type traits
 
-[ [Run this code](https://godbolt.org/z/Ec4h38x7o) ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_type_traits.cpp) ]
+[ [Run this code]() ] [ [Open source file](../examples/module_log/extending_formatter_for_custom_type_traits.cpp) ]
 
 ```cpp
 using namespace utl;
 
 // Several custom classes
-struct Class1 { std::string to_string() const { return "Class 1"; }; };
-struct Class2 { std::string to_string() const { return "Class 2"; }; };
-struct Class3 { std::string to_string() const { return "Class 3"; }; };
+struct class_1 { std::string to_string() const { return "Class 1"; }; };
+struct class_2 { std::string to_string() const { return "Class 2"; }; };
+struct class_3 { std::string to_string() const { return "Class 3"; }; };
 
 // Type trait corresponding to those classes
 template <class T, class = void>
@@ -714,19 +714,19 @@ struct has_to_string<T, std::void_t<decltype(std::declval<T>().to_string())>> : 
 
 // Extend formatter to support anything that provides '.to_string()' member function
 template <class T>
-struct log::Formatter<T, std::enable_if_t<has_to_string<T>::value>> {
+struct log::formatter<T, std::enable_if_t<has_to_string<T>::value>> {
     template <class Buffer>
     void operator()(Buffer& buffer, const T& arg) {
-        Formatter<std::string>{}(buffer, arg.to_string());
+        formatter<std::string>{}(buffer, arg.to_string());
     }
 };
 
 // ...
 
 // Test
-assert(log::stringify(Class1{}) == "Class 1");
-assert(log::stringify(Class2{}) == "Class 2");
-assert(log::stringify(Class2{}) == "Class 3");
+assert(log::stringify(class_1{}) == "Class 1");
+assert(log::stringify(class_2{}) == "Class 2");
+assert(log::stringify(class_3{}) == "Class 3");
 ```
 
 ## Serialization support

@@ -4,12 +4,12 @@ using namespace utl;
 
 // Create global logger
 auto& logger() {
-    static auto logger = log::Logger{
-        log::Sink{"log.txt"},
-        log::Sink{std::cout}
+    static auto instance = log::logger{
+        log::sink{"log.txt"},
+        log::sink{std::cout}
     };
     
-    return logger;
+    return instance;
 }
 
 int main() {
