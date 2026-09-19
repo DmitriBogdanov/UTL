@@ -268,7 +268,7 @@ template <class To, class From, require_integral<To> = true, require_integral<Fr
             if (value > static_cast<From>(to_max)) return to_max;
         }
     }
-    // signed -> unsigned
+    // any -> unsigned
     else if constexpr (std::is_unsigned_v<To>) {
         // value negative => clamp to 0
         if (value < static_cast<From>(to_min)) return to_min;
@@ -278,15 +278,14 @@ template <class To, class From, require_integral<To> = true, require_integral<Fr
         // but it doesn't really achieve anything except verbosity
         else if (std::make_unsigned_t<From>(value) > to_max) return to_max;
     }
-    // unsigned -> signed
+    // unsigned -> any
     else if constexpr (std::is_unsigned_v<From>) {
         // value too big => clamp to max
         // like before 'make_unsigned_t' is here to make both sides of comparison unsigned
         if (value > std::make_unsigned_t<To>(to_max)) return to_max;
     }
-
-    // unsigned -> unsigned
-    // + everything that didn't trigger a runtime saturating condition
+    
+    // everything that didn't trigger a runtime saturating condition
     return static_cast<To>(value);
 }
 
