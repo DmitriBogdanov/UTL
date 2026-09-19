@@ -168,7 +168,7 @@ In practice this is usually used with a template lambda.
 
 ### Basics
 
-[ [Run this code](https://godbolt.org/z/e5qq7eb11) ] [ [Open source file](../examples/module_describe_struct/basics.cpp) ]
+[ [Run this code](https://godbolt.org/z/cKGsn6n8o) ] [ [Open source file](../examples/module_describe_struct/basics.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -202,7 +202,7 @@ static_assert( describe_struct::entry<2>(vec).second ==  3. );
 
 ### Tuple API
 
-[ [Run this code](https://godbolt.org/z/oz1zPY95f) ] [ [Open source file](../examples/module_describe_struct/tuple_api.cpp) ]
+[ [Run this code](https://godbolt.org/z/nc69YjbdT) ] [ [Open source file](../examples/module_describe_struct/tuple_api.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -232,7 +232,7 @@ static_assert( std::get<2>(describe_struct::entry_view(vec)).second ==  3. );
 
 ### Serialization
 
-[ [Run this code](https://godbolt.org/z/aWMeKx1sx) ] [ [Open source file](../examples/module_describe_struct/serialization.cpp) ]
+[ [Run this code](https://godbolt.org/z/P4PGec4Mx) ] [ [Open source file](../examples/module_describe_struct/serialization.cpp) ]
 
 ```cpp
 using namespace utl;
@@ -261,7 +261,7 @@ Output:
 
 ### Operators
 
-[ [Run this code](https://godbolt.org/z/o8noxx6P6) ] [ [Open source file](../examples/module_describe_struct/operators.cpp) ]
+[ [Run this code](https://godbolt.org/z/Yqr8b4xTs) ] [ [Open source file](../examples/module_describe_struct/operators.cpp) ]
 
 ```cpp
 using namespace utl;
