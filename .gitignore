@@ -30,6 +30,7 @@
 # > Content
 !docs/
 !docs/**
+!README.md
 !LICENSE.md
 
 # Code

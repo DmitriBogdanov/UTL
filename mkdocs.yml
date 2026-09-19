@@ -34,6 +34,8 @@ markdown_extensions:
   - github-callouts      # enables Github-flavour callouts
   - pymdownx.arithmatex: # enables KaTeX parser
       generic: true      #
+  - pymdownx.snippets:   # enables inclusion of files outside the docs folder
+      check_paths: true  #
   - pymdownx.superfences # enables nesting of code and content blocks
   - toc:                 # enables permalink buttons next to the section headings
       permalink: true    #

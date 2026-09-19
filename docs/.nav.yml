@@ -10,7 +10,7 @@
 # _______________________________________________________________________________
 
 nav:
-  - "Home": README.md
+  - "Home": index.md
   - "Modules":
     - "utl::assertion"       : module_assertion.md
     - "utl::bit"             : module_bit.md
