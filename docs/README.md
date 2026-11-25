@@ -93,7 +93,7 @@ While the library itself consists of isolated headers with no embedded dependenc
 
 | Library                                                       | Version            | License                                                                        | Used for                   | Embedded in repo |
 | ------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------ | -------------------------- | ---------------- |
-| [doctest](https://github.com/doctest/doctest)                 | **v.2.4.11**       | [MIT](https://github.com/doctest/doctest/blob/master/LICENSE.txt)              | Unit testing               | ✔                |
+| [doctest](https://github.com/doctest/doctest)                 | **v.2.5.3**        | [MIT](https://github.com/doctest/doctest/blob/master/LICENSE.txt)              | Unit testing               | ✔                |
 | [nanobench](https://github.com/martinus/nanobench)            | **v.4.3.11**       | [MIT](https://github.com/martinus/nanobench/blob/master/LICENSE)               | Benchmarking               | ✔                |
 | [nlohmann json](https://github.com/nlohmann/json)             | **v.3.11.3**       | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT)               | Benchmark comparison       | ✔                |
 | [PicoJSON](https://github.com/kazuho/picojson)                | **v.1.3.0**        | [BSD-2](https://github.com/kazuho/picojson/blob/master/LICENSE)                | Benchmark comparison       | ✔                |
