@@ -70,3 +70,15 @@ TEST_CASE_TEMPLATE("Uniform int range", T, //
         }
     });
 }
+
+TEST_CASE("Zero width int distribution") {
+    random::generators::SplitMix32 gen;
+    
+    constexpr std::size_t min = 0;
+    
+    const random::UniformIntDistribution dist{min, min};
+    
+    constexpr std::size_t sample = 120;
+    
+    for (std::size_t i = 0; i < sample; ++i) FAST_CHECK(dist(gen) == min);
+}

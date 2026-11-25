@@ -11630,8 +11630,8 @@ struct UniformIntDistribution {
     };
 
     constexpr UniformIntDistribution() = default;
-    constexpr UniformIntDistribution(T min, T max) noexcept : pars({min, max}) { assert(min < max); }
-    constexpr UniformIntDistribution(const param_type& p) noexcept : pars(p) { assert(p.min < p.max); }
+    constexpr UniformIntDistribution(T min, T max) noexcept : pars({min, max}) { assert(min <= max); }
+    constexpr UniformIntDistribution(const param_type& p) noexcept : pars(p) { assert(p.min <= p.max); }
 
     template <class Gen>
     constexpr T operator()(Gen& gen) const noexcept(noexcept(gen())) {
@@ -11797,13 +11797,14 @@ struct UniformRealDistribution {
     } pars{};
 
     constexpr UniformRealDistribution() = default;
-    constexpr UniformRealDistribution(T min, T max) noexcept : pars({min, max}) { assert(min < max); }
-    constexpr UniformRealDistribution(const param_type& p) noexcept : pars(p) { assert(p.min < p.max); }
+    constexpr UniformRealDistribution(T min, T max) noexcept : pars({min, max}) { assert(min <= max); }
+    constexpr UniformRealDistribution(const param_type& p) noexcept : pars(p) { assert(p.min <= p.max); }
 
     template <class Gen>
     constexpr result_type operator()(Gen& gen) const noexcept(noexcept(gen())) {
+        assert(this->pars.min < this->pars.max);
         return this->pars.min + generate_canonical<result_type>(gen) * (this->pars.max - this->pars.min);
-    }
+    } // creating `min == max` distribution is legal, but invoking it is UB as per the standard
 
     template <class Gen>
     constexpr T operator()(Gen& gen, const param_type& p) const noexcept(noexcept(gen())) {
