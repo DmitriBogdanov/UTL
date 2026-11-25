@@ -34,6 +34,11 @@ TEST_CASE_TEMPLATE("Arithmetic / Integral", T, //
     
     val.get() = r; // mutable access
     CHECK(val.get() == r);
+    
+    // Constraints
+    static_assert(std::is_default_constructible_v<Int>);
+    static_assert(std::is_copy_constructible_v<Int>);
+    static_assert(std::is_move_constructible_v<Int>);
 
     // Increment
     static_assert(++(Int{l}) == Int{l + 1});
@@ -107,6 +112,11 @@ TEST_CASE_TEMPLATE("Arithmetic / Float", T, //
     
     val.get() = r; // mutable access
     CHECK(val.get() == r);
+    
+    // Constraints
+    static_assert(std::is_default_constructible_v<Float>);
+    static_assert(std::is_copy_constructible_v<Float>);
+    static_assert(std::is_move_constructible_v<Float>);
 
     // Unary operators
     static_assert(+Float{l} == Float{+l});

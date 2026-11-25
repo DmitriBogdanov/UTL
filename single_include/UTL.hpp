@@ -13425,6 +13425,7 @@ public:
     using   tag_type = Tag;
     
     // Copyable semantics
+    constexpr Arithmetic           (                  ) = default;
     constexpr Arithmetic           (const Arithmetic& ) = default;
     constexpr Arithmetic           (      Arithmetic&&) = default;
     constexpr Arithmetic& operator=(const Arithmetic& ) = default;
@@ -13517,6 +13518,7 @@ public:
     using   tag_type = Tag;
     
     // Copyable semantics
+    constexpr Arithmetic           (                  ) = default;
     constexpr Arithmetic           (const Arithmetic& ) = default;
     constexpr Arithmetic           (      Arithmetic&&) = default;
     constexpr Arithmetic& operator=(const Arithmetic& ) = default;
